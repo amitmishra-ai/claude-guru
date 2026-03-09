@@ -1,0 +1,197 @@
+import { minutes } from "@/lib/helpers";
+import type { Session, LearnerRating, RatingHistoryEntry, MonthlyEarning, DeclinedSession, Busy, CohortStart, CourseCatalogItem } from "@/lib/types";
+
+export const demoSessions: Session[] = [
+  {
+    id: "s0",
+    title: "Mentor Session: Intro & Orientation",
+    program: "PGP-DS",
+    cohort: "Cohort Feb",
+    group: "Group 02 (Mixed work, beginner prog)",
+    dateYmd: "2026-02-14",
+    start: minutes(10),
+    end: minutes(12),
+    location: "Online",
+    sessionType: "Online session",
+    contentReady: true,
+    paymentAmountInr: 18000,
+    paymentStatus: "paid",
+    transactionId: "TXN-GL-8F3K2Q",
+    invoiceId: "INV-2026-0214-001",
+    recordingUrl: "https://example.com/recording/s0",
+  },
+  {
+    id: "s0b",
+    title: "Mentor Session: Excel Foundations",
+    program: "PGP-DS",
+    cohort: "Cohort Feb",
+    group: "Group 03 (Mixed)",
+    dateYmd: "2026-02-15",
+    start: minutes(18),
+    end: minutes(20),
+    location: "Online",
+    sessionType: "Career mentoring session",
+    contentReady: true,
+    paymentAmountInr: 16000,
+    paymentStatus: "invoice_pending",
+    invoiceId: "INV-2026-0215-004",
+    recordingUrl: "https://example.com/recording/s0b",
+  },
+  {
+    id: "s1",
+    title: "Mentor Session: Statistics",
+    program: "PGP-DS",
+    cohort: "Cohort Feb",
+    group: "Group 07 (High work, mixed prog)",
+    dateYmd: "2026-02-21",
+    start: minutes(18),
+    end: minutes(20),
+    location: "Online",
+    sessionType: "Capstone project mentoring session",
+    contentReady: true,
+    paymentAmountInr: 22000,
+  },
+  {
+    id: "s2",
+    title: "Mentor Session: Python Q&A",
+    program: "PGP-DS",
+    cohort: "Cohort Feb",
+    group: "Group 05 (Low work, high prog)",
+    dateYmd: "2026-02-22",
+    start: minutes(10),
+    end: minutes(12),
+    location: "Online",
+    sessionType: "Schedule a call",
+    contentReady: true,
+    paymentAmountInr: 12000,
+  },
+  {
+    id: "s3",
+    title: "Mentor Session: Data Visualization",
+    program: "PGP-DS",
+    cohort: "Cohort Feb",
+    group: "Group 09 (Mixed work, mixed prog)",
+    dateYmd: "2026-02-23",
+    start: minutes(18),
+    end: minutes(20),
+    location: "Online",
+    sessionType: "Industry session",
+    contentReady: false,
+    paymentAmountInr: 25000,
+  },
+  {
+    id: "s4",
+    title: "Mentor Session: SQL Basics",
+    program: "PGP-DS",
+    cohort: "Cohort Feb",
+    group: "Group 04 (High work, beginner prog)",
+    dateYmd: "2026-02-28",
+    start: minutes(10),
+    end: minutes(12),
+    location: "Online",
+    sessionType: "Online class",
+    contentReady: true,
+    paymentAmountInr: 20000,
+  },
+  {
+    id: "s5",
+    title: "Mentor Session: Capstone Review",
+    program: "PGP-DS",
+    cohort: "Cohort Feb",
+    group: "Group 01 (Mixed)",
+    dateYmd: "2026-03-01",
+    start: minutes(18),
+    end: minutes(20),
+    location: "Online",
+    sessionType: "Others",
+    contentReady: false,
+    paymentAmountInr: 14000,
+  },
+];
+
+export const demoLearnerRatingsBySessionId: Record<string, LearnerRating[]> = {
+  s0: [
+    { learnerName: "Aarav", rating: 4.8, feedback: "Very clear session structure." },
+    { learnerName: "Nisha", rating: 4.9, feedback: "Great pace and examples." },
+    { learnerName: "Rohan", rating: 4.7, feedback: "Helpful Q&A at the end." },
+  ],
+  s0b: [
+    { learnerName: "Meera", rating: 4.9, feedback: "Practical and engaging." },
+    { learnerName: "Kabir", rating: 4.8, feedback: "Good walkthrough." },
+    { learnerName: "Isha", rating: 5.0, feedback: "Excellent explanation style." },
+  ],
+};
+
+export const demoRatingHistory: RatingHistoryEntry[] = [
+  { id: "s0", title: "Mentor Session: Intro & Orientation", group: "Group 02 (Mixed work, beginner prog)", dateYmd: "2026-02-14", score: 4.85, feedback: "Great clarity and pacing." },
+  { id: "s0b", title: "Mentor Session: Excel Foundations", group: "Group 03 (Mixed)", dateYmd: "2026-02-15", score: 4.9, feedback: "Helpful examples and Q&A." },
+  { id: "rh1", title: "Mentor Session: Python Basics", group: "Group 06 (Beginner)", dateYmd: "2026-02-08", score: 4.8, feedback: "Good walkthrough with practical examples." },
+  { id: "rh2", title: "Mentor Session: SQL Practice", group: "Group 04 (High work, beginner prog)", dateYmd: "2026-02-01", score: 4.7, feedback: "Clear explanations, needed more time for doubts." },
+  { id: "rh3", title: "Mentor Session: Statistics Foundations", group: "Group 08 (Mixed)", dateYmd: "2026-01-25", score: 4.65, feedback: "Excellent session flow and engagement." },
+  { id: "rh4", title: "Mentor Session: Data Viz Deep Dive", group: "Group 09 (Mixed work, mixed prog)", dateYmd: "2026-01-18", score: 4.6, feedback: "Loved the real-world dashboard examples." },
+  { id: "rh5", title: "Mentor Session: Regression Essentials", group: "Group 10 (Advanced)", dateYmd: "2026-01-11", score: 4.5, feedback: "Good pacing and practical intuition." },
+  { id: "rh6", title: "Mentor Session: Probability Refresher", group: "Group 07 (High work, mixed prog)", dateYmd: "2026-01-04", score: 4.45, feedback: "Concepts were clear; wanted more solved examples." },
+  { id: "rh7", title: "Mentor Session: Exploratory Data Analysis", group: "Group 05 (Low work, high prog)", dateYmd: "2025-12-28", score: 4.4, feedback: "Very interactive and easy to follow." },
+  { id: "rh8", title: "Mentor Session: Feature Engineering", group: "Group 03 (Mixed)", dateYmd: "2025-12-21", score: 4.35, feedback: "Great tips for real projects." },
+  { id: "rh9", title: "Mentor Session: Model Evaluation", group: "Group 02 (Mixed work, beginner prog)", dateYmd: "2025-12-14", score: 4.3, feedback: "Excellent explanation of metrics and tradeoffs." },
+  { id: "rh10", title: "Mentor Session: Time Series Basics", group: "Group 11 (Mixed)", dateYmd: "2025-12-07", score: 4.2, feedback: "Good foundations and clear examples." },
+  { id: "rh11", title: "Mentor Session: Data Storytelling", group: "Group 01 (Mixed)", dateYmd: "2025-11-16", score: 4.28, feedback: "Strong narrative and practical examples." },
+  { id: "rh12", title: "Mentor Session: SQL Foundations", group: "Group 04 (Beginner)", dateYmd: "2025-10-19", score: 4.33, feedback: "Concepts explained clearly with good pacing." },
+  { id: "rh13", title: "Mentor Session: Python Refresher", group: "Group 06 (Mixed)", dateYmd: "2025-09-14", score: 4.25, feedback: "Useful recap and structured exercises." },
+];
+
+export const demoMonthlyEarnings: MonthlyEarning[] = [
+  { key: "2025-09", label: "Sep 25", amount: 62000 },
+  { key: "2025-10", label: "Oct 25", amount: 58000 },
+  { key: "2025-11", label: "Nov 25", amount: 69000 },
+  { key: "2025-12", label: "Dec 25", amount: 64000 },
+  { key: "2026-01", label: "Jan 26", amount: 98000 },
+  { key: "2026-02", label: "Feb 26", amount: 76000 },
+];
+
+export const demoPreviouslyDeclinedSessions: DeclinedSession[] = [
+  {
+    id: "pd1",
+    title: "Mentor Session: SQL Revision",
+    program: "PGP-DS",
+    cohort: "Cohort Jan",
+    dateYmd: "2026-01-12",
+    start: minutes(10),
+    end: minutes(12),
+    declinedOnYmd: "2026-01-08",
+  },
+  {
+    id: "pd2",
+    title: "Mentor Session: Python Practice Lab",
+    program: "PGP-DS",
+    cohort: "Cohort Jan",
+    dateYmd: "2026-01-19",
+    start: minutes(18),
+    end: minutes(20),
+    declinedOnYmd: "2026-01-15",
+  },
+];
+
+export const demoExternalBusy: Busy[] = [
+  {
+    id: "b1",
+    title: "Busy (Calendar)",
+    dateYmd: "2026-02-22",
+    start: minutes(10),
+    end: minutes(11, 30),
+  },
+];
+
+export const demoCohortStarts: CohortStart[] = [
+  { id: "cs1", program: "PGP-DS", cohort: "Cohort Mar", dateYmd: "2026-03-02", note: "New PGP cohort starts" },
+  { id: "cs2", program: "PGP-AIML", cohort: "Cohort Mar", dateYmd: "2026-03-09", note: "New PGP cohort starts" },
+  { id: "cs3", program: "PGP-BA", cohort: "Cohort Feb", dateYmd: "2026-02-23", note: "New PGP cohort starts" },
+];
+
+export const demoCourseCatalog: CourseCatalogItem[] = [
+  { id: "c1", title: "Python refresher: Data structures & functions", program: "PGDM", batch: "Cohort Feb", role: "Teacher", topics: ["python"], isNew: false },
+  { id: "c2", title: "SQL recap: Joins, aggregations, window functions", program: "AIML", batch: "Cohort Feb", role: "Course Mentor", topics: ["sql"], isNew: false },
+  { id: "c3", title: "Statistics primer: Distributions & hypothesis testing", program: "PGP-SE", batch: "Cohort Mar", role: "Industry Expert", topics: ["statistics", "statistic"], isNew: false },
+  { id: "c4", title: "ML essentials: Model evaluation & overfitting", program: "AIML", batch: "Cohort Mar", role: "Learner Success", topics: ["ml", "machine learning", "model", "evaluation", "overfitting"], isNew: true },
+  { id: "c5", title: "Mentor skills: Running effective sessions", program: "Core", batch: "Faculty Enablement", role: "Teacher", topics: ["mentor", "orientation", "capstone"], isNew: false },
+];
