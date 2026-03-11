@@ -489,11 +489,11 @@ export default function CoursesPage() {
           </Box>
         )}
 
-        {/* Past Courses */}
-        {!isLoading && pastCourses.length > 0 && (
+        {/* Completed Courses */}
+        {pastCourses.length > 0 && (
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.secondary" }}>Past Courses</Typography>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.secondary" }}>Completed Courses</Typography>
               <Chip label={pastCourses.length} size="small" sx={{ height: 20, fontSize: "0.7rem", fontWeight: 600, opacity: 0.7 }} />
             </Box>
             <Grid container spacing={2}>
