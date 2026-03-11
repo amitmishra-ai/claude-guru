@@ -1,13 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { Bell, CalendarDays, House, Settings, Users } from "lucide-react";
+import { CalendarDays, FileText, House, Settings } from "lucide-react";
 import Box from "@mui/material/Box";
-import { useAppSelector } from "@/store";
 
 export function MobileNav() {
-  const unreadCount = useAppSelector((s) =>
-    s.notifications.items.filter((n) => !n.read).length
-  );
-
   const linkSx = {
     display: "flex",
     flexDirection: "column",
@@ -61,45 +56,11 @@ export function MobileNav() {
           )}
         </NavLink>
 
-        <NavLink to="/notifications" style={{ textDecoration: "none" }}>
+        <NavLink to="/courses" style={{ textDecoration: "none" }}>
           {({ isActive }) => (
             <Box sx={{ ...linkSx, ...(isActive ? activeSx : {}) }}>
-              <Box sx={{ position: "relative" }}>
-                <Bell style={{ width: 20, height: 20 }} />
-                {unreadCount > 0 && (
-                  <Box
-                    component="span"
-                    sx={{
-                      position: "absolute",
-                      top: -6,
-                      right: -6,
-                      display: "inline-flex",
-                      height: 16,
-                      minWidth: 16,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: 9999,
-                      backgroundColor: "var(--gl-badge-bg)",
-                      px: 0.5,
-                      fontSize: "10px",
-                      fontWeight: 600,
-                      color: "#fff",
-                    }}
-                  >
-                    {unreadCount}
-                  </Box>
-                )}
-              </Box>
-              <span>Alerts</span>
-            </Box>
-          )}
-        </NavLink>
-
-        <NavLink to="/profile" style={{ textDecoration: "none" }}>
-          {({ isActive }) => (
-            <Box sx={{ ...linkSx, ...(isActive ? activeSx : {}) }}>
-              <Users style={{ width: 20, height: 20 }} />
-              <span>Profile</span>
+              <FileText style={{ width: 20, height: 20 }} />
+              <span>Courses</span>
             </Box>
           )}
         </NavLink>

@@ -12,6 +12,9 @@ import EventNoteIcon from "@mui/icons-material/EventNote";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Card from "@mui/material/Card";
+import SpeedDial from "@mui/material/SpeedDial";
+import SpeedDialAction from "@mui/material/SpeedDialAction";
+import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { keyframes } from "@mui/system";
@@ -301,19 +304,20 @@ export default function CalendarPage() {
   /* ═══════════════════════════════════════════════════════════════════════ */
   return (
     <>
-      {/* ── Header ──────────────────────────────────────────────────────── */}
+      {/* ── Row 1: Title + actions (actions hidden on mobile) ───────────── */}
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <CalendarMonthIcon sx={{ fontSize: 20 }} aria-hidden="true" />
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Calendar</Typography>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        {/* Desktop: action buttons */}
+        <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 1 }}>
           <Button
-            variant="outlined"
+            variant="soft"
             size="small"
             startIcon={<EventBusyIcon sx={{ fontSize: 16 }} />}
             aria-label="Mark leave"
-            sx={{ textTransform: 'none', borderColor: 'divider', color: 'text.primary', fontWeight: 400 }}
+            sx={{ textTransform: 'none' }}
             onClick={() => dispatch(setOpenNotAvailable(true))}
           >
             Mark leave
@@ -329,23 +333,58 @@ export default function CalendarPage() {
             Add availability
           </Button>
         </Box>
-      </Box>
 
-      {/* ── Controls row ──────────────────────────────────────────────────── */}
-      <Box sx={{ mt: 2, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
-
-        {/* Left: timezone */}
+        {/* Mobile: timezone in title row */}
         <Button
-          variant="outlined"
+          variant="text"
           size="small"
-          startIcon={<LanguageIcon sx={{ fontSize: 16 }} />}
-          sx={{ textTransform: 'none', borderColor: 'divider', color: 'text.secondary', fontWeight: 400, fontSize: '0.8125rem' }}
+          startIcon={<LanguageIcon sx={{ fontSize: 13 }} />}
+          sx={{ display: { xs: "flex", sm: "none" }, textTransform: 'none', color: 'text.disabled', fontWeight: 400, fontSize: '0.75rem', p: 0, minWidth: 0, '&:hover': { color: 'text.secondary', bgcolor: 'transparent' } }}
           onClick={() => dispatch(setOpenTimezone(true))}
         >
           {effectiveTz}
         </Button>
+      </Box>
 
-        {/* Center: Week/Month pill toggle */}
+      {/* ── Row 2: Date navigator (left) + Week/Month toggle (right) ─────── */}
+      <Box sx={{ mt: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+
+        {/* Left: prev / date label / next + "Today" jump */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Button
+            variant="text"
+            size="small"
+            aria-label="Previous period"
+            sx={{ minWidth: 0, p: 0.75, color: 'text.secondary' }}
+            onClick={navPrev}
+          >
+            <ChevronLeftIcon sx={{ fontSize: 20 }} />
+          </Button>
+          <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+            {calendarViewMode === "week" ? weekLabel(anchorDate) : monthLabel(anchorDate)}
+          </Typography>
+          <Button
+            variant="text"
+            size="small"
+            aria-label="Next period"
+            sx={{ minWidth: 0, p: 0.75, color: 'text.secondary' }}
+            onClick={navNext}
+          >
+            <ChevronRightIcon sx={{ fontSize: 20 }} />
+          </Button>
+          {!isCurrentPeriod && (
+            <Button
+              variant="soft"
+              size="small"
+              sx={{ textTransform: 'none', fontSize: '0.8125rem', fontWeight: 500, ml: 0.5 }}
+              onClick={() => dispatch(setAnchorDate(realNow.toISOString()))}
+            >
+              Today
+            </Button>
+          )}
+        </Box>
+
+        {/* Right: Week/Month pill toggle */}
         <Box
           sx={{
             display: 'inline-flex',
@@ -353,6 +392,7 @@ export default function CalendarPage() {
             bgcolor: 'action.hover',
             borderRadius: '100px',
             p: '4px',
+            flexShrink: 0,
           }}
         >
           {(["week", "month"] as const).map((mode) => (
@@ -363,16 +403,14 @@ export default function CalendarPage() {
               sx={{
                 fontSize: '0.875rem',
                 textTransform: 'capitalize',
-                minWidth: 72,
-                px: 2,
+                minWidth: 64,
+                px: 1.75,
                 borderRadius: '100px',
                 fontWeight: calendarViewMode === mode ? 600 : 400,
                 bgcolor: calendarViewMode === mode ? 'primary.main' : 'transparent',
                 color: calendarViewMode === mode ? 'primary.contrastText' : 'text.secondary',
                 boxShadow: calendarViewMode === mode ? '0 1px 4px rgba(25,106,229,0.35)' : 'none',
-                '&:hover': {
-                  bgcolor: calendarViewMode === mode ? 'primary.dark' : 'transparent',
-                },
+                '&:hover': { bgcolor: calendarViewMode === mode ? 'primary.dark' : 'transparent' },
               }}
               onClick={() => dispatch(setCalendarViewMode(mode))}
             >
@@ -381,38 +419,19 @@ export default function CalendarPage() {
           ))}
         </Box>
 
-        {/* Right: Current period + prev/next */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          <Button
-            variant="outlined"
-            size="small"
-            sx={{ textTransform: 'none', fontSize: '0.875rem', borderColor: 'divider', color: 'text.primary', fontWeight: 400 }}
-            onClick={() => dispatch(setAnchorDate(realNow.toISOString()))}
-          >
-            Current {calendarViewMode}
-          </Button>
-          <Button
-            variant="text"
-            size="small"
-            aria-label="Previous period"
-            sx={{ minWidth: 0, p: 0.5, color: 'text.secondary' }}
-            onClick={navPrev}
-          >
-            <ChevronLeftIcon sx={{ fontSize: 20 }} />
-          </Button>
-          <Typography sx={{ fontSize: '0.9375rem', fontWeight: 500, minWidth: 170, textAlign: 'center', whiteSpace: 'nowrap' }}>
-            {calendarViewMode === "week" ? weekLabel(anchorDate) : monthLabel(anchorDate)}
-          </Typography>
-          <Button
-            variant="text"
-            size="small"
-            aria-label="Next period"
-            sx={{ minWidth: 0, p: 0.5, color: 'text.secondary' }}
-            onClick={navNext}
-          >
-            <ChevronRightIcon sx={{ fontSize: 20 }} />
-          </Button>
-        </Box>
+      </Box>
+
+      {/* ── Row 3: Timezone (desktop only, left) + mobile actions (right, xs only) ─── */}
+      <Box sx={{ mt: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Button
+          variant="text"
+          size="small"
+          startIcon={<LanguageIcon sx={{ fontSize: 14 }} />}
+          sx={{ display: { xs: "none", sm: "flex" }, textTransform: 'none', color: 'text.disabled', fontWeight: 400, fontSize: '0.75rem', p: 0, minWidth: 0, '&:hover': { color: 'text.secondary', bgcolor: 'transparent' } }}
+          onClick={() => dispatch(setOpenTimezone(true))}
+        >
+          {effectiveTz}
+        </Button>
 
       </Box>
 
@@ -1499,6 +1518,34 @@ export default function CalendarPage() {
           </Box>
         </Card>
       </Box>
+
+      {/* ── Mobile FAB ────────────────────────────────────────────────────── */}
+      <SpeedDial
+        ariaLabel="Calendar actions"
+        icon={<SpeedDialIcon />}
+        sx={{
+          display: { xs: "flex", sm: "none" },
+          position: "fixed",
+          bottom: "calc(4.5rem + env(safe-area-inset-bottom))",
+          right: 20,
+          zIndex: 25,
+        }}
+      >
+        <SpeedDialAction
+          icon={<EventBusyIcon />}
+          tooltipTitle="Mark leave"
+          tooltipOpen
+          onClick={() => dispatch(setOpenNotAvailable(true))}
+          sx={{ "& .MuiSpeedDialAction-staticTooltipLabel": { whiteSpace: "nowrap" } }}
+        />
+        <SpeedDialAction
+          icon={<EditCalendarIcon />}
+          tooltipTitle="Add availability"
+          tooltipOpen
+          onClick={() => dispatch(setOpenAvailability(true))}
+          sx={{ "& .MuiSpeedDialAction-staticTooltipLabel": { whiteSpace: "nowrap" } }}
+        />
+      </SpeedDial>
     </>
   );
 }

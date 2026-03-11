@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Box from "@mui/material/Box";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
+import { MobileAppBar } from "./MobileAppBar";
 import { ToastViewport } from "@/components/shared/ToastViewport";
 import { GlobalDialogs } from "@/components/dialogs";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -52,6 +53,7 @@ export function AppLayout() {
           minWidth: 0,
           overflow: "hidden",
           p: { xs: 2, md: 3 },
+          pt: { xs: "calc(56px + 16px)", md: 3 },
           pb: { xs: "calc(6rem + env(safe-area-inset-bottom))", md: 3 },
         }}
       >
@@ -59,6 +61,7 @@ export function AppLayout() {
           <Outlet />
         </Box>
       </Box>
+      <MobileAppBar />
       <MobileNav />
       <ToastViewport />
       <GlobalDialogs />
