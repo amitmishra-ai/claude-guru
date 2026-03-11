@@ -158,7 +158,7 @@ export default function ProfilePage() {
           </Typography>
         </Box>
         <Button
-          variant="outlined"
+          variant="soft"
           size="small"
           startIcon={<Pencil size={14} />}
           sx={{ borderRadius: 1, flexShrink: 0, mt: 0.5 }}
@@ -553,7 +553,7 @@ export default function ProfilePage() {
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button variant="outlined" sx={{ borderRadius: 1 }} onClick={() => dispatch(setOpenProfileEdit(false))}>
+          <Button variant="soft" sx={{ borderRadius: 1 }} onClick={() => dispatch(setOpenProfileEdit(false))}>
             Cancel
           </Button>
           <Button

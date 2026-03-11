@@ -1,22 +1,17 @@
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import type { LucideIcon } from "lucide-react";
+import type { SvgIconComponent } from "@mui/icons-material";
 
-/**
- * Standardised page/section header — icon badge + title + optional subtitle.
- * Replaces SectionTitle (Tailwind-only) and ad-hoc h4/h5 headers across pages.
- */
 export function PageHeader({
   icon: Icon,
   title,
   subtitle,
   action,
 }: {
-  icon: LucideIcon;
+  icon: SvgIconComponent;
   title: string;
   subtitle?: string;
-  /** Optional trailing element (button, chip, etc.) */
   action?: React.ReactNode;
 }) {
   return (
@@ -40,7 +35,7 @@ export function PageHeader({
             justifyContent: "center",
           }}
         >
-          <Icon size={16} />
+          <Icon sx={{ fontSize: 16 }} />
         </Box>
 
         <Box>

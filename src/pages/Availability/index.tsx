@@ -1,4 +1,5 @@
-import { ListChecks, Plus, Clock } from "lucide-react";
+import { Plus, Clock } from "lucide-react";
+import ChecklistIcon from "@mui/icons-material/Checklist";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -17,10 +18,10 @@ export default function AvailabilityPage() {
   return (
     <>
       <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
-        <PageHeader icon={ListChecks} title="Availability" subtitle="Manage your recurring patterns and one-off blocks." />
+        <PageHeader icon={ChecklistIcon} title="Availability" subtitle="Manage your recurring patterns and one-off blocks." />
         <Box sx={{ display: "flex", gap: 1, flexShrink: 0 }}>
           <Button
-            variant="outlined"
+            variant="soft"
             size="small"
             startIcon={<Clock style={{ width: 14, height: 14 }} />}
             sx={{ borderRadius: "4px" }}

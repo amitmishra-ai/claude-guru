@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import SettingsIcon from "@mui/icons-material/Settings";
 import Box from "@mui/material/Box";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
@@ -22,7 +22,7 @@ export default function PreferencesPage() {
 
   return (
     <>
-      <PageHeader icon={Settings} title="Preferences" subtitle="Manage your notification and communication settings." />
+      <PageHeader icon={SettingsIcon} title="Preferences" subtitle="Manage your notification and communication settings." />
 
       <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 0.5 }}>
         {prefItems.map((item, idx) => (

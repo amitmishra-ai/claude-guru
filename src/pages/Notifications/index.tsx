@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, CheckCheck } from "lucide-react";
+import { CheckCheck } from "lucide-react";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -106,7 +107,7 @@ export default function NotificationsPage() {
   return (
     <>
       <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
-        <PageHeader icon={Bell} title="Alerts" subtitle="Notifications and action items." />
+        <PageHeader icon={NotificationsIcon} title="Alerts" subtitle="Notifications and action items." />
         {unreadCount > 0 && (
           <Button
             variant="text"
