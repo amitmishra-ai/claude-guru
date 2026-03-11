@@ -14,6 +14,7 @@ import InputBase from "@mui/material/InputBase";
 import LinearProgress from "@mui/material/LinearProgress";
 import Skeleton from "@mui/material/Skeleton";
 import Popover from "@mui/material/Popover";
+import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -254,6 +255,100 @@ function CourseCard({
   );
 }
 
+/* ─── Course card skeleton ────────────────────────────────────────────────── */
+function CourseCardSkeleton() {
+  return (
+    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+      <Card variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+        <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", flex: 1 }}>
+          {/* Tags row */}
+          <Box sx={{ display: "flex", gap: 0.75, mb: 1.25 }}>
+            <Skeleton variant="rounded" width={48} height={22} sx={{ borderRadius: 10 }} />
+            <Skeleton variant="rounded" width={64} height={22} sx={{ borderRadius: 10 }} />
+          </Box>
+          {/* Title */}
+          <Skeleton variant="text" sx={{ fontSize: "1rem", mb: 0.5 }} />
+          <Skeleton variant="text" sx={{ fontSize: "1rem", width: "70%", mb: 1.25 }} />
+          {/* Meta */}
+          <Skeleton variant="text" sx={{ fontSize: "0.8125rem", width: "55%", mb: 0.5 }} />
+          <Skeleton variant="text" sx={{ fontSize: "0.8125rem", width: "75%", mb: 1.5 }} />
+          <Divider sx={{ mb: 1.5 }} />
+          {/* Sessions label + chip */}
+          <Box sx={{ display: "flex", gap: 0.75, alignItems: "center", mb: 0.75 }}>
+            <Skeleton variant="circular" width={14} height={14} />
+            <Skeleton variant="text" width={100} sx={{ fontSize: "0.68rem" }} />
+          </Box>
+          <Skeleton variant="rounded" width={140} height={24} sx={{ borderRadius: 10 }} />
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+}
+
+/* ─── Search + filter bar ─────────────────────────────────────────────────── */
+function SearchFilterBar({
+  searchQuery,
+  onSearchChange,
+  activeFilterCount,
+  onOpenDrawer,
+  fullWidth = false,
+}: {
+  searchQuery: string;
+  onSearchChange: (v: string) => void;
+  activeFilterCount: number;
+  onOpenDrawer: () => void;
+  fullWidth?: boolean;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "flex", alignItems: "center", height: 40,
+        border: 1, borderColor: "divider", borderRadius: 1.5,
+        overflow: "hidden", bgcolor: "background.paper",
+        width: fullWidth ? "100%" : undefined,
+        "&:focus-within": { borderColor: "text.secondary" },
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", px: 1.25, gap: 0.75, flex: 1, minWidth: 0 }}>
+        <SearchIcon sx={{ fontSize: 15, color: "text.disabled", flexShrink: 0 }} />
+        <InputBase
+          placeholder="Search courses…"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          sx={{ fontSize: "0.8125rem", flex: 1, minWidth: 0 }}
+        />
+      </Box>
+
+      <Divider orientation="vertical" flexItem />
+
+      <Box
+        component="button"
+        onClick={onOpenDrawer}
+        sx={{
+          display: "flex", alignItems: "center", gap: 0.75,
+          px: 1.5, height: "100%", flexShrink: 0,
+          border: "none", bgcolor: activeFilterCount > 0 ? "action.selected" : "transparent",
+          cursor: "pointer", fontFamily: "inherit",
+          color: activeFilterCount > 0 ? "text.primary" : "text.secondary",
+          "&:hover": { bgcolor: "action.hover" },
+        }}
+      >
+        <TuneIcon sx={{ fontSize: 15 }} />
+        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: "0.8125rem" }}>
+          Filters
+        </Typography>
+        {activeFilterCount > 0 && (
+          <Chip
+            label={activeFilterCount}
+            size="small"
+            sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, px: 0, "& .MuiChip-label": { px: "5px" } }}
+          />
+        )}
+      </Box>
+    </Box>
+  );
+}
+
 /* ─── Filter section label ────────────────────────────────────────────────── */
 function FilterSectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -397,52 +492,13 @@ export default function CoursesPage() {
         title="Courses"
         subtitle="Track your teaching assignments, sessions and learning content"
         action={
-          <Box
-            sx={{
-              display: "flex", alignItems: "center", height: 40,
-              border: 1, borderColor: "divider", borderRadius: 1.5,
-              overflow: "hidden", bgcolor: "background.paper",
-              "&:focus-within": { borderColor: "text.secondary" },
-            }}
-          >
-            {/* Search input */}
-            <Box sx={{ display: "flex", alignItems: "center", px: 1.25, gap: 0.75, minWidth: 180 }}>
-              <SearchIcon sx={{ fontSize: 15, color: "text.disabled", flexShrink: 0 }} />
-              <InputBase
-                placeholder="Search courses…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{ fontSize: "0.8125rem", flex: 1 }}
-              />
-            </Box>
-
-            <Divider orientation="vertical" flexItem />
-
-            {/* Filter trigger */}
-            <Box
-              component="button"
-              onClick={openDrawer}
-              sx={{
-                display: "flex", alignItems: "center", gap: 0.75,
-                px: 1.5, height: "100%", flexShrink: 0,
-                border: "none", bgcolor: activeFilterCount > 0 ? "action.selected" : "transparent",
-                cursor: "pointer", fontFamily: "inherit",
-                color: activeFilterCount > 0 ? "text.primary" : "text.secondary",
-                "&:hover": { bgcolor: "action.hover" },
-              }}
-            >
-              <TuneIcon sx={{ fontSize: 15 }} />
-              <Typography variant="body2" sx={{ fontWeight: 500, fontSize: "0.8125rem" }}>
-                Filters
-              </Typography>
-              {activeFilterCount > 0 && (
-                <Chip
-                  label={activeFilterCount}
-                  size="small"
-                  sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, px: 0, "& .MuiChip-label": { px: "5px" } }}
-                />
-              )}
-            </Box>
+          <Box sx={{ display: { xs: "none", sm: "flex" } }}>
+            <SearchFilterBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              activeFilterCount={activeFilterCount}
+              onOpenDrawer={openDrawer}
+            />
           </Box>
         }
       />
