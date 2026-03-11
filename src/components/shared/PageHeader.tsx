@@ -1,18 +1,19 @@
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import type { SvgIconComponent } from "@mui/icons-material";
 
 export function PageHeader({
   icon: Icon,
   title,
   subtitle,
   action,
+  iconBoxSx,
 }: {
-  icon: SvgIconComponent;
+  icon: React.ElementType;
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
+  iconBoxSx?: object;
 }) {
   return (
     <Stack
@@ -33,9 +34,10 @@ export function PageHeader({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            ...iconBoxSx,
           }}
         >
-          <Icon sx={{ fontSize: 16 }} />
+          <Icon style={{ width: 16, height: 16 }} />
         </Box>
 
         <Box>

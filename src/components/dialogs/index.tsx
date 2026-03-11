@@ -1,4 +1,5 @@
 import { SessionDetailDialog } from "./SessionDetailDialog";
+import { CompletedSessionDetailDialog } from "./CompletedSessionDetailDialog";
 import { DeclineReasonDialog } from "./DeclineReasonDialog";
 import { RequestDetailDialog } from "./RequestDetailDialog";
 import { TimezoneDialog } from "./TimezoneDialog";
@@ -9,6 +10,7 @@ import { LearnerRatingsDialog } from "./LearnerRatingsDialog";
 import { PollBuilderDialog } from "./PollBuilderDialog";
 import { MarkUnavailableModal } from "./MarkUnavailableModal";
 import { AddAvailabilityModal } from "./AddAvailabilityModal";
+import { CourseDetailDialog } from "./CourseDetailDialog";
 
 /**
  * Global dialogs rendered at the root layout level.
@@ -18,6 +20,7 @@ export function GlobalDialogs() {
   return (
     <>
       <SessionDetailDialog />
+      <CompletedSessionDetailDialog />
       <DeclineReasonDialog />
       <RequestDetailDialog />
       <TimezoneDialog />
@@ -28,6 +31,7 @@ export function GlobalDialogs() {
       <PollBuilderDialog />
       <MarkUnavailableModal />
       <AddAvailabilityModal />
+      <CourseDetailDialog />
     </>
   );
 }

@@ -5,6 +5,7 @@ interface UiState {
   openAvailability: boolean;
   openNotAvailable: boolean;
   openSession: boolean;
+  openCompletedSession: boolean;
   openRequest: boolean;
   openPollBuilder: boolean;
   openTimezone: boolean;
@@ -21,6 +22,8 @@ interface UiState {
   openMarkUnavailable: boolean;
   openAddAvailability: boolean;
   impactOpen: boolean;
+  openCourseDetail: boolean;
+  courseDetailId: string | null;
   // Popover state
   leavePopoverNaId: string | null;
   availPopoverBlockId: string | null;
@@ -36,6 +39,7 @@ const initialState: UiState = {
   openAvailability: false,
   openNotAvailable: false,
   openSession: false,
+  openCompletedSession: false,
   openRequest: false,
   openPollBuilder: false,
   openTimezone: false,
@@ -52,6 +56,8 @@ const initialState: UiState = {
   openMarkUnavailable: false,
   openAddAvailability: false,
   impactOpen: false,
+  openCourseDetail: false,
+  courseDetailId: null,
   leavePopoverNaId: null,
   availPopoverBlockId: null,
   learnerRatingsSessionId: null,
@@ -73,6 +79,9 @@ const uiSlice = createSlice({
     },
     setOpenSession(state, action: PayloadAction<boolean>) {
       state.openSession = action.payload;
+    },
+    setOpenCompletedSession(state, action: PayloadAction<boolean>) {
+      state.openCompletedSession = action.payload;
     },
     setOpenRequest(state, action: PayloadAction<boolean>) {
       state.openRequest = action.payload;
@@ -143,6 +152,12 @@ const uiSlice = createSlice({
     setMarkUnavailableTarget(state, action: PayloadAction<{ type: "session" | "request"; id: string } | null>) {
       state.markUnavailableTarget = action.payload;
     },
+    setOpenCourseDetail(state, action: PayloadAction<boolean>) {
+      state.openCourseDetail = action.payload;
+    },
+    setCourseDetailId(state, action: PayloadAction<string | null>) {
+      state.courseDetailId = action.payload;
+    },
   },
 });
 
@@ -150,6 +165,7 @@ export const {
   setOpenAvailability,
   setOpenNotAvailable,
   setOpenSession,
+  setOpenCompletedSession,
   setOpenRequest,
   setOpenPollBuilder,
   setOpenTimezone,
@@ -173,6 +189,8 @@ export const {
   setLeavePopoverNaId,
   setAvailPopoverBlockId,
   setMarkUnavailableTarget,
+  setOpenCourseDetail,
+  setCourseDetailId,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
