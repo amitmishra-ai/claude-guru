@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, CheckCheck } from "lucide-react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -68,22 +69,27 @@ export default function NotificationsPage() {
   const renderItem = (n: NotificationItem) => (
     <Card
       key={n.id}
-      className={!n.read ? "!border-unread-border !bg-unread-bg" : ""}
+      sx={!n.read ? { borderColor: "var(--gl-unread-border)", backgroundColor: "var(--gl-unread-bg)" } : {}}
     >
       <CardContent sx={{ p: 2 }}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              {!n.read && <span className="h-2 w-2 shrink-0 rounded-full bg-badge" />}
-              <div className="text-sm font-semibold">{n.title}</div>
-            </div>
-            <div className="mt-1 text-xs text-on-surface-variant">{n.body}</div>
-          </div>
+        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {!n.read && (
+                <Box
+                  component="span"
+                  sx={{ height: 8, width: 8, flexShrink: 0, borderRadius: "50%", backgroundColor: "var(--gl-badge-bg)" }}
+                />
+              )}
+              <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{n.title}</Box>
+            </Box>
+            <Box sx={{ mt: 0.5, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>{n.body}</Box>
+          </Box>
           {n.ctaLabel && n.ctaAction && (
             <Button
               variant="text"
               size="small"
-              sx={{ flexShrink: 0, borderRadius: '4px', fontSize: '0.75rem' }}
+              sx={{ flexShrink: 0, borderRadius: "4px", fontSize: "0.75rem" }}
               onClick={() => {
                 dispatch(markRead(n.id));
                 executeCtaAction(n.ctaAction!, navigate, dispatch);
@@ -92,53 +98,66 @@ export default function NotificationsPage() {
               {n.ctaLabel}
             </Button>
           )}
-        </div>
+        </Box>
       </CardContent>
     </Card>
   );
 
   return (
     <>
-      <div className="flex items-start justify-between gap-3">
+      <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
         <PageHeader icon={Bell} title="Alerts" subtitle="Notifications and action items." />
         {unreadCount > 0 && (
           <Button
             variant="text"
             size="small"
-            startIcon={<CheckCheck className="h-3.5 w-3.5" />}
-            sx={{ borderRadius: '4px', fontSize: '0.75rem', flexShrink: 0 }}
+            startIcon={<CheckCheck style={{ width: 14, height: 14 }} />}
+            sx={{ borderRadius: "4px", fontSize: "0.75rem", flexShrink: 0 }}
             onClick={() => dispatch(markAllRead())}
           >
             Mark all read
           </Button>
         )}
-      </div>
+      </Box>
 
       {happeningNow.length > 0 && (
-        <div className="mt-3">
-          <div className="text-xs font-semibold text-on-surface-variant mb-2">Happening now</div>
-          <div className="space-y-2">{happeningNow.map(renderItem)}</div>
-        </div>
+        <Box sx={{ mt: 1.5 }}>
+          <Box sx={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(var(--md-on-surface-variant))", mb: 1 }}>Happening now</Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>{happeningNow.map(renderItem)}</Box>
+        </Box>
       )}
 
       {unread.length > 0 && (
-        <div className="mt-3">
-          <div className="text-xs font-semibold text-on-surface-variant mb-2">Unread ({unread.length})</div>
-          <div className="space-y-2">{unread.map(renderItem)}</div>
-        </div>
+        <Box sx={{ mt: 1.5 }}>
+          <Box sx={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(var(--md-on-surface-variant))", mb: 1 }}>Unread ({unread.length})</Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>{unread.map(renderItem)}</Box>
+        </Box>
       )}
 
       {read.length > 0 && (
-        <div className="mt-3">
-          <div className="text-xs font-semibold text-on-surface-variant mb-2">Earlier</div>
-          <div className="space-y-2">{read.map(renderItem)}</div>
-        </div>
+        <Box sx={{ mt: 1.5 }}>
+          <Box sx={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(var(--md-on-surface-variant))", mb: 1 }}>Earlier</Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>{read.map(renderItem)}</Box>
+        </Box>
       )}
 
       {!notifications.length && (
-        <div className="mt-4 rounded-2xl border bg-surface-container/20 px-4 py-8 text-center text-sm text-on-surface-variant">
+        <Box
+          sx={{
+            mt: 2,
+            borderRadius: "16px",
+            border: 1,
+            borderColor: "divider",
+            backgroundColor: "hsl(var(--md-surface-container) / 0.2)",
+            px: 2,
+            py: 4,
+            textAlign: "center",
+            fontSize: "0.875rem",
+            color: "hsl(var(--md-on-surface-variant))",
+          }}
+        >
           No notifications yet.
-        </div>
+        </Box>
       )}
     </>
   );

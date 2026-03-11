@@ -1,4 +1,5 @@
 import { Settings } from "lucide-react";
+import Box from "@mui/material/Box";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
@@ -23,23 +24,23 @@ export default function PreferencesPage() {
     <>
       <PageHeader icon={Settings} title="Preferences" subtitle="Manage your notification and communication settings." />
 
-      <div className="mt-4 space-y-1">
+      <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 0.5 }}>
         {prefItems.map((item, idx) => (
-          <div key={item.key}>
-            <div className="flex items-center justify-between gap-4 py-3">
-              <div className="min-w-0">
+          <Box key={item.key}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, py: 1.5 }}>
+              <Box sx={{ minWidth: 0 }}>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>{item.label}</Typography>
-                <div className="mt-0.5 text-xs text-on-surface-variant">{item.description}</div>
-              </div>
+                <Box sx={{ mt: 0.25, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>{item.description}</Box>
+              </Box>
               <Switch
                 checked={prefs[item.key]}
                 onChange={() => dispatch(togglePref(item.key))}
               />
-            </div>
+            </Box>
             {idx < prefItems.length - 1 && <Divider />}
-          </div>
+          </Box>
         ))}
-      </div>
+      </Box>
     </>
   );
 }

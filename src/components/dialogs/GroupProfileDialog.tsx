@@ -1,3 +1,4 @@
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
@@ -12,56 +13,64 @@ export function GroupProfileDialog() {
   const open = useAppSelector((s) => s.ui.openGroupProfile);
 
   return (
-    <Dialog
-      open={open}
-      onClose={() => dispatch(setOpenGroupProfile(false))}
-    >
+    <Dialog open={open} onClose={() => dispatch(setOpenGroupProfile(false))}>
       <DialogTitle>Group profile (PDF)</DialogTitle>
 
       <DialogContent>
-        <div className="space-y-3">
-          <div className="rounded-2xl border bg-surface-container/30 p-3 text-sm text-on-surface-variant">
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Box
+            sx={{
+              borderRadius: "16px",
+              border: 1,
+              borderColor: "divider",
+              backgroundColor: "hsl(var(--md-surface-container) / 0.3)",
+              p: 1.5,
+              fontSize: "0.875rem",
+              color: "hsl(var(--md-on-surface-variant))",
+            }}
+          >
             In reality this arrives via email as a PDF; here we surface it next to session actions.
-          </div>
+          </Box>
 
-          <div className="rounded-2xl border bg-surface p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-semibold">Cohort Feb &bull; Group 07</div>
-                <div className="mt-1 text-xs text-on-surface-variant">(Placeholder preview)</div>
-              </div>
+          <Box
+            sx={{
+              borderRadius: "16px",
+              border: 1,
+              borderColor: "divider",
+              backgroundColor: "hsl(var(--md-surface))",
+              p: 2,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box>
+                <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>Cohort Feb &bull; Group 07</Box>
+                <Box sx={{ mt: 0.5, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>(Placeholder preview)</Box>
+              </Box>
               <Chip size="small" color="primary" label="PDF" />
-            </div>
+            </Box>
 
-            <div className="mt-3 space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-on-surface-variant">Avg work exp</span>
-                <span className="font-medium">6.2 yrs</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-on-surface-variant">Programming exp</span>
-                <span className="font-medium">Mixed</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-on-surface-variant">Top industries</span>
-                <span className="font-medium">IT, BFSI, Ops</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-on-surface-variant">Learners</span>
-                <span className="font-medium">25</span>
-              </div>
-            </div>
-          </div>
-        </div>
+            <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1, fontSize: "0.875rem" }}>
+              {[
+                { label: "Avg work exp", value: "6.2 yrs" },
+                { label: "Programming exp", value: "Mixed" },
+                { label: "Top industries", value: "IT, BFSI, Ops" },
+                { label: "Learners", value: "25" },
+              ].map(({ label, value }) => (
+                <Box key={label} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <Box component="span" sx={{ color: "hsl(var(--md-on-surface-variant))" }}>{label}</Box>
+                  <Box component="span" sx={{ fontWeight: 500 }}>{value}</Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
       </DialogContent>
 
       <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={() => dispatch(setOpenGroupProfile(false))}>
+        <Button variant="text" color="inherit" onClick={() => dispatch(setOpenGroupProfile(false))}>
           Close
         </Button>
-        <Button
-          variant="contained"
-        >
+        <Button variant="contained">
           Download / open PDF
         </Button>
       </DialogActions>

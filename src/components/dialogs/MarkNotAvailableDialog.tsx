@@ -281,14 +281,14 @@ export function MarkNotAvailableDialog() {
 
       <DialogContent>
         {step === 1 && (
-          <div className="space-y-4 pt-1">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
             <Box sx={{ border: 1, borderColor: 'divider', bgcolor: 'action.hover', p: 1.5 }}>
               <Typography variant="body2" color="text.secondary">
                 Block off a date or period when you are not available for sessions.
               </Typography>
             </Box>
 
-            <div className="grid grid-cols-2 gap-3">
+            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1.5 }}>
               <TextField
                 label="Start date"
                 type="date"
@@ -307,10 +307,10 @@ export function MarkNotAvailableDialog() {
                 fullWidth
                 slotProps={{ inputLabel: { shrink: true } }}
               />
-            </div>
+            </Box>
 
             {/* Time pickers */}
-            <div className="grid grid-cols-2 gap-3">
+            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1.5 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>Start time</InputLabel>
                 <Select
@@ -335,7 +335,7 @@ export function MarkNotAvailableDialog() {
                   ))}
                 </Select>
               </FormControl>
-            </div>
+            </Box>
 
             {/* Validation error */}
             {naStartDate && naEndDate && !isValid && (
@@ -352,11 +352,11 @@ export function MarkNotAvailableDialog() {
               size="small"
               fullWidth
             />
-          </div>
+          </Box>
         )}
 
         {step === 2 && (
-          <div className="space-y-4 pt-1">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
             <Box
               sx={{
                 display: 'flex',
@@ -439,14 +439,14 @@ export function MarkNotAvailableDialog() {
                   : { borderColor: 'warning.light', color: 'warning.dark', '&:hover': { bgcolor: 'warning.light' } }),
               }}
             />
-          </div>
+          </Box>
         )}
       </DialogContent>
 
       <DialogActions>
         {step === 1 && (
           <>
-            <Button variant="outlined" color="inherit" onClick={handleClose}>
+            <Button variant="text" color="inherit" onClick={handleClose}>
               Cancel
             </Button>
             <Button variant="contained" onClick={handleMarkLeave} disabled={!isValid}>
@@ -456,7 +456,7 @@ export function MarkNotAvailableDialog() {
         )}
         {step === 2 && (
           <>
-            <Button variant="outlined" color="inherit" onClick={() => setStep(1)}>
+            <Button variant="text" color="inherit" onClick={() => setStep(1)}>
               Go back
             </Button>
             <Button variant="contained" onClick={handleConfirm}>

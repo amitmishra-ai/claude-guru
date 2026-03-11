@@ -1,4 +1,5 @@
 import { Plus, Trash2 } from "lucide-react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
@@ -67,7 +68,7 @@ export function PollBuilderDialog() {
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>{pollEditingId ? "Edit poll" : "Create poll"}</DialogTitle>
       <DialogContent>
-        <div className="space-y-4 pt-1">
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
           <TextField
             label="Question"
             value={pollQuestion}
@@ -76,10 +77,10 @@ export function PollBuilderDialog() {
             fullWidth
             placeholder="E.g., Which topic should we cover next?"
           />
-          <div className="space-y-2">
-            <div className="text-xs font-semibold text-on-surface-variant">Options</div>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Box sx={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(var(--md-on-surface-variant))" }}>Options</Box>
             {pollOptions.map((opt, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <TextField
                   value={opt}
                   onChange={(e) => updateOption(i, e.target.value)}
@@ -91,27 +92,27 @@ export function PollBuilderDialog() {
                   <IconButton size="small" onClick={() => {
                     dispatch(setPollOptions(pollOptions.filter((_, j) => j !== i)));
                   }}>
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 style={{ width: 14, height: 14 }} />
                   </IconButton>
                 )}
-              </div>
+              </Box>
             ))}
             {pollOptions.length < 4 && (
               <Button
                 size="small"
                 variant="text"
-                startIcon={<Plus className="h-3.5 w-3.5" />}
+                startIcon={<Plus style={{ width: 14, height: 14 }} />}
                 onClick={() => dispatch(setPollOptions([...pollOptions, ""]))}
               >
                 Add option
               </Button>
             )}
-          </div>
-        </div>
+          </Box>
+        </Box>
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={handleClose}>Cancel</Button>
-        <Button variant="outlined" onClick={handleSaveDraft} disabled={!pollQuestion.trim()}>Save draft</Button>
+        <Button variant="text" color="inherit" onClick={handleClose}>Cancel</Button>
+        <Button variant="soft" onClick={handleSaveDraft} disabled={!pollQuestion.trim()}>Save draft</Button>
         <Button variant="contained" onClick={handleQueue} disabled={!pollQuestion.trim()}>Queue to Zoom</Button>
       </DialogActions>
     </Dialog>

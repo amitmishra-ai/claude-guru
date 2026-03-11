@@ -93,7 +93,7 @@ export function AddAvailabilityModal() {
             slotProps={{ inputLabel: { shrink: true } }}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1.5 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Start time</InputLabel>
               <Select
@@ -118,7 +118,7 @@ export function AddAvailabilityModal() {
                 ))}
               </Select>
             </FormControl>
-          </div>
+          </Box>
 
           {date && !isValid && (
             <Typography variant="caption" sx={{ color: 'error.main' }}>
@@ -129,7 +129,7 @@ export function AddAvailabilityModal() {
       </DialogContent>
 
       <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={handleClose}>
+        <Button variant="text" color="inherit" onClick={handleClose}>
           Cancel
         </Button>
         <Button variant="contained" onClick={handleAdd} disabled={!isValid}>

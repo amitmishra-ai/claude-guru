@@ -1,7 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -10,12 +9,18 @@ import {
   Star,
   TrendingUp,
   Users,
-  XCircle,
   Video,
   BookOpen,
+  Calendar,
   Pencil,
   Trash2,
 } from "lucide-react";
+import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
+import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
+import EditCalendarIcon from "@mui/icons-material/EditCalendar";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
@@ -29,14 +34,16 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
+import { keyframes } from "@mui/system";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
   setSessionFocus,
   confirmSession,
+  clearRecentlyConfirmed,
   acceptSession,
   setHomeSessionsView,
   setDeclineSessionFocus,
@@ -73,6 +80,16 @@ import { demoNow } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions } from "@/data/demo-sessions";
 import { StatTile } from "@/components/shared/StatTile";
 import type { Session, SessionType } from "@/lib/types";
+
+const slideOutDown = keyframes`
+  0%   { opacity: 1; transform: translateY(0)     scale(1);   }
+  100% { opacity: 0; transform: translateY(16px)  scale(0.97); }
+`;
+
+const slideInFromAbove = keyframes`
+  0%   { opacity: 0; transform: translateY(-16px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0)     scale(1);   }
+`;
 
 const SESSION_TYPES: Array<"All" | SessionType> = [
   "All",
@@ -138,6 +155,22 @@ export default function DashboardPage() {
   const guruName = useAppSelector((s) => s.profile.guruName);
   const polls = useAppSelector((s) => s.polls.items);
   const selectedSessionType = useAppSelector((s) => s.sessions.selectedSessionType);
+  const recentlyConfirmedIds = useAppSelector((s) => s.sessions.recentlyConfirmedIds);
+
+  /* ── local state for exit animation ─────────────────────────────── */
+  const [exitingId, setExitingId] = useState<string | null>(null);
+
+  /* ── clean up recentlyConfirmedIds (same pattern as Calendar) ───── */
+  useEffect(() => {
+    const ids = Object.keys(recentlyConfirmedIds);
+    if (ids.length === 0) return;
+    const timers = ids.map((id) => {
+      const elapsed = Date.now() - (recentlyConfirmedIds[id] || 0);
+      const remaining = Math.max(0, 2000 - elapsed);
+      return setTimeout(() => dispatch(clearRecentlyConfirmed(id)), remaining);
+    });
+    return () => timers.forEach(clearTimeout);
+  }, [recentlyConfirmedIds, dispatch]);
 
   const nowMs = demoNow.getTime();
 
@@ -164,6 +197,17 @@ export default function DashboardPage() {
   const confirmedCount = upcomingSessions.filter((s) => confirmations[s.id]).length;
   const scheduled = upcomingSessions.filter((s) => !confirmations[s.id]);
   const confirmedUpcoming = upcomingSessions.filter((s) => confirmations[s.id]);
+
+  // Display lists that account for the exit animation window:
+  // Keep the exiting card in the scheduled list until its animation finishes,
+  // and hide it from confirmedUpcoming until exitingId is cleared.
+  const scheduledDisplay = exitingId
+    ? upcomingSessions.filter((s) => !confirmations[s.id] || s.id === exitingId)
+    : scheduled;
+  const confirmedDisplay = exitingId
+    ? confirmedUpcoming.filter((s) => s.id !== exitingId)
+    : confirmedUpcoming;
+
   const needsWednesdayConfirm = scheduled.length > 0;
   const pendingRequestsCount = requests.filter((r) => r.response === "pending").length;
   const nextSession = upcomingSessions[0] || null;
@@ -184,7 +228,7 @@ export default function DashboardPage() {
     <Stack spacing={3}>
       {/* ── Welcome header ── */}
       <Box>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
+        <Typography variant="h4" fontWeight={700} gutterBottom sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
           Welcome {guruName}
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -192,8 +236,59 @@ export default function DashboardPage() {
         </Typography>
       </Box>
 
+      {/* ── Availability gate ── */}
+      {!hasUserConfiguredAvailability && (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2.5,
+            py: 12,
+            borderRadius: 3,
+            border: '2px dashed',
+            borderColor: 'divider',
+            bgcolor: 'action.hover',
+            textAlign: 'center',
+            px: 4,
+          }}
+        >
+          <Box
+            sx={{
+              width: 72,
+              height: 72,
+              borderRadius: '50%',
+              bgcolor: 'primary.main',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <EventNoteIcon sx={{ fontSize: 36, color: 'primary.contrastText' }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.75 }}>
+              Set your availability to get started
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto' }}>
+              Without marking your availability, no sessions will be scheduled with you. Let learners know when you're free so they can book time with you.
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<EditCalendarIcon sx={{ fontSize: 18 }} />}
+            sx={{ textTransform: 'none', px: 4 }}
+            onClick={() => dispatch(setOpenAvailability(true))}
+          >
+            Set your availability
+          </Button>
+        </Box>
+      )}
+
       {/* ── Main layout ── */}
-      <Grid container spacing={3}>
+      {hasUserConfiguredAvailability && <Grid container spacing={{ xs: 2, md: 3 }}>
         {/* Left column (2/3) */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Stack spacing={3}>
@@ -262,7 +357,7 @@ export default function DashboardPage() {
                         title="Add your availability"
                         description={`Keep availability up-to-date for next ${rangeDays} days.`}
                         action={
-                          <Button size="small" variant="contained" sx={{ bgcolor: 'text.primary', color: 'background.paper', '&:hover': { bgcolor: 'text.secondary' } }} onClick={() => dispatch(setOpenAvailability(true))}>
+                          <Button size="small" variant="contained" onClick={() => dispatch(setOpenAvailability(true))}>
                             Update availability
                           </Button>
                         }
@@ -280,7 +375,7 @@ export default function DashboardPage() {
                         description="Ops needs clarity ~72 hours before weekend sessions."
                         extra={<Chip label={`Confirmed ${confirmedCount} / ${sessions.length}`} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
                         action={
-                          <Button size="small" variant="contained" sx={{}} onClick={() => dispatch(setOpenSession(true))}>
+                          <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
                             Review confirmations
                           </Button>
                         }
@@ -296,7 +391,7 @@ export default function DashboardPage() {
                         title="Respond to upcoming requests"
                         description="Indicate availability against real upcoming slots."
                         action={
-                          <Button size="small" variant="contained" sx={{}} onClick={() => navigate("/calendar")}>
+                          <Button size="small" variant="soft" onClick={() => navigate("/calendar")}>
                             Review calendar
                           </Button>
                         }
@@ -309,8 +404,8 @@ export default function DashboardPage() {
 
             {/* Sessions card */}
             <Card data-testid="home-sessions-card">
-              <Box sx={{ px: 3, pt: 2.5, pb: 1 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+              <Box sx={{ px: { xs: 2, sm: 3 }, pt: 2.5, pb: 1 }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'flex-start' }} spacing={1} useFlexGap>
                   <Box>
                     <Typography variant="h6" fontWeight={600}>Sessions</Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -319,7 +414,7 @@ export default function DashboardPage() {
                   </Box>
                   <Button
                     size="small"
-                    variant="outlined"
+                    variant="soft"
                     sx={{ flexShrink: 0 }}
                     onClick={() => navigate("/calendar")}
                   >
@@ -327,21 +422,47 @@ export default function DashboardPage() {
                   </Button>
                 </Stack>
               </Box>
-              <Tabs
-                value={homeSessionsView}
-                onChange={(_e, v) => dispatch(setHomeSessionsView(v))}
-                variant="fullWidth"
-                sx={{
-                  borderBottom: 1,
-                  borderColor: 'divider',
-                  minHeight: 42,
-                  '& .MuiTab-root': { minHeight: 42, textTransform: 'none', fontSize: '0.8rem' },
-                }}
-              >
-                <Tab value="next" label={`Upcoming (${upcomingSessions.length})`} />
-                <Tab value="completed" label={`Completed (${completedSessions.length})`} />
-                <Tab value="declined" label={`Declined (${declinedSessions.length})`} />
-              </Tabs>
+              <Box sx={{ px: { xs: 2, sm: 3 }, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <ToggleButtonGroup
+                    value={homeSessionsView}
+                    exclusive
+                    onChange={(_e, v) => { if (v !== null) dispatch(setHomeSessionsView(v)); }}
+                    size="small"
+                    sx={{
+                      bgcolor: 'action.hover',
+                      borderRadius: '10px',
+                      p: '4px',
+                      gap: '4px',
+                      whiteSpace: 'nowrap',
+                      '& .MuiToggleButtonGroup-grouped': {
+                        border: '0 !important',
+                        borderRadius: '7px !important',
+                      },
+                      '& .MuiToggleButton-root': {
+                        textTransform: 'none',
+                        fontSize: '0.8125rem',
+                        fontWeight: 500,
+                        px: 2,
+                        py: 0.625,
+                        color: 'text.secondary',
+                        '&:hover': { bgcolor: 'transparent', color: 'text.primary' },
+                        '&.Mui-selected': {
+                          bgcolor: 'background.paper',
+                          color: 'text.primary',
+                          fontWeight: 600,
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06)',
+                          '&:hover': { bgcolor: 'background.paper' },
+                        },
+                      },
+                    }}
+                  >
+                    <ToggleButton value="next">{`Upcoming (${upcomingSessions.length})`}</ToggleButton>
+                    <ToggleButton value="completed">{`Completed (${completedSessions.length})`}</ToggleButton>
+                    <ToggleButton value="declined">{`Declined (${declinedSessions.length})`}</ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+              </Box>
 
               <CardContent>
                 <Stack spacing={3}>
@@ -351,15 +472,15 @@ export default function DashboardPage() {
                       <Paper
                         variant="outlined"
                         sx={{
-                          p: 3,
-                                                   borderLeft: 4,
+                          p: { xs: 2, sm: 3 },
+                          borderLeft: 4,
                           borderLeftColor: 'primary.main',
                         }}
                       >
                         <Typography variant="overline" color="text.secondary">Next session</Typography>
                         {nextSession ? (
                           <Box sx={{ mt: 1 }}>
-                            <Typography variant="h5" fontWeight={600}>{nextSession.title}</Typography>
+                            <Typography variant="h5" fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.5rem' } }}>{nextSession.title}</Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                               {fmtDateNice(nextSession.dateYmd)} &bull; {fmtTime12(nextSession.start)}&ndash;{fmtTime12(nextSession.end)} &bull; {nextSession.group}
                             </Typography>
@@ -368,7 +489,7 @@ export default function DashboardPage() {
                               <Chip label={nextSession.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
                               <Chip label={nextSession.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
                             </Stack>
-                            <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mt: 3 }} flexWrap="wrap" useFlexGap>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1.5} sx={{ mt: 3 }} useFlexGap>
                               <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                                 {(() => {
                                   const sessionStartMs = dateTimeMs(nextSession.dateYmd, nextSession.start);
@@ -376,6 +497,7 @@ export default function DashboardPage() {
                                   return (
                                     <Button
                                       variant="contained"
+                                      size="small"
                                       startIcon={<Link2 size={16} />}
                                       disabled={!joinEnabled}
                                                                            onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
@@ -385,8 +507,7 @@ export default function DashboardPage() {
                                   );
                                 })()}
                                 <Button
-                                  variant="outlined"
-                                  color="inherit"
+                                  variant="soft"
                                   size="small"
                                   startIcon={<BookOpen size={16} />}
                                                                    onClick={() => dispatch(pushToast({ title: "Downloading slides", description: "Preparing download..." }))}
@@ -394,8 +515,7 @@ export default function DashboardPage() {
                                   Download slides
                                 </Button>
                                 <Button
-                                  variant="outlined"
-                                  color="inherit"
+                                  variant="soft"
                                   size="small"
                                                                    onClick={() => {
                                     dispatch(setPollSessionId(nextSession.id));
@@ -409,8 +529,7 @@ export default function DashboardPage() {
                                 </Button>
                               </Stack>
                               <Button
-                                variant="outlined"
-                                color="inherit"
+                                variant="text"
                                 size="small"
                                                                onClick={() => dispatch(setOpenGroupProfile(true))}
                               >
@@ -424,11 +543,11 @@ export default function DashboardPage() {
                       </Paper>
 
                       {/* Up next: scheduled + confirmed sessions */}
-                      <Paper variant="outlined" sx={{ p: 3 }}>
+                      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
                         <Typography variant="overline" color="text.secondary">Up next</Typography>
 
                         {/* Scheduled sessions */}
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 2, gap: 1 }}>
                           <Typography variant="subtitle2" fontWeight={600}>Scheduled sessions</Typography>
                           <Chip label={`${scheduled.length} scheduled`} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
                         </Stack>
@@ -441,39 +560,81 @@ export default function DashboardPage() {
                         )}
                         <Stack divider={<Divider />} sx={{ mt: 2 }}>
                           {scheduled.length ? (
-                            scheduled.map((s) => (
-                              <Box key={s.id} sx={{ py: 2.5 }}>
-                                <Typography variant="h6" fontWeight={600}>{s.title}</Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                  {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
-                                </Typography>
-                                <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
-                                  <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
-                                  <Chip label={s.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
+                            scheduledDisplay.map((s) => {
+                              const isExiting = s.id === exitingId && !!confirmations[s.id];
+                              return (
+                              <Box
+                                key={s.id}
+                                sx={{
+                                  py: 2.5,
+                                  ...(isExiting && {
+                                    animation: `${slideOutDown} 0.38s ease forwards`,
+                                    pointerEvents: 'none',
+                                  }),
+                                }}
+                              >
+                                {/* Row 1: Status chip + category chips */}
+                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
+                                  <Chip
+                                    label="Scheduled"
+                                    size="small"
+                                    sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-pending-bg)', color: 'var(--gl-status-pending-text)', border: '1px solid var(--gl-status-pending-border)', fontWeight: 600 }}
+                                  />
+                                  {s.program && <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
+                                  {s.cohort && <Chip label={s.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
+                                  {s.location && <Chip label={s.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
                                 </Stack>
-                                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ sm: 'center' }} spacing={1.5} sx={{ mt: 2.5 }}>
+
+                                {/* Row 2: Title */}
+                                <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>{s.title}</Typography>
+
+                                {/* Row 3: Date + group */}
+                                <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2.5, color: 'text.secondary' }}>
+                                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                                    <Calendar size={14} />
+                                    <Typography variant="body2" color="text.secondary">
+                                      {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
+                                    </Typography>
+                                  </Stack>
+                                  {s.group && (
+                                    <>
+                                      <Typography variant="body2" color="text.disabled">&middot;</Typography>
+                                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                                        <Users size={14} />
+                                        <Typography variant="body2" color="text.secondary">{s.group}</Typography>
+                                      </Stack>
+                                    </>
+                                  )}
+                                </Stack>
+
+                                {/* Row 4: Actions */}
+                                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent={{ xs: 'flex-start', sm: 'space-between' }} alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1.5}>
                                   <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                                     <Button
-                                      startIcon={<CheckCircle2 size={16} />}
-                                      variant={confirmations[s.id] ? "outlined" : "contained"}
+                                      startIcon={<TaskAltRoundedIcon sx={{ fontSize: 18 }} />}
+                                      size="small"
+                                      variant={confirmations[s.id] ? "soft" : "contained"}
                                       sx={{
-                                                                               ...(confirmations[s.id]
+                                        transition: 'background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease',
+                                        ...(confirmations[s.id]
                                           ? { borderColor: 'var(--gl-status-confirmed-border)', bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', '&:hover': { bgcolor: 'var(--gl-status-confirmed-bg)' } }
                                           : {}),
                                       }}
                                       onClick={() => {
                                         if (confirmations[s.id]) return;
+                                        setExitingId(s.id);
                                         dispatch(confirmSession(s.id));
                                         dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
+                                        setTimeout(() => setExitingId(null), 420);
                                       }}
                                     >
                                       {confirmations[s.id] ? "Confirmed" : "Confirm"}
                                     </Button>
                                     <Button
-                                      startIcon={<XCircle size={16} />}
-                                      variant="outlined"
-                                      color="inherit"
-                                                                           onClick={() => {
+                                      startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />}
+                                      size="small"
+                                      variant="soft"
+                                      onClick={() => {
                                         dispatch(setDeclineSessionFocus(s));
                                         dispatch(setDeclineReason(""));
                                         dispatch(setOpenDeclineReason(true));
@@ -483,15 +644,16 @@ export default function DashboardPage() {
                                     </Button>
                                   </Stack>
                                   <Button
-                                    variant="outlined"
+                                    variant="text"
                                     size="small"
-                                                                       onClick={() => dispatch(setOpenGroupProfile(true))}
+                                    onClick={() => dispatch(setOpenGroupProfile(true))}
                                   >
                                     Group profile
                                   </Button>
                                 </Stack>
                               </Box>
-                            ))
+                              );
+                            })
                           ) : (
                             <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
                               <Typography variant="body2" color="text.secondary">No scheduled sessions.</Typography>
@@ -500,54 +662,77 @@ export default function DashboardPage() {
                         </Stack>
 
                         {/* Confirmed sessions */}
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 4 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 4, gap: 1 }}>
                           <Typography variant="subtitle2" fontWeight={600}>Confirmed sessions</Typography>
                           <Chip label={`${confirmedUpcoming.length} confirmed`} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
                         </Stack>
                         <Stack divider={<Divider />} sx={{ mt: 2 }}>
                           {confirmedUpcoming.length ? (
-                            confirmedUpcoming.map((s) => (
-                              <Box key={s.id} sx={{ py: 2.5 }}>
-                                <Typography variant="h6" fontWeight={600}>{s.title}</Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                  {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
-                                </Typography>
-                                <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
-                                  <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
-                                  <Chip label={s.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
+                            confirmedDisplay.map((s) => (
+                              <Box
+                                key={s.id}
+                                sx={{
+                                  py: 2.5,
+                                  ...(recentlyConfirmedIds[s.id] && {
+                                    animation: `${slideInFromAbove} 0.38s ease forwards`,
+                                  }),
+                                }}
+                              >
+                                {/* Row 1: Status chip + category chips */}
+                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
+                                  <Chip
+                                    icon={<TaskAltRoundedIcon sx={{ fontSize: 14, color: 'var(--gl-status-confirmed-text)' }} />}
+                                    label="Confirmed"
+                                    size="small"
+                                    sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', border: '1px solid var(--gl-status-confirmed-border)', fontWeight: 600 }}
+                                  />
+                                  {s.program && <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
+                                  {s.cohort && <Chip label={s.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
+                                  {s.location && <Chip label={s.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
                                 </Stack>
-                                <Stack direction="row" spacing={1} sx={{ mt: 2.5 }} flexWrap="wrap" useFlexGap>
+
+                                {/* Row 2: Title */}
+                                <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>{s.title}</Typography>
+
+                                {/* Row 3: Date + group */}
+                                <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2.5, color: 'text.secondary' }}>
+                                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                                    <Calendar size={14} />
+                                    <Typography variant="body2" color="text.secondary">
+                                      {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
+                                    </Typography>
+                                  </Stack>
+                                  {s.group && (
+                                    <>
+                                      <Typography variant="body2" color="text.disabled">&middot;</Typography>
+                                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                                        <Users size={14} />
+                                        <Typography variant="body2" color="text.secondary">{s.group}</Typography>
+                                      </Stack>
+                                    </>
+                                  )}
+                                </Stack>
+
+                                {/* Row 4: Link-style actions */}
+                                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
                                   <Button
-                                    startIcon={<CheckCircle2 size={16} />}
-                                    variant="outlined"
-                                    disabled
-                                    sx={{ borderColor: 'var(--gl-status-confirmed-border)', bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)' }}
+                                    variant="text"
+                                    size="small"
+                                    startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                                    onClick={() => dispatch(pushToast({ title: "Downloading slides", description: "Preparing download..." }))}
                                   >
-                                    Confirmed
+                                    Download Slides
                                   </Button>
                                   <Button
-                                    startIcon={<BookOpen size={16} />}
-                                    variant="outlined"
+                                    variant="text"
                                     size="small"
-                                                                       onClick={() => {
+                                    startIcon={<OpenInNewRoundedIcon sx={{ fontSize: 16 }} />}
+                                    onClick={() => {
                                       navigate("/courses");
                                       dispatch(pushToast({ title: "Course content", description: `Viewing content for ${s.title}` }));
                                     }}
                                   >
-                                    View course content
-                                  </Button>
-                                  <Button
-                                    startIcon={<XCircle size={16} />}
-                                    variant="outlined"
-                                    color="inherit"
-                                    size="small"
-                                                                       onClick={() => {
-                                      dispatch(setDeclineSessionFocus(s));
-                                      dispatch(setDeclineReason(""));
-                                      dispatch(setOpenDeclineReason(true));
-                                    }}
-                                  >
-                                    I'm unavailable
+                                    View Course content
                                   </Button>
                                 </Stack>
                               </Box>
@@ -564,7 +749,7 @@ export default function DashboardPage() {
 
                   {homeSessionsView === "completed" && (
                     <>
-                      <FormControl size="small" sx={{ minWidth: 220 }}>
+                      <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220 } }}>
                         <InputLabel>Filter by session type</InputLabel>
                         <Select
                           label="Filter by session type"
@@ -609,7 +794,7 @@ export default function DashboardPage() {
                                   {s.recordingUrl && (
                                     <Button
                                       startIcon={<Video size={14} />}
-                                      variant="outlined"
+                                      variant="soft"
                                       size="small"
                                                                            onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
                                     >
@@ -619,7 +804,7 @@ export default function DashboardPage() {
                                   {hasRatings && (
                                     <Button
                                       startIcon={<Star size={14} />}
-                                      variant="outlined"
+                                      variant="soft"
                                       size="small"
                                                                            onClick={() => {
                                         dispatch(setLearnerRatingsSessionId(s.id));
@@ -631,7 +816,7 @@ export default function DashboardPage() {
                                   )}
                                   <Button
                                     startIcon={<TrendingUp size={14} />}
-                                    variant="outlined"
+                                    variant="soft"
                                     size="small"
                                                                        onClick={() => navigate("/profile")}
                                   >
@@ -669,10 +854,9 @@ export default function DashboardPage() {
                                 />
                                 <Box sx={{ mt: 2 }}>
                                   <Button
-                                    startIcon={<CheckCircle2 size={16} />}
-                                    variant="outlined"
+                                    startIcon={<TaskAltRoundedIcon sx={{ fontSize: 18 }} />}
+                                    variant="soft"
                                     size="small"
-                                    sx={{ borderColor: 'var(--gl-status-confirmed-border)', color: 'var(--gl-status-confirmed-text)', '&:hover': { bgcolor: 'var(--gl-status-confirmed-bg)' } }}
                                     onClick={() => {
                                       dispatch(acceptSession(s.id));
                                       dispatch(removeUnavailableBySessionId(s.id));
@@ -705,7 +889,7 @@ export default function DashboardPage() {
                                     sx={{ borderRadius: 9999, bgcolor: 'action.hover', color: 'text.secondary', fontSize: '0.7rem' }}
                                   />
                                   <Button
-                                    variant="outlined"
+                                    variant="soft"
                                     size="small"
                                     disabled
                                                                      >
@@ -757,10 +941,10 @@ export default function DashboardPage() {
                   action={
                     hasUserConfiguredAvailability ? (
                       <Stack direction="row" spacing={1}>
-                        <Button size="small" variant="outlined" color="inherit" sx={{}} onClick={() => dispatch(setOpenAvailability(true))}>
+                        <Button size="small" variant="soft" onClick={() => dispatch(setOpenAvailability(true))}>
                           Edit
                         </Button>
-                        <Button size="small" variant="outlined" sx={{}} onClick={() => navigate("/calendar")}>
+                        <Button size="small" variant="soft" onClick={() => navigate("/calendar")}>
                           View calendar
                         </Button>
                       </Stack>
@@ -768,7 +952,6 @@ export default function DashboardPage() {
                       <Button
                         size="small"
                         variant="contained"
-                        sx={{ bgcolor: 'text.primary', color: 'background.paper', '&:hover': { bgcolor: 'text.secondary' } }}
                         onClick={() => dispatch(setOpenAvailability(true))}
                       >
                         Update availability
@@ -788,7 +971,7 @@ export default function DashboardPage() {
                     description="Ops needs clarity ~72 hours before weekend sessions."
                     extra={<Chip label={`${confirmedCount} / ${sessions.length}`} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
                     action={
-                      <Button size="small" variant="contained" sx={{}} onClick={() => dispatch(setOpenSession(true))}>
+                      <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
                         Review confirmations
                       </Button>
                     }
@@ -804,7 +987,7 @@ export default function DashboardPage() {
                     title="Respond to upcoming requests"
                     description="Indicate availability against real upcoming slots."
                     action={
-                      <Button size="small" variant="contained" sx={{}} onClick={() => navigate("/calendar")}>
+                      <Button size="small" variant="soft" onClick={() => navigate("/calendar")}>
                         Review calendar
                       </Button>
                     }
@@ -871,7 +1054,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-      </Grid>
+      </Grid>}
     </Stack>
   );
 }

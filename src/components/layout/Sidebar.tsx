@@ -11,15 +11,31 @@ import {
   Sun,
   Users,
 } from "lucide-react";
+import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setIsNavCollapsed, setIsDarkMode } from "@/store/slices/uiSlice";
-import { classNames } from "@/lib/helpers";
 
-const navItemBase =
-  "w-full rounded-nav py-2 text-sm border border-transparent hover:bg-surface-container/30 text-on-surface-variant transition-colors";
-const navItemActive =
-  "bg-surface-container/40 !text-on-surface border-outline-variant";
+const NAV_ITEM_SX = {
+  display: "flex",
+  alignItems: "center",
+  width: "100%",
+  borderRadius: "10px",
+  py: 1,
+  fontSize: "0.875rem",
+  border: "1px solid transparent",
+  color: "hsl(var(--md-on-surface-variant))",
+  textDecoration: "none",
+  transition: "background-color 0.15s, color 0.15s",
+  "&:hover": { backgroundColor: "hsl(var(--md-surface-container) / 0.3)" },
+} as const;
+
+const NAV_ITEM_ACTIVE_SX = {
+  backgroundColor: "hsl(var(--md-surface-container) / 0.4)",
+  color: "hsl(var(--md-on-surface))",
+  borderColor: "hsl(var(--md-outline-variant))",
+} as const;
 
 export function Sidebar() {
   const dispatch = useAppDispatch();
@@ -29,116 +45,194 @@ export function Sidebar() {
     s.notifications.items.filter((n) => !n.read).length
   );
 
-  const linkClass = ({ isActive }: { isActive: boolean }) =>
-    classNames(
-      navItemBase,
-      isActive && navItemActive,
-      isNavCollapsed ? "justify-center px-2" : "justify-start gap-3 px-3",
-      "flex items-center"
-    );
+  const collapsedSx = isNavCollapsed
+    ? { justifyContent: "center", px: 1 }
+    : { justifyContent: "flex-start", gap: 1.5, px: 1.5 };
 
   return (
-    <aside className="hidden md:block border-r bg-surface sticky top-0 h-screen">
-      <div className="h-full p-4 flex flex-col">
+    <Box
+      component="aside"
+      sx={{
+        display: { xs: "none", md: "block" },
+        borderRight: 1,
+        borderColor: "divider",
+        backgroundColor: "hsl(var(--md-surface))",
+        position: "sticky",
+        top: 0,
+        height: "100vh",
+      }}
+    >
+      <Box sx={{ height: "100%", p: 2, display: "flex", flexDirection: "column" }}>
         {/* Sidebar header */}
-        <div
-          className={classNames(
-            "mb-4 flex items-center rounded-nav border bg-surface py-2",
-            isNavCollapsed ? "justify-center px-2" : "gap-2 px-3"
-          )}
+        <Box
+          sx={{
+            mb: 2,
+            display: "flex",
+            alignItems: "center",
+            borderRadius: "10px",
+            border: 1,
+            borderColor: "divider",
+            backgroundColor: "hsl(var(--md-surface))",
+            py: 1,
+            ...collapsedSx,
+          }}
         >
-          <div className="grid h-8 w-8 place-items-center" aria-label="Great Learning">
+          <Box sx={{ display: "grid", height: 32, width: 32, placeItems: "center" }} aria-label="Great Learning">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19.9338 30.4595L20.0177 30.3608L23.4279 26.2037H18.8904C13.201 26.2037 8.57217 21.6262 8.57217 15.9998C8.57217 10.3731 13.201 5.79565 18.8904 5.79565H24.1907L27.7173 1.54004H18.8904C10.8277 1.54004 4.26855 8.02664 4.26855 15.9998C4.26855 23.9729 10.8277 30.4595 18.8904 30.4595H19.9338Z" fill="#0E39A9" />
               <path d="M4.26855 15.9998C4.26855 19.6784 5.66696 23.0386 7.96278 25.5933L10.726 22.2286C9.37739 20.5039 8.57193 18.3438 8.57193 15.9998C8.57193 10.3733 13.201 5.79588 18.8904 5.79588H24.2224L27.7173 1.54004H18.8904C10.8277 1.54004 4.26855 8.02664 4.26855 15.9998Z" fill="#1974D2" />
               <path d="M23.4277 26.2038L27.7311 20.9576V13.7129H18.5888L15.1025 17.9687H23.4277V26.2038Z" fill="#0E39A9" />
             </svg>
-          </div>
-          <div className={classNames("min-w-0", isNavCollapsed && "hidden")}>
-            <div className="truncate text-sm font-semibold">Guru Dashboard</div>
-          </div>
-        </div>
+          </Box>
+          {!isNavCollapsed && (
+            <Box sx={{ minWidth: 0 }}>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+              >
+                Guru Dashboard
+              </Typography>
+            </Box>
+          )}
+        </Box>
 
         {!isNavCollapsed && (
-          <div className="mb-3 px-2 text-xs font-semibold text-on-surface-variant">Navigation</div>
+          <Typography
+            variant="caption"
+            sx={{ mb: 1.5, px: 1, fontWeight: 600, color: "hsl(var(--md-on-surface-variant))" }}
+          >
+            Navigation
+          </Typography>
         )}
 
-        <div className="flex-1 min-h-0 flex flex-col">
+        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
           {/* Main nav links */}
-          <nav className="flex flex-col gap-1" aria-label="Primary navigation">
-            <NavLink to="/" end className={linkClass}>
-              <House className="h-4 w-4" />
-              {!isNavCollapsed && <span>Home</span>}
-            </NavLink>
-
-            <NavLink to="/courses" className={linkClass}>
-              <FileText className="h-4 w-4" />
-              {!isNavCollapsed && <span className="flex-1 text-left">Courses</span>}
-            </NavLink>
-
-            <NavLink to="/calendar" className={linkClass}>
-              <CalendarDays className="h-4 w-4" />
-              {!isNavCollapsed && <span>Calendar</span>}
-            </NavLink>
-
-            <NavLink to="/notifications" className={linkClass}>
-              {isNavCollapsed ? (
-                unreadCount > 0 ? (
-                  <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-badge px-1.5 text-[11px] font-semibold text-white tabular-nums">
-                    {unreadCount}
-                  </span>
-                ) : (
-                  <Bell className="h-4 w-4 shrink-0" />
-                )
-              ) : (
-                <Bell className="h-4 w-4 shrink-0" />
-              )}
-              {!isNavCollapsed && <span className="flex-1 text-left">Alerts</span>}
-              {!isNavCollapsed && unreadCount > 0 && (
-                <span className="shrink-0 ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-badge px-1.5 text-[11px] font-semibold text-white tabular-nums">
-                  {unreadCount}
-                </span>
+          <Box component="nav" sx={{ display: "flex", flexDirection: "column", gap: 0.5 }} aria-label="Primary navigation">
+            <NavLink to="/" end style={{ textDecoration: "none" }}>
+              {({ isActive }) => (
+                <Box sx={{ ...NAV_ITEM_SX, ...(isActive ? NAV_ITEM_ACTIVE_SX : {}), ...collapsedSx }}>
+                  <House style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  {!isNavCollapsed && <span>Home</span>}
+                </Box>
               )}
             </NavLink>
-          </nav>
+
+            <NavLink to="/courses" style={{ textDecoration: "none" }}>
+              {({ isActive }) => (
+                <Box sx={{ ...NAV_ITEM_SX, ...(isActive ? NAV_ITEM_ACTIVE_SX : {}), ...collapsedSx }}>
+                  <FileText style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  {!isNavCollapsed && <span style={{ flex: 1, textAlign: "left" }}>Courses</span>}
+                </Box>
+              )}
+            </NavLink>
+
+            <NavLink to="/calendar" style={{ textDecoration: "none" }}>
+              {({ isActive }) => (
+                <Box sx={{ ...NAV_ITEM_SX, ...(isActive ? NAV_ITEM_ACTIVE_SX : {}), ...collapsedSx }}>
+                  <CalendarDays style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  {!isNavCollapsed && <span>Calendar</span>}
+                </Box>
+              )}
+            </NavLink>
+
+            <NavLink to="/notifications" style={{ textDecoration: "none" }}>
+              {({ isActive }) => (
+                <Box sx={{ ...NAV_ITEM_SX, ...(isActive ? NAV_ITEM_ACTIVE_SX : {}), ...collapsedSx }}>
+                  {isNavCollapsed ? (
+                    unreadCount > 0 ? (
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "inline-flex", height: 20, minWidth: 20, alignItems: "center",
+                          justifyContent: "center", borderRadius: 9999, backgroundColor: "var(--gl-badge-bg)",
+                          px: 0.75, fontSize: "11px", fontWeight: 600, color: "#fff",
+                        }}
+                      >
+                        {unreadCount}
+                      </Box>
+                    ) : (
+                      <Bell style={{ width: 16, height: 16, flexShrink: 0 }} />
+                    )
+                  ) : (
+                    <Bell style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  )}
+                  {!isNavCollapsed && <span style={{ flex: 1, textAlign: "left" }}>Alerts</span>}
+                  {!isNavCollapsed && unreadCount > 0 && (
+                    <Box
+                      component="span"
+                      sx={{
+                        flexShrink: 0, ml: "auto", display: "inline-flex", height: 20, minWidth: 20,
+                        alignItems: "center", justifyContent: "center", borderRadius: 9999,
+                        backgroundColor: "var(--gl-badge-bg)", px: 0.75, fontSize: "11px",
+                        fontWeight: 600, color: "#fff",
+                      }}
+                    >
+                      {unreadCount}
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </NavLink>
+          </Box>
 
           {/* Bottom nav */}
-          <div className="mt-auto pt-2">
-            <button
+          <Box sx={{ mt: "auto", pt: 1 }}>
+            <Box
+              component="button"
               type="button"
               aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
               onClick={() => dispatch(setIsDarkMode(!isDarkMode))}
-              className={classNames(
-                "mb-1 w-full rounded-nav py-2 text-sm border border-transparent hover:bg-surface-container/30",
-                isNavCollapsed ? "grid place-items-center px-2" : "flex items-center gap-3 px-3"
-              )}
+              sx={{
+                mb: 0.5,
+                width: "100%",
+                borderRadius: "10px",
+                py: 1,
+                fontSize: "0.875rem",
+                border: "1px solid transparent",
+                backgroundColor: "transparent",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                color: "hsl(var(--md-on-surface-variant))",
+                "&:hover": { backgroundColor: "hsl(var(--md-surface-container) / 0.3)" },
+                display: "flex",
+                alignItems: "center",
+                ...collapsedSx,
+              }}
             >
-              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {isDarkMode ? <Sun style={{ width: 16, height: 16 }} /> : <Moon style={{ width: 16, height: 16 }} />}
               {!isNavCollapsed && <span>{isDarkMode ? "Light mode" : "Dark mode"}</span>}
-            </button>
+            </Box>
 
-            <NavLink to="/profile" className={linkClass}>
-              <Users className="h-4 w-4" />
-              {!isNavCollapsed && <span>Profile</span>}
+            <NavLink to="/profile" style={{ textDecoration: "none" }}>
+              {({ isActive }) => (
+                <Box sx={{ ...NAV_ITEM_SX, ...(isActive ? NAV_ITEM_ACTIVE_SX : {}), ...collapsedSx }}>
+                  <Users style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  {!isNavCollapsed && <span>Profile</span>}
+                </Box>
+              )}
             </NavLink>
 
-            <NavLink to="/preferences" className={linkClass}>
-              <Settings className="h-4 w-4" />
-              {!isNavCollapsed && <span>Preferences</span>}
+            <NavLink to="/preferences" style={{ textDecoration: "none", marginTop: 4, display: "block" }}>
+              {({ isActive }) => (
+                <Box sx={{ ...NAV_ITEM_SX, ...(isActive ? NAV_ITEM_ACTIVE_SX : {}), ...collapsedSx, mt: 0.5 }}>
+                  <Settings style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  {!isNavCollapsed && <span>Preferences</span>}
+                </Box>
+              )}
             </NavLink>
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        <div className={classNames("mt-3 flex", isNavCollapsed ? "justify-center" : "justify-end")}>
+        <Box sx={{ mt: 1.5, display: "flex", justifyContent: isNavCollapsed ? "center" : "flex-end" }}>
           <IconButton
             onClick={() => dispatch(setIsNavCollapsed(!isNavCollapsed))}
             aria-label={isNavCollapsed ? "Expand navigation panel" : "Collapse navigation panel"}
-            sx={{ height: 40, width: 40, border: '1px solid', borderColor: 'divider' }}
+            sx={{ height: 40, width: 40, border: "1px solid", borderColor: "divider" }}
           >
-            {isNavCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {isNavCollapsed ? <ChevronRight style={{ width: 16, height: 16 }} /> : <ChevronLeft style={{ width: 16, height: 16 }} />}
           </IconButton>
-        </div>
-      </div>
-    </aside>
+        </Box>
+      </Box>
+    </Box>
   );
 }

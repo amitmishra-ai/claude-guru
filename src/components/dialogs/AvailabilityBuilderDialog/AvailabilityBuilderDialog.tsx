@@ -192,7 +192,7 @@ const AvailabilityBuilderDialog = () => {
           size="small"
           sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.75 }}
         >
-          <X className="h-4 w-4" />
+          <X style={{ width: 16, height: 16 }} />
         </IconButton>
       </FlexBox>
 
@@ -231,7 +231,7 @@ const AvailabilityBuilderDialog = () => {
                   onClick={() => dispatch(setMaxPerWeek(Math.max(1, maxPerWeek - 1)))}
                   sx={{ borderRadius: 0, px: 1.5, py: 1 }}
                 >
-                  <Minus className="h-4 w-4" />
+                  <Minus style={{ width: 16, height: 16 }} />
                 </IconButton>
                 <Typography sx={{ minWidth: 36, textAlign: "center", fontWeight: 600, fontSize: "1rem", userSelect: "none" }}>
                   {maxPerWeek}
@@ -241,7 +241,7 @@ const AvailabilityBuilderDialog = () => {
                   onClick={() => dispatch(setMaxPerWeek(maxPerWeek + 1))}
                   sx={{ borderRadius: 0, px: 1.5, py: 1 }}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus style={{ width: 16, height: 16 }} />
                 </IconButton>
               </FlexBox>
             </FlexBox>
@@ -283,7 +283,7 @@ const AvailabilityBuilderDialog = () => {
                   {fmtTimezoneDisplay(effectiveTimezone)}
                 </Typography>
                 <IconButton size="small" sx={{ p: 0.25 }}>
-                  <Pencil className="h-3.5 w-3.5" />
+                  <Pencil style={{ width: 14, height: 14 }} />
                 </IconButton>
               </FlexBox>
             </FlexBox>
@@ -311,23 +311,16 @@ const AvailabilityBuilderDialog = () => {
                 </FlexBox>
                 <FlexBox alignItems="center" gap={1} sx={{ flexShrink: 0 }}>
                   <Button
-                    variant="contained"
+                    variant={card.enabled ? "soft" : "contained"}
                     size="small"
                     onClick={() => togglePreset(card.key)}
-                    sx={{
-                      px: 2,
-                      bgcolor: card.enabled ? "success.main" : "text.primary",
-                      color: "background.paper",
-                      boxShadow: "none",
-                      "&:hover": { bgcolor: card.enabled ? "success.dark" : "text.secondary", boxShadow: "none" },
-                    }}
+                    sx={card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" } : { px: 2 }}
                   >
                     {card.enabled ? "Added" : "Add"}
                   </Button>
                   <Button
-                    variant="outlined"
+                    variant="text"
                     size="small"
-                    sx={{ px: 2, color: "text.primary", borderColor: "divider" }}
                   >
                     Edit
                   </Button>
@@ -336,7 +329,7 @@ const AvailabilityBuilderDialog = () => {
                     onClick={() => dispatch(setPresetCards(cards.filter((c) => c.key !== card.key)))}
                     sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <X style={{ width: 14, height: 14 }} />
                   </IconButton>
                 </FlexBox>
               </FlexBox>
@@ -359,7 +352,7 @@ const AvailabilityBuilderDialog = () => {
                   onClick={() => removeCustomSlot(p.id)}
                   sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X style={{ width: 14, height: 14 }} />
                 </IconButton>
               </FlexBox>
             ))}
@@ -420,13 +413,12 @@ const AvailabilityBuilderDialog = () => {
                     variant="contained"
                     onClick={addCustomSlot}
                     disabled={!builderDays.length}
-                    sx={{ bgcolor: "text.primary", color: "background.paper", boxShadow: "none", "&:hover": { bgcolor: "text.secondary", boxShadow: "none" } }}
                   >
                     Add
                   </Button>
                   <Button
                     size="small"
-                    variant="outlined"
+                    variant="text"
                     color="inherit"
                     onClick={() => setShowCustomForm(false)}
                   >
@@ -437,9 +429,8 @@ const AvailabilityBuilderDialog = () => {
             ) : (
               <FlexBox justifyContent="flex-end" sx={{ mt: 0.5 }}>
                 <Button
-                  variant="outlined"
+                  variant="soft"
                   onClick={() => setShowCustomForm(true)}
-                  sx={{ color: "text.primary", borderColor: "divider", px: 2.5 }}
                 >
                   Add another time slot
                 </Button>
@@ -453,38 +444,20 @@ const AvailabilityBuilderDialog = () => {
       <DialogActions sx={{ px: 3, pb: 3, pt: 2, justifyContent: "space-between" }}>
         {step === 1 ? (
           <>
-            <Button
-              variant="contained"
-              onClick={handleClose}
-              sx={{ px: 3, bgcolor: "action.selected", color: "text.primary", boxShadow: "none", "&:hover": { bgcolor: "action.hover", boxShadow: "none" } }}
-            >
+            <Button variant="text" color="inherit" onClick={handleClose}>
               Cancel
             </Button>
-            <Button
-              variant="contained"
-              onClick={handleNext}
-              sx={{ px: 3, bgcolor: "text.primary", color: "background.paper", boxShadow: "none", "&:hover": { bgcolor: "text.secondary", boxShadow: "none" } }}
-            >
+            <Button variant="contained" onClick={handleNext}>
               Next
             </Button>
           </>
         ) : (
           <>
-            <Button
-              variant="contained"
-              onClick={handleClose}
-              disabled={isSaving}
-              sx={{ px: 3, bgcolor: "action.selected", color: "text.primary", boxShadow: "none", "&:hover": { bgcolor: "action.hover", boxShadow: "none" } }}
-            >
+            <Button variant="text" color="inherit" onClick={handleClose} disabled={isSaving}>
               Cancel
             </Button>
             <FlexBox gap={1}>
-              <Button
-                variant="outlined"
-                onClick={handleBack}
-                disabled={isSaving}
-                sx={{ px: 3, color: "text.primary", borderColor: "text.primary" }}
-              >
+              <Button variant="soft" onClick={handleBack} disabled={isSaving}>
                 Back
               </Button>
               <Button
@@ -492,7 +465,6 @@ const AvailabilityBuilderDialog = () => {
                 onClick={handleSave}
                 disabled={isSaving || (!cards.some((c) => c.enabled) && !draftPatterns.length)}
                 startIcon={isSaving ? <CircularProgress size={14} color="inherit" /> : undefined}
-                sx={{ px: 3, bgcolor: "text.primary", color: "background.paper", boxShadow: "none", "&:hover": { bgcolor: "text.secondary", boxShadow: "none" } }}
               >
                 {isSaving ? "Saving…" : "Update"}
               </Button>

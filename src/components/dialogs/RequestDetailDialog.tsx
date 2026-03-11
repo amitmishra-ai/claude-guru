@@ -1,4 +1,5 @@
 import { CheckCircle2, XCircle } from "lucide-react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
@@ -37,49 +38,63 @@ export function RequestDetailDialog() {
 
       <DialogContent>
         {requestFocus ? (
-          <div className="space-y-4">
-            <div className="rounded-2xl border bg-surface-container/30 p-3 text-sm text-on-surface-variant">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
+            <Box
+              sx={{
+                borderRadius: "16px",
+                border: 1,
+                borderColor: "divider",
+                backgroundColor: "hsl(var(--md-surface-container) / 0.3)",
+                p: 1.5,
+                fontSize: "0.875rem",
+                color: "hsl(var(--md-on-surface-variant))",
+              }}
+            >
               Confirm if you can take this session. You can still mark yourself unavailable later if plans change.
-            </div>
+            </Box>
 
-            <div className="rounded-2xl border bg-surface p-4">
-              <div className="text-sm font-semibold">{requestFocus.title}</div>
-              <div className="mt-1 text-xs text-on-surface-variant">
+            <Box
+              sx={{
+                borderRadius: "16px",
+                border: 1,
+                borderColor: "divider",
+                backgroundColor: "hsl(var(--md-surface))",
+                p: 2,
+              }}
+            >
+              <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{requestFocus.title}</Box>
+              <Box sx={{ mt: 0.5, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
                 {fmtDateNice(requestFocus.dateYmd)} &bull; {fmtTime12(requestFocus.start)}&ndash;{fmtTime12(requestFocus.end)} &bull; {requestFocus.location}
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
+              </Box>
+              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
                 <Chip variant="outlined" size="small" label={requestFocus.program} />
                 <Chip variant="outlined" size="small" label={requestFocus.cohort} />
                 <Chip variant="outlined" size="small" label={`Group hint: ${requestFocus.groupHint}`} />
-              </div>
-            </div>
+              </Box>
+            </Box>
 
-            <div className="flex flex-wrap gap-2">
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               <Button
                 variant="contained"
                 onClick={() => handleRespond(requestFocus.id, "available")}
               >
-                <CheckCircle2 className="mr-2 h-4 w-4" /> Confirm
+                <CheckCircle2 style={{ marginRight: 8, width: 16, height: 16 }} /> Confirm
               </Button>
               <Button
-                variant="outlined"
-                sx={requestFocus.response === "unavailable"
-                  ? { borderColor: 'transparent', bgcolor: 'transparent', color: 'error.main', '&:hover': { bgcolor: 'var(--gl-status-declined-bg)', color: 'error.dark' } }
-                  : {}
-                }
+                variant="soft"
                 onClick={() => handleRespond(requestFocus.id, "unavailable")}
               >
-                <XCircle className="mr-2 h-4 w-4" /> I'm unavailable
+                <XCircle style={{ marginRight: 8, width: 16, height: 16 }} /> I'm unavailable
               </Button>
-            </div>
-          </div>
+            </Box>
+          </Box>
         ) : (
-          <div className="text-sm text-on-surface-variant">Select a request from the calendar.</div>
+          <Box sx={{ fontSize: "0.875rem", color: "hsl(var(--md-on-surface-variant))" }}>Select a request from the calendar.</Box>
         )}
       </DialogContent>
 
       <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={() => dispatch(setOpenRequest(false))}>
+        <Button variant="text" color="inherit" onClick={() => dispatch(setOpenRequest(false))}>
           Close
         </Button>
       </DialogActions>

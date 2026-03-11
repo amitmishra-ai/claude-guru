@@ -1,9 +1,11 @@
 import { useMemo } from "react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -56,19 +58,26 @@ export function TimezoneDialog() {
   }, [effectiveTimeZone]);
 
   return (
-    <Dialog
-      open={open}
-      onClose={() => dispatch(setOpenTimezone(false))}
-    >
+    <Dialog open={open} onClose={() => dispatch(setOpenTimezone(false))}>
       <DialogTitle>Timezone</DialogTitle>
 
       <DialogContent>
-        <div className="space-y-4">
-          <div className="rounded-2xl border bg-surface-container/30 p-3 text-sm text-on-surface-variant">
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box
+            sx={{
+              borderRadius: "16px",
+              border: 1,
+              borderColor: "divider",
+              backgroundColor: "hsl(var(--md-surface-container) / 0.3)",
+              p: 1.5,
+              fontSize: "0.875rem",
+              color: "hsl(var(--md-on-surface-variant))",
+            }}
+          >
             Choose which timezone you want to view the schedule in.
-          </div>
+          </Box>
 
-          <div className="space-y-2">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <FormControl fullWidth size="small">
               <InputLabel id="timezone-mode-label">Timezone</InputLabel>
               <Select
@@ -81,13 +90,13 @@ export function TimezoneDialog() {
                 <MenuItem value="manual">Choose another timezone</MenuItem>
               </Select>
             </FormControl>
-            <div className="text-xs text-on-surface-variant">
-              Current: <span className="font-medium text-on-surface">{effectiveTimeZone}</span> ({effectiveGmt})
-            </div>
-          </div>
+            <Box sx={{ fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
+              Current: <Typography component="span" sx={{ fontWeight: 500, fontSize: "0.75rem", color: "hsl(var(--md-on-surface))" }}>{effectiveTimeZone}</Typography> ({effectiveGmt})
+            </Box>
+          </Box>
 
           {timeZoneMode === "manual" ? (
-            <div className="space-y-2">
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               <FormControl fullWidth size="small">
                 <InputLabel id="manual-timezone-label">Select a timezone</InputLabel>
                 <Select
@@ -98,14 +107,14 @@ export function TimezoneDialog() {
                   renderValue={(selected) => {
                     const option = manualTimeZoneOptions.find((tz) => tz.value === selected);
                     return (
-                      <div className="flex w-full items-center justify-between pr-5">
-                        <span className="truncate">
+                      <Box sx={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", pr: 2.5 }}>
+                        <Box component="span" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {option?.label || selected}
-                        </span>
-                        <span className="ml-3 shrink-0 text-xs text-on-surface-variant">
+                        </Box>
+                        <Box component="span" sx={{ ml: 1.5, flexShrink: 0, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
                           {utcLabelForTimeZone(selected)}
-                        </span>
-                      </div>
+                        </Box>
+                      </Box>
                     );
                   }}
                   MenuProps={{ PaperProps: { style: { maxHeight: 288 } } }}
@@ -114,27 +123,39 @@ export function TimezoneDialog() {
                     const utcLabel = utcLabelForTimeZone(tz.value);
                     return (
                       <MenuItem key={tz.value} value={tz.value}>
-                        <div className="flex w-full items-center justify-between gap-3 pr-1">
+                        <Box sx={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: 1.5, pr: 0.5 }}>
                           <span>{tz.label}</span>
-                          <span className="text-xs text-on-surface-variant">{utcLabel}</span>
-                        </div>
+                          <Box component="span" sx={{ fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>{utcLabel}</Box>
+                        </Box>
                       </MenuItem>
                     );
                   })}
                 </Select>
               </FormControl>
-              <div className="text-xs text-on-surface-variant">Offset updates based on today's date (DST aware where applicable).</div>
-            </div>
+              <Box sx={{ fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
+                Offset updates based on today's date (DST aware where applicable).
+              </Box>
+            </Box>
           ) : null}
 
-          <div className="rounded-card border border-status-pending-border bg-status-pending-bg p-3 text-sm text-status-pending-text">
+          <Box
+            sx={{
+              borderRadius: "12px",
+              border: 1,
+              borderColor: "var(--gl-status-pending-border)",
+              backgroundColor: "var(--gl-status-pending-bg)",
+              p: 1.5,
+              fontSize: "0.875rem",
+              color: "var(--gl-status-pending-text)",
+            }}
+          >
             Prototype note: changing timezone updates the indicator. This demo does not convert session times across timezones.
-          </div>
-        </div>
+          </Box>
+        </Box>
       </DialogContent>
 
       <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={() => dispatch(setOpenTimezone(false))}>
+        <Button variant="contained" onClick={() => dispatch(setOpenTimezone(false))}>
           Save
         </Button>
       </DialogActions>

@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
+import Box from "@mui/material/Box";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
 import { ToastViewport } from "@/components/shared/ToastViewport";
 import { GlobalDialogs } from "@/components/dialogs";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setIsDarkMode } from "@/store/slices/uiSlice";
-import { classNames } from "@/lib/helpers";
 
 export function AppLayout() {
   const dispatch = useAppDispatch();
@@ -38,21 +38,30 @@ export function AppLayout() {
   }, [isDarkMode]);
 
   return (
-    <div
-      className={classNames(
-        "grid grid-cols-1 transition-all duration-200",
-        isNavCollapsed ? "md:grid-cols-[84px_1fr]" : "md:grid-cols-[260px_1fr]"
-      )}
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: isNavCollapsed ? "84px minmax(0, 1fr)" : "260px minmax(0, 1fr)" },
+        transition: "grid-template-columns 0.2s",
+      }}
     >
       <Sidebar />
-      <main className="p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-6">
-        <div className="mx-auto max-w-6xl space-y-5">
+      <Box
+        component="main"
+        sx={{
+          minWidth: 0,
+          overflow: "hidden",
+          p: { xs: 2, md: 3 },
+          pb: { xs: "calc(6rem + env(safe-area-inset-bottom))", md: 3 },
+        }}
+      >
+        <Box sx={{ mx: "auto", maxWidth: "72rem", display: "flex", flexDirection: "column", gap: 2.5 }}>
           <Outlet />
-        </div>
-      </main>
+        </Box>
+      </Box>
       <MobileNav />
       <ToastViewport />
       <GlobalDialogs />
-    </div>
+    </Box>
   );
 }

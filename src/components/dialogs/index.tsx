@@ -3,7 +3,6 @@ import { DeclineReasonDialog } from "./DeclineReasonDialog";
 import { RequestDetailDialog } from "./RequestDetailDialog";
 import { TimezoneDialog } from "./TimezoneDialog";
 import { GroupProfileDialog } from "./GroupProfileDialog";
-import { AvailabilityNudgeDialog } from "./AvailabilityNudgeDialog";
 import { MarkNotAvailableDialog } from "./MarkNotAvailableDialog";
 import AvailabilityBuilderDialog from "./AvailabilityBuilderDialog";
 import { LearnerRatingsDialog } from "./LearnerRatingsDialog";
@@ -23,7 +22,6 @@ export function GlobalDialogs() {
       <RequestDetailDialog />
       <TimezoneDialog />
       <GroupProfileDialog />
-      <AvailabilityNudgeDialog />
       <MarkNotAvailableDialog />
       <AvailabilityBuilderDialog />
       <LearnerRatingsDialog />

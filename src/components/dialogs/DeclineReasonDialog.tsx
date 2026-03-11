@@ -1,3 +1,4 @@
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
@@ -41,23 +42,39 @@ export function DeclineReasonDialog() {
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-    >
+    <Dialog open={open} onClose={handleClose}>
       <DialogTitle>Mark unavailable</DialogTitle>
       <DialogContent>
         {declineSessionFocus ? (
-          <div className="space-y-4">
-            <div className="rounded-2xl border bg-surface-container/30 p-3 text-sm text-on-surface-variant">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
+            <Box
+              sx={{
+                borderRadius: "16px",
+                border: 1,
+                borderColor: "divider",
+                backgroundColor: "hsl(var(--md-surface-container) / 0.3)",
+                p: 1.5,
+                fontSize: "0.875rem",
+                color: "hsl(var(--md-on-surface-variant))",
+              }}
+            >
               This will mark your calendar as unavailable for this session slot.
-            </div>
-            <div className="rounded-2xl border bg-surface p-3 text-sm">
-              <div className="font-medium">{declineSessionFocus.title}</div>
-              <div className="mt-1 text-on-surface-variant">
+            </Box>
+            <Box
+              sx={{
+                borderRadius: "16px",
+                border: 1,
+                borderColor: "divider",
+                backgroundColor: "hsl(var(--md-surface))",
+                p: 1.5,
+                fontSize: "0.875rem",
+              }}
+            >
+              <Box sx={{ fontWeight: 500 }}>{declineSessionFocus.title}</Box>
+              <Box sx={{ mt: 0.5, color: "hsl(var(--md-on-surface-variant))" }}>
                 {fmtDateNice(declineSessionFocus.dateYmd)} &bull; {fmtTime12(declineSessionFocus.start)}&ndash;{fmtTime12(declineSessionFocus.end)}
-              </div>
-            </div>
+              </Box>
+            </Box>
             <TextField
               label="Reason"
               value={declineReason}
@@ -66,16 +83,16 @@ export function DeclineReasonDialog() {
               size="small"
               fullWidth
             />
-          </div>
+          </Box>
         ) : null}
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={handleClose}>
+        <Button variant="text" color="inherit" onClick={handleClose}>
           Cancel
         </Button>
         <Button
           variant="contained"
-          sx={{ bgcolor: 'error.main', color: 'error.contrastText', '&:hover': { bgcolor: 'error.dark' } }}
+          color="error"
           onClick={handleSubmit}
         >
           I'm unavailable

@@ -1,4 +1,5 @@
 import { CheckCircle2, XCircle } from "lucide-react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
@@ -35,45 +36,61 @@ export function SessionDetailDialog() {
       maxWidth="sm"
       fullWidth
       PaperProps={{
-        className: "p-0 max-h-[85vh] overflow-hidden w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-2xl",
+        sx: {
+          p: 0,
+          maxHeight: "85vh",
+          overflow: "hidden",
+          width: { xs: "calc(100vw - 1.5rem)", sm: "100%" },
+          maxWidth: { xs: "calc(100vw - 1.5rem)", sm: "672px" },
+        },
       }}
     >
-      <div className="flex max-h-[85vh] flex-col">
-        <DialogTitle sx={{ position: 'sticky', top: 0, zIndex: 10, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper', px: 3, py: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
+        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2 }}>
           Session details &amp; confirmation
         </DialogTitle>
 
-        <DialogContent className="flex-1 overflow-y-auto themed-scrollbar" sx={{ padding: '1rem 1.5rem' }}>
-          <div className="space-y-4">
-            <div className="rounded-2xl border bg-surface-container/30 p-3 text-sm text-on-surface-variant">
+        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", padding: "1rem 1.5rem" }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box
+              sx={{
+                borderRadius: "16px",
+                border: 1,
+                borderColor: "divider",
+                backgroundColor: "hsl(var(--md-surface-container) / 0.3)",
+                p: 1.5,
+                fontSize: "0.875rem",
+                color: "hsl(var(--md-on-surface-variant))",
+              }}
+            >
               Cadence: content Monday &rarr; acknowledgement/clarity by Wednesday &rarr; reminders (1 day + 30 min).
-            </div>
+            </Box>
 
-            <div className="space-y-2">
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {displayed.map((s) => {
                 const isConfirmed = confirmations[s.id];
                 return (
-                  <div key={s.id} className="py-4 border-b last:border-b-0">
-                    <div className="space-y-3">
-                      <div className="min-w-0">
-                        <div className="text-lg font-semibold">{s.title}</div>
-                        <div className="mt-1 text-sm text-on-surface-variant">
+                  <Box key={s.id} sx={{ py: 2, borderBottom: 1, borderColor: "divider", "&:last-child": { borderBottom: 0 } }}>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Box sx={{ fontSize: "1.125rem", fontWeight: 600 }}>{s.title}</Box>
+                        <Box sx={{ mt: 0.5, fontSize: "0.875rem", color: "hsl(var(--md-on-surface-variant))" }}>
                           {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)} &bull; {s.group}
-                        </div>
-                        <div className="mt-3 flex flex-wrap gap-2">
+                        </Box>
+                        <Box sx={{ mt: 1.5, display: "flex", flexWrap: "wrap", gap: 1 }}>
                           <Chip variant="outlined" size="small" label={s.program} />
                           <Chip variant="outlined" size="small" label={s.cohort} />
                           <Chip variant="outlined" size="small" label={s.sessionType} />
-                        </div>
-                      </div>
+                        </Box>
+                      </Box>
 
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex flex-wrap gap-2">
+                      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { sm: "center" }, justifyContent: { sm: "space-between" }, gap: 1 }}>
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                           <Button
-                            variant={isConfirmed ? "outlined" : "contained"}
+                            variant={isConfirmed ? "soft" : "contained"}
                             sx={isConfirmed
-                              ? { borderColor: 'var(--gl-status-confirmed-border)', bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', '&:hover': { bgcolor: 'var(--gl-status-confirmed-bg)', borderColor: 'var(--gl-status-confirmed-border)' } }
-                              : { bgcolor: 'primary.main', color: 'primary.contrastText', '&:hover': { bgcolor: 'primary.dark' } }
+                              ? { borderColor: "var(--gl-status-confirmed-border)", bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", "&:hover": { bgcolor: "var(--gl-status-confirmed-bg)" } }
+                              : {}
                             }
                             onClick={() => {
                               if (isConfirmed) return;
@@ -81,46 +98,45 @@ export function SessionDetailDialog() {
                               dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
                             }}
                           >
-                            <CheckCircle2 className="mr-2 h-4 w-4" /> {isConfirmed ? "Confirmed" : "Confirm"}
+                            <CheckCircle2 style={{ marginRight: 8, width: 16, height: 16 }} /> {isConfirmed ? "Confirmed" : "Confirm"}
                           </Button>
 
                           <Button
-                            variant={!isConfirmed ? "outlined" : "outlined"}
-                            color="inherit"
+                            variant="soft"
                             onClick={() => {
                               dispatch(setDeclineSessionFocus(s));
                               dispatch(setDeclineReason(""));
                               dispatch(setOpenDeclineReason(true));
                             }}
                           >
-                            <XCircle className="mr-2 h-4 w-4" /> I'm unavailable
+                            <XCircle style={{ marginRight: 8, width: 16, height: 16 }} /> I'm unavailable
                           </Button>
-                        </div>
+                        </Box>
 
-                        <div className="flex flex-wrap gap-2 sm:justify-end">
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: { sm: "flex-end" } }}>
                           <Button
-                            variant="outlined"
+                            variant="text"
                             size="small"
-                            sx={{ fontSize: '0.75rem' }}
+                            sx={{ fontSize: "0.75rem" }}
                             onClick={() => dispatch(setOpenGroupProfile(true))}
                           >
                             Group profile
                           </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
                 );
               })}
-            </div>
-          </div>
+            </Box>
+          </Box>
         </DialogContent>
 
-        <DialogActions sx={{ position: 'sticky', bottom: 0, zIndex: 10, borderTop: 1, borderColor: 'divider', bgcolor: 'background.paper', px: 3, py: 2 }}>
+        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2 }}>
           <Button
-            variant="outlined"
+            variant="text"
             color="inherit"
-            sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+            sx={{ display: { xs: "none", sm: "inline-flex" } }}
             onClick={() => {
               dispatch(setOpenSession(false));
               dispatch(setSessionFocus(null));
@@ -129,7 +145,7 @@ export function SessionDetailDialog() {
             Close
           </Button>
         </DialogActions>
-      </div>
+      </Box>
     </Dialog>
   );
 }

@@ -13,12 +13,12 @@ interface ProfileState {
 }
 
 const initialState: ProfileState = {
-  guruName: "Shome",
+  guruName: "Snehanjan",
   primaryMode: "Online",
   guruPrograms: "PGP-DS",
   timeZoneMode: "auto",
   manualTimeZone: "Asia/Kolkata",
-  draftName: "Shome",
+  draftName: "Snehanjan",
   draftMode: "Online",
   draftPrograms: "PGP-DS",
 };

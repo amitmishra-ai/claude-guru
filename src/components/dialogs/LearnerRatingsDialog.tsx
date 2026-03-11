@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -6,6 +7,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setOpenLearnerRatings, setLearnerRatingsSessionId } from "@/store/slices/uiSlice";
 import { demoLearnerRatingsBySessionId } from "@/data/demo-sessions";
@@ -32,43 +34,55 @@ export function LearnerRatingsDialog() {
       <DialogTitle>Learner Ratings</DialogTitle>
       <DialogContent>
         {session ? (
-          <div className="space-y-4 pt-1">
-            <div className="rounded-2xl border bg-surface p-3">
-              <div className="text-sm font-semibold">{session.title}</div>
-              <div className="mt-1 flex items-center gap-2">
-                <Star className="h-4 w-4" style={{ color: "var(--gl-star-color)" }} />
-                <span className="text-lg font-semibold">{avgRating}</span>
-                <span className="text-xs text-on-surface-variant">avg from {ratings.length} ratings</span>
-              </div>
-            </div>
-            <div className="space-y-2">
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
+            <Box
+              sx={{
+                borderRadius: "16px",
+                border: 1,
+                borderColor: "divider",
+                backgroundColor: "hsl(var(--md-surface))",
+                p: 1.5,
+              }}
+            >
+              <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{session.title}</Box>
+              <Box sx={{ mt: 0.5, display: "flex", alignItems: "center", gap: 1 }}>
+                <Star style={{ width: 16, height: 16, color: "var(--gl-star-color)" }} />
+                <Typography sx={{ fontSize: "1.125rem", fontWeight: 600 }}>{avgRating}</Typography>
+                <Typography sx={{ fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
+                  avg from {ratings.length} ratings
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {ratings.map((r, i) => (
                 <Card key={i}>
                   <CardContent sx={{ p: 2 }}>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold">{r.learnerName}</div>
-                      <div className="flex items-center gap-1 text-xs">
-                        <Star className="h-3 w-3" style={{ color: "var(--gl-star-color)" }} />
-                        <span className="font-medium">{r.rating}</span>
-                      </div>
-                    </div>
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+                      <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{r.learnerName}</Box>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.75rem" }}>
+                        <Star style={{ width: 12, height: 12, color: "var(--gl-star-color)" }} />
+                        <Box component="span" sx={{ fontWeight: 500 }}>{r.rating}</Box>
+                      </Box>
+                    </Box>
                     {r.feedback && (
-                      <div className="mt-1 text-xs text-on-surface-variant">{r.feedback}</div>
+                      <Box sx={{ mt: 0.5, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>{r.feedback}</Box>
                     )}
                   </CardContent>
                 </Card>
               ))}
               {!ratings.length && (
-                <div className="text-sm text-on-surface-variant">No ratings available for this session.</div>
+                <Box sx={{ fontSize: "0.875rem", color: "hsl(var(--md-on-surface-variant))" }}>
+                  No ratings available for this session.
+                </Box>
               )}
-            </div>
-          </div>
+            </Box>
+          </Box>
         ) : (
-          <div className="text-sm text-on-surface-variant">No session selected.</div>
+          <Box sx={{ fontSize: "0.875rem", color: "hsl(var(--md-on-surface-variant))" }}>No session selected.</Box>
         )}
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={handleClose}>Close</Button>
+        <Button variant="text" color="inherit" onClick={handleClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );

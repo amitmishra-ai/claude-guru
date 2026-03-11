@@ -135,7 +135,7 @@ export function MarkUnavailableModal() {
       </DialogContent>
 
       <DialogActions>
-        <Button variant="outlined" color="inherit" onClick={handleClose}>
+        <Button variant="text" color="inherit" onClick={handleClose}>
           Cancel
         </Button>
         <Button variant="contained" color="error" onClick={handleSubmit} disabled={!canSubmit}>

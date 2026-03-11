@@ -1,11 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* ── Design-system surface tokens ──
    Synced with GL color palette (primary #196ae5).
-   Uses HSL channel syntax so Tailwind opacity modifiers work:
-   bg-surface-container/40  →  background: hsl(0 0% 96% / 0.4)
 */
 :root {
   /* ── Material Design 3 surface tokens ── */
@@ -68,7 +62,7 @@
   --gl-cal-session-confirmed-border: rgb(34, 197, 94);
   --gl-cal-session-confirmed-text: #1e40af;
   --gl-cal-session-confirmed-sub: #196ae5;
-  --gl-cal-session-scheduled-bg: rgba(37, 99, 235, 0.12);
+  --gl-cal-session-scheduled-bg: #e0e7ff;
   --gl-cal-session-scheduled-border: #2563eb;
   --gl-cal-session-scheduled-text: rgb(79, 70, 229);
   --gl-cal-session-scheduled-sub: rgb(99, 102, 241);
@@ -177,7 +171,7 @@
   --gl-cal-session-confirmed-border: rgba(34, 197, 94, 0.6);
   --gl-cal-session-confirmed-text: #93c5fd;
   --gl-cal-session-confirmed-sub: #60a5fa;
-  --gl-cal-session-scheduled-bg: rgba(37, 99, 235, 0.15);
+  --gl-cal-session-scheduled-bg: #1e3a5f;
   --gl-cal-session-scheduled-border: rgba(37, 99, 235, 0.6);
   --gl-cal-session-scheduled-text: #c4b5fd;
   --gl-cal-session-scheduled-sub: #a5b4fc;
@@ -231,6 +225,7 @@
 }
 
 body {
+  font-family: 'Inter', sans-serif;
   background: hsl(var(--md-surface-bright));
   color: hsl(var(--md-on-surface));
   scrollbar-gutter: stable;

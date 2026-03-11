@@ -1,5 +1,14 @@
 import { useCallback, useState, useRef, useEffect, useMemo } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, ChevronDown, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import EventBusyIcon from "@mui/icons-material/EventBusy";
+import EditCalendarIcon from "@mui/icons-material/EditCalendar";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import LanguageIcon from "@mui/icons-material/Language";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Card from "@mui/material/Card";
@@ -16,9 +25,9 @@ import {
   setOpenAvailability,
   setOpenNotAvailable,
   setOpenAddAvailability,
-  setOpenAvailabilityNudge,
   setLeavePopoverNaId,
   setAvailPopoverBlockId,
+  setOpenTimezone,
 } from "@/store/slices/uiSlice";
 import { LeavePopover } from "@/components/dialogs/LeavePopover";
 import { AvailabilityPopover } from "@/components/dialogs/AvailabilityPopover";
@@ -53,6 +62,39 @@ function overlaps(aStart: number, aEnd: number, bStart: number, bEnd: number) {
   return aStart < bEnd && bStart < aEnd;
 }
 
+/**
+ * Computes side-by-side column layout for overlapping events.
+ * Returns { col, numCols } per event id so overlapping events
+ * can be rendered as horizontal neighbours instead of stacking.
+ */
+function computeEventLayout(
+  items: Array<{ id: string; start: number; end: number }>
+): Record<string, { col: number; numCols: number }> {
+  if (items.length === 0) return {};
+  const sorted = [...items].sort((a, b) =>
+    a.start !== b.start ? a.start - b.start : b.end - a.end
+  );
+  const cols: number[] = new Array(sorted.length).fill(0);
+  const colEnds: number[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    let col = 0;
+    while (col < colEnds.length && colEnds[col] > sorted[i].start) col++;
+    cols[i] = col;
+    colEnds[col] = sorted[i].end;
+  }
+  const result: Record<string, { col: number; numCols: number }> = {};
+  for (let i = 0; i < sorted.length; i++) {
+    let maxCol = cols[i];
+    for (let j = 0; j < sorted.length; j++) {
+      if (i !== j && overlaps(sorted[i].start, sorted[i].end, sorted[j].start, sorted[j].end)) {
+        maxCol = Math.max(maxCol, cols[j]);
+      }
+    }
+    result[sorted[i].id] = { col: cols[i], numCols: maxCol + 1 };
+  }
+  return result;
+}
+
 /** Convert minutes-since-midnight to a percentage within the visible grid. */
 function timeToPercent(mins: number) {
   return ((mins - TIME_START) / (TIME_END - TIME_START)) * 100;
@@ -72,6 +114,15 @@ const CALENDAR_CARD_HEIGHT = HOUR_LABELS.length * GRID_ROW_PX + 84; // grid + he
 /** Format a Date as "Feb 16" */
 function fmtShortDate(d: Date) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+/** Format minutes as "8 AM" or "8:30 AM" */
+function fmtTimeLabel(mins: number) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const ampm = h < 12 ? 'AM' : 'PM';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return m === 0 ? `${h12} ${ampm}` : `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
 /** Session status color (§8.4) */
@@ -141,6 +192,9 @@ export default function CalendarPage() {
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
   const recentlyConfirmedIds = useAppSelector((s) => s.sessions.recentlyConfirmedIds);
   const calendarViewMode = useAppSelector((s) => s.calendar.calendarViewMode);
+  const timeZoneMode = useAppSelector((s) => s.profile.timeZoneMode);
+  const manualTimeZone = useAppSelector((s) => s.profile.manualTimeZone);
+  const effectiveTz = timeZoneMode === "manual" ? manualTimeZone : Intl.DateTimeFormat().resolvedOptions().timeZone;
   const patterns = useAppSelector((s) => s.availability.patterns);
   const oneOffAvail = useAppSelector((s) => s.availability.oneOffAvail);
   const unavailable = useAppSelector((s) => s.availability.unavailable);
@@ -178,41 +232,6 @@ export default function CalendarPage() {
     dispatch(setAnchorDate(demoNow.toISOString()));
   };
 
-  /* ── Month picker dropdown ────────────────────────────────────────────── */
-  const [monthMenuOpen, setMonthMenuOpen] = useState(false);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
-  const monthPickerRef = useRef<HTMLDivElement>(null);
-
-  const openMonthMenu = () => {
-    if (monthPickerRef.current) {
-      const rect = monthPickerRef.current.getBoundingClientRect();
-      setDropdownPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
-    }
-    setMonthMenuOpen(true);
-  };
-
-  useEffect(() => {
-    if (!monthMenuOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (monthPickerRef.current && !monthPickerRef.current.contains(e.target as Node)) {
-        setMonthMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [monthMenuOpen]);
-
-  // Build list: 6 months back → 6 months forward from demoNow
-  const monthOptions = Array.from({ length: 13 }, (_, i) => {
-    const d = addMonths(demoNow, i - 6);
-    return { label: d.toLocaleDateString("en-US", { month: "long", year: "numeric" }), date: d };
-  });
-
-  // Build list: 13 weeks back → 13 weeks forward from demoNow (week view)
-  const weekOptions = Array.from({ length: 27 }, (_, i) => {
-    const d = addDays(demoNow, (i - 13) * 7);
-    return { label: weekLabel(d), date: d };
-  });
 
   /* ── Month day-click → switch to week view (§9.5) ─────────────────── */
   const handleMonthDayClick = useCallback(
@@ -225,6 +244,10 @@ export default function CalendarPage() {
     },
     [dispatch, rangeEndYmd]
   );
+
+  /* ── Mobile selected day ──────────────────────────────────────────── */
+  const todayYmd = toYmd(demoNow);
+  const [mobileSelectedDay, setMobileSelectedDay] = useState<string>(todayYmd);
 
   /* ── Popover anchor refs ──────────────────────────────────────────── */
   const [leaveAnchorEl, setLeaveAnchorEl] = useState<HTMLElement | null>(null);
@@ -242,14 +265,6 @@ export default function CalendarPage() {
     return () => timers.forEach(clearTimeout);
   }, [recentlyConfirmedIds, dispatch]);
 
-  /* ── First-visit nudge delay (§4E) ────────────────────────────────── */
-  useEffect(() => {
-    if (hasUserConfiguredAvailability) return;
-    const timer = setTimeout(() => {
-      dispatch(setOpenAvailabilityNudge(true));
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [hasUserConfiguredAvailability, dispatch]);
 
   /* ── Summary stats for "week at a glance" ─────────────────────────── */
   const weekStats = useMemo(() => {
@@ -284,276 +299,367 @@ export default function CalendarPage() {
   return (
     <>
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5" aria-hidden="true" />
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <CalendarMonthIcon sx={{ fontSize: 20 }} aria-hidden="true" />
           <Typography variant="h5" sx={{ fontWeight: 700 }}>Calendar</Typography>
-        </div>
-        <div className="flex items-center gap-2">
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Button
             variant="outlined"
             size="small"
+            startIcon={<EventBusyIcon sx={{ fontSize: 16 }} />}
             aria-label="Mark leave"
-            sx={{ textTransform: 'none' }}
+            sx={{ textTransform: 'none', borderColor: 'divider', color: 'text.primary', fontWeight: 400 }}
             onClick={() => dispatch(setOpenNotAvailable(true))}
           >
             Mark leave
           </Button>
           <Button
-            variant="outlined"
-            size="small"
-            aria-label="Quick add availability"
-            sx={{ textTransform: 'none' }}
-            onClick={() => dispatch(setOpenAddAvailability(true))}
-          >
-            + Add slot
-          </Button>
-          <Button
             variant="contained"
             size="small"
+            startIcon={<EditCalendarIcon sx={{ fontSize: 16 }} />}
             aria-label="Add availability"
-            sx={{ textTransform: 'none', bgcolor: 'text.primary', color: 'background.default', '&:hover': { bgcolor: 'text.secondary' } }}
+            sx={{ textTransform: 'none' }}
             onClick={() => dispatch(setOpenAvailability(true))}
           >
-            Set availability
+            Add availability
           </Button>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      {/* ── View toggle + navigation ───────────────────────────────────── */}
-      <div className="mt-4 flex items-center justify-between gap-3">
-        {/* Left side: Week/Month toggle */}
+      {/* ── Controls row ──────────────────────────────────────────────────── */}
+      <Box sx={{ mt: 2, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+
+        {/* Left: timezone */}
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<LanguageIcon sx={{ fontSize: 16 }} />}
+          sx={{ textTransform: 'none', borderColor: 'divider', color: 'text.secondary', fontWeight: 400, fontSize: '0.8125rem' }}
+          onClick={() => dispatch(setOpenTimezone(true))}
+        >
+          {effectiveTz}
+        </Button>
+
+        {/* Center: Week/Month pill toggle */}
         <Box
           sx={{
             display: 'inline-flex',
             gap: 0.5,
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: '4px',
-            p: 0.5,
+            bgcolor: 'action.hover',
+            borderRadius: '100px',
+            p: '4px',
           }}
         >
           {(["week", "month"] as const).map((mode) => (
             <Button
               key={mode}
-              variant={calendarViewMode === mode ? "contained" : "text"}
               size="small"
+              aria-label={`Switch to ${mode} view`}
               sx={{
-                fontSize: '0.8rem',
+                fontSize: '0.875rem',
                 textTransform: 'capitalize',
-                minWidth: 64,
+                minWidth: 72,
                 px: 2,
+                borderRadius: '100px',
+                fontWeight: calendarViewMode === mode ? 600 : 400,
+                bgcolor: calendarViewMode === mode ? 'primary.main' : 'transparent',
+                color: calendarViewMode === mode ? 'primary.contrastText' : 'text.secondary',
+                boxShadow: calendarViewMode === mode ? '0 1px 4px rgba(25,106,229,0.35)' : 'none',
+                '&:hover': {
+                  bgcolor: calendarViewMode === mode ? 'primary.dark' : 'transparent',
+                },
               }}
               onClick={() => dispatch(setCalendarViewMode(mode))}
-              aria-label={`Switch to ${mode} view`}
             >
-              {mode}
+              {mode.charAt(0).toUpperCase() + mode.slice(1)}
             </Button>
           ))}
         </Box>
 
-        {/* Right side: date label + Prev/Next */}
-        <div className="flex items-center gap-2">
-          <div ref={monthPickerRef} style={{ position: 'relative' }}>
-            <Chip
-              label={
-                <span className="flex items-center gap-1">
-                  {calendarViewMode === "week" ? weekLabel(anchorDate) : monthLabel(anchorDate)}
-                  <ChevronDown className="h-3.5 w-3.5" style={{ transform: monthMenuOpen ? 'rotate(180deg)' : undefined, transition: 'transform 0.15s' }} />
-                </span>
-              }
-              variant="outlined"
-              onClick={() => monthMenuOpen ? setMonthMenuOpen(false) : openMonthMenu()}
-              sx={{ borderRadius: '4px', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer' }}
-            />
-            {monthMenuOpen && (
-              <Box
-                sx={{
-                  position: 'fixed',
-                  top: dropdownPos.top,
-                  right: dropdownPos.right,
-                  zIndex: 1300,
-                  minWidth: calendarViewMode === "week" ? 220 : 180,
-                  maxHeight: 320,
-                  overflowY: 'auto',
-                  borderRadius: 0.25,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                  bgcolor: 'background.paper',
-                  border: 1,
-                  borderColor: 'divider',
-                }}
-              >
-                {(calendarViewMode === "week" ? weekOptions : monthOptions).map(({ label, date }) => {
-                  const isSelected = (calendarViewMode === "week" ? weekLabel(anchorDate) : monthLabel(anchorDate)) === label;
-                  return (
-                    <Box
-                      key={label}
-                      onClick={() => {
-                        dispatch(setAnchorDate(date.toISOString()));
-                        setMonthMenuOpen(false);
-                      }}
-                      sx={{
-                        px: 2,
-                        py: 1,
-                        cursor: 'pointer',
-                        fontSize: '0.875rem',
-                        fontWeight: isSelected ? 600 : 400,
-                        bgcolor: isSelected ? 'action.selected' : undefined,
-                        color: isSelected ? 'primary.main' : 'text.primary',
-                        '&:hover': {
-                          bgcolor: isSelected ? 'action.selected' : 'action.hover',
-                        },
-                      }}
-                    >
-                      {label}
-                    </Box>
-                  );
-                })}
-              </Box>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outlined"
-              size="small"
-              aria-label="Previous period"
-              sx={{ minWidth: 0, height: 36, width: 36, p: 0 }}
-              onClick={navPrev}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              aria-label="Next period"
-              sx={{ minWidth: 0, height: 36, width: 36, p: 0 }}
-              onClick={navNext}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+        {/* Right: Current period + prev/next */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            sx={{ textTransform: 'none', fontSize: '0.875rem', borderColor: 'divider', color: 'text.primary', fontWeight: 400 }}
+            onClick={() => dispatch(setAnchorDate(demoNow.toISOString()))}
+          >
+            Current {calendarViewMode}
+          </Button>
+          <Button
+            variant="text"
+            size="small"
+            aria-label="Previous period"
+            sx={{ minWidth: 0, p: 0.5, color: 'text.secondary' }}
+            onClick={navPrev}
+          >
+            <ChevronLeftIcon sx={{ fontSize: 20 }} />
+          </Button>
+          <Typography sx={{ fontSize: '0.9375rem', fontWeight: 500, minWidth: 170, textAlign: 'center', whiteSpace: 'nowrap' }}>
+            {calendarViewMode === "week" ? weekLabel(anchorDate) : monthLabel(anchorDate)}
+          </Typography>
+          <Button
+            variant="text"
+            size="small"
+            aria-label="Next period"
+            sx={{ minWidth: 0, p: 0.5, color: 'text.secondary' }}
+            onClick={navNext}
+          >
+            <ChevronRightIcon sx={{ fontSize: 20 }} />
+          </Button>
+        </Box>
+
+      </Box>
+
+      {/* ── Availability gate ─────────────────────────────────────────── */}
+      {!hasUserConfiguredAvailability && (
+        <Box
+          sx={{
+            mt: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2.5,
+            py: 10,
+            borderRadius: 3,
+            border: '2px dashed',
+            borderColor: 'divider',
+            bgcolor: 'action.hover',
+            textAlign: 'center',
+            px: 4,
+          }}
+        >
+          <Box
+            sx={{
+              width: 72,
+              height: 72,
+              borderRadius: '50%',
+              bgcolor: 'primary.main',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <EventNoteIcon sx={{ fontSize: 36, color: 'primary.contrastText' }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.75 }}>
+              Set your availability to get started
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto' }}>
+              Without marking your availability, no sessions will be scheduled with you. Let learners know when you're free so they can book time with you.
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<EditCalendarIcon sx={{ fontSize: 18 }} />}
+            sx={{ textTransform: 'none', px: 4 }}
+            onClick={() => dispatch(setOpenAvailability(true))}
+          >
+            Set your availability
+          </Button>
+        </Box>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── WEEK VIEW ─────────────────────────────────────────────────── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      {calendarViewMode === "week" && (
+      {hasUserConfiguredAvailability && calendarViewMode === "week" && (
         <>
-          {/* ── Mobile list view (below md) ─────────────────────────────── */}
-          <div className="mt-3 block md:hidden">
-            <div className="grid grid-cols-7 gap-2">
+          {/* ── Mobile time-grid view (below md) ────────────────────────── */}
+          <Box sx={{ mt: 2, display: { md: "none" } }}>
+
+            {/* Day strip */}
+            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", mb: 1.5 }}>
               {weekDays.map((d, i) => {
                 const ymd = toYmd(d);
-                const daySessions = sessionsThisWeek.filter(
-                  (s) => s.dateYmd === ymd && !sessionDeclined[s.id]
-                );
-                const dayRequests = requestsThisWeek.filter(
-                  (r) => r.dateYmd === ymd && r.response === "pending"
-                );
                 const isToday = ymd === toYmd(demoNow);
+                const isSelected = ymd === mobileSelectedDay;
+                const hasEvents =
+                  sessionsThisWeek.some((s) => s.dateYmd === ymd && !sessionDeclined[s.id]) ||
+                  requestsThisWeek.some((r) => r.dateYmd === ymd && r.response === "pending");
                 return (
-                  <div key={i} className="min-h-[120px]">
-                    <div className="mb-1 text-center">
-                      <Typography
-                        variant="caption"
-                        sx={{ fontWeight: 600, ...(isToday && { color: 'primary.main' }) }}
-                      >
-                        {DOW[i]}
-                      </Typography>
-                      <Box
-                        sx={{
-                          mx: 'auto',
-                          mt: 0.5,
-                          height: 24,
-                          width: 24,
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.75rem',
-                          fontWeight: 500,
-                          ...(isToday && { bgcolor: 'primary.main', color: 'primary.contrastText' }),
-                        }}
-                      >
-                        {d.getDate()}
-                      </Box>
-                    </div>
-                    <div className="space-y-1">
-                      {/* Sessions (§14: preserve status colors) */}
-                      {daySessions.map((s) => {
-                        const confirmed = !!confirmations[s.id];
-                        const colors = sessionColors(confirmed, false);
-                        return (
-                          <button
-                            key={s.id}
-                            type="button"
-                            className="w-full rounded-lg px-1.5 py-1 text-left text-[10px] leading-tight transition-colors"
-                            style={{ backgroundColor: colors.bg }}
-                            onClick={() => {
-                              dispatch(setSessionFocus(s));
-                              dispatch(setOpenSession(true));
-                            }}
-                            aria-label={`Session: ${s.title}, ${fmtTime12(s.start)} to ${fmtTime12(s.end)}`}
-                          >
-                            <div className="font-medium truncate">
-                              {s.title.replace("Mentor Session: ", "")}
-                            </div>
-                            <div style={{ color: "var(--mui-palette-text-secondary)" }}>
-                              {fmtTime12(s.start)}
-                            </div>
-                          </button>
-                        );
-                      })}
-                      {/* Requests on mobile */}
-                      {dayRequests.map((r) => (
-                        <button
-                          key={r.id}
-                          type="button"
-                          className="w-full rounded-lg px-1.5 py-1 text-left text-[10px] leading-tight transition-colors"
-                          style={{ backgroundColor: "var(--gl-cal-request-pending-bg)", border: "1px dashed var(--gl-cal-request-pending-border)" }}
-                          onClick={() => {
-                            dispatch(setRequestFocus(r));
-                            dispatch(setOpenRequest(true));
-                          }}
-                          aria-label={`Request: ${r.title}, ${fmtTime12(r.start)} to ${fmtTime12(r.end)}`}
-                        >
-                          <div className="font-medium truncate">
-                            {r.title}
-                          </div>
-                          <div style={{ color: "var(--mui-palette-text-secondary)" }}>
-                            {fmtTime12(r.start)}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <Box
+                    key={i}
+                    component="button"
+                    onClick={() => setMobileSelectedDay(ymd)}
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 0.25,
+                      border: 'none',
+                      background: 'none',
+                      cursor: 'pointer',
+                      p: 0.5,
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {/* Event dot */}
+                    <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: hasEvents ? 'warning.main' : 'transparent' }} />
+                    {/* Day name */}
+                    <Typography
+                      variant="caption"
+                      sx={{ fontWeight: 500, fontSize: '0.65rem', color: isSelected ? 'primary.main' : 'text.secondary' }}
+                    >
+                      {DOW[i]}
+                    </Typography>
+                    {/* Date circle */}
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: isSelected ? 'primary.main' : 'transparent',
+                        color: isSelected ? 'primary.contrastText' : isToday ? 'primary.main' : 'text.primary',
+                        fontWeight: isSelected || isToday ? 700 : 400,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      {d.getDate()}
+                    </Box>
+                  </Box>
                 );
               })}
-            </div>
-          </div>
+            </Box>
+
+            {/* Single-day time grid */}
+            <Card variant="outlined" sx={{ overflow: 'hidden' }}>
+              <Box sx={{ overflowY: 'auto', maxHeight: 480, position: 'relative' }}>
+                {/* Hour rows */}
+                <Box sx={{ position: 'relative', height: HOUR_LABELS.length * GRID_ROW_PX }}>
+                  {HOUR_LABELS.map((mins, idx) => (
+                    <Box
+                      key={mins}
+                      sx={{
+                        position: 'absolute',
+                        top: idx * GRID_ROW_PX,
+                        left: 0,
+                        right: 0,
+                        height: GRID_ROW_PX,
+                        display: 'grid',
+                        gridTemplateColumns: '48px 1fr',
+                        borderTop: idx > 0 ? 1 : 0,
+                        borderColor: 'divider',
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{ color: 'text.secondary', fontWeight: 500, pt: 0.5, pr: 1, textAlign: 'right', fontSize: '0.7rem' }}
+                      >
+                        {fmtTime(mins)}
+                      </Typography>
+                      <Box sx={{ borderLeft: 1, borderColor: 'divider' }} />
+                    </Box>
+                  ))}
+
+                  {/* Session events for selected day */}
+                  {sessionsThisWeek
+                    .filter((s) => s.dateYmd === mobileSelectedDay && !sessionDeclined[s.id])
+                    .map((s) => {
+                      const confirmed = !!confirmations[s.id];
+                      const sColors = sessionColors(confirmed, false);
+                      const topPct = timeToPercent(s.start);
+                      const blockHeight = timeToPercent(s.end) - topPct;
+                      const totalPx = HOUR_LABELS.length * GRID_ROW_PX;
+                      return (
+                        <Box
+                          key={s.id}
+                          component="button"
+                          onClick={() => { dispatch(setSessionFocus(s)); dispatch(setOpenSession(true)); }}
+                          sx={{
+                            position: 'absolute',
+                            top: `${topPct}%`,
+                            height: `${blockHeight}%`,
+                            left: 52,
+                            right: 4,
+                            bgcolor: sColors.bg,
+                            borderRadius: '10px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            px: 1,
+                            pt: 0.5,
+                            overflow: 'hidden',
+                            fontFamily: 'inherit',
+                            zIndex: 5,
+                            minHeight: totalPx * blockHeight / 100,
+                          }}
+                        >
+                          <Typography sx={{ fontSize: '0.7rem', color: sColors.text, fontWeight: 500, lineHeight: '14px' }} noWrap>
+                            {fmtTime(s.start)}
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.75rem', color: sColors.text, fontWeight: 700, lineHeight: '16px' }} noWrap>
+                            {s.title.replace("Mentor Session: ", "")}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+
+                  {/* Request events for selected day */}
+                  {requestsThisWeek
+                    .filter((r) => r.dateYmd === mobileSelectedDay && r.response === "pending")
+                    .map((r) => {
+                      const topPct = timeToPercent(r.start);
+                      const blockHeight = timeToPercent(r.end) - topPct;
+                      return (
+                        <Box
+                          key={r.id}
+                          component="button"
+                          onClick={() => { dispatch(setRequestFocus(r)); dispatch(setOpenRequest(true)); }}
+                          sx={{
+                            position: 'absolute',
+                            top: `${topPct}%`,
+                            height: `${blockHeight}%`,
+                            left: 52,
+                            right: 4,
+                            bgcolor: 'var(--gl-cal-request-pending-bg)',
+                            border: '1px dashed var(--gl-cal-request-pending-border)',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            px: 1,
+                            pt: 0.5,
+                            overflow: 'hidden',
+                            fontFamily: 'inherit',
+                            zIndex: 5,
+                          }}
+                        >
+                          <Typography sx={{ fontSize: '0.7rem', color: 'var(--gl-cal-request-pending-text)', fontWeight: 500, lineHeight: '14px' }} noWrap>
+                            {fmtTime(r.start)}
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.75rem', color: 'var(--gl-cal-request-pending-text)', fontWeight: 700, lineHeight: '16px' }} noWrap>
+                            {r.title}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                </Box>
+              </Box>
+            </Card>
+          </Box>
 
           {/* ── Desktop time-grid view (md and above) ───────────────────── */}
-          <Card variant="outlined" sx={{ mt: 2, overflow: 'hidden', display: { xs: 'none', md: 'block' }, height: CALENDAR_CARD_HEIGHT }}>
-            {/* Header + body container — no internal scroll */}
-            <Box sx={{ height: '100%' }}>
+          <Box sx={{ mt: 2, display: { xs: 'none', md: 'flex' }, flexDirection: 'column', border: 1, borderColor: 'divider', borderRadius: 2 }}>
+
             {/* Day-of-week header row */}
             <Box
               sx={{
-                zIndex: 10,
-                bgcolor: 'background.paper',
                 display: 'grid',
-                gridTemplateColumns: '60px repeat(7, 1fr)',
+                gridTemplateColumns: '56px repeat(7, 1fr)',
                 borderBottom: 1,
                 borderColor: 'divider',
+                bgcolor: 'background.paper',
               }}
             >
-              {/* "Time" label */}
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 1.5 }}>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-                  Time
-                </Typography>
-              </Box>
+              <Box /> {/* time gutter */}
               {weekDays.map((d, i) => {
                 const ymd = toYmd(d);
                 const isToday = ymd === toYmd(demoNow);
@@ -561,71 +667,77 @@ export default function CalendarPage() {
                   <Box
                     key={i}
                     sx={{
-                      textAlign: 'center',
                       py: 1.5,
+                      textAlign: 'center',
                       borderLeft: 1,
                       borderColor: 'divider',
+                      bgcolor: isToday ? 'action.selected' : 'transparent',
                     }}
-                    aria-label={`${DOW_LONG[i]} ${fmtShortDate(d)}`}
+                    aria-label={`${DOW_LONG[i]} ${d.getDate()}`}
                   >
                     <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 700, ...(isToday && { color: 'primary.main' }) }}
+                      variant="caption"
+                      sx={{
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        color: isToday ? 'primary.main' : 'text.secondary',
+                        fontSize: '0.7rem',
+                      }}
                     >
-                      {DOW[i]}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {fmtShortDate(d)}
+                      {DOW[i]} {d.getDate()}
                     </Typography>
                   </Box>
                 );
               })}
             </Box>
 
-            {/* Time grid body */}
+            {/* Time grid body — full height, no internal scroll */}
+            <Box>
               <Box
                 sx={{
                   display: 'grid',
-                  gridTemplateColumns: '60px repeat(7, 1fr)',
+                  gridTemplateColumns: '56px repeat(7, 1fr)',
                   position: 'relative',
                   height: HOUR_LABELS.length * GRID_ROW_PX,
-                  mb: 1.5, // bottom breathing room for 20:00 label
                 }}
               >
                 {/* ── Time labels + horizontal grid lines ──────────────── */}
-                {HOUR_LABELS.map((mins) => {
+                {HOUR_LABELS.map((mins, hIdx) => {
+                  const isFirst = hIdx === 0;
+                  const isLast = hIdx === HOUR_LABELS.length - 1;
                   const top = `${timeToPercent(mins)}%`;
                   return (
-                    <div key={mins} className="contents">
-                      {/* time label */}
+                    <Box key={mins} sx={{ display: "contents" }}>
                       <Typography
                         variant="caption"
                         sx={{
                           position: 'absolute',
                           left: 0,
-                          width: 60,
+                          width: 56,
                           textAlign: 'right',
                           pr: 1,
                           top,
-                          transform: 'translateY(-50%)',
-                          color: 'text.secondary',
+                          transform: isFirst ? 'none' : isLast ? 'translateY(-100%)' : 'translateY(-50%)',
+                          color: 'text.disabled',
                           fontSize: '0.65rem',
+                          fontWeight: 500,
+                          userSelect: 'none',
                         }}
                       >
-                        {fmtTime(mins)}
+                        {fmtTimeLabel(mins)}
                       </Typography>
-                      {/* horizontal line */}
                       <Box
                         sx={{
                           position: 'absolute',
                           top,
-                          left: 60,
+                          left: 56,
                           right: 0,
                           height: '1px',
                           bgcolor: 'divider',
                         }}
                       />
-                    </div>
+                    </Box>
                   );
                 })}
 
@@ -711,6 +823,14 @@ export default function CalendarPage() {
                     );
                   });
 
+                  // Compute side-by-side column layout for ALL events together so that
+                  // overlapping sessions AND requests are placed in adjacent columns.
+                  const combinedLayout = computeEventLayout([
+                    ...drawnSessions.map((s) => ({ id: `sess-${s.id}`, start: s.start, end: s.end })),
+                    ...dayRequests.map((r) => ({ id: `req-${r.id}`, start: r.start, end: r.end })),
+                  ]);
+
+                  const colIsToday = toYmd(d) === toYmd(demoNow);
                   return (
                     <Box
                       key={colIdx}
@@ -720,6 +840,7 @@ export default function CalendarPage() {
                         gridRow: 1,
                         borderLeft: 1,
                         borderColor: 'divider',
+                        bgcolor: colIsToday ? 'action.hover' : 'transparent',
                       }}
                     >
                       {/* §8.2 Draw order: 1. Busy (lowest) */}
@@ -874,6 +995,9 @@ export default function CalendarPage() {
                       {/* §8.2 Draw order: 4. Requests */}
                       {dayRequests.map((r) => {
                         const rColors = requestColors(r.response);
+                        const { col: rCol, numCols: rNumCols } = combinedLayout[`req-${r.id}`] ?? { col: 0, numCols: 1 };
+                        const rLeftPct = (rCol / rNumCols) * 100;
+                        const rWidthPct = (1 / rNumCols) * 100;
                         return (
                           <Box
                             key={`req-${r.id}`}
@@ -885,8 +1009,8 @@ export default function CalendarPage() {
                             aria-label={`Request: ${r.title}, ${fmtTime12(r.start)} to ${fmtTime12(r.end)}, status ${r.response}`}
                             sx={{
                               position: 'absolute',
-                              left: 0,
-                              right: 0,
+                              left: `${rLeftPct}%`,
+                              width: `calc(${rWidthPct}% - ${rNumCols > 1 ? 2 : 0}px)`,
                               top: `${timeToPercent(r.start)}%`,
                               height: `${timeToPercent(r.end) - timeToPercent(r.start)}%`,
                               bgcolor: rColors.bg,
@@ -898,7 +1022,6 @@ export default function CalendarPage() {
                               textAlign: 'left',
                               cursor: 'pointer',
                               overflow: 'hidden',
-                              width: '100%',
                               fontFamily: 'inherit',
                             }}
                           >
@@ -937,6 +1060,9 @@ export default function CalendarPage() {
                         const blockHeight = timeToPercent(s.end) - timeToPercent(s.start);
                         // Approximate pixel height based on grid
                         const pxHeight = (blockHeight / 100) * (HOUR_LABELS.length * GRID_ROW_PX);
+                        const { col, numCols } = combinedLayout[`sess-${s.id}`] ?? { col: 0, numCols: 1 };
+                        const leftPct = (col / numCols) * 100;
+                        const widthPct = (1 / numCols) * 100;
                         return (
                           <Box
                             key={`sess-${s.id}`}
@@ -948,86 +1074,46 @@ export default function CalendarPage() {
                             aria-label={`${statusLabel} session: ${s.title}, ${fmtTime12(s.start)} to ${fmtTime12(s.end)}`}
                             sx={{
                               position: 'absolute',
-                              left: 0,
-                              right: 0,
+                              left: `${leftPct}%`,
+                              width: `calc(${widthPct}% - ${numCols > 1 ? 2 : 0}px)`,
                               top: `${timeToPercent(s.start)}%`,
                               height: `${blockHeight}%`,
                               bgcolor: sColors.bg,
-                              borderLeft: '3px solid',
-                              borderColor: sColors.border,
-                              borderRadius: '12px',
+                              border: 'none',
+                              borderRadius: '10px',
                               zIndex: 5,
-                              px: 0.5,
-                              pt: 0.25,
+                              px: 1,
+                              pt: 0.75,
+                              pb: 0.5,
                               textAlign: 'left',
                               cursor: 'pointer',
                               textDecoration: declined ? 'line-through' : 'none',
                               overflow: 'hidden',
-                              border: 'none',
-                              borderLeftWidth: '3px',
-                              borderLeftStyle: 'solid',
-                              width: '100%',
                               fontFamily: 'inherit',
+                              transition: 'background-color 0.4s ease',
                               ...(isRecentlyConfirmed && {
                                 animation: `${confirmPulse} 0.8s ease-in-out 2`,
                               }),
                             }}
                           >
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              {/* Status dot */}
-                              <Box
-                                sx={{
-                                  width: 6,
-                                  height: 6,
-                                  borderRadius: '50%',
-                                  bgcolor: sColors.border,
-                                  flexShrink: 0,
-                                }}
-                              />
+                            {/* Time range row with dashed bottom border */}
+                            <Box sx={{ borderBottom: `1px dashed ${sColors.border}`, pb: 0.5, mb: 0.5 }}>
                               <Typography
-                                sx={{
-                                  fontSize: 10,
-                                  fontWeight: 700,
-                                  lineHeight: '14px',
-                                  color: sColors.text,
-                                }}
+                                sx={{ fontSize: '0.6rem', fontWeight: 600, color: sColors.text, lineHeight: '14px' }}
                                 noWrap
                               >
-                                {statusLabel}
+                                {fmtTimeLabel(s.start)} - {fmtTimeLabel(s.end)}
                               </Typography>
                             </Box>
+                            {/* Title */}
                             <Typography
-                              sx={{
-                                fontSize: 10,
-                                lineHeight: '14px',
-                                color: sColors.text,
-                              }}
-                              noWrap
+                              sx={{ fontSize: '0.7rem', fontWeight: 600, color: sColors.text, lineHeight: '1.3' }}
                             >
                               {s.title.replace("Mentor Session: ", "")}
                             </Typography>
-                            {/* Show time only if block height > 36px */}
-                            {pxHeight > 36 && (
-                              <Typography
-                                sx={{
-                                  fontSize: 9,
-                                  lineHeight: '12px',
-                                  color: sColors.sub,
-                                }}
-                                noWrap
-                              >
-                                {fmtTime(s.start)}–{fmtTime(s.end)}
-                              </Typography>
-                            )}
-                            {/* Show session type only if block height > 56px */}
                             {pxHeight > 56 && (
                               <Typography
-                                sx={{
-                                  fontSize: 9,
-                                  lineHeight: '12px',
-                                  color: sColors.sub,
-                                  mt: 0.25,
-                                }}
+                                sx={{ fontSize: '0.6rem', color: sColors.sub, mt: 0.25, lineHeight: '1.2' }}
                                 noWrap
                               >
                                 {s.sessionType}
@@ -1042,9 +1128,42 @@ export default function CalendarPage() {
 
                 {/* Time-column spacer */}
                 <Box sx={{ position: 'relative', gridColumn: 1, gridRow: 1 }} />
+
+                {/* Current time indicator line */}
+                {(() => {
+                  const nowMins = demoNow.getHours() * 60 + demoNow.getMinutes();
+                  if (nowMins < TIME_START || nowMins > TIME_END) return null;
+                  const topPct = timeToPercent(nowMins);
+                  return (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: `${topPct}%`,
+                        left: 56,
+                        right: 0,
+                        height: '2px',
+                        bgcolor: 'primary.main',
+                        zIndex: 20,
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          left: -4,
+                          top: -3,
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'primary.main',
+                        }}
+                      />
+                    </Box>
+                  );
+                })()}
               </Box>
             </Box>
-          </Card>
+          </Box>
 
           {/* ── Legend bar ──────────────────────────────────────────────── */}
           <Box
@@ -1066,7 +1185,7 @@ export default function CalendarPage() {
               { color: 'var(--gl-cal-leave-border, rgb(244,63,94))', label: 'Not available', dashed: true },
               { color: 'var(--gl-cal-busy-border)', label: 'External busy' },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-1.5">
+              <Box key={item.label} sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                 <Box
                   sx={{
                     width: 8,
@@ -1080,7 +1199,7 @@ export default function CalendarPage() {
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                   {item.label}
                 </Typography>
-              </div>
+              </Box>
             ))}
           </Box>
 
@@ -1093,7 +1212,7 @@ export default function CalendarPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── MONTH VIEW ────────────────────────────────────────────────── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      {calendarViewMode === "month" && (
+      {hasUserConfiguredAvailability && calendarViewMode === "month" && (
         <>
           <Card variant="outlined" sx={{ mt: 2, p: { xs: 1, md: 2 }, overflow: 'hidden', height: CALENDAR_CARD_HEIGHT, display: 'flex', flexDirection: 'column' }}>
             {/* §9.1 Sunday-first visual month grid — but we use Monday-first to match week view DOW header */}
@@ -1303,7 +1422,7 @@ export default function CalendarPage() {
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ width: 32, height: 32, borderRadius: '0.5rem', bgcolor: 'var(--gl-cal-session-scheduled-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CalendarDays style={{ width: 16, height: 16, color: 'var(--gl-cal-session-scheduled-border)' }} />
+                <CalendarMonthIcon sx={{ fontSize: 16, color: 'var(--gl-cal-session-scheduled-border)' }} />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>{weekStats.total}</Typography>
@@ -1312,7 +1431,7 @@ export default function CalendarPage() {
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ width: 32, height: 32, borderRadius: '0.5rem', bgcolor: 'var(--gl-cal-session-confirmed-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CheckCircle2 style={{ width: 16, height: 16, color: 'var(--gl-cal-session-confirmed-border)' }} />
+                <TaskAltIcon sx={{ fontSize: 16, color: 'var(--gl-cal-session-confirmed-border)' }} />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>{weekStats.confirmedCount}</Typography>
@@ -1321,7 +1440,7 @@ export default function CalendarPage() {
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ width: 32, height: 32, borderRadius: '0.5rem', bgcolor: 'var(--gl-cal-request-pending-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Clock style={{ width: 16, height: 16, color: 'var(--gl-cal-request-pending-border)' }} />
+                <AccessTimeIcon sx={{ fontSize: 16, color: 'var(--gl-cal-request-pending-border)' }} />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>{weekStats.pendingReqs}</Typography>
@@ -1330,7 +1449,7 @@ export default function CalendarPage() {
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ width: 32, height: 32, borderRadius: '0.5rem', bgcolor: 'var(--gl-cal-avail-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CalendarDays style={{ width: 16, height: 16, color: 'var(--gl-cal-avail-border, rgb(34,197,94))' }} />
+                <CalendarMonthIcon sx={{ fontSize: 16, color: 'var(--gl-cal-avail-border, rgb(34,197,94))' }} />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>{weekStats.availSlots}</Typography>
@@ -1349,7 +1468,7 @@ export default function CalendarPage() {
             {weekStats.unconfirmedCount > 0 && (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <AlertCircle style={{ width: 16, height: 16, color: 'var(--gl-cal-session-scheduled-border)' }} />
+                  <ErrorOutlineIcon sx={{ fontSize: 16, color: 'var(--gl-cal-session-scheduled-border)' }} />
                   <Typography variant="body2">
                     {weekStats.unconfirmedCount} unconfirmed session{weekStats.unconfirmedCount > 1 ? "s" : ""}
                   </Typography>
@@ -1359,7 +1478,7 @@ export default function CalendarPage() {
             {weekStats.pendingReqs > 0 && (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <AlertCircle style={{ width: 16, height: 16, color: 'var(--gl-warning-icon)' }} />
+                  <ErrorOutlineIcon sx={{ fontSize: 16, color: 'var(--gl-warning-icon)' }} />
                   <Typography variant="body2">
                     {weekStats.pendingReqs} pending request{weekStats.pendingReqs > 1 ? "s" : ""}
                   </Typography>
@@ -1368,7 +1487,7 @@ export default function CalendarPage() {
             )}
             {weekStats.unconfirmedCount === 0 && weekStats.pendingReqs === 0 && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1 }}>
-                <CheckCircle2 style={{ width: 16, height: 16, color: 'var(--gl-cal-avail-border, rgb(34,197,94))' }} />
+                <TaskAltIcon sx={{ fontSize: 16, color: 'var(--gl-cal-avail-border, rgb(34,197,94))' }} />
                 <Typography variant="body2" color="text.secondary">
                   All caught up! No actions needed.
                 </Typography>

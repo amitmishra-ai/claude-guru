@@ -2,6 +2,12 @@ import * as React from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
+declare module "@mui/material/Button" {
+  interface ButtonPropsVariantOverrides {
+    soft: true;
+  }
+}
+
 /**
  * Builds an MUI theme using the Great Learning design-system colors.
  * Light primary: #196ae5, Secondary: #ff9800
@@ -102,56 +108,90 @@ function buildTheme(mode: "light" | "dark") {
       borderRadius: 8,
     },
 
-    /* ── Typography Scale ──────────────────────────────────────── */
+    /* ── Typography Scale (MUI standard scale) ─────────────────── */
     typography: {
-      fontFamily: "inherit",
+      fontFamily: "'Inter', sans-serif",
+      htmlFontSize: 16,
+      fontSize: 14,
+
+      h1: {
+        fontSize: "6rem",
+        fontWeight: 300,
+        lineHeight: 1.167,
+        letterSpacing: "-0.01562em",
+      },
+      h2: {
+        fontSize: "3.75rem",
+        fontWeight: 300,
+        lineHeight: 1.2,
+        letterSpacing: "-0.00833em",
+      },
+      h3: {
+        fontSize: "3rem",
+        fontWeight: 400,
+        lineHeight: 1.167,
+        letterSpacing: "0em",
+      },
       h4: {
-        fontSize: "1.75rem",
-        fontWeight: 700,
-        lineHeight: 1.25,
-        letterSpacing: "-0.01em",
+        fontSize: "2.125rem",
+        fontWeight: 400,
+        lineHeight: 1.235,
+        letterSpacing: "0.00735em",
       },
       h5: {
-        fontSize: "1.375rem",
-        fontWeight: 700,
-        lineHeight: 1.3,
-        letterSpacing: "-0.005em",
+        fontSize: "1.5rem",
+        fontWeight: 400,
+        lineHeight: 1.334,
+        letterSpacing: "0em",
       },
       h6: {
-        fontSize: "1.125rem",
-        fontWeight: 700,
-        lineHeight: 1.35,
+        fontSize: "1.25rem",
+        fontWeight: 500,
+        lineHeight: 1.6,
+        letterSpacing: "0.0075em",
       },
       subtitle1: {
         fontSize: "1rem",
-        fontWeight: 600,
-        lineHeight: 1.4,
+        fontWeight: 400,
+        lineHeight: 1.75,
+        letterSpacing: "0.00938em",
       },
       subtitle2: {
         fontSize: "0.875rem",
-        fontWeight: 600,
-        lineHeight: 1.4,
+        fontWeight: 500,
+        lineHeight: 1.57,
+        letterSpacing: "0.00714em",
       },
       body1: {
-        fontSize: "0.9375rem",
+        fontSize: "1rem",
         fontWeight: 400,
         lineHeight: 1.5,
+        letterSpacing: "0.00938em",
       },
       body2: {
-        fontSize: "0.8125rem",
+        fontSize: "0.875rem",
         fontWeight: 400,
-        lineHeight: 1.5,
+        lineHeight: 1.43,
+        letterSpacing: "0.01071em",
+      },
+      button: {
+        fontSize: "0.875rem",
+        fontWeight: 500,
+        lineHeight: 1.75,
+        letterSpacing: "0.02857em",
+        textTransform: "none" as const,
       },
       caption: {
         fontSize: "0.75rem",
         fontWeight: 400,
-        lineHeight: 1.4,
+        lineHeight: 1.66,
+        letterSpacing: "0.03333em",
       },
       overline: {
-        fontSize: "0.6875rem",
-        fontWeight: 600,
-        lineHeight: 1.4,
-        letterSpacing: "0.04em",
+        fontSize: "0.75rem",
+        fontWeight: 400,
+        lineHeight: 2.66,
+        letterSpacing: "0.08333em",
         textTransform: "uppercase" as const,
       },
     },
@@ -172,6 +212,35 @@ function buildTheme(mode: "light" | "dark") {
             padding: "4px 12px",
           },
         },
+        variants: [
+          {
+            props: { variant: "soft" },
+            style: {
+              backgroundColor:
+                mode === "light"
+                  ? "rgba(25, 106, 229, 0.10)"
+                  : "rgba(102, 187, 255, 0.15)",
+              color:
+                mode === "light" ? "#0f4089" : "#66bbff",
+              "&:hover": {
+                backgroundColor:
+                  mode === "light"
+                    ? "rgba(25, 106, 229, 0.17)"
+                    : "rgba(102, 187, 255, 0.22)",
+              },
+              "&:disabled": {
+                backgroundColor:
+                  mode === "light"
+                    ? "rgba(25, 106, 229, 0.05)"
+                    : "rgba(102, 187, 255, 0.08)",
+                color:
+                  mode === "light"
+                    ? "rgba(15, 64, 137, 0.4)"
+                    : "rgba(102, 187, 255, 0.4)",
+              },
+            },
+          },
+        ],
       },
 
       /* Chip — 8px rounded-square default; use sx borderRadius 9999px for pills */

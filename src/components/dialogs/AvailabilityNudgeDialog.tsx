@@ -1,7 +1,7 @@
 import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setOpenAvailabilityNudge, setOpenAvailability } from "@/store/slices/uiSlice";
@@ -15,20 +15,21 @@ export function AvailabilityNudgeDialog() {
     <Dialog
       open={open}
       onClose={() => dispatch(setOpenAvailabilityNudge(false))}
-      PaperProps={{ className: "p-0 overflow-hidden" }}
+      PaperProps={{ sx: { p: 0, overflow: "hidden" } }}
     >
-      <img
+      <Box
+        component="img"
         src={availabilityNudgeImageSrc}
         alt="Update availability reminder"
-        className="h-[216px] w-full rounded-t-2xl object-cover"
+        sx={{ height: 216, width: "100%", borderTopLeftRadius: 16, borderTopRightRadius: 16, objectFit: "cover" }}
       />
-      <div className="p-6">
+      <Box sx={{ p: 3 }}>
         <DialogTitle sx={{ padding: 0 }}>Update your availability</DialogTitle>
-        <div className="mt-2 text-sm text-on-surface-variant">
+        <Box sx={{ mt: 1, fontSize: "0.875rem", color: "hsl(var(--md-on-surface-variant))" }}>
           If you do not update your availability, ops will not be able to schedule sessions with you.
-        </div>
-        <DialogActions sx={{ padding: 0, marginTop: '1.25rem' }}>
-          <Button variant="outlined" color="inherit" onClick={() => dispatch(setOpenAvailabilityNudge(false))}>
+        </Box>
+        <DialogActions sx={{ padding: 0, marginTop: "1.25rem" }}>
+          <Button variant="text" color="inherit" onClick={() => dispatch(setOpenAvailabilityNudge(false))}>
             Maybe later
           </Button>
           <Button
@@ -41,7 +42,7 @@ export function AvailabilityNudgeDialog() {
             Update availability
           </Button>
         </DialogActions>
-      </div>
+      </Box>
     </Dialog>
   );
 }

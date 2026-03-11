@@ -7,7 +7,7 @@ interface CalendarState {
 }
 
 const initialState: CalendarState = {
-  anchorDate: demoNow.toISOString(),
+  anchorDate: new Date().toISOString(),
   calendarViewMode: "week",
 };
 
