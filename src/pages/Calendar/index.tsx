@@ -186,6 +186,9 @@ const confirmPulse = keyframes`
 export default function CalendarPage() {
   const dispatch = useAppDispatch();
 
+  /* ── real current date/time (local) ───────────────────────────────────── */
+  const realNow = new Date();
+
   /* ── redux state ──────────────────────────────────────────────────────── */
   const sessions = useAppSelector((s) => s.sessions.items);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
@@ -229,7 +232,7 @@ export default function CalendarPage() {
     }
   };
   const navCurrent = () => {
-    dispatch(setAnchorDate(demoNow.toISOString()));
+    dispatch(setAnchorDate(realNow.toISOString()));
   };
 
 
@@ -246,7 +249,7 @@ export default function CalendarPage() {
   );
 
   /* ── Mobile selected day ──────────────────────────────────────────── */
-  const todayYmd = toYmd(demoNow);
+  const todayYmd = toYmd(realNow);
   const [mobileSelectedDay, setMobileSelectedDay] = useState<string>(todayYmd);
 
   /* ── Popover anchor refs ──────────────────────────────────────────── */
@@ -384,7 +387,7 @@ export default function CalendarPage() {
             variant="outlined"
             size="small"
             sx={{ textTransform: 'none', fontSize: '0.875rem', borderColor: 'divider', color: 'text.primary', fontWeight: 400 }}
-            onClick={() => dispatch(setAnchorDate(demoNow.toISOString()))}
+            onClick={() => dispatch(setAnchorDate(realNow.toISOString()))}
           >
             Current {calendarViewMode}
           </Button>
@@ -477,7 +480,7 @@ export default function CalendarPage() {
             <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", mb: 1.5 }}>
               {weekDays.map((d, i) => {
                 const ymd = toYmd(d);
-                const isToday = ymd === toYmd(demoNow);
+                const isToday = ymd === toYmd(realNow);
                 const isSelected = ymd === mobileSelectedDay;
                 const hasEvents =
                   sessionsThisWeek.some((s) => s.dateYmd === ymd && !sessionDeclined[s.id]) ||
@@ -662,7 +665,7 @@ export default function CalendarPage() {
               <Box /> {/* time gutter */}
               {weekDays.map((d, i) => {
                 const ymd = toYmd(d);
-                const isToday = ymd === toYmd(demoNow);
+                const isToday = ymd === toYmd(realNow);
                 return (
                   <Box
                     key={i}
@@ -830,7 +833,7 @@ export default function CalendarPage() {
                     ...dayRequests.map((r) => ({ id: `req-${r.id}`, start: r.start, end: r.end })),
                   ]);
 
-                  const colIsToday = toYmd(d) === toYmd(demoNow);
+                  const colIsToday = toYmd(d) === toYmd(realNow);
                   return (
                     <Box
                       key={colIdx}
@@ -843,6 +846,39 @@ export default function CalendarPage() {
                         bgcolor: colIsToday ? 'action.hover' : 'transparent',
                       }}
                     >
+                      {/* Current time indicator — today column only */}
+                      {colIsToday && (() => {
+                        const nowMins = realNow.getHours() * 60 + realNow.getMinutes();
+                        if (nowMins < TIME_START || nowMins > TIME_END) return null;
+                        const topPct = timeToPercent(nowMins);
+                        return (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              top: `${topPct}%`,
+                              left: 0,
+                              right: 0,
+                              height: '2px',
+                              bgcolor: 'primary.main',
+                              zIndex: 20,
+                              pointerEvents: 'none',
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                position: 'absolute',
+                                left: -4,
+                                top: -3,
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                bgcolor: 'primary.main',
+                              }}
+                            />
+                          </Box>
+                        );
+                      })()}
+
                       {/* §8.2 Draw order: 1. Busy (lowest) */}
                       {filteredBusyBlocks.map((b) => (
                         <Box
@@ -1128,39 +1164,6 @@ export default function CalendarPage() {
 
                 {/* Time-column spacer */}
                 <Box sx={{ position: 'relative', gridColumn: 1, gridRow: 1 }} />
-
-                {/* Current time indicator line */}
-                {(() => {
-                  const nowMins = demoNow.getHours() * 60 + demoNow.getMinutes();
-                  if (nowMins < TIME_START || nowMins > TIME_END) return null;
-                  const topPct = timeToPercent(nowMins);
-                  return (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: `${topPct}%`,
-                        left: 56,
-                        right: 0,
-                        height: '2px',
-                        bgcolor: 'primary.main',
-                        zIndex: 20,
-                        pointerEvents: 'none',
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          left: -4,
-                          top: -3,
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          bgcolor: 'primary.main',
-                        }}
-                      />
-                    </Box>
-                  );
-                })()}
               </Box>
             </Box>
           </Box>
@@ -1363,7 +1366,7 @@ export default function CalendarPage() {
                         variant="caption"
                         sx={{
                           fontWeight: 500,
-                          ...(ymd === toYmd(demoNow) && {
+                          ...(ymd === toYmd(realNow) && {
                             bgcolor: 'primary.main',
                             color: 'primary.contrastText',
                             borderRadius: '50%',
