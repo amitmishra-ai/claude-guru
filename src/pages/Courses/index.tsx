@@ -14,7 +14,6 @@ import InputBase from "@mui/material/InputBase";
 import LinearProgress from "@mui/material/LinearProgress";
 import Skeleton from "@mui/material/Skeleton";
 import Popover from "@mui/material/Popover";
-import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -92,36 +91,6 @@ function MappedSessionsOverflow({
 }
 
 /* ─── Course card skeleton ────────────────────────────────────────────────── */
-function CourseCardSkeleton() {
-  return (
-    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-      <Card variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-        <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", flex: 1 }}>
-          {/* Thumbnail row */}
-          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, mb: 1.5 }}>
-            <Skeleton variant="rounded" width={72} height={72} sx={{ borderRadius: "12px", flexShrink: 0 }} />
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, alignItems: "flex-end", pt: 0.25 }}>
-              <Skeleton variant="rounded" width={80} height={22} sx={{ borderRadius: 10 }} />
-              <Skeleton variant="rounded" width={52} height={22} sx={{ borderRadius: 10 }} />
-            </Box>
-          </Box>
-          {/* Title */}
-          <Skeleton variant="text" width="90%" height={22} sx={{ mb: 0.5 }} />
-          <Skeleton variant="text" width="60%" height={22} sx={{ mb: 0.5 }} />
-          {/* Program · Batch */}
-          <Skeleton variant="text" width="55%" height={16} sx={{ mb: 1.5 }} />
-          {/* Progress bar */}
-          <Skeleton variant="rounded" height={4} sx={{ borderRadius: 2, mb: 1.5 }} />
-          {/* Sessions label */}
-          <Skeleton variant="text" width={100} height={14} sx={{ mb: 0.75 }} />
-          {/* Session chip */}
-          <Skeleton variant="rounded" width={140} height={24} sx={{ borderRadius: 10 }} />
-        </CardContent>
-      </Card>
-    </Grid>
-  );
-}
-
 /* ─── Course card ─────────────────────────────────────────────────────────── */
 function CourseCard({
   c,
@@ -363,6 +332,9 @@ function FilterSectionLabel({ children }: { children: React.ReactNode }) {
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
+// Module-level flag: survives React Strict Mode double-mount in development
+let _coursesInitialLoadDone = false;
+
 export default function CoursesPage() {
   const dispatch = useAppDispatch();
   const sessions = useAppSelector((s) => s.sessions.items);
@@ -399,9 +371,13 @@ export default function CoursesPage() {
   const allBatches  = useMemo(() => [...new Set(sortedCatalog.map((c) => c.batch))],   [sortedCatalog]);
 
   /* ── Loading skeleton ── */
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!_coursesInitialLoadDone);
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1000);
+    if (_coursesInitialLoadDone) return;
+    const t = setTimeout(() => {
+      _coursesInitialLoadDone = true;
+      setLoading(false);
+    }, 1000);
     return () => clearTimeout(t);
   }, []);
 
