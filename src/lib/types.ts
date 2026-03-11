@@ -103,6 +103,8 @@ export type CourseCatalogItem = {
   topics: string[];
   isNew: boolean;
   status: "current" | "past";
+  color: string;
+  pattern: number;
 };
 
 // ─── Poll Types ─────────────────────────────────────────────────────────────
@@ -197,4 +199,35 @@ export type PresetCard = {
   start: string;
   end: string;
   enabled: boolean;
+};
+
+// ─── Course Module Types ─────────────────────────────────────────────────────
+
+export type CourseVideoItem = {
+  id: string;
+  number: number;
+  title: string;
+  duration: string;
+  viewed?: boolean;
+};
+
+export type CoursePresentationItem = {
+  id: string;
+  title: string;
+  sizeKb: string;
+  viewed?: boolean;
+};
+
+export type CourseSection = {
+  id: string;
+  title: string;
+  progress: number; // 0–100
+  isNew?: boolean;
+  videos: CourseVideoItem[];
+  presentations: CoursePresentationItem[];
+};
+
+export type CourseModuleData = {
+  courseId: string;
+  sections: CourseSection[];
 };

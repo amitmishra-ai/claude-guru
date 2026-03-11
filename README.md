@@ -2,7 +2,7 @@
 
 Interactive mentor dashboard prototype for Great Learning's Ninja platform — built with **Vite + React 19**, **TypeScript**, **MUI v7**, **Redux Toolkit + RTK Query**, and **Tailwind CSS**.
 
----
+----
 
 ## What This Prototype Covers
 
@@ -14,7 +14,7 @@ Interactive mentor dashboard prototype for Great Learning's Ninja platform — b
 - **Profile & preferences** — timezone settings, communication preferences
 - **Rating history** — session-wise rating entries, trend chart with tooltip
 
----
+----
 
 ## Tech Stack
 
