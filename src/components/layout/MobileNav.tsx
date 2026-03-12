@@ -35,6 +35,7 @@ export function MobileNav() {
         borderColor: "divider",
         backgroundColor: "hsl(var(--md-surface))",
         display: { md: "none" },
+        pb: "env(safe-area-inset-bottom)",
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-around", py: 0.5 }}>
