@@ -469,27 +469,35 @@ export default function DashboardPage() {
                   {homeSessionsView === "next" && (
                     <>
                       {/* Next session featured */}
-                      <Paper
-                        variant="outlined"
-                        sx={{
-                          p: { xs: 2, sm: 3 },
-                          borderLeft: 4,
-                          borderLeftColor: 'primary.main',
-                        }}
-                      >
+                      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
                         <Typography variant="overline" color="text.secondary">Next session</Typography>
                         {nextSession ? (
-                          <Box sx={{ mt: 1 }}>
-                            <Typography variant="h5" fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.5rem' } }}>{nextSession.title}</Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                              {fmtDateNice(nextSession.dateYmd)} &bull; {fmtTime12(nextSession.start)}&ndash;{fmtTime12(nextSession.end)} &bull; {nextSession.group}
-                            </Typography>
-                            <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
-                              <Chip label={nextSession.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
-                              <Chip label={nextSession.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
-                              <Chip label={nextSession.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
+                          <>
+                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1.5, mb: 1.5 }}>
+                              <Chip label="Upcoming" size="small" sx={{ borderRadius: 9999, bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 600 }} />
+                              {nextSession.program && <Chip label={nextSession.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
+                              {nextSession.cohort && <Chip label={nextSession.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
+                              {nextSession.location && <Chip label={nextSession.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
                             </Stack>
-                            <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1.5} sx={{ mt: 3 }} useFlexGap>
+                            <Typography variant="h5" fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.5rem' }, mb: 1 }}>{nextSession.title}</Typography>
+                            <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2.5 }}>
+                              <Stack direction="row" alignItems="center" spacing={0.5}>
+                                <Calendar size={14} style={{ color: 'var(--md-on-surface-variant)' }} />
+                                <Typography variant="body2" color="text.secondary">
+                                  {fmtDateNice(nextSession.dateYmd)} &bull; {fmtTime12(nextSession.start)}&ndash;{fmtTime12(nextSession.end)}
+                                </Typography>
+                              </Stack>
+                              {nextSession.group && (
+                                <>
+                                  <Typography variant="body2" color="text.disabled">&middot;</Typography>
+                                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                                    <Users size={14} style={{ color: 'var(--md-on-surface-variant)' }} />
+                                    <Typography variant="body2" color="text.secondary">{nextSession.group}</Typography>
+                                  </Stack>
+                                </>
+                              )}
+                            </Stack>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1.5} useFlexGap>
                               <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                                 {(() => {
                                   const sessionStartMs = dateTimeMs(nextSession.dateYmd, nextSession.start);
@@ -500,7 +508,7 @@ export default function DashboardPage() {
                                       size="small"
                                       startIcon={<Link2 size={16} />}
                                       disabled={!joinEnabled}
-                                                                           onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
+                                      onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
                                     >
                                       Join link
                                     </Button>
@@ -510,14 +518,14 @@ export default function DashboardPage() {
                                   variant="soft"
                                   size="small"
                                   startIcon={<BookOpen size={16} />}
-                                                                   onClick={() => dispatch(pushToast({ title: "Downloading slides", description: "Preparing download..." }))}
+                                  onClick={() => dispatch(pushToast({ title: "Downloading slides", description: "Preparing download..." }))}
                                 >
                                   Download slides
                                 </Button>
                                 <Button
                                   variant="soft"
                                   size="small"
-                                                                   onClick={() => {
+                                  onClick={() => {
                                     dispatch(setPollSessionId(nextSession.id));
                                     dispatch(setPollEditingId(null));
                                     dispatch(setPollQuestion(""));
@@ -528,17 +536,13 @@ export default function DashboardPage() {
                                   Create poll
                                 </Button>
                               </Stack>
-                              <Button
-                                variant="text"
-                                size="small"
-                                                               onClick={() => dispatch(setOpenGroupProfile(true))}
-                              >
+                              <Button variant="text" size="small" onClick={() => dispatch(setOpenGroupProfile(true))}>
                                 Group profile
                               </Button>
                             </Stack>
-                          </Box>
+                          </>
                         ) : (
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>No upcoming sessions.</Typography>
+                          <Typography variant="body2" color="text.secondary">No upcoming sessions.</Typography>
                         )}
                       </Paper>
 
@@ -681,10 +685,10 @@ export default function DashboardPage() {
                                 {/* Row 1: Status chip + category chips */}
                                 <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
                                   <Chip
-                                    icon={<TaskAltRoundedIcon sx={{ fontSize: 14, color: 'var(--gl-status-confirmed-text)' }} />}
+                                    icon={<TaskAltRoundedIcon sx={{ fontSize: 14 }} />}
                                     label="Confirmed"
                                     size="small"
-                                    sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', border: '1px solid var(--gl-status-confirmed-border)', fontWeight: 600 }}
+                                    sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', border: '1px solid var(--gl-status-confirmed-border)', fontWeight: 600, '& .MuiChip-icon': { color: 'inherit' } }}
                                   />
                                   {s.program && <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
                                   {s.cohort && <Chip label={s.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
@@ -772,31 +776,36 @@ export default function DashboardPage() {
                               : null;
                             return (
                               <Box key={s.id} sx={{ py: 2.5 }}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                                  <Box sx={{ minWidth: 0 }}>
-                                    <Typography variant="h6" fontWeight={600}>{s.title}</Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                      {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
-                                    </Typography>
-                                  </Box>
+                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
+                                  <Chip label="Completed" size="small" sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', border: '1px solid var(--gl-status-confirmed-border)', fontWeight: 600, fontSize: '0.7rem' }} />
+                                  {s.sessionType && <Chip label={s.sessionType} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />}
+                                  {s.program && <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />}
                                   {avg && (
-                                    <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
-                                      <Star size={14} style={{ color: "var(--gl-star-color)" }} />
-                                      <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
-                                    </Stack>
+                                    <Chip
+                                      icon={<Star size={11} style={{ color: "var(--gl-star-color)" }} />}
+                                      label={avg}
+                                      size="small"
+                                      variant="outlined"
+                                      sx={{ borderRadius: 9999, fontSize: '0.7rem' }}
+                                    />
                                   )}
                                 </Stack>
-                                <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
-                                  <Chip label={s.sessionType} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />
-                                  <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />
+                                <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>{s.title}</Typography>
+                                <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2.5 }}>
+                                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                                    <Calendar size={14} style={{ color: 'var(--md-on-surface-variant)' }} />
+                                    <Typography variant="body2" color="text.secondary">
+                                      {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
+                                    </Typography>
+                                  </Stack>
                                 </Stack>
-                                <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
+                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                                   {s.recordingUrl && (
                                     <Button
                                       startIcon={<Video size={14} />}
                                       variant="soft"
                                       size="small"
-                                                                           onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
+                                      onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
                                     >
                                       Watch recording
                                     </Button>
@@ -806,7 +815,7 @@ export default function DashboardPage() {
                                       startIcon={<Star size={14} />}
                                       variant="soft"
                                       size="small"
-                                                                           onClick={() => {
+                                      onClick={() => {
                                         dispatch(setLearnerRatingsSessionId(s.id));
                                         dispatch(setOpenLearnerRatings(true));
                                       }}
@@ -818,7 +827,7 @@ export default function DashboardPage() {
                                     startIcon={<TrendingUp size={14} />}
                                     variant="soft"
                                     size="small"
-                                                                       onClick={() => navigate("/profile")}
+                                    onClick={() => navigate("/profile")}
                                   >
                                     View in payments
                                   </Button>

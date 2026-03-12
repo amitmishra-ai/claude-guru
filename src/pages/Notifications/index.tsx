@@ -105,7 +105,7 @@ export default function NotificationsPage() {
   return (
     <>
       <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
-        <PageHeader icon={NotificationsIcon} title="Alerts" subtitle="Notifications and action items." />
+        <PageHeader icon={NotificationsIcon} title="Alerts" />
         {unreadCount > 0 && (
           <Button
             variant="text"
