@@ -54,12 +54,12 @@ import { removeUnavailableBySessionId } from "@/store/slices/availabilitySlice";
 import {
   setOpenSession,
   setOpenAvailability,
-  setOpenGroupProfile,
   setOpenDeclineReason,
   setImpactOpen,
   setOpenLearnerRatings,
   setLearnerRatingsSessionId,
   setOpenPollBuilder,
+  setOpenSessionDetails,
 } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import {
@@ -79,6 +79,7 @@ import {
 import { demoNow } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions } from "@/data/demo-sessions";
 import { StatTile } from "@/components/shared/StatTile";
+import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import type { Session, SessionType } from "@/lib/types";
 
 const slideOutDown = keyframes`
@@ -210,7 +211,7 @@ export default function DashboardPage() {
 
   const needsWednesdayConfirm = scheduled.length > 0;
   const pendingRequestsCount = requests.filter((r) => r.response === "pending").length;
-  const nextSession = upcomingSessions[0] || null;
+  const nextSessions = upcomingSessions.slice(0, 2);
 
   const impact = useMemo(() => {
     const rating = demoRatingHistory.length
@@ -373,7 +374,7 @@ export default function DashboardPage() {
                         chipBorder="var(--gl-status-declined-border)"
                         title="Confirm sessions by Wednesday"
                         description="Ops needs clarity ~72 hours before weekend sessions."
-                        extra={<Chip label={`Confirmed ${confirmedCount} / ${sessions.length}`} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
+                        extra={<Chip label={`Confirmed ${confirmedCount} / ${sessions.length}`} size="small" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
                         action={
                           <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
                             Review confirmations
@@ -469,38 +470,30 @@ export default function DashboardPage() {
                   {homeSessionsView === "next" && (
                     <>
                       {/* Next session featured */}
-                      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
+                      <Paper
+                        variant="outlined"
+                        sx={{
+                          p: { xs: 2, sm: 3 },
+                          borderLeft: 4,
+                          borderLeftColor: 'primary.main',
+                        }}
+                      >
                         <Typography variant="overline" color="text.secondary">Next session</Typography>
                         {nextSession ? (
-                          <>
-                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1.5, mb: 1.5 }}>
-                              <Chip label="Upcoming" size="small" sx={{ borderRadius: 9999, bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 600 }} />
-                              {nextSession.program && <Chip label={nextSession.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
-                              {nextSession.cohort && <Chip label={nextSession.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
-                              {nextSession.location && <Chip label={nextSession.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
+                          <Box sx={{ mt: 1 }}>
+                            <Typography variant="h5" fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.5rem' } }}>{nextSession.title}</Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                              {fmtDateNice(nextSession.dateYmd)} &bull; {fmtTime12(nextSession.start)}&ndash;{fmtTime12(nextSession.end)} &bull; {nextSession.group}
+                            </Typography>
+                            <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
+                              <Chip label={nextSession.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
+                              <Chip label={nextSession.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
+                              <Chip label={nextSession.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
                             </Stack>
-                            <Typography variant="h5" fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.5rem' }, mb: 1 }}>{nextSession.title}</Typography>
-                            <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2.5 }}>
-                              <Stack direction="row" alignItems="center" spacing={0.5}>
-                                <Calendar size={14} style={{ color: 'var(--md-on-surface-variant)' }} />
-                                <Typography variant="body2" color="text.secondary">
-                                  {fmtDateNice(nextSession.dateYmd)} &bull; {fmtTime12(nextSession.start)}&ndash;{fmtTime12(nextSession.end)}
-                                </Typography>
-                              </Stack>
-                              {nextSession.group && (
-                                <>
-                                  <Typography variant="body2" color="text.disabled">&middot;</Typography>
-                                  <Stack direction="row" alignItems="center" spacing={0.5}>
-                                    <Users size={14} style={{ color: 'var(--md-on-surface-variant)' }} />
-                                    <Typography variant="body2" color="text.secondary">{nextSession.group}</Typography>
-                                  </Stack>
-                                </>
-                              )}
-                            </Stack>
-                            <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1.5} useFlexGap>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1.5} sx={{ mt: 3 }} useFlexGap>
                               <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                                 {(() => {
-                                  const sessionStartMs = dateTimeMs(nextSession.dateYmd, nextSession.start);
+                                  const sessionStartMs = dateTimeMs(ns.dateYmd, ns.start);
                                   const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
                                   return (
                                     <Button
@@ -525,7 +518,7 @@ export default function DashboardPage() {
                                 <Button
                                   variant="soft"
                                   size="small"
-                                  onClick={() => {
+                                                                   onClick={() => {
                                     dispatch(setPollSessionId(nextSession.id));
                                     dispatch(setPollEditingId(null));
                                     dispatch(setPollQuestion(""));
@@ -536,13 +529,17 @@ export default function DashboardPage() {
                                   Create poll
                                 </Button>
                               </Stack>
-                              <Button variant="text" size="small" onClick={() => dispatch(setOpenGroupProfile(true))}>
+                              <Button
+                                variant="text"
+                                size="small"
+                                                               onClick={() => dispatch(setOpenGroupProfile(true))}
+                              >
                                 Group profile
                               </Button>
                             </Stack>
-                          </>
+                          </Box>
                         ) : (
-                          <Typography variant="body2" color="text.secondary">No upcoming sessions.</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>No upcoming sessions.</Typography>
                         )}
                       </Paper>
 
@@ -553,7 +550,7 @@ export default function DashboardPage() {
                         {/* Scheduled sessions */}
                         <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 2, gap: 1 }}>
                           <Typography variant="subtitle2" fontWeight={600}>Scheduled sessions</Typography>
-                          <Chip label={`${scheduled.length} scheduled`} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
+                          <Chip label={`${scheduled.length} scheduled`} size="small" sx={{ borderRadius: 9999 }} />
                         </Stack>
                         {scheduled.length > 0 && (
                           <Chip
@@ -567,8 +564,15 @@ export default function DashboardPage() {
                             scheduledDisplay.map((s) => {
                               const isExiting = s.id === exitingId && !!confirmations[s.id];
                               return (
-                              <Box
+                              <SessionCard
                                 key={s.id}
+                                title={s.title}
+                                dateYmd={s.dateYmd}
+                                start={s.start}
+                                end={s.end}
+                                group={s.group}
+                                status={STATUS_SCHEDULED}
+                                chips={[s.program, s.cohort, s.location].filter(Boolean)}
                                 sx={{
                                   py: 2.5,
                                   ...(isExiting && {
@@ -576,44 +580,8 @@ export default function DashboardPage() {
                                     pointerEvents: 'none',
                                   }),
                                 }}
-                              >
-                                {/* Row 1: Status chip + category chips */}
-                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
-                                  <Chip
-                                    label="Scheduled"
-                                    size="small"
-                                    sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-pending-bg)', color: 'var(--gl-status-pending-text)', border: '1px solid var(--gl-status-pending-border)', fontWeight: 600 }}
-                                  />
-                                  {s.program && <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
-                                  {s.cohort && <Chip label={s.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
-                                  {s.location && <Chip label={s.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
-                                </Stack>
-
-                                {/* Row 2: Title */}
-                                <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>{s.title}</Typography>
-
-                                {/* Row 3: Date + group */}
-                                <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2.5, color: 'text.secondary' }}>
-                                  <Stack direction="row" alignItems="center" spacing={0.5}>
-                                    <Calendar size={14} />
-                                    <Typography variant="body2" color="text.secondary">
-                                      {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
-                                    </Typography>
-                                  </Stack>
-                                  {s.group && (
-                                    <>
-                                      <Typography variant="body2" color="text.disabled">&middot;</Typography>
-                                      <Stack direction="row" alignItems="center" spacing={0.5}>
-                                        <Users size={14} />
-                                        <Typography variant="body2" color="text.secondary">{s.group}</Typography>
-                                      </Stack>
-                                    </>
-                                  )}
-                                </Stack>
-
-                                {/* Row 4: Actions */}
-                                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent={{ xs: 'flex-start', sm: 'space-between' }} alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1.5}>
-                                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                actions={
+                                  <>
                                     <Button
                                       startIcon={<TaskAltRoundedIcon sx={{ fontSize: 18 }} />}
                                       size="small"
@@ -646,16 +614,17 @@ export default function DashboardPage() {
                                     >
                                       I'm unavailable
                                     </Button>
-                                  </Stack>
-                                  <Button
-                                    variant="text"
-                                    size="small"
-                                    onClick={() => dispatch(setOpenGroupProfile(true))}
-                                  >
-                                    Group profile
+                                  </>
+                                }
+                                secondaryAction={
+                                  <Button variant="text" size="small" onClick={() => {
+                                    dispatch(setSessionFocus(s));
+                                    dispatch(setOpenSessionDetails(true));
+                                  }}>
+                                    View details
                                   </Button>
-                                </Stack>
-                              </Box>
+                                }
+                              />
                               );
                             })
                           ) : (
@@ -668,13 +637,20 @@ export default function DashboardPage() {
                         {/* Confirmed sessions */}
                         <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 4, gap: 1 }}>
                           <Typography variant="subtitle2" fontWeight={600}>Confirmed sessions</Typography>
-                          <Chip label={`${confirmedUpcoming.length} confirmed`} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
+                          <Chip label={`${confirmedUpcoming.length} confirmed`} size="small" sx={{ borderRadius: 9999 }} />
                         </Stack>
                         <Stack divider={<Divider />} sx={{ mt: 2 }}>
                           {confirmedUpcoming.length ? (
                             confirmedDisplay.map((s) => (
-                              <Box
+                              <SessionCard
                                 key={s.id}
+                                title={s.title}
+                                dateYmd={s.dateYmd}
+                                start={s.start}
+                                end={s.end}
+                                group={s.group}
+                                status={STATUS_CONFIRMED(<TaskAltRoundedIcon sx={{ fontSize: 14 }} />)}
+                                chips={[s.program, s.cohort, s.location].filter(Boolean)}
                                 sx={{
                                   py: 2.5,
                                   ...(recentlyConfirmedIds[s.id] && {
@@ -685,10 +661,10 @@ export default function DashboardPage() {
                                 {/* Row 1: Status chip + category chips */}
                                 <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
                                   <Chip
-                                    icon={<TaskAltRoundedIcon sx={{ fontSize: 14 }} />}
+                                    icon={<TaskAltRoundedIcon sx={{ fontSize: 14, color: 'var(--gl-status-confirmed-text)' }} />}
                                     label="Confirmed"
                                     size="small"
-                                    sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', border: '1px solid var(--gl-status-confirmed-border)', fontWeight: 600, '& .MuiChip-icon': { color: 'inherit' } }}
+                                    sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', border: '1px solid var(--gl-status-confirmed-border)', fontWeight: 600 }}
                                   />
                                   {s.program && <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
                                   {s.cohort && <Chip label={s.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
@@ -776,36 +752,31 @@ export default function DashboardPage() {
                               : null;
                             return (
                               <Box key={s.id} sx={{ py: 2.5 }}>
-                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
-                                  <Chip label="Completed" size="small" sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', border: '1px solid var(--gl-status-confirmed-border)', fontWeight: 600, fontSize: '0.7rem' }} />
-                                  {s.sessionType && <Chip label={s.sessionType} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />}
-                                  {s.program && <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />}
-                                  {avg && (
-                                    <Chip
-                                      icon={<Star size={11} style={{ color: "var(--gl-star-color)" }} />}
-                                      label={avg}
-                                      size="small"
-                                      variant="outlined"
-                                      sx={{ borderRadius: 9999, fontSize: '0.7rem' }}
-                                    />
-                                  )}
-                                </Stack>
-                                <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>{s.title}</Typography>
-                                <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2.5 }}>
-                                  <Stack direction="row" alignItems="center" spacing={0.5}>
-                                    <Calendar size={14} style={{ color: 'var(--md-on-surface-variant)' }} />
-                                    <Typography variant="body2" color="text.secondary">
+                                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                                  <Box sx={{ minWidth: 0 }}>
+                                    <Typography variant="h6" fontWeight={600}>{s.title}</Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                                       {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
                                     </Typography>
-                                  </Stack>
+                                  </Box>
+                                  {avg && (
+                                    <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
+                                      <Star size={14} style={{ color: "var(--gl-star-color)" }} />
+                                      <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
+                                    </Stack>
+                                  )}
                                 </Stack>
-                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
+                                  <Chip label={s.sessionType} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />
+                                  <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />
+                                </Stack>
+                                <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
                                   {s.recordingUrl && (
                                     <Button
                                       startIcon={<Video size={14} />}
                                       variant="soft"
                                       size="small"
-                                      onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
+                                                                           onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
                                     >
                                       Watch recording
                                     </Button>
@@ -815,7 +786,7 @@ export default function DashboardPage() {
                                       startIcon={<Star size={14} />}
                                       variant="soft"
                                       size="small"
-                                      onClick={() => {
+                                                                           onClick={() => {
                                         dispatch(setLearnerRatingsSessionId(s.id));
                                         dispatch(setOpenLearnerRatings(true));
                                       }}
@@ -827,7 +798,7 @@ export default function DashboardPage() {
                                     startIcon={<TrendingUp size={14} />}
                                     variant="soft"
                                     size="small"
-                                    onClick={() => navigate("/profile")}
+                                                                       onClick={() => navigate("/profile")}
                                   >
                                     View in payments
                                   </Button>
@@ -851,17 +822,16 @@ export default function DashboardPage() {
                           <Typography variant="overline" color="text.secondary">Active declined</Typography>
                           <Stack divider={<Divider />}>
                             {declinedSessions.map((s) => (
-                              <Box key={s.id} sx={{ py: 2.5 }}>
-                                <Typography variant="h6" fontWeight={600}>{s.title}</Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                  {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
-                                </Typography>
-                                <Chip
-                                  label="Declined"
-                                  size="small"
-                                  sx={{ mt: 1.5, borderRadius: 9999, bgcolor: 'var(--gl-status-declined-bg)', color: 'var(--gl-status-declined-text)', fontSize: '0.7rem' }}
-                                />
-                                <Box sx={{ mt: 2 }}>
+                              <SessionCard
+                                key={s.id}
+                                title={s.title}
+                                dateYmd={s.dateYmd}
+                                start={s.start}
+                                end={s.end}
+                                titleFirst
+                                status={STATUS_DECLINED}
+                                sx={{ py: 2.5 }}
+                                actions={
                                   <Button
                                     startIcon={<TaskAltRoundedIcon sx={{ fontSize: 18 }} />}
                                     variant="soft"
@@ -874,8 +844,8 @@ export default function DashboardPage() {
                                   >
                                     Accept
                                   </Button>
-                                </Box>
-                              </Box>
+                                }
+                              />
                             ))}
                           </Stack>
                         </>
@@ -886,26 +856,21 @@ export default function DashboardPage() {
                           <Typography variant="overline" color="text.secondary" sx={{ mt: 2 }}>Previously declined</Typography>
                           <Stack divider={<Divider />}>
                             {demoPreviouslyDeclinedSessions.map((s) => (
-                              <Box key={s.id} sx={{ py: 2.5, opacity: 0.6 }}>
-                                <Typography variant="h6" fontWeight={600}>{s.title}</Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                  {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
-                                </Typography>
-                                <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5 }}>
-                                  <Chip
-                                    label="Declined"
-                                    size="small"
-                                    sx={{ borderRadius: 9999, bgcolor: 'action.hover', color: 'text.secondary', fontSize: '0.7rem' }}
-                                  />
-                                  <Button
-                                    variant="soft"
-                                    size="small"
-                                    disabled
-                                                                     >
+                              <SessionCard
+                                key={s.id}
+                                title={s.title}
+                                dateYmd={s.dateYmd}
+                                start={s.start}
+                                end={s.end}
+                                titleFirst
+                                status={{ label: "Declined", bg: "action.hover", color: "text.secondary", border: "transparent" }}
+                                sx={{ py: 2.5, opacity: 0.6 }}
+                                actions={
+                                  <Button variant="soft" size="small" disabled>
                                     Confirm
                                   </Button>
-                                </Stack>
-                              </Box>
+                                }
+                              />
                             ))}
                           </Stack>
                         </>
@@ -978,7 +943,7 @@ export default function DashboardPage() {
                     chipBorder="var(--gl-status-declined-border)"
                     title="Confirm sessions by Wednesday"
                     description="Ops needs clarity ~72 hours before weekend sessions."
-                    extra={<Chip label={`${confirmedCount} / ${sessions.length}`} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
+                    extra={<Chip label={`${confirmedCount} / ${sessions.length}`} size="small" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
                     action={
                       <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
                         Review confirmations

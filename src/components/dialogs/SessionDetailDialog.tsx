@@ -2,7 +2,6 @@ import { useState } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -17,16 +16,9 @@ import {
   setDeclineSessionFocus,
   setDeclineReason,
 } from "@/store/slices/sessionsSlice";
-import { setOpenSession, setOpenDeclineReason } from "@/store/slices/uiSlice";
+import { setOpenSession, setOpenDeclineReason, setOpenGroupProfile } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import { fmtDateNice, fmtTime12 } from "@/lib/helpers";
-
-const GROUP_STATS = [
-  { label: "Avg work exp", value: "6.2 yrs" },
-  { label: "Programming exp", value: "Mixed" },
-  { label: "Top industries", value: "IT, BFSI, Ops" },
-  { label: "Learners", value: "25" },
-];
 
 export function SessionDetailDialog() {
   const dispatch = useAppDispatch();
@@ -129,7 +121,7 @@ export function SessionDetailDialog() {
                             variant="text"
                             size="small"
                             sx={{ fontSize: "0.75rem" }}
-                            onClick={(e) => setGroupAnchor(e.currentTarget)}
+                            onClick={() => dispatch(setOpenGroupProfile(true))}
                           >
                             Group profile
                           </Button>
