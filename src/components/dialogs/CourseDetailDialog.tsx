@@ -247,7 +247,7 @@ export function CourseDetailDialog() {
                     />
                   </Box>
                   <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, fontSize: "0.72rem" }}>
-                    {completedSections}/{totalSections} sections &bull; {overallProgress}%
+                    {overallProgress}%
                   </Typography>
                 </Box>
               )}
