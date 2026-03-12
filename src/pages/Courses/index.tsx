@@ -146,7 +146,7 @@ function CourseCard({
                 }}
               />
             )}
-            <Chip label={c.program} size="small" variant="outlined" sx={{ fontSize: "0.7rem", height: 22, fontWeight: 500 }} />
+            <Chip label={c.program} size="small" sx={{ fontSize: "0.7rem", height: 22, fontWeight: 500 }} />
           </Box>
 
           {/* Title */}

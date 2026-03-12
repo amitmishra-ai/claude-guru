@@ -16,9 +16,10 @@ import {
   setDeclineSessionFocus,
   setDeclineReason,
 } from "@/store/slices/sessionsSlice";
-import { setOpenSession, setOpenDeclineReason, setOpenGroupProfile } from "@/store/slices/uiSlice";
+import { setOpenSession, setOpenDeclineReason, setOpenSessionDetails } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
-import { fmtDateNice, fmtTime12 } from "@/lib/helpers";
+import { fmtDateNice } from "@/lib/helpers";
+import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED } from "@/components/shared/SessionCard";
 
 export function SessionDetailDialog() {
   const dispatch = useAppDispatch();
@@ -73,62 +74,55 @@ export function SessionDetailDialog() {
               {displayed.map((s) => {
                 const isConfirmed = confirmations[s.id];
                 return (
-                  <Box key={s.id} sx={{ py: 2, borderBottom: 1, borderColor: "divider", "&:last-child": { borderBottom: 0 } }}>
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                      <Box sx={{ minWidth: 0 }}>
-                        <Box sx={{ fontSize: "1.125rem", fontWeight: 600 }}>{s.title}</Box>
-                        <Box sx={{ mt: 0.5, fontSize: "0.875rem", color: "hsl(var(--md-on-surface-variant))" }}>
-                          {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)} &bull; {s.group}
-                        </Box>
-                        <Box sx={{ mt: 1.5, display: "flex", flexWrap: "wrap", gap: 1 }}>
-                          <Chip variant="outlined" size="small" label={s.program} />
-                          <Chip variant="outlined" size="small" label={s.cohort} />
-                          <Chip variant="outlined" size="small" label={s.sessionType} />
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { sm: "center" }, justifyContent: { sm: "space-between" }, gap: 1 }}>
-                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                          <Button
-                            variant={isConfirmed ? "soft" : "contained"}
-                            sx={isConfirmed
-                              ? { borderColor: "var(--gl-status-confirmed-border)", bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", "&:hover": { bgcolor: "var(--gl-status-confirmed-bg)" } }
-                              : {}
-                            }
-                            onClick={() => {
-                              if (isConfirmed) return;
-                              dispatch(confirmSession(s.id));
-                              dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
-                            }}
-                          >
-                            <CheckCircle2 style={{ marginRight: 8, width: 16, height: 16 }} /> {isConfirmed ? "Confirmed" : "Confirm"}
-                          </Button>
-
-                          <Button
-                            variant="soft"
-                            onClick={() => {
-                              dispatch(setDeclineSessionFocus(s));
-                              dispatch(setDeclineReason(""));
-                              dispatch(setOpenDeclineReason(true));
-                            }}
-                          >
-                            <XCircle style={{ marginRight: 8, width: 16, height: 16 }} /> I'm unavailable
-                          </Button>
-                        </Box>
-
-                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: { sm: "flex-end" } }}>
-                          <Button
-                            variant="text"
-                            size="small"
-                            sx={{ fontSize: "0.75rem" }}
-                            onClick={() => dispatch(setOpenGroupProfile(true))}
-                          >
-                            Group profile
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Box>
+                  <SessionCard
+                    key={s.id}
+                    title={s.title}
+                    dateYmd={s.dateYmd}
+                    start={s.start}
+                    end={s.end}
+                    group={s.group}
+                    status={isConfirmed ? STATUS_CONFIRMED() : STATUS_SCHEDULED}
+                    chips={[s.program, s.cohort, s.sessionType].filter(Boolean) as string[]}
+                    sx={{ py: 2, borderBottom: 1, borderColor: "divider", "&:last-child": { borderBottom: 0 } }}
+                    actions={
+                      <>
+                        <Button
+                          variant={isConfirmed ? "soft" : "contained"}
+                          size="small"
+                          sx={isConfirmed
+                            ? { borderColor: "var(--gl-status-confirmed-border)", bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", "&:hover": { bgcolor: "var(--gl-status-confirmed-bg)" } }
+                            : {}
+                          }
+                          onClick={() => {
+                            if (isConfirmed) return;
+                            dispatch(confirmSession(s.id));
+                            dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
+                          }}
+                        >
+                          <CheckCircle2 style={{ marginRight: 8, width: 16, height: 16 }} /> {isConfirmed ? "Confirmed" : "Confirm"}
+                        </Button>
+                        <Button
+                          variant="soft"
+                          size="small"
+                          onClick={() => {
+                            dispatch(setDeclineSessionFocus(s));
+                            dispatch(setDeclineReason(""));
+                            dispatch(setOpenDeclineReason(true));
+                          }}
+                        >
+                          <XCircle style={{ marginRight: 8, width: 16, height: 16 }} /> I'm unavailable
+                        </Button>
+                      </>
+                    }
+                    secondaryAction={
+                      <Button variant="text" size="small" onClick={() => {
+                        dispatch(setSessionFocus(s));
+                        dispatch(setOpenSessionDetails(true));
+                      }}>
+                        View details
+                      </Button>
+                    }
+                  />
                 );
               })}
             </Box>

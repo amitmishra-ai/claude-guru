@@ -469,29 +469,29 @@ export default function DashboardPage() {
                 <Stack spacing={3}>
                   {homeSessionsView === "next" && (
                     <>
-                      {/* Next session featured */}
-                      <Paper
-                        variant="outlined"
-                        sx={{
-                          p: { xs: 2, sm: 3 },
-                          borderLeft: 4,
-                          borderLeftColor: 'primary.main',
-                        }}
-                      >
-                        <Typography variant="overline" color="text.secondary">Next session</Typography>
-                        {nextSession ? (
-                          <Box sx={{ mt: 1 }}>
-                            <Typography variant="h5" fontWeight={600} sx={{ fontSize: { xs: '1.125rem', md: '1.5rem' } }}>{nextSession.title}</Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                              {fmtDateNice(nextSession.dateYmd)} &bull; {fmtTime12(nextSession.start)}&ndash;{fmtTime12(nextSession.end)} &bull; {nextSession.group}
-                            </Typography>
-                            <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
-                              <Chip label={nextSession.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
-                              <Chip label={nextSession.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
-                              <Chip label={nextSession.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />
-                            </Stack>
-                            <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1.5} sx={{ mt: 3 }} useFlexGap>
-                              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                      {/* Next sessions featured */}
+                      {nextSessions.length > 0 ? nextSessions.map((ns) => (
+                        <Paper
+                          key={ns.id}
+                          variant="outlined"
+                          sx={{
+                            p: { xs: 2, sm: 3 },
+                            borderLeft: 4,
+                            borderLeftColor: 'primary.main',
+                          }}
+                        >
+                          <Typography variant="overline" color="text.secondary">Next session</Typography>
+                          <SessionCard
+                            title={ns.title}
+                            titleVariant="h5"
+                            dateYmd={ns.dateYmd}
+                            start={ns.start}
+                            end={ns.end}
+                            group={ns.group}
+                            chips={[ns.program, ns.cohort, ns.location].filter(Boolean)}
+                            sx={{ mt: 1 }}
+                            actions={
+                              <>
                                 {(() => {
                                   const sessionStartMs = dateTimeMs(ns.dateYmd, ns.start);
                                   const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
@@ -518,8 +518,8 @@ export default function DashboardPage() {
                                 <Button
                                   variant="soft"
                                   size="small"
-                                                                   onClick={() => {
-                                    dispatch(setPollSessionId(nextSession.id));
+                                  onClick={() => {
+                                    dispatch(setPollSessionId(ns.id));
                                     dispatch(setPollEditingId(null));
                                     dispatch(setPollQuestion(""));
                                     dispatch(setPollOptions(["", "", "", ""]));
@@ -528,20 +528,31 @@ export default function DashboardPage() {
                                 >
                                   Create poll
                                 </Button>
-                              </Stack>
-                              <Button
-                                variant="text"
-                                size="small"
-                                                               onClick={() => dispatch(setOpenGroupProfile(true))}
-                              >
-                                Group profile
+                              </>
+                            }
+                            secondaryAction={
+                              <Button variant="text" size="small" onClick={() => {
+                                dispatch(setSessionFocus(ns));
+                                dispatch(setOpenSessionDetails(true));
+                              }}>
+                                View details
                               </Button>
-                            </Stack>
-                          </Box>
-                        ) : (
+                            }
+                          />
+                        </Paper>
+                      )) : (
+                        <Paper
+                          variant="outlined"
+                          sx={{
+                            p: { xs: 2, sm: 3 },
+                            borderLeft: 4,
+                            borderLeftColor: 'primary.main',
+                          }}
+                        >
+                          <Typography variant="overline" color="text.secondary">Next session</Typography>
                           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>No upcoming sessions.</Typography>
-                        )}
-                      </Paper>
+                        </Paper>
+                      )}
 
                       {/* Up next: scheduled + confirmed sessions */}
                       <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
@@ -657,65 +668,30 @@ export default function DashboardPage() {
                                     animation: `${slideInFromAbove} 0.38s ease forwards`,
                                   }),
                                 }}
-                              >
-                                {/* Row 1: Status chip + category chips */}
-                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1.5 }}>
-                                  <Chip
-                                    icon={<TaskAltRoundedIcon sx={{ fontSize: 14, color: 'var(--gl-status-confirmed-text)' }} />}
-                                    label="Confirmed"
-                                    size="small"
-                                    sx={{ borderRadius: 9999, bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', border: '1px solid var(--gl-status-confirmed-border)', fontWeight: 600 }}
-                                  />
-                                  {s.program && <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
-                                  {s.cohort && <Chip label={s.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
-                                  {s.location && <Chip label={s.location} size="small" variant="outlined" sx={{ borderRadius: 9999 }} />}
-                                </Stack>
-
-                                {/* Row 2: Title */}
-                                <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>{s.title}</Typography>
-
-                                {/* Row 3: Date + group */}
-                                <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2.5, color: 'text.secondary' }}>
-                                  <Stack direction="row" alignItems="center" spacing={0.5}>
-                                    <Calendar size={14} />
-                                    <Typography variant="body2" color="text.secondary">
-                                      {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
-                                    </Typography>
-                                  </Stack>
-                                  {s.group && (
-                                    <>
-                                      <Typography variant="body2" color="text.disabled">&middot;</Typography>
-                                      <Stack direction="row" alignItems="center" spacing={0.5}>
-                                        <Users size={14} />
-                                        <Typography variant="body2" color="text.secondary">{s.group}</Typography>
-                                      </Stack>
-                                    </>
-                                  )}
-                                </Stack>
-
-                                {/* Row 4: Link-style actions */}
-                                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                                  <Button
-                                    variant="text"
-                                    size="small"
-                                    startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                                    onClick={() => dispatch(pushToast({ title: "Downloading slides", description: "Preparing download..." }))}
-                                  >
-                                    Download Slides
-                                  </Button>
-                                  <Button
-                                    variant="text"
-                                    size="small"
-                                    startIcon={<OpenInNewRoundedIcon sx={{ fontSize: 16 }} />}
-                                    onClick={() => {
-                                      navigate("/courses");
-                                      dispatch(pushToast({ title: "Course content", description: `Viewing content for ${s.title}` }));
-                                    }}
-                                  >
-                                    View Course content
-                                  </Button>
-                                </Stack>
-                              </Box>
+                                actions={
+                                  <>
+                                    <Button
+                                      variant="text"
+                                      size="small"
+                                      startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                                      onClick={() => dispatch(pushToast({ title: "Downloading slides", description: "Preparing download..." }))}
+                                    >
+                                      Download Slides
+                                    </Button>
+                                    <Button
+                                      variant="text"
+                                      size="small"
+                                      startIcon={<OpenInNewRoundedIcon sx={{ fontSize: 16 }} />}
+                                      onClick={() => {
+                                        navigate("/courses");
+                                        dispatch(pushToast({ title: "Course content", description: `Viewing content for ${s.title}` }));
+                                      }}
+                                    >
+                                      View Course content
+                                    </Button>
+                                  </>
+                                }
+                              />
                             ))
                           ) : (
                             <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
@@ -751,59 +727,57 @@ export default function DashboardPage() {
                               ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(1)
                               : null;
                             return (
-                              <Box key={s.id} sx={{ py: 2.5 }}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                                  <Box sx={{ minWidth: 0 }}>
-                                    <Typography variant="h6" fontWeight={600}>{s.title}</Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                      {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
-                                    </Typography>
-                                  </Box>
-                                  {avg && (
-                                    <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
-                                      <Star size={14} style={{ color: "var(--gl-star-color)" }} />
-                                      <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
-                                    </Stack>
-                                  )}
-                                </Stack>
-                                <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
-                                  <Chip label={s.sessionType} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />
-                                  <Chip label={s.program} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: '0.7rem' }} />
-                                </Stack>
-                                <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
-                                  {s.recordingUrl && (
+                              <SessionCard
+                                key={s.id}
+                                title={s.title}
+                                dateYmd={s.dateYmd}
+                                start={s.start}
+                                end={s.end}
+                                titleFirst
+                                chips={[s.sessionType, s.program]}
+                                topRight={avg ? (
+                                  <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
+                                    <Star size={14} style={{ color: "var(--gl-star-color)" }} />
+                                    <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
+                                  </Stack>
+                                ) : undefined}
+                                sx={{ py: 2.5 }}
+                                actions={
+                                  <>
+                                    {s.recordingUrl && (
+                                      <Button
+                                        startIcon={<Video size={14} />}
+                                        variant="soft"
+                                        size="small"
+                                        onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
+                                      >
+                                        Watch recording
+                                      </Button>
+                                    )}
+                                    {hasRatings && (
+                                      <Button
+                                        startIcon={<Star size={14} />}
+                                        variant="soft"
+                                        size="small"
+                                        onClick={() => {
+                                          dispatch(setLearnerRatingsSessionId(s.id));
+                                          dispatch(setOpenLearnerRatings(true));
+                                        }}
+                                      >
+                                        View ratings
+                                      </Button>
+                                    )}
                                     <Button
-                                      startIcon={<Video size={14} />}
+                                      startIcon={<TrendingUp size={14} />}
                                       variant="soft"
                                       size="small"
-                                                                           onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
+                                      onClick={() => navigate("/profile")}
                                     >
-                                      Watch recording
+                                      View in payments
                                     </Button>
-                                  )}
-                                  {hasRatings && (
-                                    <Button
-                                      startIcon={<Star size={14} />}
-                                      variant="soft"
-                                      size="small"
-                                                                           onClick={() => {
-                                        dispatch(setLearnerRatingsSessionId(s.id));
-                                        dispatch(setOpenLearnerRatings(true));
-                                      }}
-                                    >
-                                      View ratings
-                                    </Button>
-                                  )}
-                                  <Button
-                                    startIcon={<TrendingUp size={14} />}
-                                    variant="soft"
-                                    size="small"
-                                                                       onClick={() => navigate("/profile")}
-                                  >
-                                    View in payments
-                                  </Button>
-                                </Stack>
-                              </Box>
+                                  </>
+                                }
+                              />
                             );
                           })}
                         </Stack>
