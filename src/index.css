@@ -5,18 +5,28 @@
   /* ── Material Design 3 surface tokens ── */
   --md-surface: 0 0% 100%;
   --md-surface-dim: 0 0% 93%;
-  --md-surface-bright: 0 0% 98%;     /* #fafafa */
-  --md-surface-container: 0 0% 96%;  /* #f5f5f5 */
-  --md-on-surface: 0 0% 13%;         /* rgba(33,33,33,0.92) */
-  --md-on-surface-variant: 0 0% 29%; /* rgba(33,33,33,0.72) */
-  --md-outline: 0 0% 46%;            /* #757575 */
-  --md-outline-variant: 0 0% 88%;    /* #e0e0e0 */
-  --md-primary: 215 82% 50%;         /* #196ae5 */
+  --md-surface-bright: 0 0% 98%;
+  /* #fafafa */
+  --md-surface-container: 0 0% 96%;
+  /* #f5f5f5 */
+  --md-on-surface: 0 0% 13%;
+  /* rgba(33,33,33,0.92) */
+  --md-on-surface-variant: 0 0% 29%;
+  /* rgba(33,33,33,0.72) */
+  --md-outline: 0 0% 46%;
+  /* #757575 */
+  --md-outline-variant: 0 0% 88%;
+  /* #e0e0e0 */
+  --md-primary: 215 82% 50%;
+  /* #196ae5 */
   --md-on-primary: 0 0% 100%;
-  --md-error: 0 100% 60%;            /* #ff3333 */
+  --md-error: 0 100% 60%;
+  /* #ff3333 */
   --md-on-error: 0 0% 100%;
-  --md-secondary-container: 36 100% 80%; /* #ffcc80 */
-  --md-on-secondary-container: 24 100% 47%; /* #ef6c00 */
+  --md-secondary-container: 36 100% 80%;
+  /* #ffcc80 */
+  --md-on-secondary-container: 24 100% 47%;
+  /* #ef6c00 */
 
   /* ── GL semantic status tokens ──
      Confirmed (green), Scheduled (blue), Pending (amber), Declined (red) */
@@ -92,13 +102,14 @@
   --gl-cal-busy-border: rgb(156, 163, 175);
 
   /* ── UI accent tokens ── */
-  --gl-badge-bg: #7c3aed;        /* violet-600 */
+  --gl-badge-bg: #7c3aed;
+  /* violet-600 */
   --gl-badge-text: #ffffff;
   --gl-unread-bg: rgba(219, 234, 254, 0.4);
   --gl-unread-border: #93c5fd;
   --gl-star-color: #f59e0b;
   --gl-warning-icon: #d97706;
-  --gl-new-badge-bg: #196ae5;
+  --gl-new-badge-bg: #e53935;
   --gl-new-badge-text: #ffffff;
   --gl-mapped-session-bg: rgba(37, 99, 235, 0.08);
   --gl-mapped-session-text: #1e40af;
@@ -113,17 +124,23 @@
 
 .dark {
   /* ── Material Design 3 surface tokens ── */
-  --md-surface: 0 0% 7%;             /* #121212 */
+  --md-surface: 0 0% 7%;
+  /* #121212 */
   --md-surface-dim: 0 0% 5%;
   --md-surface-bright: 0 0% 7%;
-  --md-surface-container: 0 0% 11%;  /* #1B1B1B */
+  --md-surface-container: 0 0% 11%;
+  /* #1B1B1B */
   --md-on-surface: 0 0% 100%;
-  --md-on-surface-variant: 0 0% 70%; /* rgba(255,255,255,0.7) */
+  --md-on-surface-variant: 0 0% 70%;
+  /* rgba(255,255,255,0.7) */
   --md-outline: 0 0% 46%;
-  --md-outline-variant: 0 0% 23%;    /* rgba(255,255,255,0.23) */
-  --md-primary: 207 100% 70%;        /* #66bbff */
+  --md-outline-variant: 0 0% 23%;
+  /* rgba(255,255,255,0.23) */
+  --md-primary: 207 100% 70%;
+  /* #66bbff */
   --md-on-primary: 0 0% 0%;
-  --md-error: 4 90% 58%;             /* #f44336 */
+  --md-error: 4 90% 58%;
+  /* #f44336 */
   --md-on-error: 0 0% 100%;
   --md-secondary-container: 36 100% 40%;
   --md-on-secondary-container: 36 100% 75%;
@@ -207,8 +224,8 @@
   --gl-unread-border: rgba(59, 130, 246, 0.35);
   --gl-star-color: #fbbf24;
   --gl-warning-icon: #fbbf24;
-  --gl-new-badge-bg: #66bbff;
-  --gl-new-badge-text: rgba(0, 0, 0, 0.87);
+  --gl-new-badge-bg: #e53935;
+  --gl-new-badge-text: #ffffff;
   --gl-mapped-session-bg: rgba(96, 165, 250, 0.12);
   --gl-mapped-session-text: #93c5fd;
   --gl-mapped-session-hover: rgba(96, 165, 250, 0.2);
