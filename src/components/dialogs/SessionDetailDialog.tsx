@@ -6,6 +6,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
@@ -20,6 +21,12 @@ import { setOpenSession, setOpenDeclineReason, setOpenSessionDetails } from "@/s
 import { pushToast } from "@/store/slices/toastsSlice";
 import { fmtDateNice } from "@/lib/helpers";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED } from "@/components/shared/SessionCard";
+
+const GROUP_STATS = [
+  { label: "Learners", value: "24" },
+  { label: "Avg. attendance", value: "88%" },
+  { label: "Sessions completed", value: "6 / 12" },
+];
 
 export function SessionDetailDialog() {
   const dispatch = useAppDispatch();
