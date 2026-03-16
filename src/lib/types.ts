@@ -136,8 +136,8 @@ export type CourseCatalogItem = {
   topics: string[];
   isNew: boolean;
   status: "current" | "past";
-  color: string;
-  pattern: number;
+  color?: string;
+  pattern?: number;
 };
 
 // ─── Poll Types ─────────────────────────────────────────────────────────────
