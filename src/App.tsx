@@ -1,26 +1,24 @@
-import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
-
-const DashboardPage = lazy(() => import("@/pages/Dashboard"));
-const CoursesPage = lazy(() => import("@/pages/Courses"));
-const CalendarPage = lazy(() => import("@/pages/Calendar"));
-const AvailabilityPage = lazy(() => import("@/pages/Availability"));
-const NotificationsPage = lazy(() => import("@/pages/Notifications"));
-const ProfilePage = lazy(() => import("@/pages/Profile"));
-const PreferencesPage = lazy(() => import("@/pages/Preferences"));
+import DashboardPage from "@/pages/Dashboard";
+import CoursesPage from "@/pages/Courses";
+import CalendarPage from "@/pages/Calendar";
+import AvailabilityPage from "@/pages/Availability";
+import NotificationsPage from "@/pages/Notifications";
+import ProfilePage from "@/pages/Profile";
+import PreferencesPage from "@/pages/Preferences";
 
 export default function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Suspense><DashboardPage /></Suspense>} />
-        <Route path="/courses" element={<Suspense><CoursesPage /></Suspense>} />
-        <Route path="/calendar" element={<Suspense><CalendarPage /></Suspense>} />
-        <Route path="/availability" element={<Suspense><AvailabilityPage /></Suspense>} />
-        <Route path="/notifications" element={<Suspense><NotificationsPage /></Suspense>} />
-        <Route path="/profile" element={<Suspense><ProfilePage /></Suspense>} />
-        <Route path="/preferences" element={<Suspense><PreferencesPage /></Suspense>} />
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/courses" element={<CoursesPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/availability" element={<AvailabilityPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/preferences" element={<PreferencesPage />} />
       </Route>
     </Routes>
   );

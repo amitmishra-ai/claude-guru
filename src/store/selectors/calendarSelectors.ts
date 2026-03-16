@@ -55,7 +55,7 @@ export const selectAvailabilityEndDate = createSelector(
   selectRangeDays,
   (rangeDays) => {
     // Use a fixed demoNow to keep selectors pure (no Date.now() in createSelector)
-    const demoNow = new Date("2026-03-12T09:00:00");
+    const demoNow = new Date("2026-02-16T09:00:00");
     return toYmd(addDays(demoNow, rangeDays));
   }
 );
@@ -111,7 +111,7 @@ export const selectIsCurrentPeriod = createSelector(
   selectWeekStart,
   selectAnchorDate,
   (viewMode, weekStart, anchorDate) => {
-    const demoNow = new Date("2026-03-12T09:00:00");
+    const demoNow = new Date("2026-02-16T09:00:00");
     const currentWeekStart = startOfWeekMonday(demoNow);
     if (viewMode === "week") {
       return toYmd(weekStart) === toYmd(currentWeekStart);

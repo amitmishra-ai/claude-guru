@@ -21,7 +21,6 @@ interface UiState {
   openPreferences: boolean;
   openMarkUnavailable: boolean;
   openAddAvailability: boolean;
-  openSessionDetails: boolean;
   impactOpen: boolean;
   openCourseDetail: boolean;
   courseDetailId: string | null;
@@ -56,7 +55,6 @@ const initialState: UiState = {
   openPreferences: false,
   openMarkUnavailable: false,
   openAddAvailability: false,
-  openSessionDetails: false,
   impactOpen: false,
   openCourseDetail: false,
   courseDetailId: null,
@@ -145,9 +143,6 @@ const uiSlice = createSlice({
     setOpenAddAvailability(state, action: PayloadAction<boolean>) {
       state.openAddAvailability = action.payload;
     },
-    setOpenSessionDetails(state, action: PayloadAction<boolean>) {
-      state.openSessionDetails = action.payload;
-    },
     setLeavePopoverNaId(state, action: PayloadAction<string | null>) {
       state.leavePopoverNaId = action.payload;
     },
@@ -191,7 +186,6 @@ export const {
   setIsNavCollapsed,
   setOpenMarkUnavailable,
   setOpenAddAvailability,
-  setOpenSessionDetails,
   setLeavePopoverNaId,
   setAvailPopoverBlockId,
   setMarkUnavailableTarget,

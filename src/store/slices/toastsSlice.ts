@@ -16,10 +16,6 @@ const toastsSlice = createSlice({
     pushToast(state, action: PayloadAction<Omit<ToastMsg, "id">>) {
       const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
       state.items.push({ id, ...action.payload });
-      // Keep at most 2 toasts — drop the oldest when exceeding
-      if (state.items.length > 2) {
-        state.items = state.items.slice(-2);
-      }
     },
     dismissToast(state, action: PayloadAction<string>) {
       state.items = state.items.filter((t) => t.id !== action.payload);

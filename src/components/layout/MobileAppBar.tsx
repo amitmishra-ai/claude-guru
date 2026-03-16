@@ -26,6 +26,7 @@ export function MobileAppBar() {
         bgcolor: "hsl(var(--md-surface))",
         color: "text.primary",
         zIndex: 40,
+        pt: "env(safe-area-inset-top)",
       }}
     >
       <Toolbar sx={{ minHeight: 56, px: 2, gap: 1 }}>

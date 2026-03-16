@@ -10,7 +10,7 @@ import { LearnerRatingsDialog } from "./LearnerRatingsDialog";
 import { PollBuilderDialog } from "./PollBuilderDialog";
 import { MarkUnavailableModal } from "./MarkUnavailableModal";
 import { AddAvailabilityModal } from "./AddAvailabilityModal";
-import { SessionDetailsModal } from "./SessionDetailsModal";
+import { CourseDetailDialog } from "./CourseDetailDialog";
 
 /**
  * Global dialogs rendered at the root layout level.
@@ -31,7 +31,7 @@ export function GlobalDialogs() {
       <PollBuilderDialog />
       <MarkUnavailableModal />
       <AddAvailabilityModal />
-      <SessionDetailsModal />
+      <CourseDetailDialog />
     </>
   );
 }

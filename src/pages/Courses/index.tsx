@@ -132,21 +132,25 @@ function CourseCard({
       >
         <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", flex: 1 }}>
 
-          {/* Tags row */}
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mb: 1.25 }}>
-            {c.isNew && !isPast && (
-              <Chip
-                label="New"
-                size="small"
-                icon={<span style={{ fontSize: 11, marginLeft: 6 }}>✦</span>}
-                sx={{
-                  bgcolor: "var(--gl-new-badge-bg)", color: "var(--gl-new-badge-text)",
-                  fontSize: "0.7rem", height: 22, fontWeight: 700,
-                  "& .MuiChip-icon": { color: "var(--gl-new-badge-text)", ml: "4px" },
-                }}
-              />
-            )}
-            <Chip label={c.program} size="small" sx={{ fontSize: "0.7rem", height: 22, fontWeight: 500 }} />
+          {/* Thumbnail row: pattern left, chips right */}
+          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, mb: 1.5 }}>
+            <CoursePatternThumb color={c.color} pattern={c.pattern} size={72} />
+
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, justifyContent: "flex-end", pt: 0.25 }}>
+              <Chip label={c.role} size="small" variant="outlined" sx={{ fontSize: "0.7rem", height: 22, fontWeight: 500 }} />
+              {c.isNew && !isPast && (
+                <Chip
+                  label="New"
+                  size="small"
+                  icon={<span style={{ fontSize: 11, marginLeft: 6 }}>✦</span>}
+                  sx={{
+                    bgcolor: "var(--gl-new-badge-bg)", color: "var(--gl-new-badge-text)",
+                    fontSize: "0.7rem", height: 22, fontWeight: 700,
+                    "& .MuiChip-icon": { color: "var(--gl-new-badge-text)", ml: "4px" },
+                  }}
+                />
+              )}
+            </Box>
           </Box>
 
           {/* Title */}

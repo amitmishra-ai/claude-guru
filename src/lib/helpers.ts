@@ -177,16 +177,3 @@ export function dateTimeMs(dateYmd: string, startMinutes: number) {
 export function isSessionCompleted(s: Session, nowMs: number) {
   return dateTimeMs(s.dateYmd, s.end) < nowMs;
 }
-
-export function fmtDuration(startMins: number, endMins: number): string {
-  const diff = endMins - startMins;
-  const h = Math.floor(diff / 60);
-  const m = diff % 60;
-  if (h === 0) return `${m} min`;
-  if (m === 0) return `${h} hr`;
-  return `${h} hr ${m} min`;
-}
-
-export function fmtInr(amount: number): string {
-  return `₹${amount.toLocaleString("en-IN")}`;
-}
