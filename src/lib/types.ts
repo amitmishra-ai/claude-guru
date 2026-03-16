@@ -179,10 +179,23 @@ export type NotificationItem = {
 
 // ─── Rating Types ───────────────────────────────────────────────────────────
 
+export type ParameterRating = {
+  label: string;
+  fiveStar: number;
+  fourStar: number;
+  threeAndBelow: number;
+};
+
 export type LearnerRating = {
   learnerName: string;
   rating: number;
   feedback?: string;
+};
+
+export type SessionFeedbackSummary = {
+  totalResponses: number;
+  totalEnrolled: number;
+  parameterRatings: ParameterRating[];
 };
 
 export type RatingHistoryEntry = {

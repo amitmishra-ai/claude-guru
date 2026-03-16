@@ -13,7 +13,9 @@ import {
   BookOpen,
   Calendar,
   Pencil,
+  Plus,
   Trash2,
+  X,
 } from "lucide-react";
 import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
@@ -34,6 +36,10 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
@@ -50,7 +56,7 @@ import {
   setDeclineReason,
   setSelectedSessionType,
 } from "@/store/slices/sessionsSlice";
-import { removeUnavailableBySessionId } from "@/store/slices/availabilitySlice";
+import { removeUnavailableBySessionId, setPatterns } from "@/store/slices/availabilitySlice";
 import {
   setOpenSession,
   setOpenAvailability,
@@ -75,8 +81,11 @@ import {
   fmtTime12,
   fmtDateNice,
   isSessionCompleted,
+  formatDayGroupShort,
+  parseHHMM,
+  fmtTime,
 } from "@/lib/helpers";
-import { demoNow } from "@/lib/constants";
+import { demoNow, DOW_LONG, timeOptions12 } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions } from "@/data/demo-sessions";
 import { StatTile } from "@/components/shared/StatTile";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
@@ -103,6 +112,12 @@ const SESSION_TYPES: Array<"All" | SessionType> = [
   "Others",
 ];
 
+const PRESET_SLOTS = [
+  { key: "weekendMorning", label: "Weekend morning", days: ["Saturday", "Sunday"], start: "10:00", end: "12:00" },
+  { key: "weekendAfternoon", label: "Weekend afternoon", days: ["Saturday", "Sunday"], start: "14:00", end: "16:00" },
+  { key: "weekdayEvenings", label: "Weekday evenings", days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], start: "18:00", end: "20:00" },
+];
+
 /* ── Task card used in sidebar ── */
 function TaskCard({
   chipLabel,
@@ -113,6 +128,7 @@ function TaskCard({
   description,
   action,
   extra,
+  body,
 }: {
   chipLabel: string;
   chipColor: string;
@@ -122,6 +138,7 @@ function TaskCard({
   description: string;
   action: React.ReactNode;
   extra?: React.ReactNode;
+  body?: React.ReactNode;
 }) {
   return (
     <Paper
@@ -134,6 +151,7 @@ function TaskCard({
           <Typography variant="subtitle2" fontWeight={600}>{title}</Typography>
           <Typography variant="caption" color="text.secondary">{description}</Typography>
         </Box>
+        {body}
         {action}
       </Stack>
     </Paper>
@@ -152,6 +170,7 @@ export default function DashboardPage() {
   const maxPerWeek = useAppSelector((s) => s.availability.maxPerWeek);
   const rangeDays = useAppSelector((s) => s.availability.rangeDays);
   const calendarConnected = useAppSelector((s) => s.availability.calendarConnected);
+  const patterns = useAppSelector((s) => s.availability.patterns);
   const requests = useAppSelector((s) => s.requests.items);
   const guruName = useAppSelector((s) => s.profile.guruName);
   const polls = useAppSelector((s) => s.polls.items);
@@ -160,6 +179,17 @@ export default function DashboardPage() {
 
   /* ── local state for exit animation ─────────────────────────────── */
   const [exitingId, setExitingId] = useState<string | null>(null);
+
+  /* ── inline availability editing state ───────────────────────────── */
+  const [editingPatternId, setEditingPatternId] = useState<string | null>(null);
+  const [editDays, setEditDays] = useState<string[]>([]);
+  const [editStart, setEditStart] = useState("10:00");
+  const [editEnd, setEditEnd] = useState("12:00");
+  const [showAddSlotModal, setShowAddSlotModal] = useState(false);
+  const [addDays, setAddDays] = useState<string[]>(["Saturday", "Sunday"]);
+  const [addStart, setAddStart] = useState("10:00");
+  const [addEnd, setAddEnd] = useState("12:00");
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
 
   /* ── clean up recentlyConfirmedIds (same pattern as Calendar) ───── */
   useEffect(() => {
@@ -883,28 +913,125 @@ export default function DashboardPage() {
                   title={hasUserConfiguredAvailability ? "Availability summary" : "Add your availability"}
                   description={
                     hasUserConfiguredAvailability
-                      ? `Max/week: ${maxPerWeek} · Window: ${rangeDays} days`
+                      ? `${patterns.length} slot${patterns.length !== 1 ? "s" : ""} configured`
                       : `Keep availability up-to-date for next ${rangeDays} days.`
                   }
-                  action={
+                  body={
                     hasUserConfiguredAvailability ? (
-                      <Stack direction="row" spacing={1}>
-                        <Button size="small" variant="soft" onClick={() => dispatch(setOpenAvailability(true))}>
-                          Edit
-                        </Button>
-                        <Button size="small" variant="soft" onClick={() => navigate("/calendar")}>
-                          View calendar
+                      <Stack spacing={1}>
+                        {patterns.map((p) =>
+                          editingPatternId === p.id ? (
+                            /* ── Inline edit form ── */
+                            <Paper key={p.id} variant="outlined" sx={{ p: 1.5, borderRadius: 1.5, borderColor: "primary.main" }}>
+                              <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 1 }}>Edit slot</Typography>
+                              <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mb: 1 }}>
+                                {DOW_LONG.map((day) => (
+                                  <Chip
+                                    key={day}
+                                    label={day.slice(0, 3)}
+                                    size="small"
+                                    variant={editDays.includes(day) ? "filled" : "outlined"}
+                                    sx={editDays.includes(day) ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { cursor: "pointer" }}
+                                    onClick={() => setEditDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day])}
+                                  />
+                                ))}
+                              </Stack>
+                              <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                                <FormControl size="small" fullWidth>
+                                  <InputLabel>Start</InputLabel>
+                                  <Select label="Start" value={editStart} onChange={(e) => setEditStart(e.target.value)}>
+                                    {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                                  </Select>
+                                </FormControl>
+                                <FormControl size="small" fullWidth>
+                                  <InputLabel>End</InputLabel>
+                                  <Select label="End" value={editEnd} onChange={(e) => setEditEnd(e.target.value)}>
+                                    {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                                  </Select>
+                                </FormControl>
+                              </Stack>
+                              <Stack direction="row" spacing={1}>
+                                <Button size="small" variant="contained" disabled={!editDays.length} onClick={() => {
+                                  const label = `${formatDayGroupShort(editDays)} ${fmtTime12(parseHHMM(editStart))}–${fmtTime12(parseHHMM(editEnd))}`;
+                                  const updated = patterns.map((pat) => pat.id === p.id ? { ...pat, label, days: editDays, start: parseHHMM(editStart), end: parseHHMM(editEnd) } : pat);
+                                  dispatch(setPatterns(updated));
+                                  dispatch(pushToast({ title: "Slot updated", description: label }));
+                                  setEditingPatternId(null);
+                                }}>Save</Button>
+                                <Button size="small" variant="text" color="inherit" onClick={() => setEditingPatternId(null)}>Cancel</Button>
+                              </Stack>
+                            </Paper>
+                          ) : (
+                            /* ── Display row ── */
+                            <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
+                              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                <Box>
+                                  <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>
+                                    {p.label}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {formatDayGroupShort(p.days)} · {fmtTime12(p.start)} – {fmtTime12(p.end)}
+                                  </Typography>
+                                </Box>
+                                <Stack direction="row" spacing={0.25}>
+                                  <IconButton size="small" onClick={() => {
+                                    setEditingPatternId(p.id);
+                                    setEditDays([...p.days]);
+                                    setEditStart(fmtTime(p.start));
+                                    setEditEnd(fmtTime(p.end));
+                                  }}>
+                                    <Pencil size={14} />
+                                  </IconButton>
+                                  <IconButton size="small" onClick={() => setConfirmRemoveId(p.id)}>
+                                    <Trash2 size={14} />
+                                  </IconButton>
+                                </Stack>
+                              </Stack>
+                            </Paper>
+                          )
+                        )}
+
+                        {/* ── Preset suggestions (shown when not all 3 presets are active) ── */}
+                        {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).length > 0 && (
+                          <>
+                            <Divider sx={{ my: 0.5 }} />
+                            <Typography variant="caption" color="text.secondary" fontWeight={600}>Quick add</Typography>
+                            {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).map((ps) => (
+                              <Stack key={ps.key} direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.5 }}>
+                                <Box>
+                                  <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>{ps.label}</Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {formatDayGroupShort(ps.days)} · {fmtTime12(parseHHMM(ps.start))} – {fmtTime12(parseHHMM(ps.end))}
+                                  </Typography>
+                                </Box>
+                                <Button
+                                  size="small"
+                                  variant="soft"
+                                  onClick={() => {
+                                    const newPattern = { id: `preset-${ps.key}-${Date.now()}`, label: ps.label, days: [...ps.days], start: parseHHMM(ps.start), end: parseHHMM(ps.end) };
+                                    dispatch(setPatterns([...patterns, newPattern]));
+                                    dispatch(pushToast({ title: "Slot added", description: ps.label }));
+                                  }}
+                                >
+                                  Add
+                                </Button>
+                              </Stack>
+                            ))}
+                          </>
+                        )}
+
+                        {/* ── Add custom slot button ── */}
+                        <Button
+                          size="small"
+                          variant="soft"
+                          startIcon={<Plus size={14} />}
+                          onClick={() => setShowAddSlotModal(true)}
+                          fullWidth
+                        >
+                          Custom slot
                         </Button>
                       </Stack>
-                    ) : (
-                      <Button
-                        size="small"
-                        variant="contained"
-                        onClick={() => dispatch(setOpenAvailability(true))}
-                      >
-                        Update availability
-                      </Button>
-                    )
+                    ) : undefined
                   }
                 />
 
@@ -1003,6 +1130,81 @@ export default function DashboardPage() {
           </Card>
         </Grid>
       </Grid>}
+
+      {/* ── Add custom slot modal ── */}
+      <Dialog open={showAddSlotModal} onClose={() => setShowAddSlotModal(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: "1.1rem", pb: 0 }}>
+          Add custom slot
+          <IconButton size="small" onClick={() => setShowAddSlotModal(false)} sx={{ position: "absolute", right: 12, top: 12 }}>
+            <X size={16} />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 1 }}>Select days</Typography>
+          <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mb: 2 }}>
+            {DOW_LONG.map((day) => (
+              <Chip
+                key={day}
+                label={day.slice(0, 3)}
+                size="small"
+                variant={addDays.includes(day) ? "filled" : "outlined"}
+                sx={addDays.includes(day) ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { cursor: "pointer" }}
+                onClick={() => setAddDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day])}
+              />
+            ))}
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Start time</InputLabel>
+              <Select label="Start time" value={addStart} onChange={(e) => setAddStart(e.target.value)}>
+                {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <FormControl size="small" fullWidth>
+              <InputLabel>End time</InputLabel>
+              <Select label="End time" value={addEnd} onChange={(e) => setAddEnd(e.target.value)}>
+                {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="text" color="inherit" onClick={() => setShowAddSlotModal(false)}>Cancel</Button>
+          <Button variant="contained" disabled={!addDays.length} onClick={() => {
+            const label = `${formatDayGroupShort(addDays)} ${fmtTime12(parseHHMM(addStart))}–${fmtTime12(parseHHMM(addEnd))}`;
+            const newPattern = { id: `custom-${Date.now()}`, label, days: [...addDays], start: parseHHMM(addStart), end: parseHHMM(addEnd) };
+            dispatch(setPatterns([...patterns, newPattern]));
+            dispatch(pushToast({ title: "Slot added", description: label }));
+            setAddDays(["Saturday", "Sunday"]);
+            setAddStart("10:00");
+            setAddEnd("12:00");
+            setShowAddSlotModal(false);
+          }}>Add slot</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Confirm remove slot dialog ── */}
+      <Dialog open={!!confirmRemoveId} onClose={() => setConfirmRemoveId(null)} maxWidth="xs">
+        <DialogTitle sx={{ fontWeight: 700, fontSize: "1.1rem" }}>Remove availability slot?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            {confirmRemoveId && patterns.find((p) => p.id === confirmRemoveId)
+              ? `This will remove "${patterns.find((p) => p.id === confirmRemoveId)!.label}" from your availability. You can add it back anytime.`
+              : "This slot will be removed from your availability."}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="text" color="inherit" onClick={() => setConfirmRemoveId(null)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={() => {
+            if (!confirmRemoveId) return;
+            const removed = patterns.find((p) => p.id === confirmRemoveId);
+            const updated = patterns.filter((p) => p.id !== confirmRemoveId);
+            dispatch(setPatterns(updated));
+            dispatch(pushToast({ title: "Slot removed", description: removed?.label ?? "" }));
+            setConfirmRemoveId(null);
+          }}>Remove</Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 }

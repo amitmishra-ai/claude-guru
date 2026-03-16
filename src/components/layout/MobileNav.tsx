@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { CalendarDays, FileText, House, Settings } from "lucide-react";
+import { FileText, House, Settings, Users } from "lucide-react";
 import Box from "@mui/material/Box";
 
 export function MobileNav() {
@@ -48,11 +48,11 @@ export function MobileNav() {
           )}
         </NavLink>
 
-        <NavLink to="/calendar" style={{ textDecoration: "none" }}>
+        <NavLink to="/profile" style={{ textDecoration: "none" }}>
           {({ isActive }) => (
             <Box sx={{ ...linkSx, ...(isActive ? activeSx : {}) }}>
-              <CalendarDays style={{ width: 20, height: 20 }} />
-              <span>Calendar</span>
+              <Users style={{ width: 20, height: 20 }} />
+              <span>Profile</span>
             </Box>
           )}
         </NavLink>
