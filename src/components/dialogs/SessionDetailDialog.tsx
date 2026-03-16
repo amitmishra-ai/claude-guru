@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle } from "lucide-react";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -106,7 +107,7 @@ export function SessionDetailDialog() {
                             dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
                           }}
                         >
-                          <CheckCircle2 style={{ marginRight: 8, width: 16, height: 16 }} /> {isConfirmed ? "Confirmed" : "Confirm"}
+                          <CheckCircleOutlinedIcon sx={{ mr: 1, fontSize: 16 }} /> {isConfirmed ? "Confirmed" : "Confirm"}
                         </Button>
                         <Button
                           variant="soft"
@@ -117,7 +118,7 @@ export function SessionDetailDialog() {
                             dispatch(setOpenDeclineReason(true));
                           }}
                         >
-                          <XCircle style={{ marginRight: 8, width: 16, height: 16 }} /> I'm unavailable
+                          <CancelOutlinedIcon sx={{ mr: 1, fontSize: 16 }} /> I'm unavailable
                         </Button>
                       </>
                     }

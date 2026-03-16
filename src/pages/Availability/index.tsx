@@ -1,4 +1,5 @@
-import { Plus, Clock } from "lucide-react";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -23,7 +24,7 @@ export default function AvailabilityPage() {
           <Button
             variant="soft"
             size="small"
-            startIcon={<Clock style={{ width: 14, height: 14 }} />}
+            startIcon={<AccessTimeOutlinedIcon sx={{ fontSize: 14 }} />}
             sx={{ borderRadius: "4px" }}
             onClick={() => dispatch(setOpenNotAvailable(true))}
           >
@@ -32,7 +33,7 @@ export default function AvailabilityPage() {
           <Button
             variant="contained"
             size="small"
-            startIcon={<Plus style={{ width: 14, height: 14 }} />}
+            startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
             sx={{ borderRadius: "4px" }}
             onClick={() => dispatch(setOpenAvailability(true))}
           >

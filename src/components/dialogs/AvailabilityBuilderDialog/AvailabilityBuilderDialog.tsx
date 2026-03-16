@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { X, Plus, Minus, Pencil } from "lucide-react";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -192,7 +195,7 @@ const AvailabilityBuilderDialog = () => {
           size="small"
           sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.75 }}
         >
-          <X style={{ width: 16, height: 16 }} />
+          <CloseOutlinedIcon sx={{ fontSize: 16 }} />
         </IconButton>
       </FlexBox>
 
@@ -231,7 +234,7 @@ const AvailabilityBuilderDialog = () => {
                   onClick={() => dispatch(setMaxPerWeek(Math.max(1, maxPerWeek - 1)))}
                   sx={{ borderRadius: 0, px: 1.5, py: 1 }}
                 >
-                  <Minus style={{ width: 16, height: 16 }} />
+                  <RemoveOutlinedIcon sx={{ fontSize: 16 }} />
                 </IconButton>
                 <Typography sx={{ minWidth: 36, textAlign: "center", fontWeight: 600, fontSize: "1rem", userSelect: "none" }}>
                   {maxPerWeek}
@@ -241,7 +244,7 @@ const AvailabilityBuilderDialog = () => {
                   onClick={() => dispatch(setMaxPerWeek(maxPerWeek + 1))}
                   sx={{ borderRadius: 0, px: 1.5, py: 1 }}
                 >
-                  <Plus style={{ width: 16, height: 16 }} />
+                  <AddOutlinedIcon sx={{ fontSize: 16 }} />
                 </IconButton>
               </FlexBox>
             </FlexBox>
@@ -283,7 +286,7 @@ const AvailabilityBuilderDialog = () => {
                   {fmtTimezoneDisplay(effectiveTimezone)}
                 </Typography>
                 <IconButton size="small" sx={{ p: 0.25 }}>
-                  <Pencil style={{ width: 14, height: 14 }} />
+                  <EditOutlinedIcon sx={{ fontSize: 14 }} />
                 </IconButton>
               </FlexBox>
             </FlexBox>
@@ -329,7 +332,7 @@ const AvailabilityBuilderDialog = () => {
                     onClick={() => dispatch(setPresetCards(cards.filter((c) => c.key !== card.key)))}
                     sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
                   >
-                    <X style={{ width: 14, height: 14 }} />
+                    <CloseOutlinedIcon sx={{ fontSize: 14 }} />
                   </IconButton>
                 </FlexBox>
               </FlexBox>
@@ -352,7 +355,7 @@ const AvailabilityBuilderDialog = () => {
                   onClick={() => removeCustomSlot(p.id)}
                   sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
                 >
-                  <X style={{ width: 14, height: 14 }} />
+                  <CloseOutlinedIcon sx={{ fontSize: 14 }} />
                 </IconButton>
               </FlexBox>
             ))}

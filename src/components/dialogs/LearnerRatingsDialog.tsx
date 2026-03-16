@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star } from "lucide-react";
+import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -218,13 +218,11 @@ export function LearnerRatingsDialog() {
               <Box sx={{ textAlign: "right" }}>
                 <Stack direction="row" spacing={0.25} justifyContent="flex-end" sx={{ mb: 0.25 }}>
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <Star
+                    <StarOutlinedIcon
                       key={i}
-                      style={{
-                        width: 14,
-                        height: 14,
+                      sx={{
+                        fontSize: 14,
                         color: i <= Math.round(Number(avgRating)) ? "var(--gl-star-color)" : "hsl(var(--md-outline-variant))",
-                        fill: i <= Math.round(Number(avgRating)) ? "var(--gl-star-color)" : "none",
                       }}
                     />
                   ))}
@@ -305,12 +303,10 @@ export function LearnerRatingsDialog() {
                       {r.feedback || "No comment provided."}
                     </Typography>
                     <Stack direction="row" spacing={0.5} alignItems="center">
-                      <Star
-                        style={{
-                          width: 12,
-                          height: 12,
+                      <StarOutlinedIcon
+                        sx={{
+                          fontSize: 12,
                           color: r.rating >= 4 ? green[500] : r.rating >= 3 ? amber[600] : red[500],
-                          fill: r.rating >= 4 ? green[500] : r.rating >= 3 ? amber[600] : red[500],
                         }}
                       />
                       <Typography variant="caption" sx={{ fontWeight: 600, color: r.rating >= 4 ? green[700] : r.rating >= 3 ? amber[800] : red[700] }}>

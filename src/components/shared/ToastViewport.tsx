@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { X } from "lucide-react";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import Box from "@mui/material/Box";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { dismissToast } from "@/store/slices/toastsSlice";
@@ -96,7 +96,7 @@ export function ToastViewport() {
                   "&:hover": { backgroundColor: "hsl(var(--md-surface-container))" },
                 }}
               >
-                <X style={{ width: 16, height: 16 }} />
+                <CloseOutlinedIcon sx={{ fontSize: 16 }} />
               </Box>
             </Box>
           </Box>

@@ -1,28 +1,25 @@
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Link2,
-  ListChecks,
-  Star,
-  TrendingUp,
-  Users,
-  Video,
-  BookOpen,
-  Calendar,
-  Pencil,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
-import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
+import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
-import EditCalendarIcon from "@mui/icons-material/EditCalendar";
-import EventNoteIcon from "@mui/icons-material/EventNote";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
+import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
+import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
@@ -40,9 +37,13 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import IconButton from "@mui/material/IconButton";
 import { keyframes } from "@mui/system";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -61,7 +62,6 @@ import {
   setOpenSession,
   setOpenAvailability,
   setOpenDeclineReason,
-  setImpactOpen,
   setOpenLearnerRatings,
   setLearnerRatingsSessionId,
   setOpenPollBuilder,
@@ -87,7 +87,6 @@ import {
 } from "@/lib/helpers";
 import { demoNow, DOW_LONG, timeOptions12 } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions } from "@/data/demo-sessions";
-import { StatTile } from "@/components/shared/StatTile";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import type { Session, SessionType } from "@/lib/types";
 
@@ -141,20 +140,25 @@ function TaskCard({
   body?: React.ReactNode;
 }) {
   return (
-    <Paper
+    <Card
       variant="outlined"
       sx={{ p: 2.5 }}
     >
       <Stack spacing={1.5}>
-        <Box>{extra ? <Stack direction="row" justifyContent="space-between" alignItems="center">{<Chip label={chipLabel} size="small" sx={{ borderRadius: 9999, bgcolor: chipBg, color: chipColor, border: chipBorder ? `1px solid ${chipBorder}` : undefined, fontWeight: 600, fontSize: '0.7rem' }} />}{extra}</Stack> : <Chip label={chipLabel} size="small" sx={{ borderRadius: 9999, bgcolor: chipBg, color: chipColor, border: chipBorder ? `1px solid ${chipBorder}` : undefined, fontWeight: 600, fontSize: '0.7rem' }} />}</Box>
         <Box>
-          <Typography variant="subtitle2" fontWeight={600}>{title}</Typography>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2" fontWeight={600}>{title}</Typography>
+            <Stack direction="row" spacing={0.75} alignItems="center">
+              <Chip label={chipLabel} size="small" sx={{ borderRadius: 9999, bgcolor: chipBg, color: chipColor, border: chipBorder ? `1px solid ${chipBorder}` : undefined, fontWeight: 600, fontSize: '0.7rem' }} />
+              {extra}
+            </Stack>
+          </Stack>
           <Typography variant="caption" color="text.secondary">{description}</Typography>
         </Box>
         {body}
         {action}
       </Stack>
-    </Paper>
+    </Card>
   );
 }
 
@@ -165,7 +169,6 @@ export default function DashboardPage() {
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
   const homeSessionsView = useAppSelector((s) => s.sessions.homeSessionsView);
-  const impactOpen = useAppSelector((s) => s.ui.impactOpen);
   const hasUserConfiguredAvailability = useAppSelector((s) => s.availability.hasUserConfiguredAvailability);
   const maxPerWeek = useAppSelector((s) => s.availability.maxPerWeek);
   const rangeDays = useAppSelector((s) => s.availability.rangeDays);
@@ -241,31 +244,14 @@ export default function DashboardPage() {
 
   const needsWednesdayConfirm = scheduled.length > 0;
   const pendingRequestsCount = requests.filter((r) => r.response === "pending").length;
-  const nextSessions = upcomingSessions.slice(0, 2);
-
-  const impact = useMemo(() => {
-    const rating = demoRatingHistory.length
-      ? demoRatingHistory.reduce((a, r) => a + r.score, 0) / demoRatingHistory.length
-      : 0;
-    return {
-      rating,
-      engagementHours: 42,
-      engagementCount: sessions.length,
-      learnersImpacted: 180,
-    };
-  }, [sessions]);
+  const nextSession = upcomingSessions[0] ?? null;
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={2}>
       {/* ── Welcome header ── */}
-      <Box>
-        <Typography variant="h4" fontWeight={700} gutterBottom sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
-          Welcome {guruName}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Mark availability, respond to requests, and confirm by Wednesday.
-        </Typography>
-      </Box>
+      <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' }, mb: -0.5 }}>
+        Welcome {guruName}
+      </Typography>
 
       {/* ── Availability gate ── */}
       {!hasUserConfiguredAvailability && (
@@ -296,7 +282,7 @@ export default function DashboardPage() {
               justifyContent: 'center',
             }}
           >
-            <EventNoteIcon sx={{ fontSize: 36, color: 'primary.contrastText' }} />
+            <EventNoteOutlinedIcon sx={{ fontSize: 36, color: 'primary.contrastText' }} />
           </Box>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.75 }}>
@@ -309,7 +295,7 @@ export default function DashboardPage() {
           <Button
             variant="contained"
             size="large"
-            startIcon={<EditCalendarIcon sx={{ fontSize: 18 }} />}
+            startIcon={<EditCalendarOutlinedIcon sx={{ fontSize: 18 }} />}
             sx={{ textTransform: 'none', px: 4 }}
             onClick={() => dispatch(setOpenAvailability(true))}
           >
@@ -322,61 +308,11 @@ export default function DashboardPage() {
       {hasUserConfiguredAvailability && <Grid container spacing={{ xs: 2, md: 3 }}>
         {/* Left column (2/3) */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Stack spacing={3}>
-            {/* Impact card */}
-            <Card>
-              <Box
-                onClick={() => dispatch(setImpactOpen(!impactOpen))}
-                sx={{
-                  px: 3,
-                  py: 2,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  '&:hover': { bgcolor: 'action.hover' },
-                  transition: 'background 0.15s',
-                }}
-              >
-                <Box>
-                  <Typography variant="h6" fontWeight={600}>Your Impact</Typography>
-                  {!impactOpen && (
-                    <Typography variant="caption" color="text.secondary">
-                      Avg Ratings: {impact.rating.toFixed(1)} &bull; Hours taught: {impact.engagementHours} &bull; Sessions: {impact.engagementCount}
-                    </Typography>
-                  )}
-                </Box>
-                <IconButton size="small" sx={{ ml: 1 }}>
-                  {impactOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                </IconButton>
-              </Box>
-              {impactOpen && (
-                <CardContent sx={{ pt: 0 }}>
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 6, sm: 3 }}>
-                      <StatTile icon={Star} label="Rating" value={impact.rating.toFixed(1)} color="var(--gl-stat-rating)" />
-                    </Grid>
-                    <Grid size={{ xs: 6, sm: 3 }}>
-                      <StatTile icon={Clock} label="Hours" value={impact.engagementHours} color="var(--gl-stat-hours)" />
-                    </Grid>
-                    <Grid size={{ xs: 6, sm: 3 }}>
-                      <StatTile icon={TrendingUp} label="Sessions" value={impact.engagementCount} color="var(--gl-stat-sessions)" />
-                    </Grid>
-                    <Grid size={{ xs: 6, sm: 3 }}>
-                      <StatTile icon={Users} label="Learners" value={impact.learnersImpacted} color="var(--gl-stat-learners)" />
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              )}
-            </Card>
-
+          <Stack>
             {/* Mobile tasks (horizontal scroll) */}
-            {(needsWednesdayConfirm || pendingRequestsCount > 0 || !hasUserConfiguredAvailability) && (
+            {(needsWednesdayConfirm || !hasUserConfiguredAvailability) && (
               <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
-                  <ListChecks size={16} />
-                  <Typography variant="subtitle2" fontWeight={600}>Tasks</Typography>
-                </Stack>
+                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><AssignmentOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Tasks</Typography></Stack>
                 <Stack direction="row" spacing={2} sx={{ overflowX: 'auto', pb: 1 }}>
                   {!hasUserConfiguredAvailability && (
                     <Box sx={{ minWidth: 280, flexShrink: 0 }}>
@@ -402,8 +338,8 @@ export default function DashboardPage() {
                         chipColor="var(--gl-status-declined-text)"
                         chipBg="var(--gl-status-declined-bg)"
                         chipBorder="var(--gl-status-declined-border)"
-                        title="Confirm sessions by Wednesday"
-                        description="Ops needs clarity ~72 hours before weekend sessions."
+                        title="Confirm upcoming sessions"
+                        description="Confirm by Wednesday 6 PM so ops can finalize allocations."
                         extra={<Chip label={`Confirmed ${confirmedCount} / ${sessions.length}`} size="small" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
                         action={
                           <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
@@ -413,274 +349,190 @@ export default function DashboardPage() {
                       />
                     </Box>
                   )}
-                  {pendingRequestsCount > 0 && (
-                    <Box sx={{ minWidth: 280, flexShrink: 0 }}>
-                      <TaskCard
-                        chipLabel={String(pendingRequestsCount)}
-                        chipColor="white"
-                        chipBg="primary.main"
-                        title="Respond to upcoming requests"
-                        description="Indicate availability against real upcoming slots."
-                        action={
-                          <Button size="small" variant="soft" onClick={() => navigate("/calendar")}>
-                            Review calendar
-                          </Button>
-                        }
-                      />
-                    </Box>
-                  )}
                 </Stack>
               </Box>
             )}
 
-            {/* Sessions card */}
+            {/* ── Next Session (standalone, above tabs) ── */}
+            <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><PlayCircleOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Next Session</Typography></Stack>
+            {nextSession ? (
+              <Card
+                variant="outlined"
+                sx={{
+                  p: { xs: 2, sm: 2.5 },
+                  mb: 3,
+                  bgcolor: 'hsl(var(--md-primary-container) / 0.16)',
+                  borderColor: 'hsl(var(--md-primary) / 0.48)',
+                  borderStyle: 'solid',
+                  borderWidth: '1.5px',
+                }}
+              >
+                <SessionCard
+                  title={nextSession.title}
+                  dateYmd={nextSession.dateYmd}
+                  start={nextSession.start}
+                  end={nextSession.end}
+                  group={nextSession.group}
+                  chips={[nextSession.program, nextSession.cohort, nextSession.location].filter(Boolean)}
+                  actions={
+                    <>
+                      {(() => {
+                        const sessionStartMs = dateTimeMs(nextSession.dateYmd, nextSession.start);
+                        const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
+                        return (
+                          <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}
+                            disabled={!joinEnabled}
+                            onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
+                          >
+                            Join session
+                          </Button>
+                        );
+                      })()}
+                      <Button
+                        variant="soft"
+                        size="small"
+                        startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                        onClick={() => dispatch(pushToast({ title: "Session Materials", description: "Opening session materials..." }))}
+                      >
+                        Session Materials
+                      </Button>
+                    </>
+                  }
+                  secondaryAction={
+                    <Button variant="text" size="small" onClick={() => {
+                      dispatch(setSessionFocus(nextSession));
+                      dispatch(setOpenSessionDetails(true));
+                    }}>
+                      View details
+                    </Button>
+                  }
+                />
+              </Card>
+            ) : (
+              <Card variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mb: 3 }}>
+                <Typography variant="body2" color="text.secondary">No upcoming sessions.</Typography>
+              </Card>
+            )}
+
+            {/* ── Sessions card with tabs ── */}
+            <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><ViewListOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Sessions</Typography></Stack>
             <Card data-testid="home-sessions-card">
-              <Box sx={{ px: { xs: 2, sm: 3 }, pt: 2.5, pb: 1 }}>
-                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'flex-start' }} spacing={1} useFlexGap>
-                  <Box>
-                    <Typography variant="h6" fontWeight={600}>Sessions</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Quick access to upcoming, confirmations, and history.
-                    </Typography>
-                  </Box>
-                  <Button
-                    size="small"
-                    variant="soft"
-                    sx={{ flexShrink: 0 }}
-                    onClick={() => navigate("/calendar")}
-                  >
-                    View calendar
-                  </Button>
-                </Stack>
-              </Box>
-              <Box sx={{ px: { xs: 2, sm: 3 }, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
-                <Box sx={{ overflowX: 'auto' }}>
-                  <ToggleButtonGroup
-                    value={homeSessionsView}
-                    exclusive
-                    onChange={(_e, v) => { if (v !== null) dispatch(setHomeSessionsView(v)); }}
-                    size="small"
-                    sx={{
-                      bgcolor: 'action.hover',
-                      borderRadius: '10px',
-                      p: '4px',
-                      gap: '4px',
-                      whiteSpace: 'nowrap',
-                      '& .MuiToggleButtonGroup-grouped': {
-                        border: '0 !important',
-                        borderRadius: '7px !important',
-                      },
-                      '& .MuiToggleButton-root': {
-                        textTransform: 'none',
-                        fontSize: '0.8125rem',
-                        fontWeight: 500,
-                        px: 2,
-                        py: 0.625,
-                        color: 'text.secondary',
-                        '&:hover': { bgcolor: 'transparent', color: 'text.primary' },
-                        '&.Mui-selected': {
-                          bgcolor: 'background.paper',
-                          color: 'text.primary',
-                          fontWeight: 600,
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06)',
-                          '&:hover': { bgcolor: 'background.paper' },
-                        },
-                      },
-                    }}
-                  >
-                    <ToggleButton value="next">{`Upcoming (${upcomingSessions.length})`}</ToggleButton>
-                    <ToggleButton value="completed">{`Completed (${completedSessions.length})`}</ToggleButton>
-                    <ToggleButton value="declined">{`Declined (${declinedSessions.length})`}</ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
-              </Box>
+              <Tabs
+                value={homeSessionsView}
+                onChange={(_e, v) => dispatch(setHomeSessionsView(v))}
+                variant="fullWidth"
+                sx={{
+                  minHeight: 40,
+                  '& .MuiTab-root': {
+                    textTransform: 'none',
+                    fontSize: '0.8125rem',
+                    fontWeight: 500,
+                    minHeight: 40,
+                    py: 1,
+                  },
+                }}
+              >
+                <Tab label={`Upcoming (${upcomingSessions.length})`} value="next" />
+                <Tab label={`Completed (${completedSessions.length})`} value="completed" />
+                <Tab label={`Declined (${declinedSessions.length})`} value="declined" />
+              </Tabs>
 
               <CardContent>
                 <Stack spacing={3}>
                   {homeSessionsView === "next" && (
                     <>
-                      {/* Next sessions featured */}
-                      {nextSessions.length > 0 ? nextSessions.map((ns) => (
-                        <Paper
-                          key={ns.id}
-                          variant="outlined"
-                          sx={{
-                            p: { xs: 2, sm: 3 },
-                            borderLeft: 4,
-                            borderLeftColor: 'primary.main',
-                          }}
-                        >
-                          <Typography variant="overline" color="text.secondary">Next session</Typography>
-                          <SessionCard
-                            title={ns.title}
-                            titleVariant="h5"
-                            dateYmd={ns.dateYmd}
-                            start={ns.start}
-                            end={ns.end}
-                            group={ns.group}
-                            chips={[ns.program, ns.cohort, ns.location].filter(Boolean)}
-                            sx={{ mt: 1 }}
-                            actions={
-                              <>
-                                {(() => {
-                                  const sessionStartMs = dateTimeMs(ns.dateYmd, ns.start);
-                                  const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
-                                  return (
-                                    <Button
-                                      variant="contained"
-                                      size="small"
-                                      startIcon={<Link2 size={16} />}
-                                      disabled={!joinEnabled}
-                                      onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
-                                    >
-                                      Join link
-                                    </Button>
-                                  );
-                                })()}
-                                <Button
-                                  variant="soft"
-                                  size="small"
-                                  startIcon={<BookOpen size={16} />}
-                                  onClick={() => dispatch(pushToast({ title: "Downloading slides", description: "Preparing download..." }))}
-                                >
-                                  Download slides
-                                </Button>
-                                <Button
-                                  variant="soft"
-                                  size="small"
-                                  onClick={() => {
-                                    dispatch(setPollSessionId(ns.id));
-                                    dispatch(setPollEditingId(null));
-                                    dispatch(setPollQuestion(""));
-                                    dispatch(setPollOptions(["", "", "", ""]));
-                                    dispatch(setOpenPollBuilder(true));
-                                  }}
-                                >
-                                  Create poll
-                                </Button>
-                              </>
-                            }
-                            secondaryAction={
-                              <Button variant="text" size="small" onClick={() => {
-                                dispatch(setSessionFocus(ns));
-                                dispatch(setOpenSessionDetails(true));
-                              }}>
-                                View details
-                              </Button>
-                            }
-                          />
-                        </Paper>
-                      )) : (
-                        <Paper
-                          variant="outlined"
-                          sx={{
-                            p: { xs: 2, sm: 3 },
-                            borderLeft: 4,
-                            borderLeftColor: 'primary.main',
-                          }}
-                        >
-                          <Typography variant="overline" color="text.secondary">Next session</Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>No upcoming sessions.</Typography>
-                        </Paper>
-                      )}
-
-                      {/* Up next: scheduled + confirmed sessions */}
-                      <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography variant="overline" color="text.secondary">Up next</Typography>
-
-                        {/* Scheduled sessions */}
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 2, gap: 1 }}>
-                          <Typography variant="subtitle2" fontWeight={600}>Scheduled sessions</Typography>
-                          <Chip label={`${scheduled.length} scheduled`} size="small" sx={{ borderRadius: 9999 }} />
+                      {/* Scheduled sessions */}
+                      <Box>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <Typography variant="subtitle2" fontWeight={600}>Scheduled</Typography>
+                          <Chip label={`${scheduled.length}`} size="small" sx={{ borderRadius: 9999 }} />
                         </Stack>
-                        {scheduled.length > 0 && (
-                          <Chip
-                            label="Confirm by Wednesday, 6:00 PM to help ops finalize allocations."
-                            size="small"
-                            sx={{ mt: 1, borderRadius: 9999, bgcolor: 'var(--gl-status-pending-bg)', color: 'var(--gl-status-pending-text)', border: '1px solid var(--gl-status-pending-border)', fontWeight: 500 }}
-                          />
-                        )}
-                        <Stack divider={<Divider />} sx={{ mt: 2 }}>
-                          {scheduled.length ? (
-                            scheduledDisplay.map((s) => {
+                        <Stack divider={<Divider />} sx={{ mt: 1.5 }}>
+                          {scheduled.filter((s) => s.id !== nextSession?.id).length ? (
+                            scheduledDisplay.filter((s) => s.id !== nextSession?.id).map((s) => {
                               const isExiting = s.id === exitingId && !!confirmations[s.id];
                               return (
-                              <SessionCard
-                                key={s.id}
-                                title={s.title}
-                                dateYmd={s.dateYmd}
-                                start={s.start}
-                                end={s.end}
-                                group={s.group}
-                                status={STATUS_SCHEDULED}
-                                chips={[s.program, s.cohort, s.location].filter(Boolean)}
-                                sx={{
-                                  py: 2.5,
-                                  ...(isExiting && {
-                                    animation: `${slideOutDown} 0.38s ease forwards`,
-                                    pointerEvents: 'none',
-                                  }),
-                                }}
-                                actions={
-                                  <>
-                                    <Button
-                                      startIcon={<TaskAltRoundedIcon sx={{ fontSize: 18 }} />}
-                                      size="small"
-                                      variant={confirmations[s.id] ? "soft" : "contained"}
-                                      sx={{
-                                        transition: 'background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease',
-                                        ...(confirmations[s.id]
-                                          ? { borderColor: 'var(--gl-status-confirmed-border)', bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', '&:hover': { bgcolor: 'var(--gl-status-confirmed-bg)' } }
-                                          : {}),
-                                      }}
-                                      onClick={() => {
-                                        if (confirmations[s.id]) return;
-                                        setExitingId(s.id);
-                                        dispatch(confirmSession(s.id));
-                                        dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
-                                        setTimeout(() => setExitingId(null), 420);
-                                      }}
-                                    >
-                                      {confirmations[s.id] ? "Confirmed" : "Confirm"}
+                                <SessionCard
+                                  key={s.id}
+                                  title={s.title}
+                                  dateYmd={s.dateYmd}
+                                  start={s.start}
+                                  end={s.end}
+                                  group={s.group}
+                                  status={STATUS_SCHEDULED}
+                                  chips={[s.program, s.cohort, s.location].filter(Boolean)}
+                                  sx={{
+                                    py: 2.5,
+                                    ...(isExiting && {
+                                      animation: `${slideOutDown} 0.38s ease forwards`,
+                                      pointerEvents: 'none',
+                                    }),
+                                  }}
+                                  actions={
+                                    <>
+                                      <Button
+                                        startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
+                                        size="small"
+                                        variant={confirmations[s.id] ? "soft" : "contained"}
+                                        sx={{
+                                          transition: 'background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease',
+                                          ...(confirmations[s.id]
+                                            ? { borderColor: 'var(--gl-status-confirmed-border)', bgcolor: 'var(--gl-status-confirmed-bg)', color: 'var(--gl-status-confirmed-text)', '&:hover': { bgcolor: 'var(--gl-status-confirmed-bg)' } }
+                                            : {}),
+                                        }}
+                                        onClick={() => {
+                                          if (confirmations[s.id]) return;
+                                          setExitingId(s.id);
+                                          dispatch(confirmSession(s.id));
+                                          dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
+                                          setTimeout(() => setExitingId(null), 420);
+                                        }}
+                                      >
+                                        {confirmations[s.id] ? "Confirmed" : "Confirm"}
+                                      </Button>
+                                      <Button
+                                        startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />}
+                                        size="small"
+                                        variant="soft"
+                                        onClick={() => {
+                                          dispatch(setDeclineSessionFocus(s));
+                                          dispatch(setDeclineReason(""));
+                                          dispatch(setOpenDeclineReason(true));
+                                        }}
+                                      >
+                                        I'm unavailable
+                                      </Button>
+                                    </>
+                                  }
+                                  secondaryAction={
+                                    <Button variant="text" size="small" onClick={() => {
+                                      dispatch(setSessionFocus(s));
+                                      dispatch(setOpenSessionDetails(true));
+                                    }}>
+                                      View details
                                     </Button>
-                                    <Button
-                                      startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />}
-                                      size="small"
-                                      variant="soft"
-                                      onClick={() => {
-                                        dispatch(setDeclineSessionFocus(s));
-                                        dispatch(setDeclineReason(""));
-                                        dispatch(setOpenDeclineReason(true));
-                                      }}
-                                    >
-                                      I'm unavailable
-                                    </Button>
-                                  </>
-                                }
-                                secondaryAction={
-                                  <Button variant="text" size="small" onClick={() => {
-                                    dispatch(setSessionFocus(s));
-                                    dispatch(setOpenSessionDetails(true));
-                                  }}>
-                                    View details
-                                  </Button>
-                                }
-                              />
+                                  }
+                                />
                               );
                             })
                           ) : (
-                            <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
-                              <Typography variant="body2" color="text.secondary">No scheduled sessions.</Typography>
-                            </Paper>
+                            <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>No scheduled sessions.</Typography>
                           )}
                         </Stack>
+                      </Box>
 
-                        {/* Confirmed sessions */}
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 4, gap: 1 }}>
-                          <Typography variant="subtitle2" fontWeight={600}>Confirmed sessions</Typography>
-                          <Chip label={`${confirmedUpcoming.length} confirmed`} size="small" sx={{ borderRadius: 9999 }} />
+                      <Divider />
+
+                      {/* Confirmed sessions */}
+                      <Box>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <Typography variant="subtitle2" fontWeight={600}>Confirmed</Typography>
+                          <Chip label={`${confirmedUpcoming.length}`} size="small" sx={{ borderRadius: 9999 }} />
                         </Stack>
-                        <Stack divider={<Divider />} sx={{ mt: 2 }}>
+                        <Stack divider={<Divider />} sx={{ mt: 1.5 }}>
                           {confirmedUpcoming.length ? (
                             confirmedDisplay.map((s) => (
                               <SessionCard
@@ -690,7 +542,7 @@ export default function DashboardPage() {
                                 start={s.start}
                                 end={s.end}
                                 group={s.group}
-                                status={STATUS_CONFIRMED(<TaskAltRoundedIcon sx={{ fontSize: 14 }} />)}
+                                status={STATUS_CONFIRMED(<TaskAltOutlinedIcon sx={{ fontSize: 14 }} />)}
                                 chips={[s.program, s.cohort, s.location].filter(Boolean)}
                                 sx={{
                                   py: 2.5,
@@ -704,14 +556,14 @@ export default function DashboardPage() {
                                       variant="text"
                                       size="small"
                                       startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                                      onClick={() => dispatch(pushToast({ title: "Downloading slides", description: "Preparing download..." }))}
+                                      onClick={() => dispatch(pushToast({ title: "Downloading session materials", description: "Preparing download..." }))}
                                     >
-                                      Download Slides
+                                      Session Materials
                                     </Button>
                                     <Button
                                       variant="text"
                                       size="small"
-                                      startIcon={<OpenInNewRoundedIcon sx={{ fontSize: 16 }} />}
+                                      startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}
                                       onClick={() => {
                                         navigate("/courses");
                                         dispatch(pushToast({ title: "Course content", description: `Viewing content for ${s.title}` }));
@@ -724,12 +576,10 @@ export default function DashboardPage() {
                               />
                             ))
                           ) : (
-                            <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
-                              <Typography variant="body2" color="text.secondary">No confirmed sessions.</Typography>
-                            </Paper>
+                            <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>No confirmed sessions.</Typography>
                           )}
                         </Stack>
-                      </Paper>
+                      </Box>
                     </>
                   )}
 
@@ -741,7 +591,7 @@ export default function DashboardPage() {
                           label="Filter by session type"
                           value={selectedSessionType}
                           onChange={(e) => dispatch(setSelectedSessionType(e.target.value as typeof selectedSessionType))}
-                                                 >
+                        >
                           {SESSION_TYPES.map((t) => (
                             <MenuItem key={t} value={t}>{t}</MenuItem>
                           ))}
@@ -767,7 +617,7 @@ export default function DashboardPage() {
                                 chips={[s.sessionType, s.program]}
                                 topRight={avg ? (
                                   <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
-                                    <Star size={14} style={{ color: "var(--gl-star-color)" }} />
+                                    <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
                                     <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
                                   </Stack>
                                 ) : undefined}
@@ -776,7 +626,7 @@ export default function DashboardPage() {
                                   <>
                                     {s.recordingUrl && (
                                       <Button
-                                        startIcon={<Video size={14} />}
+                                        startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}
                                         variant="soft"
                                         size="small"
                                         onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
@@ -786,7 +636,7 @@ export default function DashboardPage() {
                                     )}
                                     {hasRatings && (
                                       <Button
-                                        startIcon={<Star size={14} />}
+                                        startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
                                         variant="soft"
                                         size="small"
                                         onClick={() => {
@@ -798,7 +648,7 @@ export default function DashboardPage() {
                                       </Button>
                                     )}
                                     <Button
-                                      startIcon={<TrendingUp size={14} />}
+                                      startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
                                       variant="soft"
                                       size="small"
                                       onClick={() => navigate("/profile")}
@@ -836,7 +686,7 @@ export default function DashboardPage() {
                                 sx={{ py: 2.5 }}
                                 actions={
                                   <Button
-                                    startIcon={<TaskAltRoundedIcon sx={{ fontSize: 18 }} />}
+                                    startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
                                     variant="soft"
                                     size="small"
                                     onClick={() => {
@@ -893,175 +743,173 @@ export default function DashboardPage() {
 
         {/* Right column: Tasks sidebar (desktop only) */}
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' } }}>
-          <Card data-testid="tasks-card" sx={{ position: 'sticky', top: 24 }}>
-            <Box sx={{ px: 3, py: 2, borderBottom: 1, borderColor: 'divider' }}>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <ListChecks size={18} />
-                <Typography variant="h6" fontWeight={600}>Tasks</Typography>
-              </Stack>
-            </Box>
-            <CardContent>
-              <Stack spacing={2}>
+          <Box sx={{ position: 'sticky', top: 24 }}>
+            <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><AssignmentOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Tasks</Typography></Stack>
+            <Stack spacing={2}>
                 {/* Availability task */}
-                <TaskCard
-                  chipLabel={hasUserConfiguredAvailability ? "Configured" : "Needs update"}
-                  chipColor={hasUserConfiguredAvailability ? "var(--gl-status-confirmed-text)" : "var(--gl-status-declined-text)"}
-                  chipBg={hasUserConfiguredAvailability ? "var(--gl-status-confirmed-bg)" : "var(--gl-status-declined-bg)"}
-                  chipBorder={hasUserConfiguredAvailability ? "var(--gl-status-confirmed-border)" : "var(--gl-status-declined-border)"}
-                  title={hasUserConfiguredAvailability ? "Availability summary" : "Add your availability"}
-                  description={
-                    hasUserConfiguredAvailability
-                      ? `${patterns.length} slot${patterns.length !== 1 ? "s" : ""} configured`
-                      : `Keep availability up-to-date for next ${rangeDays} days.`
-                  }
-                  body={
-                    hasUserConfiguredAvailability ? (
-                      <Stack spacing={1}>
-                        {patterns.map((p) =>
-                          editingPatternId === p.id ? (
-                            /* ── Inline edit form ── */
-                            <Paper key={p.id} variant="outlined" sx={{ p: 1.5, borderRadius: 1.5, borderColor: "primary.main" }}>
-                              <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 1 }}>Edit slot</Typography>
-                              <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mb: 1 }}>
-                                {DOW_LONG.map((day) => (
-                                  <Chip
-                                    key={day}
-                                    label={day.slice(0, 3)}
-                                    size="small"
-                                    variant={editDays.includes(day) ? "filled" : "outlined"}
-                                    sx={editDays.includes(day) ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { cursor: "pointer" }}
-                                    onClick={() => setEditDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day])}
-                                  />
-                                ))}
-                              </Stack>
-                              <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                                <FormControl size="small" fullWidth>
-                                  <InputLabel>Start</InputLabel>
-                                  <Select label="Start" value={editStart} onChange={(e) => setEditStart(e.target.value)}>
-                                    {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                                  </Select>
-                                </FormControl>
-                                <FormControl size="small" fullWidth>
-                                  <InputLabel>End</InputLabel>
-                                  <Select label="End" value={editEnd} onChange={(e) => setEditEnd(e.target.value)}>
-                                    {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                                  </Select>
-                                </FormControl>
-                              </Stack>
-                              <Stack direction="row" spacing={1}>
-                                <Button size="small" variant="contained" disabled={!editDays.length} onClick={() => {
-                                  const label = `${formatDayGroupShort(editDays)} ${fmtTime12(parseHHMM(editStart))}–${fmtTime12(parseHHMM(editEnd))}`;
-                                  const updated = patterns.map((pat) => pat.id === p.id ? { ...pat, label, days: editDays, start: parseHHMM(editStart), end: parseHHMM(editEnd) } : pat);
-                                  dispatch(setPatterns(updated));
-                                  dispatch(pushToast({ title: "Slot updated", description: label }));
-                                  setEditingPatternId(null);
-                                }}>Save</Button>
-                                <Button size="small" variant="text" color="inherit" onClick={() => setEditingPatternId(null)}>Cancel</Button>
-                              </Stack>
-                            </Paper>
-                          ) : (
-                            /* ── Display row ── */
-                            <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
-                              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                <Box>
-                                  <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>
-                                    {p.label}
-                                  </Typography>
-                                  <Typography variant="caption" color="text.secondary">
-                                    {formatDayGroupShort(p.days)} · {fmtTime12(p.start)} – {fmtTime12(p.end)}
-                                  </Typography>
-                                </Box>
-                                <Stack direction="row" spacing={0.25}>
-                                  <IconButton size="small" onClick={() => {
-                                    setEditingPatternId(p.id);
-                                    setEditDays([...p.days]);
-                                    setEditStart(fmtTime(p.start));
-                                    setEditEnd(fmtTime(p.end));
-                                  }}>
-                                    <Pencil size={14} />
-                                  </IconButton>
-                                  <IconButton size="small" onClick={() => setConfirmRemoveId(p.id)}>
-                                    <Trash2 size={14} />
-                                  </IconButton>
+                {hasUserConfiguredAvailability ? (
+                  <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+                    <Accordion
+                      defaultExpanded={false}
+                      disableGutters
+                      elevation={0}
+                      sx={{ bgcolor: "transparent", "&::before": { display: "none" } }}
+                    >
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 18 }} />}
+                        sx={{ px: 2.5, py: 0.5, minHeight: "unset", "& .MuiAccordionSummary-content": { my: 1.5 } }}
+                      >
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%", mr: 1 }}>
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={600}>Availability summary</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {patterns.length} slot{patterns.length !== 1 ? "s" : ""} configured
+                            </Typography>
+                          </Box>
+                          <Chip label="Configured" size="small" sx={{ borderRadius: 9999, bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600, fontSize: '0.7rem' }} />
+                        </Stack>
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ px: 2.5, pt: 0, pb: 2 }}>
+                        <Stack spacing={1}>
+                          {patterns.map((p) =>
+                            editingPatternId === p.id ? (
+                              /* ── Inline edit form ── */
+                              <Paper key={p.id} variant="outlined" sx={{ p: 1.5, borderRadius: 1.5, borderColor: "primary.main" }}>
+                                <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 1 }}>Edit slot</Typography>
+                                <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mb: 1 }}>
+                                  {DOW_LONG.map((day) => (
+                                    <Chip
+                                      key={day}
+                                      label={day.slice(0, 3)}
+                                      size="small"
+                                      variant={editDays.includes(day) ? "filled" : "outlined"}
+                                      sx={editDays.includes(day) ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { cursor: "pointer" }}
+                                      onClick={() => setEditDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day])}
+                                    />
+                                  ))}
                                 </Stack>
-                              </Stack>
-                            </Paper>
-                          )
-                        )}
+                                <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                                  <FormControl size="small" fullWidth>
+                                    <InputLabel>Start</InputLabel>
+                                    <Select label="Start" value={editStart} onChange={(e) => setEditStart(e.target.value)}>
+                                      {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                                    </Select>
+                                  </FormControl>
+                                  <FormControl size="small" fullWidth>
+                                    <InputLabel>End</InputLabel>
+                                    <Select label="End" value={editEnd} onChange={(e) => setEditEnd(e.target.value)}>
+                                      {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                                    </Select>
+                                  </FormControl>
+                                </Stack>
+                                <Stack direction="row" spacing={1}>
+                                  <Button size="small" variant="contained" disabled={!editDays.length} onClick={() => {
+                                    const label = `${formatDayGroupShort(editDays)} ${fmtTime12(parseHHMM(editStart))}–${fmtTime12(parseHHMM(editEnd))}`;
+                                    const updated = patterns.map((pat) => pat.id === p.id ? { ...pat, label, days: editDays, start: parseHHMM(editStart), end: parseHHMM(editEnd) } : pat);
+                                    dispatch(setPatterns(updated));
+                                    dispatch(pushToast({ title: "Slot updated", description: label }));
+                                    setEditingPatternId(null);
+                                  }}>Save</Button>
+                                  <Button size="small" variant="text" color="inherit" onClick={() => setEditingPatternId(null)}>Cancel</Button>
+                                </Stack>
+                              </Paper>
+                            ) : (
+                              /* ── Display row ── */
+                              <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
+                                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                  <Box>
+                                    <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>
+                                      {p.label}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      {formatDayGroupShort(p.days)} · {fmtTime12(p.start)} – {fmtTime12(p.end)}
+                                    </Typography>
+                                  </Box>
+                                  <Stack direction="row" spacing={0.25}>
+                                    <IconButton size="small" onClick={() => {
+                                      setEditingPatternId(p.id);
+                                      setEditDays([...p.days]);
+                                      setEditStart(fmtTime(p.start));
+                                      setEditEnd(fmtTime(p.end));
+                                    }}>
+                                      <EditOutlinedIcon sx={{ fontSize: 14 }} />
+                                    </IconButton>
+                                    <IconButton size="small" onClick={() => setConfirmRemoveId(p.id)}>
+                                      <DeleteOutlinedIcon sx={{ fontSize: 14 }} />
+                                    </IconButton>
+                                  </Stack>
+                                </Stack>
+                              </Paper>
+                            )
+                          )}
 
-                        {/* ── Preset suggestions (shown when not all 3 presets are active) ── */}
-                        {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).length > 0 && (
-                          <>
-                            <Divider sx={{ my: 0.5 }} />
-                            <Typography variant="caption" color="text.secondary" fontWeight={600}>Quick add</Typography>
-                            {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).map((ps) => (
-                              <Stack key={ps.key} direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.5 }}>
-                                <Box>
-                                  <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>{ps.label}</Typography>
-                                  <Typography variant="caption" color="text.secondary">
-                                    {formatDayGroupShort(ps.days)} · {fmtTime12(parseHHMM(ps.start))} – {fmtTime12(parseHHMM(ps.end))}
-                                  </Typography>
-                                </Box>
-                                <Button
-                                  size="small"
-                                  variant="soft"
-                                  onClick={() => {
-                                    const newPattern = { id: `preset-${ps.key}-${Date.now()}`, label: ps.label, days: [...ps.days], start: parseHHMM(ps.start), end: parseHHMM(ps.end) };
-                                    dispatch(setPatterns([...patterns, newPattern]));
-                                    dispatch(pushToast({ title: "Slot added", description: ps.label }));
-                                  }}
-                                >
-                                  Add
-                                </Button>
-                              </Stack>
-                            ))}
-                          </>
-                        )}
+                          {/* ── Preset suggestions (shown when not all 3 presets are active) ── */}
+                          {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).length > 0 && (
+                            <>
+                              <Divider sx={{ my: 0.5 }} />
+                              <Typography variant="caption" color="text.secondary" fontWeight={600}>Quick add</Typography>
+                              {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).map((ps) => (
+                                <Stack key={ps.key} direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.5 }}>
+                                  <Box>
+                                    <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>{ps.label}</Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      {formatDayGroupShort(ps.days)} · {fmtTime12(parseHHMM(ps.start))} – {fmtTime12(parseHHMM(ps.end))}
+                                    </Typography>
+                                  </Box>
+                                  <Button
+                                    size="small"
+                                    variant="soft"
+                                    onClick={() => {
+                                      const newPattern = { id: `preset-${ps.key}-${Date.now()}`, label: ps.label, days: [...ps.days], start: parseHHMM(ps.start), end: parseHHMM(ps.end) };
+                                      dispatch(setPatterns([...patterns, newPattern]));
+                                      dispatch(pushToast({ title: "Slot added", description: ps.label }));
+                                    }}
+                                  >
+                                    Add
+                                  </Button>
+                                </Stack>
+                              ))}
+                            </>
+                          )}
 
-                        {/* ── Add custom slot button ── */}
-                        <Button
-                          size="small"
-                          variant="soft"
-                          startIcon={<Plus size={14} />}
-                          onClick={() => setShowAddSlotModal(true)}
-                          fullWidth
-                        >
-                          Custom slot
-                        </Button>
-                      </Stack>
-                    ) : undefined
-                  }
-                />
+                          {/* ── Add custom slot button ── */}
+                          <Button
+                            size="small"
+                            variant="soft"
+                            startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
+                            onClick={() => setShowAddSlotModal(true)}
+                            fullWidth
+                          >
+                            Custom slot
+                          </Button>
+                        </Stack>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Card>
+                ) : (
+                  <TaskCard
+                    chipLabel="Needs update"
+                    chipColor="var(--gl-status-declined-text)"
+                    chipBg="var(--gl-status-declined-bg)"
+                    chipBorder="var(--gl-status-declined-border)"
+                    title="Add your availability"
+                    description={`Keep availability up-to-date for next ${rangeDays} days.`}
+                  />
+                )}
 
                 {/* Confirm sessions task */}
                 {needsWednesdayConfirm && (
                   <TaskCard
-                    chipLabel="Action needed"
+                    chipLabel="Action Needed"
                     chipColor="var(--gl-status-declined-text)"
                     chipBg="var(--gl-status-declined-bg)"
                     chipBorder="var(--gl-status-declined-border)"
-                    title="Confirm sessions by Wednesday"
-                    description="Ops needs clarity ~72 hours before weekend sessions."
+                    title="Confirm upcoming sessions"
+                    description="Confirm by Wednesday 6 PM so ops can finalize allocations."
                     extra={<Chip label={`${confirmedCount} / ${sessions.length}`} size="small" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
                     action={
                       <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
-                        Review confirmations
-                      </Button>
-                    }
-                  />
-                )}
-
-                {/* Respond to requests task */}
-                {pendingRequestsCount > 0 && (
-                  <TaskCard
-                    chipLabel={String(pendingRequestsCount)}
-                    chipColor="white"
-                    chipBg="var(--gl-new-badge-bg)"
-                    title="Respond to upcoming requests"
-                    description="Indicate availability against real upcoming slots."
-                    action={
-                      <Button size="small" variant="soft" onClick={() => navigate("/calendar")}>
-                        Review calendar
+                        Review Confirmations
                       </Button>
                     }
                   />
@@ -1083,49 +931,8 @@ export default function DashboardPage() {
                     }
                   />
                 )}
-
-                {/* Week at a glance */}
-                <Divider />
-                <Box>
-                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Your week at a glance</Typography>
-                  <Grid container spacing={1.5}>
-                    <Grid size={6}>
-                      <Paper variant="outlined" sx={{ p: 1.5, textAlign: 'center' }}>
-                        <Typography variant="h5" fontWeight={700} color="primary.main">
-                          {upcomingSessions.length}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">Sessions</Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid size={6}>
-                      <Paper variant="outlined" sx={{ p: 1.5, textAlign: 'center' }}>
-                        <Typography variant="h5" fontWeight={700} color="primary.main">
-                          {confirmedCount}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">Confirmed</Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid size={6}>
-                      <Paper variant="outlined" sx={{ p: 1.5, textAlign: 'center' }}>
-                        <Typography variant="h5" fontWeight={700} color="primary.main">
-                          {pendingRequestsCount}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">Requests</Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid size={6}>
-                      <Paper variant="outlined" sx={{ p: 1.5, textAlign: 'center' }}>
-                        <Typography variant="h5" fontWeight={700} sx={{ color: calendarConnected ? 'success.main' : 'warning.main' }}>
-                          {calendarConnected ? "Synced" : "Off"}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">Calendar</Typography>
-                      </Paper>
-                    </Grid>
-                  </Grid>
-                </Box>
               </Stack>
-            </CardContent>
-          </Card>
+          </Box>
         </Grid>
       </Grid>}
 
@@ -1134,7 +941,7 @@ export default function DashboardPage() {
         <DialogTitle sx={{ fontWeight: 700, fontSize: "1.1rem", pb: 0 }}>
           Add custom slot
           <IconButton size="small" onClick={() => setShowAddSlotModal(false)} sx={{ position: "absolute", right: 12, top: 12 }}>
-            <X size={16} />
+            <CloseOutlinedIcon sx={{ fontSize: 16 }} />
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{ pt: 2 }}>

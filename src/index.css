@@ -27,6 +27,10 @@
   /* #ffcc80 */
   --md-on-secondary-container: 24 100% 47%;
   /* #ef6c00 */
+  --md-primary-container: 213 90% 94%;
+  /* #dbeafe — light primary tint for active nav items */
+  --md-on-primary-container: 215 82% 35%;
+  /* #1e40af */
 
   /* ── GL semantic status tokens ──
      Confirmed (green), Scheduled (blue), Pending (amber), Declined (red) */
@@ -144,6 +148,9 @@
   --md-on-error: 0 0% 100%;
   --md-secondary-container: 36 100% 40%;
   --md-on-secondary-container: 36 100% 75%;
+  --md-primary-container: 215 50% 20%;
+  /* dark primary tint for active nav items */
+  --md-on-primary-container: 207 100% 75%;
 
   /* ── GL semantic status tokens (dark variants) ── */
   --gl-status-confirmed-bg: rgba(34, 197, 94, 0.12);

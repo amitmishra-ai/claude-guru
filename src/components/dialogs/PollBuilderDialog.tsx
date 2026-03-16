@@ -1,4 +1,5 @@
-import { Plus, Trash2 } from "lucide-react";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -92,7 +93,7 @@ export function PollBuilderDialog() {
                   <IconButton size="small" onClick={() => {
                     dispatch(setPollOptions(pollOptions.filter((_, j) => j !== i)));
                   }}>
-                    <Trash2 style={{ width: 14, height: 14 }} />
+                    <DeleteOutlinedIcon sx={{ fontSize: 14 }} />
                   </IconButton>
                 )}
               </Box>
@@ -101,7 +102,7 @@ export function PollBuilderDialog() {
               <Button
                 size="small"
                 variant="text"
-                startIcon={<Plus style={{ width: 14, height: 14 }} />}
+                startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
                 onClick={() => dispatch(setPollOptions([...pollOptions, ""]))}
               >
                 Add option

@@ -1,5 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { Bell, Moon, Sun, Users } from "lucide-react";
+import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -26,6 +29,7 @@ export function MobileAppBar() {
         bgcolor: "hsl(var(--md-surface))",
         color: "text.primary",
         zIndex: 40,
+        pt: "env(safe-area-inset-top)",
       }}
     >
       <Toolbar sx={{ minHeight: 56, px: 2, gap: 1 }}>
@@ -51,8 +55,8 @@ export function MobileAppBar() {
           sx={{ color: "text.secondary", p: 1.25 }}
         >
           {isDarkMode
-            ? <Sun style={{ width: 18, height: 18 }} />
-            : <Moon style={{ width: 18, height: 18 }} />
+            ? <LightModeOutlinedIcon sx={{ fontSize: 18 }} />
+            : <DarkModeOutlinedIcon sx={{ fontSize: 18 }} />
           }
         </IconButton>
 
@@ -65,7 +69,7 @@ export function MobileAppBar() {
               sx={{ color: isActive ? "text.primary" : "text.secondary", p: 1.25 }}
             >
               <Box sx={{ position: "relative", display: "flex" }}>
-                <Bell style={{ width: 18, height: 18 }} />
+                <NotificationsOutlinedIcon sx={{ fontSize: 18 }} />
                 {unreadCount > 0 && (
                   <Box
                     component="span"
@@ -102,7 +106,7 @@ export function MobileAppBar() {
               aria-label="Profile"
               sx={{ color: isActive ? "text.primary" : "text.secondary", p: 1.25 }}
             >
-              <Users style={{ width: 18, height: 18 }} />
+              <GroupOutlinedIcon sx={{ fontSize: 18 }} />
             </IconButton>
           )}
         </NavLink>

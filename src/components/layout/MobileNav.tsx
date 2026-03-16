@@ -1,5 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { FileText, House, Settings, Users } from "lucide-react";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import Box from "@mui/material/Box";
 
 export function MobileNav() {
@@ -42,7 +45,7 @@ export function MobileNav() {
         <NavLink to="/" end style={{ textDecoration: "none" }}>
           {({ isActive }) => (
             <Box sx={{ ...linkSx, ...(isActive ? activeSx : {}) }}>
-              <House style={{ width: 20, height: 20 }} />
+              <HomeOutlinedIcon sx={{ fontSize: 20 }} />
               <span>Home</span>
             </Box>
           )}
@@ -51,7 +54,7 @@ export function MobileNav() {
         <NavLink to="/profile" style={{ textDecoration: "none" }}>
           {({ isActive }) => (
             <Box sx={{ ...linkSx, ...(isActive ? activeSx : {}) }}>
-              <Users style={{ width: 20, height: 20 }} />
+              <GroupOutlinedIcon sx={{ fontSize: 20 }} />
               <span>Profile</span>
             </Box>
           )}
@@ -60,7 +63,7 @@ export function MobileNav() {
         <NavLink to="/courses" style={{ textDecoration: "none" }}>
           {({ isActive }) => (
             <Box sx={{ ...linkSx, ...(isActive ? activeSx : {}) }}>
-              <FileText style={{ width: 20, height: 20 }} />
+              <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />
               <span>Courses</span>
             </Box>
           )}
@@ -69,7 +72,7 @@ export function MobileNav() {
         <NavLink to="/preferences" style={{ textDecoration: "none" }}>
           {({ isActive }) => (
             <Box sx={{ ...linkSx, ...(isActive ? activeSx : {}) }}>
-              <Settings style={{ width: 20, height: 20 }} />
+              <SettingsOutlinedIcon sx={{ fontSize: 20 }} />
               <span>Settings</span>
             </Box>
           )}

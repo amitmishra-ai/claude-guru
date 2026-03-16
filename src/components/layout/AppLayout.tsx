@@ -42,7 +42,7 @@ export function AppLayout() {
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: isNavCollapsed ? "84px minmax(0, 1fr)" : "260px minmax(0, 1fr)" },
+        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: isNavCollapsed ? "80px minmax(0, 1fr)" : "256px minmax(0, 1fr)" },
         transition: "grid-template-columns 0.2s",
       }}
     >
@@ -53,6 +53,7 @@ export function AppLayout() {
           minWidth: 0,
           overflow: "hidden",
           p: { xs: 2, md: 3 },
+          pt: { xs: "calc(56px + 16px + env(safe-area-inset-top))", md: 3 },
           pb: { xs: "calc(6rem + env(safe-area-inset-bottom))", md: 3 },
         }}
       >

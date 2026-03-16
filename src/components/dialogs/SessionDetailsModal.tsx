@@ -1,22 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import {
-  Calendar,
-  CheckCircle2,
-  Clock,
-  Users,
-  Globe,
-  MapPin,
-  UserCircle,
-  FileText,
-  Video,
-  Link2,
-  ExternalLink,
-  Presentation,
-  Banknote,
-  Mail,
-  X,
-  XCircle,
-} from "lucide-react";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import SlideshowOutlinedIcon from "@mui/icons-material/SlideshowOutlined";
+import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
+import MailOutlinedIcon from "@mui/icons-material/MailOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -28,6 +26,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import PollOutlinedIcon from "@mui/icons-material/PollOutlined";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
   setSessionFocus,
@@ -35,7 +34,8 @@ import {
   setDeclineSessionFocus,
   setDeclineReason,
 } from "@/store/slices/sessionsSlice";
-import { setOpenSessionDetails, setOpenDeclineReason } from "@/store/slices/uiSlice";
+import { setOpenSessionDetails, setOpenDeclineReason, setOpenPollBuilder } from "@/store/slices/uiSlice";
+import { setPollSessionId, setPollEditingId, setPollQuestion, setPollOptions } from "@/store/slices/pollsSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import { fmtDateNice, fmtTime12, fmtDuration, fmtInr, getTimeZoneOffsetMinutes, formatGMTOffsetFromMinutesAhead } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
@@ -44,10 +44,10 @@ import { dateTimeMs } from "@/lib/helpers";
 import type { SessionPrepMaterial } from "@/lib/types";
 
 const MATERIAL_ICONS: Record<SessionPrepMaterial["type"], React.ReactNode> = {
-  slides: <Presentation size={14} />,
-  document: <FileText size={14} />,
-  video: <Video size={14} />,
-  link: <Link2 size={14} />,
+  slides: <SlideshowOutlinedIcon sx={{ fontSize: 14 }} />,
+  document: <DescriptionOutlinedIcon sx={{ fontSize: 14 }} />,
+  video: <VideocamOutlinedIcon sx={{ fontSize: 14 }} />,
+  link: <LinkOutlinedIcon sx={{ fontSize: 14 }} />,
 };
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
@@ -119,7 +119,7 @@ export function SessionDetailsModal() {
         <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           Session details
           <IconButton size="small" onClick={handleClose} sx={{ color: "text.secondary" }}>
-            <X size={18} />
+            <CloseOutlinedIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </DialogTitle>
 
@@ -164,13 +164,13 @@ export function SessionDetailsModal() {
                 <Divider sx={{ mb: 0.5 }} />
                 <InfoRow label="Date">
                   <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <Calendar size={13} />
+                    <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
                     <span>{fmtDateNice(session.dateYmd)}</span>
                   </Stack>
                 </InfoRow>
                 <InfoRow label="Time">
                   <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <Clock size={13} />
+                    <AccessTimeOutlinedIcon sx={{ fontSize: 13 }} />
                     <span>{fmtTime12(session.start)}&ndash;{fmtTime12(session.end)}</span>
                   </Stack>
                 </InfoRow>
@@ -178,14 +178,14 @@ export function SessionDetailsModal() {
                 {session.timeZone && (
                   <InfoRow label="Time zone">
                     <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                      <Globe size={13} />
+                      <LanguageOutlinedIcon sx={{ fontSize: 13 }} />
                       <span>{session.timeZone} ({formatGMTOffsetFromMinutesAhead(getTimeZoneOffsetMinutes(session.timeZone))})</span>
                     </Stack>
                   </InfoRow>
                 )}
                 <InfoRow label="Location">
                   <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <MapPin size={13} />
+                    <PlaceOutlinedIcon sx={{ fontSize: 13 }} />
                     <span>{session.location}</span>
                   </Stack>
                 </InfoRow>
@@ -198,12 +198,12 @@ export function SessionDetailsModal() {
                 {session.scheduledByName && (
                   <InfoRow label="Scheduled by">
                     <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                      <UserCircle size={13} />
+                      <AccountCircleOutlinedIcon sx={{ fontSize: 13 }} />
                       <span>{session.scheduledByName}</span>
                     </Stack>
                     {session.scheduledByEmail && (
                       <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                        <Mail size={12} />
+                        <MailOutlinedIcon sx={{ fontSize: 12 }} />
                         <Typography variant="caption" color="text.secondary">
                           {session.scheduledByEmail}
                         </Typography>
@@ -219,7 +219,7 @@ export function SessionDetailsModal() {
                 {session.group && (
                   <InfoRow label="Group">
                     <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                      <Users size={13} />
+                      <GroupsOutlinedIcon sx={{ fontSize: 13 }} />
                       <span>{session.group}</span>
                     </Stack>
                   </InfoRow>
@@ -247,7 +247,7 @@ export function SessionDetailsModal() {
                     <Button
                       variant="text"
                       size="small"
-                      startIcon={<ExternalLink size={14} />}
+                      startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}
                       onClick={() => {
                         handleClose();
                         navigate("/courses");
@@ -301,7 +301,7 @@ export function SessionDetailsModal() {
                       <Button
                         variant="soft"
                         size="small"
-                        startIcon={<FileText size={14} />}
+                        startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}
                         onClick={() => dispatch(pushToast({ title: "Opening resume", description: "Downloading learner resume..." }))}
                       >
                         Resume
@@ -311,7 +311,7 @@ export function SessionDetailsModal() {
                       <Button
                         variant="soft"
                         size="small"
-                        startIcon={<ExternalLink size={14} />}
+                        startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}
                         onClick={() => dispatch(pushToast({ title: "Opening LinkedIn", description: "Launching LinkedIn profile..." }))}
                       >
                         LinkedIn
@@ -321,7 +321,7 @@ export function SessionDetailsModal() {
                       <Button
                         variant="soft"
                         size="small"
-                        startIcon={<UserCircle size={14} />}
+                        startIcon={<AccountCircleOutlinedIcon sx={{ fontSize: 14 }} />}
                         onClick={() => dispatch(pushToast({ title: "Opening profile", description: "Launching learner profile..." }))}
                       >
                         Learner profile
@@ -349,7 +349,7 @@ export function SessionDetailsModal() {
               {(isConfirmed || isCompleted) && session.paymentAmountInr && (
                 <SectionBox>
                   <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                    <Banknote size={16} style={{ color: "var(--gl-status-confirmed-text)" }} />
+                    <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-confirmed-text)" }} />
                     <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
                   </Stack>
                   <Divider sx={{ mb: 0.5 }} />
@@ -452,10 +452,27 @@ export function SessionDetailsModal() {
           </Button>
           {session && !isCompleted && (
             <Stack direction="row" spacing={1}>
+              {isConfirmed && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<PollOutlinedIcon sx={{ fontSize: 16 }} />}
+                  onClick={() => {
+                    dispatch(setPollSessionId(session.id));
+                    dispatch(setPollEditingId(null));
+                    dispatch(setPollQuestion(""));
+                    dispatch(setPollOptions(["", ""]));
+                    dispatch(setOpenSessionDetails(false));
+                    dispatch(setOpenPollBuilder(true));
+                  }}
+                >
+                  Create New Poll
+                </Button>
+              )}
               <Button
                 variant="soft"
                 size="small"
-                startIcon={<XCircle size={16} />}
+                startIcon={<CancelOutlinedIcon sx={{ fontSize: 16 }} />}
                 onClick={() => {
                   dispatch(setDeclineSessionFocus(session));
                   dispatch(setDeclineReason(""));
@@ -469,7 +486,7 @@ export function SessionDetailsModal() {
                 <Button
                   variant="contained"
                   size="small"
-                  startIcon={<CheckCircle2 size={16} />}
+                  startIcon={<CheckCircleOutlinedIcon sx={{ fontSize: 16 }} />}
                   onClick={() => {
                     dispatch(confirmSession(session.id));
                     dispatch(pushToast({ title: "Confirmed", description: `${session.title} \u2022 ${fmtDateNice(session.dateYmd)}` }));

@@ -1,4 +1,5 @@
-import { CheckCircle2, XCircle } from "lucide-react";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -75,14 +76,14 @@ export function RequestDetailDialog() {
                   size="small"
                   onClick={() => handleRespond(requestFocus.id, "available")}
                 >
-                  <CheckCircle2 style={{ marginRight: 8, width: 16, height: 16 }} /> Confirm
+                  <CheckCircleOutlinedIcon sx={{ mr: 1, fontSize: 16 }} /> Confirm
                 </Button>
                 <Button
                   variant="soft"
                   size="small"
                   onClick={() => handleRespond(requestFocus.id, "unavailable")}
                 >
-                  <XCircle style={{ marginRight: 8, width: 16, height: 16 }} /> I'm unavailable
+                  <CancelOutlinedIcon sx={{ mr: 1, fontSize: 16 }} /> I'm unavailable
                 </Button>
               </Box>
             </Box>

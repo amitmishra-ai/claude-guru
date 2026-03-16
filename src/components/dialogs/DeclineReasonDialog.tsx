@@ -1,4 +1,6 @@
-import { AlertTriangle, Mail, Phone } from "lucide-react";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -97,7 +99,7 @@ export function DeclineReasonDialog() {
                 }}
               >
                 <Stack direction="row" spacing={1} alignItems="flex-start">
-                  <AlertTriangle size={18} style={{ color: "var(--gl-status-declined-text)", flexShrink: 0, marginTop: 2 }} />
+                  <WarningAmberOutlinedIcon sx={{ fontSize: 18, color: "var(--gl-status-declined-text)", flexShrink: 0, mt: '2px' }} />
                   <Box>
                     <Typography variant="body2" fontWeight={600} sx={{ color: "var(--gl-status-declined-text)", mb: 0.5 }}>
                       This cancellation is very close to the session
@@ -108,7 +110,7 @@ export function DeclineReasonDialog() {
                     <Stack spacing={0.75}>
                       {declineSessionFocus.scheduledByEmail && (
                         <Stack direction="row" alignItems="center" spacing={0.75}>
-                          <Mail size={14} style={{ color: "hsl(var(--md-on-surface-variant))" }} />
+                          <EmailOutlinedIcon sx={{ fontSize: 14, color: "hsl(var(--md-on-surface-variant))" }} />
                           <Typography variant="body2" fontWeight={500}>
                             {declineSessionFocus.scheduledByEmail}
                           </Typography>
@@ -116,7 +118,7 @@ export function DeclineReasonDialog() {
                       )}
                       {declineSessionFocus.scheduledByPhone && (
                         <Stack direction="row" alignItems="center" spacing={0.75}>
-                          <Phone size={14} style={{ color: "hsl(var(--md-on-surface-variant))" }} />
+                          <PhoneOutlinedIcon sx={{ fontSize: 14, color: "hsl(var(--md-on-surface-variant))" }} />
                           <Typography variant="body2" fontWeight={500}>
                             {declineSessionFocus.scheduledByPhone}
                           </Typography>

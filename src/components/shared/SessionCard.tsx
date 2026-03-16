@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Calendar, Users } from "lucide-react";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
@@ -115,7 +116,7 @@ export function SessionCard({
     <Typography
       variant={titleVariant}
       fontWeight={600}
-      sx={{ mb: 1, ...(titleVariant === "h5" ? { fontSize: { xs: "1.125rem", md: "1.5rem" } } : {}) }}
+      sx={{ mb: 1, fontSize: titleVariant === "h5" ? { xs: "1rem", md: "1.125rem" } : "0.95rem" }}
     >
       {title}
     </Typography>
@@ -131,7 +132,7 @@ export function SessionCard({
       sx={{ mb: actions || secondaryAction ? 2.5 : 0, color: "text.secondary" }}
     >
       <Stack direction="row" alignItems="center" spacing={0.5}>
-        <Calendar size={14} />
+        <CalendarTodayOutlinedIcon sx={{ fontSize: 14 }} />
         <Typography variant="body2" color="text.secondary">
           {fmtDateNice(dateYmd)} &bull; {fmtTime12(start)}&ndash;{fmtTime12(end)}
           {locationText ? <> &bull; {locationText}</> : null}
@@ -141,7 +142,7 @@ export function SessionCard({
         <>
           <Typography variant="body2" color="text.disabled">&middot;</Typography>
           <Stack direction="row" alignItems="center" spacing={0.5}>
-            <Users size={14} />
+            <GroupOutlinedIcon sx={{ fontSize: 14 }} />
             <Typography variant="body2" color="text.secondary">{group}</Typography>
           </Stack>
         </>
