@@ -1,5 +1,5 @@
 import { minutes } from "@/lib/helpers";
-import type { Session, LearnerRating, RatingHistoryEntry, MonthlyEarning, DeclinedSession, Busy, CohortStart, CourseCatalogItem, CourseModuleData } from "@/lib/types";
+import type { Session, LearnerRating, SessionFeedbackSummary, RatingHistoryEntry, MonthlyEarning, DeclinedSession, Busy, CohortStart, CourseCatalogItem, CourseModuleData } from "@/lib/types";
 
 export const demoSessions: Session[] = [
   {
@@ -148,6 +148,72 @@ export const demoLearnerRatingsBySessionId: Record<string, LearnerRating[]> = {
     { learnerName: "Pooja", rating: 4.6, feedback: "Capstone review was very structured." },
     { learnerName: "Suresh", rating: 4.5, feedback: "Helpful feedback on my project." },
   ],
+};
+
+export const demoFeedbackSummaryBySessionId: Record<string, SessionFeedbackSummary> = {
+  s0: {
+    totalResponses: 31,
+    totalEnrolled: 69,
+    parameterRatings: [
+      { label: "Concepts explanation", fiveStar: 16, fourStar: 12, threeAndBelow: 3 },
+      { label: "Pace of teaching", fiveStar: 15, fourStar: 13, threeAndBelow: 3 },
+      { label: "Clearing doubts & interaction", fiveStar: 15, fourStar: 14, threeAndBelow: 2 },
+    ],
+  },
+  s0b: {
+    totalResponses: 28,
+    totalEnrolled: 55,
+    parameterRatings: [
+      { label: "Concepts explanation", fiveStar: 18, fourStar: 8, threeAndBelow: 2 },
+      { label: "Pace of teaching", fiveStar: 16, fourStar: 10, threeAndBelow: 2 },
+      { label: "Clearing doubts & interaction", fiveStar: 17, fourStar: 9, threeAndBelow: 2 },
+    ],
+  },
+  s1: {
+    totalResponses: 24,
+    totalEnrolled: 48,
+    parameterRatings: [
+      { label: "Concepts explanation", fiveStar: 12, fourStar: 9, threeAndBelow: 3 },
+      { label: "Pace of teaching", fiveStar: 11, fourStar: 10, threeAndBelow: 3 },
+      { label: "Clearing doubts & interaction", fiveStar: 13, fourStar: 8, threeAndBelow: 3 },
+    ],
+  },
+  s2: {
+    totalResponses: 30,
+    totalEnrolled: 62,
+    parameterRatings: [
+      { label: "Concepts explanation", fiveStar: 17, fourStar: 10, threeAndBelow: 3 },
+      { label: "Pace of teaching", fiveStar: 16, fourStar: 11, threeAndBelow: 3 },
+      { label: "Clearing doubts & interaction", fiveStar: 18, fourStar: 10, threeAndBelow: 2 },
+    ],
+  },
+  s3: {
+    totalResponses: 18,
+    totalEnrolled: 40,
+    parameterRatings: [
+      { label: "Concepts explanation", fiveStar: 10, fourStar: 6, threeAndBelow: 2 },
+      { label: "Pace of teaching", fiveStar: 9, fourStar: 7, threeAndBelow: 2 },
+      { label: "Clearing doubts & interaction", fiveStar: 11, fourStar: 5, threeAndBelow: 2 },
+    ],
+  },
+  s4: {
+    totalResponses: 26,
+    totalEnrolled: 52,
+    parameterRatings: [
+      { label: "Concepts explanation", fiveStar: 15, fourStar: 9, threeAndBelow: 2 },
+      { label: "Pace of teaching", fiveStar: 14, fourStar: 10, threeAndBelow: 2 },
+      { label: "Clearing doubts & interaction", fiveStar: 16, fourStar: 8, threeAndBelow: 2 },
+    ],
+  },
+  s5: {
+    totalResponses: 15,
+    totalEnrolled: 35,
+    parameterRatings: [
+      { label: "Concepts explanation", fiveStar: 8, fourStar: 5, threeAndBelow: 2 },
+      { label: "Pace of teaching", fiveStar: 7, fourStar: 6, threeAndBelow: 2 },
+      { label: "Clearing doubts & interaction", fiveStar: 9, fourStar: 4, threeAndBelow: 2 },
+    ],
+  },
 };
 
 export const demoRatingHistory: RatingHistoryEntry[] = [

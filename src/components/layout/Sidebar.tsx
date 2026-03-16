@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 import {
   Bell,
-  CalendarDays,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -126,11 +125,11 @@ export function Sidebar() {
               )}
             </NavLink>
 
-            <NavLink to="/calendar" style={{ textDecoration: "none" }}>
+            <NavLink to="/profile" style={{ textDecoration: "none" }}>
               {({ isActive }) => (
                 <Box sx={{ ...NAV_ITEM_SX, ...(isActive ? NAV_ITEM_ACTIVE_SX : {}), ...collapsedSx }}>
-                  <CalendarDays style={{ width: 16, height: 16, flexShrink: 0 }} />
-                  {!isNavCollapsed && <span>Calendar</span>}
+                  <Users style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  {!isNavCollapsed && <span>Profile</span>}
                 </Box>
               )}
             </NavLink>
@@ -202,15 +201,6 @@ export function Sidebar() {
               {isDarkMode ? <Sun style={{ width: 16, height: 16 }} /> : <Moon style={{ width: 16, height: 16 }} />}
               {!isNavCollapsed && <span>{isDarkMode ? "Light mode" : "Dark mode"}</span>}
             </Box>
-
-            <NavLink to="/profile" style={{ textDecoration: "none" }}>
-              {({ isActive }) => (
-                <Box sx={{ ...NAV_ITEM_SX, ...(isActive ? NAV_ITEM_ACTIVE_SX : {}), ...collapsedSx }}>
-                  <Users style={{ width: 16, height: 16, flexShrink: 0 }} />
-                  {!isNavCollapsed && <span>Profile</span>}
-                </Box>
-              )}
-            </NavLink>
 
             <NavLink to="/preferences" style={{ textDecoration: "none", marginTop: 4, display: "block" }}>
               {({ isActive }) => (

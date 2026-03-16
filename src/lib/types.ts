@@ -11,6 +11,25 @@ export type SessionType =
   | "Online class"
   | "Others";
 
+export type AudienceType = "Individual" | "Group" | "Batch" | "Webinar";
+
+export type PaymentModel = "hourly" | "fixed";
+
+export type SessionPrepMaterial = {
+  id: string;
+  label: string;
+  url: string;
+  type: "slides" | "document" | "video" | "link";
+};
+
+export type LearnerContext = {
+  learnerName?: string;
+  resumeUrl?: string;
+  linkedInUrl?: string;
+  learnerProfileUrl?: string;
+  notes?: string;
+};
+
 export type Session = {
   id: string;
   title: string;
@@ -28,6 +47,20 @@ export type Session = {
   transactionId?: string;
   invoiceId?: string;
   recordingUrl?: string;
+  // Session details fields
+  scheduledByName?: string;
+  scheduledByEmail?: string;
+  scheduledByPhone?: string;
+  scheduledOnYmd?: string;
+  audienceType?: AudienceType;
+  predictedGroups?: string[];
+  timeZone?: string;
+  linkedCourseId?: string;
+  prepMaterials?: SessionPrepMaterial[];
+  learnerContext?: LearnerContext;
+  paymentModel?: PaymentModel;
+  hourlyRateInr?: number;
+  totalEarningsInr?: number;
 };
 
 // ─── Request Types ──────────────────────────────────────────────────────────
@@ -103,8 +136,8 @@ export type CourseCatalogItem = {
   topics: string[];
   isNew: boolean;
   status: "current" | "past";
-  color: string;
-  pattern: number;
+  color?: string;
+  pattern?: number;
 };
 
 // ─── Poll Types ─────────────────────────────────────────────────────────────
@@ -146,10 +179,23 @@ export type NotificationItem = {
 
 // ─── Rating Types ───────────────────────────────────────────────────────────
 
+export type ParameterRating = {
+  label: string;
+  fiveStar: number;
+  fourStar: number;
+  threeAndBelow: number;
+};
+
 export type LearnerRating = {
   learnerName: string;
   rating: number;
   feedback?: string;
+};
+
+export type SessionFeedbackSummary = {
+  totalResponses: number;
+  totalEnrolled: number;
+  parameterRatings: ParameterRating[];
 };
 
 export type RatingHistoryEntry = {

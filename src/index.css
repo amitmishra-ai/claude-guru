@@ -102,8 +102,8 @@
   --gl-cal-busy-border: rgb(156, 163, 175);
 
   /* ── UI accent tokens ── */
-  --gl-badge-bg: #7c3aed;
-  /* violet-600 */
+  --gl-badge-bg: #f44336;
+  /* red-500 (MUI) */
   --gl-badge-text: #ffffff;
   --gl-unread-bg: rgba(237, 233, 254, 0.3);
   --gl-unread-border: #ddd6fe;
@@ -218,7 +218,7 @@
   --gl-cal-busy-border: rgba(156, 163, 175, 0.5);
 
   /* ── UI accent tokens (dark) ── */
-  --gl-badge-bg: #8b5cf6;
+  --gl-badge-bg: #ef5350;
   --gl-badge-text: #ffffff;
   --gl-unread-bg: rgba(139, 92, 246, 0.12);
   --gl-unread-border: rgba(139, 92, 246, 0.3);

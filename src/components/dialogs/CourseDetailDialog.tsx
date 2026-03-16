@@ -211,7 +211,7 @@ export function CourseDetailDialog() {
         {/* Header */}
         <Box sx={{ position: "sticky", top: 0, zIndex: 10, bgcolor: "background.paper", borderBottom: 1, borderColor: "divider", px: 3, pt: 2.5, pb: 2 }}>
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
-            <CoursePatternThumb color={course.color} pattern={course.pattern} size={80} borderRadius={10} />
+            <CoursePatternThumb color={course.color ?? "#6366f1"} pattern={course.pattern ?? 0} size={80} borderRadius={10} />
 
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
