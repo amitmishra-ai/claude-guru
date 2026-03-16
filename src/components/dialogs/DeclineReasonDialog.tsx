@@ -1,9 +1,6 @@
-import { AlertTriangle, Mail, Phone } from "lucide-react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -17,23 +14,14 @@ import {
 } from "@/store/slices/sessionsSlice";
 import { setOpenDeclineReason, setOpenSession } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
-import { toYmd, dateTimeMs } from "@/lib/helpers";
+import { fmtDateNice, fmtTime12, toYmd } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
-import { SessionCard } from "@/components/shared/SessionCard";
-
-const CLOSE_THRESHOLD_MS = 48 * 60 * 60 * 1000; // 48 hours
 
 export function DeclineReasonDialog() {
   const dispatch = useAppDispatch();
   const open = useAppSelector((s) => s.ui.openDeclineReason);
   const declineSessionFocus = useAppSelector((s) => s.sessions.declineSessionFocus);
   const declineReason = useAppSelector((s) => s.sessions.declineReason);
-
-  const nowMs = demoNow.getTime();
-  const sessionStartMs = declineSessionFocus
-    ? dateTimeMs(declineSessionFocus.dateYmd, declineSessionFocus.start)
-    : 0;
-  const isTooClose = declineSessionFocus ? (sessionStartMs - nowMs) < CLOSE_THRESHOLD_MS : false;
 
   const handleClose = () => {
     dispatch(setOpenDeclineReason(false));
@@ -72,62 +60,21 @@ export function DeclineReasonDialog() {
             >
               This will mark your calendar as unavailable for this session slot.
             </Box>
-            <SessionCard
-              title={declineSessionFocus.title}
-              dateYmd={declineSessionFocus.dateYmd}
-              start={declineSessionFocus.start}
-              end={declineSessionFocus.end}
+            <Box
               sx={{
                 borderRadius: "16px",
                 border: 1,
                 borderColor: "divider",
                 backgroundColor: "hsl(var(--md-surface))",
                 p: 1.5,
+                fontSize: "0.875rem",
               }}
-            />
-
-            {isTooClose && (
-              <Box
-                sx={{
-                  borderRadius: "16px",
-                  border: 1,
-                  borderColor: "var(--gl-status-declined-border)",
-                  bgcolor: "var(--gl-status-declined-bg)",
-                  p: 2,
-                }}
-              >
-                <Stack direction="row" spacing={1} alignItems="flex-start">
-                  <AlertTriangle size={18} style={{ color: "var(--gl-status-declined-text)", flexShrink: 0, marginTop: 2 }} />
-                  <Box>
-                    <Typography variant="body2" fontWeight={600} sx={{ color: "var(--gl-status-declined-text)", mb: 0.5 }}>
-                      This cancellation is very close to the session
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: "hsl(var(--md-on-surface-variant))", mb: 1.5 }}>
-                      Please inform {declineSessionFocus.scheduledByName || "the scheduler"} directly so they can arrange a replacement.
-                    </Typography>
-                    <Stack spacing={0.75}>
-                      {declineSessionFocus.scheduledByEmail && (
-                        <Stack direction="row" alignItems="center" spacing={0.75}>
-                          <Mail size={14} style={{ color: "hsl(var(--md-on-surface-variant))" }} />
-                          <Typography variant="body2" fontWeight={500}>
-                            {declineSessionFocus.scheduledByEmail}
-                          </Typography>
-                        </Stack>
-                      )}
-                      {declineSessionFocus.scheduledByPhone && (
-                        <Stack direction="row" alignItems="center" spacing={0.75}>
-                          <Phone size={14} style={{ color: "hsl(var(--md-on-surface-variant))" }} />
-                          <Typography variant="body2" fontWeight={500}>
-                            {declineSessionFocus.scheduledByPhone}
-                          </Typography>
-                        </Stack>
-                      )}
-                    </Stack>
-                  </Box>
-                </Stack>
+            >
+              <Box sx={{ fontWeight: 500 }}>{declineSessionFocus.title}</Box>
+              <Box sx={{ mt: 0.5, color: "hsl(var(--md-on-surface-variant))" }}>
+                {fmtDateNice(declineSessionFocus.dateYmd)} &bull; {fmtTime12(declineSessionFocus.start)}&ndash;{fmtTime12(declineSessionFocus.end)}
               </Box>
-            )}
-
+            </Box>
             <TextField
               label="Reason"
               value={declineReason}

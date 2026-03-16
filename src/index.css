@@ -105,8 +105,8 @@
   --gl-badge-bg: #f44336;
   /* red-500 (MUI) */
   --gl-badge-text: #ffffff;
-  --gl-unread-bg: rgba(219, 234, 254, 0.4);
-  --gl-unread-border: #93c5fd;
+  --gl-unread-bg: rgba(237, 233, 254, 0.3);
+  --gl-unread-border: #ddd6fe;
   --gl-star-color: #f59e0b;
   --gl-warning-icon: #d97706;
   --gl-new-badge-bg: #e53935;
@@ -220,8 +220,8 @@
   /* ── UI accent tokens (dark) ── */
   --gl-badge-bg: #ef5350;
   --gl-badge-text: #ffffff;
-  --gl-unread-bg: rgba(59, 130, 246, 0.12);
-  --gl-unread-border: rgba(59, 130, 246, 0.35);
+  --gl-unread-bg: rgba(139, 92, 246, 0.12);
+  --gl-unread-border: rgba(139, 92, 246, 0.3);
   --gl-star-color: #fbbf24;
   --gl-warning-icon: #fbbf24;
   --gl-new-badge-bg: #e53935;

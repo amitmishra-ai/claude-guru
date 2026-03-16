@@ -101,7 +101,7 @@ export function AvailabilityPopover({
         {!confirmRemove ? (
           <Button
             size="small"
-            variant="soft"
+            variant="outlined"
             color="error"
             onClick={() => setConfirmRemove(true)}
             fullWidth
@@ -117,7 +117,7 @@ export function AvailabilityPopover({
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button size="small" variant="text" color="inherit" onClick={() => setConfirmRemove(false)} sx={{ flex: 1 }}>
+              <Button size="small" variant="outlined" color="inherit" onClick={() => setConfirmRemove(false)} sx={{ flex: 1 }}>
                 Keep
               </Button>
               <Button size="small" variant="contained" color="error" onClick={handleRemove} sx={{ flex: 1 }}>

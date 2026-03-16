@@ -53,6 +53,7 @@ export function AppLayout() {
           minWidth: 0,
           overflow: "hidden",
           p: { xs: 2, md: 3 },
+          pt: { xs: "calc(56px + 16px + env(safe-area-inset-top))", md: 3 },
           pb: { xs: "calc(6rem + env(safe-area-inset-bottom))", md: 3 },
         }}
       >

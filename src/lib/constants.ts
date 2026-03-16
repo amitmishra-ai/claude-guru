@@ -27,7 +27,7 @@ export const timeOptions12 = Array.from(
 
 // ─── Demo Anchor Date ───────────────────────────────────────────────────────
 
-export const demoNow = new Date("2026-03-12T09:00:00");
+export const demoNow = new Date("2026-02-16T09:00:00");
 
 // ─── Nudge Image ────────────────────────────────────────────────────────────
 

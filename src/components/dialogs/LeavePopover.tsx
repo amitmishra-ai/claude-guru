@@ -121,12 +121,12 @@ export function LeavePopover({
 
         {!confirmCancel ? (
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button size="small" variant="soft" color="inherit" onClick={handleEdit} sx={{ flex: 1 }}>
+            <Button size="small" variant="outlined" color="inherit" onClick={handleEdit} sx={{ flex: 1 }}>
               Edit
             </Button>
             <Button
               size="small"
-              variant="soft"
+              variant="outlined"
               color="error"
               onClick={() => setConfirmCancel(true)}
               sx={{ flex: 1 }}
@@ -143,7 +143,7 @@ export function LeavePopover({
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button size="small" variant="text" color="inherit" onClick={() => setConfirmCancel(false)} sx={{ flex: 1 }}>
+              <Button size="small" variant="outlined" color="inherit" onClick={() => setConfirmCancel(false)} sx={{ flex: 1 }}>
                 Keep
               </Button>
               <Button size="small" variant="contained" color="error" onClick={handleCancelLeave} sx={{ flex: 1 }}>

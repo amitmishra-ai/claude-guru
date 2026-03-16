@@ -73,22 +73,24 @@ export default function NotificationsPage() {
       sx={!n.read ? { borderColor: "var(--gl-unread-border)", backgroundColor: "var(--gl-unread-bg)" } : {}}
     >
       <CardContent sx={{ p: 2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          {!n.read && (
-            <Box
-              component="span"
-              sx={{ height: 8, width: 8, flexShrink: 0, borderRadius: "50%", backgroundColor: "#3b82f6" }}
-            />
-          )}
-          <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{n.title}</Box>
-        </Box>
-        <Box sx={{ mt: 0.5, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>{n.body}</Box>
-        {n.ctaLabel && n.ctaAction && (
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {!n.read && (
+                <Box
+                  component="span"
+                  sx={{ height: 8, width: 8, flexShrink: 0, borderRadius: "50%", backgroundColor: "var(--gl-badge-bg)" }}
+                />
+              )}
+              <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{n.title}</Box>
+            </Box>
+            <Box sx={{ mt: 0.5, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>{n.body}</Box>
+          </Box>
+          {n.ctaLabel && n.ctaAction && (
             <Button
-              variant="soft"
+              variant="text"
               size="small"
-              sx={{ borderRadius: "4px", fontSize: "0.75rem" }}
+              sx={{ flexShrink: 0, borderRadius: "4px", fontSize: "0.75rem" }}
               onClick={() => {
                 dispatch(markRead(n.id));
                 executeCtaAction(n.ctaAction!, navigate, dispatch);
@@ -96,8 +98,8 @@ export default function NotificationsPage() {
             >
               {n.ctaLabel}
             </Button>
-          </Box>
-        )}
+          )}
+        </Box>
       </CardContent>
     </Card>
   );
@@ -105,7 +107,7 @@ export default function NotificationsPage() {
   return (
     <>
       <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
-        <PageHeader icon={NotificationsIcon} title="Alerts" />
+        <PageHeader icon={NotificationsIcon} title="Alerts" subtitle="Notifications and action items." />
         {unreadCount > 0 && (
           <Button
             variant="text"

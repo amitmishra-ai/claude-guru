@@ -29,15 +29,7 @@ export function ToastViewport() {
         top: { xs: 16, md: "auto" },
         bottom: { xs: "auto", md: 16 },
         transform: { xs: "translateX(-50%)", md: "none" },
-        zIndex: 1400,
-        "@keyframes toastSlideIn": {
-          "0%": { opacity: 0, transform: "translateY(12px) scale(0.96)" },
-          "100%": { opacity: 1, transform: "translateY(0) scale(1)" },
-        },
-        "@keyframes toastFadeOut": {
-          "0%": { opacity: 1, transform: "translateY(0) scale(1)" },
-          "100%": { opacity: 0, transform: "translateY(-8px) scale(0.96)" },
-        },
+        zIndex: 50,
       }}
     >
       <Box sx={{ width: "min(24rem, calc(100vw - 2rem))", display: "flex", flexDirection: "column", gap: 1 }}>
@@ -55,7 +47,6 @@ export function ToastViewport() {
               px: 2,
               py: 1.5,
               boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
-              animation: "toastSlideIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both",
             }}
           >
             <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
