@@ -832,7 +832,6 @@ export default function DashboardPage() {
                                 dateYmd={s.dateYmd}
                                 start={s.start}
                                 end={s.end}
-                                titleFirst
                                 status={STATUS_DECLINED}
                                 sx={{ py: 2.5 }}
                                 actions={
@@ -866,7 +865,6 @@ export default function DashboardPage() {
                                 dateYmd={s.dateYmd}
                                 start={s.start}
                                 end={s.end}
-                                titleFirst
                                 status={{ label: "Declined", bg: "action.hover", color: "text.secondary", border: "transparent" }}
                                 sx={{ py: 2.5, opacity: 0.6 }}
                                 actions={
