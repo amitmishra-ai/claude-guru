@@ -136,7 +136,7 @@ function TaskCard({
   chipBorder?: string;
   title: string;
   description: string;
-  action: React.ReactNode;
+  action?: React.ReactNode;
   extra?: React.ReactNode;
   body?: React.ReactNode;
 }) {
