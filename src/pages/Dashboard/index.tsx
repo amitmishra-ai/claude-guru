@@ -746,6 +746,24 @@ export default function DashboardPage() {
           <Box sx={{ position: 'sticky', top: 24 }}>
             <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><AssignmentOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Tasks</Typography></Stack>
             <Stack spacing={2}>
+                {/* Confirm sessions task */}
+                {needsWednesdayConfirm && (
+                  <TaskCard
+                    chipLabel="Action Needed"
+                    chipColor="var(--gl-status-declined-text)"
+                    chipBg="var(--gl-status-declined-bg)"
+                    chipBorder="var(--gl-status-declined-border)"
+                    title="Confirm upcoming sessions"
+                    description="Confirm by Wednesday 6 PM so ops can finalize allocations."
+                    extra={<Chip label={`${confirmedCount} / ${sessions.length}`} size="small" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
+                    action={
+                      <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
+                        Review Confirmations
+                      </Button>
+                    }
+                  />
+                )}
+
                 {/* Availability task */}
                 {hasUserConfiguredAvailability ? (
                   <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
@@ -894,24 +912,6 @@ export default function DashboardPage() {
                     chipBorder="var(--gl-status-declined-border)"
                     title="Add your availability"
                     description={`Keep availability up-to-date for next ${rangeDays} days.`}
-                  />
-                )}
-
-                {/* Confirm sessions task */}
-                {needsWednesdayConfirm && (
-                  <TaskCard
-                    chipLabel="Action Needed"
-                    chipColor="var(--gl-status-declined-text)"
-                    chipBg="var(--gl-status-declined-bg)"
-                    chipBorder="var(--gl-status-declined-border)"
-                    title="Confirm upcoming sessions"
-                    description="Confirm by Wednesday 6 PM so ops can finalize allocations."
-                    extra={<Chip label={`${confirmedCount} / ${sessions.length}`} size="small" sx={{ borderRadius: 9999, fontSize: '0.65rem' }} />}
-                    action={
-                      <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
-                        Review Confirmations
-                      </Button>
-                    }
                   />
                 )}
 
