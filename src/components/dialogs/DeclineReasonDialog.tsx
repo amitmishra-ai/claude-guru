@@ -76,6 +76,9 @@ export function DeclineReasonDialog() {
             </Box>
             <SessionCard
               title={declineSessionFocus.title}
+              sessionType={declineSessionFocus.sessionType}
+              topic={declineSessionFocus.topic}
+              batch={declineSessionFocus.batch}
               dateYmd={declineSessionFocus.dateYmd}
               start={declineSessionFocus.start}
               end={declineSessionFocus.end}

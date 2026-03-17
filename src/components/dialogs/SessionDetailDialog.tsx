@@ -1,15 +1,16 @@
-import { useState } from "react";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import { useMemo } from "react";
+import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
+import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import Chip from "@mui/material/Chip";
-import Divider from "@mui/material/Divider";
-import Popover from "@mui/material/Popover";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
@@ -20,14 +21,9 @@ import {
 } from "@/store/slices/sessionsSlice";
 import { setOpenSession, setOpenDeclineReason, setOpenSessionDetails } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
-import { fmtDateNice } from "@/lib/helpers";
+import { sortByDateTime, dateTimeMs, fmtDateNice } from "@/lib/helpers";
+import { demoNow } from "@/lib/constants";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED } from "@/components/shared/SessionCard";
-
-const GROUP_STATS = [
-  { label: "Learners", value: "24" },
-  { label: "Avg. attendance", value: "88%" },
-  { label: "Sessions completed", value: "6 / 12" },
-];
 
 export function SessionDetailDialog() {
   const dispatch = useAppDispatch();
@@ -35,10 +31,17 @@ export function SessionDetailDialog() {
   const sessionFocus = useAppSelector((s) => s.sessions.sessionFocus);
   const sessions = useAppSelector((s) => s.sessions.items);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
+  const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
 
-  const [groupAnchor, setGroupAnchor] = useState<HTMLElement | null>(null);
+  const nowMs = demoNow.getTime();
+  const todayYmd = demoNow.toISOString().slice(0, 10);
+  const upcomingSessions = useMemo(
+    () => sortByDateTime(sessions).filter((s) => dateTimeMs(s.dateYmd, s.start) >= nowMs && !sessionDeclined[s.id]),
+    [sessions, sessionDeclined, nowMs]
+  );
+  const nextSessionId = upcomingSessions.find((s) => s.dateYmd === todayYmd)?.id ?? null;
 
-  const displayed = sessionFocus ? [sessionFocus] : sessions;
+  const displayed = sessionFocus ? [sessionFocus] : upcomingSessions;
 
   return (
     <Dialog
@@ -78,62 +81,79 @@ export function SessionDetailDialog() {
               Content is shared Monday. Confirm or raise queries by Wednesday. Reminders sent 1 day and 30 min before your session.
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Stack spacing={1.5}>
               {displayed.map((s) => {
-                const isConfirmed = confirmations[s.id];
+                const isConfirmed = !!confirmations[s.id] || s.id === nextSessionId;
                 return (
-                  <SessionCard
-                    key={s.id}
-                    title={s.title}
-                    dateYmd={s.dateYmd}
-                    start={s.start}
-                    end={s.end}
-                    group={s.group}
-                    status={isConfirmed ? STATUS_CONFIRMED() : STATUS_SCHEDULED}
-                    chips={[s.program, s.cohort, s.sessionType].filter(Boolean) as string[]}
-                    sx={{ py: 2, borderBottom: 1, borderColor: "divider", "&:last-child": { borderBottom: 0 } }}
-                    actions={
-                      <>
-                        <Button
-                          variant={isConfirmed ? "soft" : "contained"}
-                          size="small"
-                          sx={isConfirmed
-                            ? { borderColor: "var(--gl-status-confirmed-border)", bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", "&:hover": { bgcolor: "var(--gl-status-confirmed-bg)" } }
-                            : {}
-                          }
-                          onClick={() => {
-                            if (isConfirmed) return;
-                            dispatch(confirmSession(s.id));
-                            dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
-                          }}
-                        >
-                          <CheckCircleOutlinedIcon sx={{ mr: 1, fontSize: 16 }} /> {isConfirmed ? "Confirmed" : "Confirm"}
+                  <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+                    <SessionCard
+                      title={s.title}
+                      sessionType={s.sessionType}
+                      topic={s.topic}
+                      batch={s.batch}
+                      dateYmd={s.dateYmd}
+                      start={s.start}
+                      end={s.end}
+                      status={isConfirmed ? STATUS_CONFIRMED() : STATUS_SCHEDULED}
+                      actions={isConfirmed ? (
+                        <>
+                          <Button
+                            variant="soft"
+                            size="small"
+                            startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                            onClick={() => dispatch(pushToast({ title: "Downloading session materials", description: "Preparing download..." }))}
+                          >
+                            Session Materials
+                          </Button>
+                          <Button
+                            variant="soft"
+                            size="small"
+                            startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}
+                            onClick={() => dispatch(pushToast({ title: "Course content", description: `Viewing content for ${s.title}` }))}
+                          >
+                            View Course content
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
+                            size="small"
+                            variant="contained"
+                            onClick={() => {
+                              dispatch(confirmSession(s.id));
+                              dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
+                            }}
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />}
+                            size="small"
+                            variant="soft"
+                            onClick={() => {
+                              dispatch(setDeclineSessionFocus(s));
+                              dispatch(setDeclineReason(""));
+                              dispatch(setOpenDeclineReason(true));
+                            }}
+                          >
+                            I'm unavailable
+                          </Button>
+                        </>
+                      )}
+                      secondaryAction={
+                        <Button variant="text" size="small" onClick={() => {
+                          dispatch(setSessionFocus(s));
+                          dispatch(setOpenSessionDetails(true));
+                        }}>
+                          View details
                         </Button>
-                        <Button
-                          variant="soft"
-                          size="small"
-                          onClick={() => {
-                            dispatch(setDeclineSessionFocus(s));
-                            dispatch(setDeclineReason(""));
-                            dispatch(setOpenDeclineReason(true));
-                          }}
-                        >
-                          <CancelOutlinedIcon sx={{ mr: 1, fontSize: 16 }} /> I'm unavailable
-                        </Button>
-                      </>
-                    }
-                    secondaryAction={
-                      <Button variant="text" size="small" onClick={() => {
-                        dispatch(setSessionFocus(s));
-                        dispatch(setOpenSessionDetails(true));
-                      }}>
-                        View details
-                      </Button>
-                    }
-                  />
+                      }
+                    />
+                  </Card>
                 );
               })}
-            </Box>
+            </Stack>
           </Box>
         </DialogContent>
 
@@ -148,43 +168,6 @@ export function SessionDetailDialog() {
           </Button>
         </DialogActions>
       </Box>
-
-      {/* Group profile popover */}
-      <Popover
-        open={Boolean(groupAnchor)}
-        anchorEl={groupAnchor}
-        onClose={() => setGroupAnchor(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{ sx: { mt: 0.75, borderRadius: 2, minWidth: 260, maxWidth: 300, boxShadow: 4 } }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
-            <Typography variant="subtitle2" fontWeight={700}>Group profile</Typography>
-            <Chip size="small" color="primary" label="PDF" sx={{ height: 20, fontSize: "0.65rem" }} />
-          </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
-            Cohort Feb &bull; Group 07
-          </Typography>
-
-          <Divider sx={{ mb: 1.5 }} />
-
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            {GROUP_STATS.map(({ label, value }) => (
-              <Box key={label} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Typography variant="body2" color="text.secondary">{label}</Typography>
-                <Typography variant="body2" fontWeight={500}>{value}</Typography>
-              </Box>
-            ))}
-          </Box>
-
-          <Divider sx={{ mt: 1.5, mb: 1.5 }} />
-
-          <Button variant="soft" size="small" fullWidth onClick={() => setGroupAnchor(null)}>
-            Download / open PDF
-          </Button>
-        </Box>
-      </Popover>
     </Dialog>
   );
 }

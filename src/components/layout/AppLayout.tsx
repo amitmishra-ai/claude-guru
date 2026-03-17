@@ -6,6 +6,7 @@ import { MobileNav } from "./MobileNav";
 import { MobileAppBar } from "./MobileAppBar";
 import { ToastViewport } from "@/components/shared/ToastViewport";
 import { GlobalDialogs } from "@/components/dialogs";
+import { DevPanel } from "@/components/dev/DevPanel";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setIsDarkMode } from "@/store/slices/uiSlice";
 
@@ -65,6 +66,7 @@ export function AppLayout() {
       <MobileNav />
       <ToastViewport />
       <GlobalDialogs />
+      <DevPanel />
     </Box>
   );
 }

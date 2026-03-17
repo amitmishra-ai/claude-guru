@@ -136,7 +136,7 @@ function CourseCard({
           <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, mb: 1.5 }}>
             <CoursePatternThumb color={c.color ?? "#1976d2"} pattern={c.pattern ?? 0} size={72} />
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, justifyContent: "flex-end", pt: 0.25 }}>
-              <Chip label={c.role} size="small" variant="outlined" sx={{ fontSize: "0.7rem", height: 22, fontWeight: 500 }} />
+              <Chip label={c.role} size="small" variant="outlined" />
               {c.isNew && !isPast && (
                 <Chip
                   label="New"
@@ -169,22 +169,6 @@ function CourseCard({
           <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.8rem", mb: 1.5 }}>
             {c.program} &bull; {c.batch}
           </Typography>
-
-          {/* Progress + stats (current courses only) */}
-          {!isPast && totalSections > 0 && (
-            <Box sx={{ mb: 1.5 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <LinearProgress
-                  variant="determinate"
-                  value={overallProgress}
-                  sx={{ flex: 1, height: 4, borderRadius: 2, bgcolor: "action.selected" }}
-                />
-                <Typography variant="caption" sx={{ flexShrink: 0, color: "text.secondary", fontSize: "0.7rem" }}>
-                  {overallProgress}%
-                </Typography>
-              </Box>
-            </Box>
-          )}
 
           {/* Mapped sessions */}
           <Box sx={{ mt: "auto" }}>
@@ -525,7 +509,7 @@ export default function CoursesPage() {
           <Box sx={{ mb: 4 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Current Courses</Typography>
-              <Chip label={currentCourses.length} size="small" sx={{ height: 20, fontSize: "0.7rem", fontWeight: 600 }} />
+              <Chip label={currentCourses.length} size="small" sx={{ fontWeight: 600 }} />
             </Box>
             <Grid container spacing={2}>
               {currentCourses.map((c) => (
@@ -540,7 +524,7 @@ export default function CoursesPage() {
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Completed Courses</Typography>
-              <Chip label={pastCourses.length} size="small" sx={{ height: 20, fontSize: "0.7rem", fontWeight: 600 }} />
+              <Chip label={pastCourses.length} size="small" sx={{ fontWeight: 600 }} />
             </Box>
             <Grid container spacing={2}>
               {visiblePastCourses.map((c) => (

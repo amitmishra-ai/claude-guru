@@ -86,10 +86,10 @@ export function CompletedSessionDetailDialog() {
           </Stack>
 
           <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
-            <Chip label={session.sessionType} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: "0.7rem" }} />
-            <Chip label={session.program} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: "0.7rem" }} />
+            <Chip label={session.sessionType} size="small" variant="outlined" />
+            <Chip label={session.program} size="small" variant="outlined" />
             {session.cohort && (
-              <Chip label={session.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: "0.7rem" }} />
+              <Chip label={session.cohort} size="small" variant="outlined" />
             )}
           </Stack>
 

@@ -140,27 +140,27 @@ export function SessionDetailsModal() {
                     <Chip
                       label="Confirmed"
                       size="small"
-                      sx={{ borderRadius: 9999, bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }}
+                      sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }}
                     />
                   )}
                   {!isConfirmed && !isCompleted && (
                     <Chip
                       label="Scheduled"
                       size="small"
-                      sx={{ borderRadius: 9999, bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }}
+                      sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }}
                     />
                   )}
                   {isCompleted && (
                     <Chip
                       label="Completed"
                       size="small"
-                      sx={{ borderRadius: 9999, bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }}
+                      sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }}
                     />
                   )}
-                  {session.program && <Chip label={session.program} size="small" sx={{ borderRadius: 9999 }} />}
-                  {session.cohort && <Chip label={session.cohort} size="small" sx={{ borderRadius: 9999 }} />}
-                  {session.sessionType && <Chip label={session.sessionType} size="small" sx={{ borderRadius: 9999 }} />}
-                  {session.audienceType && <Chip label={session.audienceType} size="small" sx={{ borderRadius: 9999 }} />}
+                  {session.program && <Chip label={session.program} size="small" />}
+                  {session.cohort && <Chip label={session.cohort} size="small" />}
+                  {session.sessionType && <Chip label={session.sessionType} size="small" />}
+                  {session.audienceType && <Chip label={session.audienceType} size="small" />}
                 </Stack>
                 <Typography variant="h6" fontWeight={600}>{session.title}</Typography>
               </Box>
@@ -239,7 +239,7 @@ export function SessionDetailsModal() {
                   <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>Predicted groups</Typography>
                   <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                     {session.predictedGroups.map((g) => (
-                      <Chip key={g} label={g} size="small" sx={{ borderRadius: 9999 }} />
+                      <Chip key={g} label={g} size="small" />
                     ))}
                   </Stack>
                 </SectionBox>
@@ -365,8 +365,7 @@ export function SessionDetailsModal() {
                       <Chip
                         label={session.paymentModel === "hourly" ? "Hourly" : "Fixed Price"}
                         size="small"
-                        sx={{ borderRadius: 9999 }}
-                      />
+                                             />
                     </InfoRow>
                   )}
                   {session.paymentModel === "hourly" && session.hourlyRateInr && (
@@ -413,7 +412,6 @@ export function SessionDetailsModal() {
                                 }
                                 size="small"
                                 sx={{
-                                  borderRadius: 9999,
                                   fontWeight: 600,
                                   ...(session.paymentStatus === "paid"
                                     ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" }

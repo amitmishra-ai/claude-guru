@@ -25,18 +25,16 @@ export function ToastViewport() {
       sx={{
         pointerEvents: "none",
         position: "fixed",
-        left: { xs: "50%", md: "276px" },
-        top: { xs: 16, md: "auto" },
-        bottom: { xs: "auto", md: 16 },
-        transform: { xs: "translateX(-50%)", md: "none" },
+        right: 16,
+        top: 16,
         zIndex: 1400,
         "@keyframes toastSlideIn": {
-          "0%": { opacity: 0, transform: "translateY(12px) scale(0.96)" },
-          "100%": { opacity: 1, transform: "translateY(0) scale(1)" },
+          "0%": { opacity: 0, transform: "translateX(12px) scale(0.96)" },
+          "100%": { opacity: 1, transform: "translateX(0) scale(1)" },
         },
         "@keyframes toastFadeOut": {
-          "0%": { opacity: 1, transform: "translateY(0) scale(1)" },
-          "100%": { opacity: 0, transform: "translateY(-8px) scale(0.96)" },
+          "0%": { opacity: 1, transform: "translateX(0) scale(1)" },
+          "100%": { opacity: 0, transform: "translateX(8px) scale(0.96)" },
         },
       }}
     >

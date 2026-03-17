@@ -62,7 +62,7 @@ function SectionPanel({
                 icon={<span style={{ fontSize: 10, marginLeft: 5 }}>✦</span>}
                 sx={{
                   bgcolor: "var(--gl-new-badge-bg)", color: "var(--gl-new-badge-text)",
-                  fontSize: "0.65rem", height: 20, fontWeight: 700, flexShrink: 0,
+                  fontWeight: 700, flexShrink: 0,
                   "& .MuiChip-icon": { color: "var(--gl-new-badge-text)", ml: "4px" },
                 }}
               />
@@ -74,17 +74,6 @@ function SectionPanel({
           <Typography variant="caption" color="text.secondary">
             {videoCount} Video{videoCount !== 1 ? "s" : ""}{presCount > 0 ? ` · ${presCount} Resource${presCount !== 1 ? "s" : ""}` : ""}
           </Typography>
-          {/* Progress bar */}
-          <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
-            <LinearProgress
-              variant="determinate"
-              value={section.progress}
-              sx={{ width: 80, height: 4, borderRadius: 2, bgcolor: "action.selected" }}
-            />
-            <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, fontSize: "0.7rem" }}>
-              {section.progress}%
-            </Typography>
-          </Box>
         </Box>
         <Box sx={{ flexShrink: 0, mt: 0.25, color: "text.secondary" }}>
           {open ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
@@ -153,7 +142,7 @@ function SectionPanel({
                     <Chip
                       label="Viewed"
                       size="small"
-                      sx={{ height: 20, fontSize: "0.65rem", bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", fontWeight: 600, flexShrink: 0 }}
+                      sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", fontWeight: 600, flexShrink: 0 }}
                     />
                   )}
                   <IconButton size="small" sx={{ flexShrink: 0, color: "primary.main" }}>
@@ -215,7 +204,7 @@ export function CourseDetailDialog() {
 
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                <Chip label={course.role} size="small" variant="outlined" sx={{ fontSize: "0.68rem", height: 20, fontWeight: 500 }} />
+                <Chip label={course.role} size="small" variant="outlined" />
                 {course.isNew && (
                   <Chip
                     label="New content"
@@ -223,7 +212,7 @@ export function CourseDetailDialog() {
                     icon={<span style={{ fontSize: 10, marginLeft: 5 }}>✦</span>}
                     sx={{
                       bgcolor: "var(--gl-new-badge-bg)", color: "var(--gl-new-badge-text)",
-                      fontSize: "0.68rem", height: 20, fontWeight: 700,
+                      fontWeight: 700,
                       "& .MuiChip-icon": { color: "var(--gl-new-badge-text)", ml: "4px" },
                     }}
                   />
@@ -236,21 +225,6 @@ export function CourseDetailDialog() {
                 {course.program} &bull; {course.batch}
               </Typography>
 
-              {/* Overall progress */}
-              {sections.length > 0 && (
-                <Box sx={{ mt: 1.25, display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <Box sx={{ flex: 1 }}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={overallProgress}
-                      sx={{ height: 5, borderRadius: 3, bgcolor: "action.selected" }}
-                    />
-                  </Box>
-                  <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, fontSize: "0.72rem" }}>
-                    {overallProgress}%
-                  </Typography>
-                </Box>
-              )}
             </Box>
 
             <IconButton size="small" onClick={close} sx={{ flexShrink: 0 }}>

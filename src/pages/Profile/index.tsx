@@ -275,7 +275,7 @@ export default function ProfilePage() {
 
           <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5 }}>
             <FlexBox sx={{ gap: 1, alignItems: "center" }}>
-              <Chip label={`Avg ${avgRating}`} size="small" sx={{ fontWeight: 600, fontSize: 11, height: 22, bgcolor: "action.selected" }} />
+              <Chip label={`Avg ${avgRating}`} size="small" sx={{ fontWeight: 600, bgcolor: "action.selected" }} />
               <Typography variant="caption" color="text.secondary">
                 Biggest gain: <strong style={{ color: "var(--gl-stat-sessions)" }}>+0.17</strong> from Nov 25 to Dec 25
               </Typography>

@@ -432,7 +432,6 @@ export function MarkNotAvailableDialog() {
               variant={autoDecline ? "filled" : "outlined"}
               onClick={() => setAutoDecline(!autoDecline)}
               sx={{
-                borderRadius: 9999,
                 cursor: 'pointer',
                 ...(autoDecline
                   ? { bgcolor: 'warning.main', color: 'warning.contrastText', '&:hover': { bgcolor: 'warning.dark' } }
