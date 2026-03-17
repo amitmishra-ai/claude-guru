@@ -64,17 +64,9 @@ import {
   setOpenDeclineReason,
   setOpenLearnerRatings,
   setLearnerRatingsSessionId,
-  setOpenPollBuilder,
   setOpenSessionDetails,
 } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
-import {
-  setPollSessionId,
-  setPollEditingId,
-  setPollQuestion,
-  setPollOptions,
-  removePoll,
-} from "@/store/slices/pollsSlice";
 import {
   sortByDateTime,
   dateTimeMs,
@@ -353,110 +345,107 @@ export default function DashboardPage() {
               </Box>
             )}
 
-            {/* ── Next Session (standalone, above tabs) ── */}
-            <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><PlayCircleOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Next Session</Typography></Stack>
-            {nextSession ? (
-              <Card
-                variant="outlined"
-                sx={{
-                  p: { xs: 2, sm: 2.5 },
-                  mb: 3,
-                  bgcolor: 'hsl(var(--md-primary-container) / 0.16)',
-                  borderColor: 'hsl(var(--md-primary) / 0.48)',
-                  borderStyle: 'solid',
-                  borderWidth: '1.5px',
-                }}
-              >
-                <SessionCard
-                  title={nextSession.title}
-                  dateYmd={nextSession.dateYmd}
-                  start={nextSession.start}
-                  end={nextSession.end}
-                  group={nextSession.group}
-                  chips={[nextSession.program, nextSession.cohort, nextSession.location].filter(Boolean)}
-                  actions={
-                    <>
-                      {(() => {
-                        const sessionStartMs = dateTimeMs(nextSession.dateYmd, nextSession.start);
-                        const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
-                        return (
-                          <Button
-                            variant="contained"
-                            size="small"
-                            startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}
-                            disabled={!joinEnabled}
-                            onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
-                          >
-                            Join session
-                          </Button>
-                        );
-                      })()}
-                      <Button
-                        variant="soft"
-                        size="small"
-                        startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                        onClick={() => dispatch(pushToast({ title: "Session Materials", description: "Opening session materials..." }))}
-                      >
-                        Session Materials
-                      </Button>
-                    </>
-                  }
-                  secondaryAction={
-                    <Button variant="text" size="small" onClick={() => {
-                      dispatch(setSessionFocus(nextSession));
-                      dispatch(setOpenSessionDetails(true));
-                    }}>
-                      View details
-                    </Button>
-                  }
-                />
-              </Card>
-            ) : (
-              <Card variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, mb: 3 }}>
-                <Typography variant="body2" color="text.secondary">No upcoming sessions.</Typography>
-              </Card>
-            )}
-
-            {/* ── Sessions card with tabs ── */}
-            <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><ViewListOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Sessions</Typography></Stack>
-            <Card data-testid="home-sessions-card">
-              <Tabs
-                value={homeSessionsView}
-                onChange={(_e, v) => dispatch(setHomeSessionsView(v))}
-                variant="fullWidth"
-                sx={{
-                  minHeight: 40,
-                  '& .MuiTab-root': {
-                    textTransform: 'none',
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
-                    minHeight: 40,
-                    py: 1,
-                  },
-                }}
-              >
-                <Tab label={`Upcoming (${upcomingSessions.length})`} value="next" />
-                <Tab label={`Completed (${completedSessions.length})`} value="completed" />
-                <Tab label={`Declined (${declinedSessions.length})`} value="declined" />
-              </Tabs>
-
-              <CardContent>
-                <Stack spacing={3}>
-                  {homeSessionsView === "next" && (
-                    <>
-                      {/* Scheduled sessions */}
-                      <Box>
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography variant="subtitle2" fontWeight={600}>Scheduled</Typography>
-                          <Chip label={`${scheduled.length}`} size="small" sx={{ borderRadius: 9999 }} />
-                        </Stack>
-                        <Stack divider={<Divider />} sx={{ mt: 1.5 }}>
-                          {scheduled.filter((s) => s.id !== nextSession?.id).length ? (
-                            scheduledDisplay.filter((s) => s.id !== nextSession?.id).map((s) => {
-                              const isExiting = s.id === exitingId && !!confirmations[s.id];
+            {/* ── Big container for entire left section ── */}
+            <Card sx={{ p: 2 }}>
+              <Stack spacing={2.5}>
+                {/* Next Session */}
+                <Box>
+                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Next Session</Typography>
+                  <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 }, bgcolor: 'hsl(var(--md-primary-container) / 0.12)', borderColor: 'hsl(var(--md-primary) / 0.4)' }}>
+                    {nextSession ? (
+                      <SessionCard
+                        title={nextSession.title}
+                        dateYmd={nextSession.dateYmd}
+                        start={nextSession.start}
+                        end={nextSession.end}
+                        group={nextSession.group}
+                        chips={[nextSession.program, nextSession.cohort, nextSession.location].filter(Boolean)}
+                        actions={
+                          <>
+                            {(() => {
+                              const sessionStartMs = dateTimeMs(nextSession.dateYmd, nextSession.start);
+                              const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
                               return (
+                                <Button
+                                  variant="contained"
+                                  size="small"
+                                  startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}
+                                  disabled={!joinEnabled}
+                                  onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
+                                >
+                                  Join session
+                                </Button>
+                              );
+                            })()}
+                            <Button
+                              variant="soft"
+                              size="small"
+                              startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                              onClick={() => dispatch(pushToast({ title: "Session Materials", description: "Opening session materials..." }))}
+                            >
+                              Session Materials
+                            </Button>
+                          </>
+                        }
+                        secondaryAction={
+                          <Button variant="text" size="small" onClick={() => {
+                            dispatch(setSessionFocus(nextSession));
+                            dispatch(setOpenSessionDetails(true));
+                          }}>
+                            View details
+                          </Button>
+                        }
+                      />
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">No upcoming sessions.</Typography>
+                    )}
+                  </Card>
+                </Box>
+
+                {/* Tabs */}
+                <Tabs
+                  value={homeSessionsView}
+                  onChange={(_e, v) => dispatch(setHomeSessionsView(v))}
+                  variant="fullWidth"
+                  data-testid="home-sessions-card"
+                  sx={{
+                    minHeight: 40,
+                    '& .MuiTab-root': {
+                      textTransform: 'none',
+                      fontSize: '0.8125rem',
+                      fontWeight: 500,
+                      minHeight: 40,
+                      py: 1,
+                    },
+                  }}
+                >
+                  <Tab label={`Upcoming (${upcomingSessions.length})`} value="next" />
+                  <Tab label={`Completed (${completedSessions.length})`} value="completed" />
+                  <Tab label={`Declined (${declinedSessions.length})`} value="declined" />
+                </Tabs>
+
+                {/* ── Upcoming tab ── */}
+                {homeSessionsView === "next" && (
+                  <>
+                    {/* Scheduled */}
+                    <Box>
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                        <Typography variant="subtitle2" fontWeight={600}>Scheduled</Typography>
+                        <Chip label={`${scheduled.length}`} size="small" sx={{ borderRadius: 9999 }} />
+                      </Stack>
+                      <Stack spacing={1.5}>
+                        {scheduled.filter((s) => s.id !== nextSession?.id).length ? (
+                          scheduledDisplay.filter((s) => s.id !== nextSession?.id).map((s) => {
+                            const isExiting = s.id === exitingId && !!confirmations[s.id];
+                            return (
+                              <Card key={s.id} variant="outlined" sx={{
+                                p: { xs: 1.5, sm: 2 },
+                                ...(isExiting && {
+                                  animation: `${slideOutDown} 0.38s ease forwards`,
+                                  pointerEvents: 'none',
+                                }),
+                              }}>
                                 <SessionCard
-                                  key={s.id}
                                   title={s.title}
                                   dateYmd={s.dateYmd}
                                   start={s.start}
@@ -464,13 +453,6 @@ export default function DashboardPage() {
                                   group={s.group}
                                   status={STATUS_SCHEDULED}
                                   chips={[s.program, s.cohort, s.location].filter(Boolean)}
-                                  sx={{
-                                    py: 2.5,
-                                    ...(isExiting && {
-                                      animation: `${slideOutDown} 0.38s ease forwards`,
-                                      pointerEvents: 'none',
-                                    }),
-                                  }}
                                   actions={
                                     <>
                                       <Button
@@ -516,27 +498,31 @@ export default function DashboardPage() {
                                     </Button>
                                   }
                                 />
-                              );
-                            })
-                          ) : (
-                            <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>No scheduled sessions.</Typography>
-                          )}
-                        </Stack>
-                      </Box>
+                              </Card>
+                            );
+                          })
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">No scheduled sessions.</Typography>
+                        )}
+                      </Stack>
+                    </Box>
 
-                      <Divider />
-
-                      {/* Confirmed sessions */}
-                      <Box>
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography variant="subtitle2" fontWeight={600}>Confirmed</Typography>
-                          <Chip label={`${confirmedUpcoming.length}`} size="small" sx={{ borderRadius: 9999 }} />
-                        </Stack>
-                        <Stack divider={<Divider />} sx={{ mt: 1.5 }}>
-                          {confirmedUpcoming.length ? (
-                            confirmedDisplay.map((s) => (
+                    {/* Confirmed */}
+                    <Box>
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                        <Typography variant="subtitle2" fontWeight={600}>Confirmed</Typography>
+                        <Chip label={`${confirmedUpcoming.length}`} size="small" sx={{ borderRadius: 9999 }} />
+                      </Stack>
+                      <Stack spacing={1.5}>
+                        {confirmedUpcoming.length ? (
+                          confirmedDisplay.map((s) => (
+                            <Card key={s.id} variant="outlined" sx={{
+                              p: { xs: 1.5, sm: 2 },
+                              ...(recentlyConfirmedIds[s.id] && {
+                                animation: `${slideInFromAbove} 0.38s ease forwards`,
+                              }),
+                            }}>
                               <SessionCard
-                                key={s.id}
                                 title={s.title}
                                 dateYmd={s.dateYmd}
                                 start={s.start}
@@ -544,12 +530,6 @@ export default function DashboardPage() {
                                 group={s.group}
                                 status={STATUS_CONFIRMED(<TaskAltOutlinedIcon sx={{ fontSize: 14 }} />)}
                                 chips={[s.program, s.cohort, s.location].filter(Boolean)}
-                                sx={{
-                                  py: 2.5,
-                                  ...(recentlyConfirmedIds[s.id] && {
-                                    animation: `${slideInFromAbove} 0.38s ease forwards`,
-                                  }),
-                                }}
                                 actions={
                                   <>
                                     <Button
@@ -573,42 +553,52 @@ export default function DashboardPage() {
                                     </Button>
                                   </>
                                 }
+                                secondaryAction={
+                                  <Button variant="text" size="small" onClick={() => {
+                                    dispatch(setSessionFocus(s));
+                                    dispatch(setOpenSessionDetails(true));
+                                  }}>
+                                    View details
+                                  </Button>
+                                }
                               />
-                            ))
-                          ) : (
-                            <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>No confirmed sessions.</Typography>
-                          )}
-                        </Stack>
-                      </Box>
-                    </>
-                  )}
+                            </Card>
+                          ))
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">No confirmed sessions.</Typography>
+                        )}
+                      </Stack>
+                    </Box>
+                  </>
+                )}
 
-                  {homeSessionsView === "completed" && (
-                    <>
-                      <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220 } }}>
-                        <InputLabel>Filter by session type</InputLabel>
-                        <Select
-                          label="Filter by session type"
-                          value={selectedSessionType}
-                          onChange={(e) => dispatch(setSelectedSessionType(e.target.value as typeof selectedSessionType))}
-                        >
-                          {SESSION_TYPES.map((t) => (
-                            <MenuItem key={t} value={t}>{t}</MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                {/* ── Completed tab ── */}
+                {homeSessionsView === "completed" && (
+                  <>
+                    <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220 } }}>
+                      <InputLabel>Filter by session type</InputLabel>
+                      <Select
+                        label="Filter by session type"
+                        value={selectedSessionType}
+                        onChange={(e) => dispatch(setSelectedSessionType(e.target.value as typeof selectedSessionType))}
+                      >
+                        {SESSION_TYPES.map((t) => (
+                          <MenuItem key={t} value={t}>{t}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
 
-                      {filteredCompletedSessions.length > 0 ? (
-                        <Stack divider={<Divider />}>
-                          {filteredCompletedSessions.map((s) => {
-                            const ratings = demoLearnerRatingsBySessionId[s.id];
-                            const hasRatings = ratings && ratings.length > 0;
-                            const avg = hasRatings
-                              ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(1)
-                              : null;
-                            return (
+                    {filteredCompletedSessions.length > 0 ? (
+                      <Stack spacing={1.5}>
+                        {filteredCompletedSessions.map((s) => {
+                          const ratings = demoLearnerRatingsBySessionId[s.id];
+                          const hasRatings = ratings && ratings.length > 0;
+                          const avg = hasRatings
+                            ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(1)
+                            : null;
+                          return (
+                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
                               <SessionCard
-                                key={s.id}
                                 title={s.title}
                                 dateYmd={s.dateYmd}
                                 start={s.start}
@@ -621,7 +611,6 @@ export default function DashboardPage() {
                                     <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
                                   </Stack>
                                 ) : undefined}
-                                sx={{ py: 2.5 }}
                                 actions={
                                   <>
                                     {s.recordingUrl && (
@@ -658,32 +647,31 @@ export default function DashboardPage() {
                                   </>
                                 }
                               />
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                          <Typography variant="body2" color="text.secondary">No completed sessions yet.</Typography>
-                        </Paper>
-                      )}
-                    </>
-                  )}
+                            </Card>
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">No completed sessions yet.</Typography>
+                    )}
+                  </>
+                )}
 
-                  {homeSessionsView === "declined" && (
-                    <>
-                      {declinedSessions.length > 0 && (
-                        <>
-                          <Typography variant="overline" color="text.secondary">Active declined</Typography>
-                          <Stack divider={<Divider />}>
-                            {declinedSessions.map((s) => (
+                {/* ── Declined tab ── */}
+                {homeSessionsView === "declined" && (
+                  <>
+                    {declinedSessions.length > 0 && (
+                      <Box>
+                        <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>Active declined</Typography>
+                        <Stack spacing={1.5}>
+                          {declinedSessions.map((s) => (
+                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
                               <SessionCard
-                                key={s.id}
                                 title={s.title}
                                 dateYmd={s.dateYmd}
                                 start={s.start}
                                 end={s.end}
                                 status={STATUS_DECLINED}
-                                sx={{ py: 2.5 }}
                                 actions={
                                   <Button
                                     startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
@@ -699,44 +687,42 @@ export default function DashboardPage() {
                                   </Button>
                                 }
                               />
-                            ))}
-                          </Stack>
-                        </>
-                      )}
+                            </Card>
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
 
-                      {demoPreviouslyDeclinedSessions.length > 0 && (
-                        <>
-                          <Typography variant="overline" color="text.secondary" sx={{ mt: 2 }}>Previously declined</Typography>
-                          <Stack divider={<Divider />}>
-                            {demoPreviouslyDeclinedSessions.map((s) => (
+                    {demoPreviouslyDeclinedSessions.length > 0 && (
+                      <Box>
+                        <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>Previously declined</Typography>
+                        <Stack spacing={1.5}>
+                          {demoPreviouslyDeclinedSessions.map((s) => (
+                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 }, opacity: 0.6 }}>
                               <SessionCard
-                                key={s.id}
                                 title={s.title}
                                 dateYmd={s.dateYmd}
                                 start={s.start}
                                 end={s.end}
                                 status={{ label: "Declined", bg: "action.hover", color: "text.secondary", border: "transparent" }}
-                                sx={{ py: 2.5, opacity: 0.6 }}
                                 actions={
                                   <Button variant="soft" size="small" disabled>
                                     Confirm
                                   </Button>
                                 }
                               />
-                            ))}
-                          </Stack>
-                        </>
-                      )}
+                            </Card>
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
 
-                      {declinedSessions.length === 0 && demoPreviouslyDeclinedSessions.length === 0 && (
-                        <Paper variant="outlined" sx={{ p: 2 }}>
-                          <Typography variant="body2" color="text.secondary">No declined sessions.</Typography>
-                        </Paper>
-                      )}
-                    </>
-                  )}
-                </Stack>
-              </CardContent>
+                    {declinedSessions.length === 0 && demoPreviouslyDeclinedSessions.length === 0 && (
+                      <Typography variant="body2" color="text.secondary">No declined sessions.</Typography>
+                    )}
+                  </>
+                )}
+              </Stack>
             </Card>
           </Stack>
         </Grid>
@@ -744,8 +730,9 @@ export default function DashboardPage() {
         {/* Right column: Tasks sidebar (desktop only) */}
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' } }}>
           <Box sx={{ position: 'sticky', top: 24 }}>
-            <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><AssignmentOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Tasks</Typography></Stack>
-            <Stack spacing={2}>
+            <Card sx={{ p: 2 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>Tasks</Typography>
+              <Stack spacing={2}>
                 {/* Confirm sessions task */}
                 {needsWednesdayConfirm && (
                   <TaskCard
@@ -932,6 +919,7 @@ export default function DashboardPage() {
                   />
                 )}
               </Stack>
+            </Card>
           </Box>
         </Grid>
       </Grid>}

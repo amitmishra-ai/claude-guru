@@ -40,7 +40,7 @@ import { pushToast } from "@/store/slices/toastsSlice";
 import { fmtDateNice, fmtTime12, fmtDuration, fmtInr, getTimeZoneOffsetMinutes, formatGMTOffsetFromMinutesAhead } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
 import { demoCourseCatalog } from "@/data/demo-sessions";
-import { dateTimeMs } from "@/lib/helpers";
+import { dateTimeMs, sortByDateTime } from "@/lib/helpers";
 import type { SessionPrepMaterial } from "@/lib/types";
 
 const MATERIAL_ICONS: Record<SessionPrepMaterial["type"], React.ReactNode> = {
@@ -85,14 +85,21 @@ export function SessionDetailsModal() {
   const open = useAppSelector((s) => s.ui.openSessionDetails);
   const session = useAppSelector((s) => s.sessions.sessionFocus);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
+  const allSessions = useAppSelector((s) => s.sessions.items);
+  const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
   const nowMs = demoNow.getTime();
+
+  // The next upcoming session (first in sorted upcoming list) is always treated as confirmed
+  const nextSessionId = sortByDateTime(allSessions).find(
+    (s) => dateTimeMs(s.dateYmd, s.start) >= nowMs && !sessionDeclined[s.id]
+  )?.id ?? null;
 
   const handleClose = () => {
     dispatch(setOpenSessionDetails(false));
     dispatch(setSessionFocus(null));
   };
 
-  const isConfirmed = session ? !!confirmations[session.id] : false;
+  const isConfirmed = session ? (!!confirmations[session.id] || session.id === nextSessionId) : false;
   const isCompleted = session ? dateTimeMs(session.dateYmd, session.end) < nowMs : false;
   const linkedCourse = session?.linkedCourseId
     ? demoCourseCatalog.find((c) => c.id === session.linkedCourseId)
