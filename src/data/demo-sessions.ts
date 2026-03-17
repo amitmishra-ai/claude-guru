@@ -70,7 +70,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "s0c",
-    title: "Mentor Session: Python Warm-up",
+    title: "Mentor Session: Python Fundamentals",
     program: "PGP-DS",
     cohort: "Cohort Mar",
     group: "Group 06 (Beginner)",
@@ -90,7 +90,7 @@ export const demoSessions: Session[] = [
     timeZone: "Asia/Kolkata",
     linkedCourseId: "c1",
     prepMaterials: [
-      { id: "pm13", label: "Python Warm-up Notebook", url: "#", type: "document" },
+      { id: "pm13", label: "Python Fundamentals Notebook", url: "#", type: "document" },
       { id: "pm14", label: "Starter Code Repository", url: "#", type: "link" },
     ],
     paymentModel: "fixed",

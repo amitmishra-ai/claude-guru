@@ -83,15 +83,15 @@ export default function PaymentsPage() {
           <Box sx={{ width: "100%", height: 200 }}>
             <ResponsiveContainer>
               <BarChart data={demoMonthlyEarnings} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--mui-palette-divider, #e0e0e0)" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--md-on-surface, #333)" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "var(--md-on-surface, #333)" }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
                 <Tooltip
                   formatter={(value) => [fmtInr(Number(value ?? 0)), "Earnings"]}
                   labelFormatter={(l) => `${l}`}
-                  contentStyle={{ backgroundColor: "var(--md-surface, #fff)", borderColor: "var(--md-outline-variant, #e0e0e0)", borderRadius: 8, color: "var(--md-on-surface, #333)" }}
-                  labelStyle={{ color: "var(--md-on-surface, #333)" }}
-                  itemStyle={{ color: "var(--md-on-surface, #333)" }}
+                  contentStyle={{ backgroundColor: "hsl(var(--md-surface))", borderColor: "hsl(var(--md-outline-variant))", borderRadius: 8, color: "hsl(var(--md-on-surface))" }}
+                  labelStyle={{ color: "hsl(var(--md-on-surface))" }}
+                  itemStyle={{ color: "hsl(var(--md-on-surface))" }}
                 />
                 <Bar dataKey="amount" fill="var(--gl-stat-hours)" radius={[4, 4, 0, 0]} />
               </BarChart>
