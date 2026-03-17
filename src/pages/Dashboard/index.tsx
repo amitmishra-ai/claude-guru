@@ -23,6 +23,20 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 import EventNoteIcon from "@mui/icons-material/EventNote";
+import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
+import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
+import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
@@ -568,14 +582,7 @@ export default function DashboardPage() {
                                       >
                                         I'm unavailable
                                       </Button>
-                                    </Stack>
-                                    <Button
-                                      variant="text"
-                                      size="small"
-                                      onClick={() => dispatch(setOpenGroupProfile(true))}
-                                    >
-                                      Group profile
-                                    </Button>
+                                    </>
                                   }
                                 />
                               </Card>
@@ -973,9 +980,24 @@ export default function DashboardPage() {
                           Custom slot
                         </Button>
                       </Stack>
-                    ) : undefined
-                  }
-                />
+                      </AccordionDetails>
+                    </Accordion>
+                  </Card>
+                ) : (
+                  <TaskCard
+                    chipLabel="Not set"
+                    chipColor="var(--gl-status-pending-text)"
+                    chipBg="var(--gl-status-pending-bg)"
+                    chipBorder="var(--gl-status-pending-border)"
+                    title="Set your availability"
+                    description="Let ops know when you're free to teach."
+                    action={
+                      <Button size="small" variant="contained" fullWidth onClick={() => dispatch(setOpenAvailability(true))}>
+                        Add availability
+                      </Button>
+                    }
+                  />
+                )}
 
                 {/* Confirm sessions task */}
                 {needsWednesdayConfirm && (
