@@ -265,9 +265,9 @@ export default function ProfilePage() {
           <Box sx={{ width: "100%", height: 200 }}>
             <ResponsiveContainer>
               <LineChart data={ratingChartData} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--mui-palette-divider, #e0e0e0)" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--md-on-surface, #333)" }} axisLine={false} tickLine={false} />
-                <YAxis domain={[4.2, 5]} tick={{ fontSize: 11, fill: "var(--md-on-surface, #333)" }} tickCount={5} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} axisLine={false} tickLine={false} />
+                <YAxis domain={[4.2, 5]} tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} tickCount={5} axisLine={false} tickLine={false} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
@@ -285,7 +285,7 @@ export default function ProfilePage() {
                   dataKey="avg"
                   stroke="var(--gl-stat-hours)"
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "var(--md-surface, #fff)", stroke: "var(--gl-stat-hours)", strokeWidth: 2 }}
+                  dot={{ r: 4, fill: "hsl(var(--md-surface))", stroke: "var(--gl-stat-hours)", strokeWidth: 2 }}
                   connectNulls
                 />
               </LineChart>
