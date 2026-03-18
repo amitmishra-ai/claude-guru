@@ -154,8 +154,27 @@ function ResidencyCards() {
         <PlannedEventCard sessionType="Residency" title="Program Overview (All)" batch="AIML Online March 26 A" contactEmail="pm.contact@greatlearning.in" startDateYmd="2026-04-10" endDateYmd="2026-04-14" />
       </ComponentSection>
 
-      {/* Completed */}
-      <ComponentSection title="Residency — Completed" description="Past residency. Star rating + numeric score, Detailed Feedback button alongside rating, payment TXN.">
+      {/* Completed — Gathering feedback */}
+      <ComponentSection title="Residency — Completed (Gathering feedback)" description="Session done but learners haven't rated yet (within 30 days). No rating shown, payment pending.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Program Overview (All)"
+            sessionType="Residency"
+            batch="AIML Online March 26 A"
+            dateYmd="2026-03-10"
+            start={minutes(9)}
+            end={minutes(17)}
+            topRight={<Typography variant="caption" color="text.secondary">Gathering feedback!</Typography>}
+            actions={
+              <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View in payments</Button>
+            }
+          />
+          <Typography variant="caption" color="var(--gl-status-pending-text)" sx={{ mt: 0.5, display: "block" }}>Payment pending</Typography>
+        </Card>
+      </ComponentSection>
+
+      {/* Completed — with rating + payment processed */}
+      <ComponentSection title="Residency — Completed" description="Past residency. Star rating + numeric score, Detailed Feedback button alongside rating, payment processed.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Program Overview (All)"
@@ -172,7 +191,7 @@ function ResidencyCards() {
               </>
             }
           />
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block", fontStyle: "italic" }}>Payment Processed, TXN ID: TXN-GL-8F3K2Q</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Payment Processed, TXN ID: TXN-GL-8F3K2Q</Typography>
         </Card>
       </ComponentSection>
     </>
@@ -236,8 +255,54 @@ function OnlineSessionCards() {
         <PlannedEventCard sessionType="Online session" title="Machine Learning" batch="PGP-AIML-BA-UTA-Nov25-C" contactEmail="gurus_support@greatlearning.in" startDateYmd="2026-01-22" endDateYmd="2026-02-14" />
       </ComponentSection>
 
-      {/* Completed */}
-      <ComponentSection title="Online Session — Completed" description="Past session. Star rating + numeric score, Detailed Feedback alongside, recording link, payment TXN.">
+      {/* Completed — Gathering feedback */}
+      <ComponentSection title="Online Session — Completed (Gathering feedback)" description="Session done within 30 days, learners haven't rated yet. Recording available, payment pending.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Statistics for Data Science"
+            sessionType="Online session"
+            topic="M5 W2 | Hypothesis Testing"
+            batch="PGPDS.O.MAR26.A"
+            dateYmd="2026-03-12"
+            start={minutes(18)}
+            end={minutes(20)}
+            topRight={<Typography variant="caption" color="text.secondary">Gathering feedback!</Typography>}
+            actions={
+              <>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+                <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View in payments</Button>
+              </>
+            }
+          />
+          <Typography variant="caption" color="var(--gl-status-pending-text)" sx={{ mt: 0.5, display: "block" }}>Payment pending</Typography>
+        </Card>
+      </ComponentSection>
+
+      {/* Completed — No feedback collected */}
+      <ComponentSection title="Online Session — Completed (No feedback)" description="Session older than 30 days with no learner ratings. Shows 'No feedback collected'.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Python Fundamentals"
+            sessionType="Online session"
+            topic="M3 W1 | Variables, Data Types"
+            batch="PGPDS.O.MAR26.A"
+            dateYmd="2026-01-15"
+            start={minutes(9, 30)}
+            end={minutes(11)}
+            topRight={<Typography variant="caption" color="text.disabled">No feedback collected</Typography>}
+            actions={
+              <>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+                <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View in payments</Button>
+              </>
+            }
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Payment Processed, TXN ID: TXN-GL-2B8X4Q</Typography>
+        </Card>
+      </ComponentSection>
+
+      {/* Completed — with rating + payment processed */}
+      <ComponentSection title="Online Session — Completed" description="Past session. Star rating + numeric score, Detailed Feedback alongside, recording link, payment processed.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -256,7 +321,7 @@ function OnlineSessionCards() {
               </>
             }
           />
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block", fontStyle: "italic" }}>Payment Processed, TXN ID: TXN-GL-7A2P9R</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Payment Processed, TXN ID: TXN-GL-7A2P9R</Typography>
         </Card>
       </ComponentSection>
     </>
@@ -339,8 +404,8 @@ function CareerMentorOnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* Completed — with "Gathering feedback!" */}
-      <ComponentSection title="Career Session — Completed (no rating yet)" description="No rating within 30 days shows 'Gathering feedback!' text.">
+      {/* Completed — Gathering feedback + payment pending */}
+      <ComponentSection title="Career Session — Completed (Gathering feedback)" description="Session done, learners haven't rated yet. Payment pending.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -350,11 +415,35 @@ function CareerMentorOnlineSessionCards() {
             dateYmd="2026-03-10"
             start={minutes(14)}
             end={minutes(15)}
-            topRight={<Typography variant="caption" color="text.secondary" fontStyle="italic">Gathering feedback!</Typography>}
+            topRight={<Typography variant="caption" color="text.secondary">Gathering feedback!</Typography>}
             actions={
               <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View in payments</Button>
             }
           />
+          <Typography variant="caption" color="var(--gl-status-pending-text)" sx={{ mt: 0.5, display: "block" }}>Payment pending</Typography>
+        </Card>
+      </ComponentSection>
+
+      {/* Completed — with rating + payment processed */}
+      <ComponentSection title="Career Session — Completed" description="Past career session. Star rating + numeric score, Detailed Feedback alongside, payment processed.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Career Mentoring"
+            sessionType="Career mentoring session"
+            topic="Resume Review & Interview Prep"
+            batch="PGP-AIML-BA-UTA-Nov25-C"
+            dateYmd="2026-02-20"
+            start={minutes(14)}
+            end={minutes(15)}
+            topRight={<StarRatingNumeric rating={4.8} />}
+            actions={
+              <>
+                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View in payments</Button>
+              </>
+            }
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Payment Processed, TXN ID: TXN-GL-6D4N8T</Typography>
         </Card>
       </ComponentSection>
     </>
@@ -399,8 +488,30 @@ function EvaluationCards() {
         <PlannedEventCard sessionType="Evaluation" title="Decision Tree Assignment" batch="PGP-AIML-BA-UTA-Nov25-C" contactEmail="gurus_support@greatlearning.in" startDateYmd="2026-04-01" endDateYmd="2026-04-10" />
       </ComponentSection>
 
-      {/* Completed */}
-      <ComponentSection title="Evaluation — Completed" description="Past evaluation. Star icons only (no numeric score), Detailed Feedback button below stars, payment TXN.">
+      {/* Completed — Gathering feedback + payment pending */}
+      <ComponentSection title="Evaluation — Completed (Gathering feedback)" description="Grading done, learners haven't rated yet. Payment pending.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Linear Regression Assignment"
+            sessionType="Evaluation"
+            batch="PGP-AIML-BA-UTA-Nov25-C"
+            dateYmd="2026-03-08"
+            start={minutes(0)}
+            end={minutes(23, 59)}
+            actions={
+              <>
+                <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Open in SpeedGrader</Button>
+                <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View in payments</Button>
+              </>
+            }
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Gathering feedback!</Typography>
+          <Typography variant="caption" color="var(--gl-status-pending-text)" sx={{ display: "block" }}>Payment pending</Typography>
+        </Card>
+      </ComponentSection>
+
+      {/* Completed — with rating + payment processed */}
+      <ComponentSection title="Evaluation — Completed" description="Past evaluation. Star icons only (no numeric score), Detailed Feedback button below stars, payment processed.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Linear Regression Assignment"
@@ -420,7 +531,7 @@ function EvaluationCards() {
             <StarRatingIcons rating={4} />
             <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />} sx={{ alignSelf: "flex-start" }}>Detailed Feedback</Button>
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block", fontStyle: "italic" }}>Payment Processed, TXN ID: TXN-GL-5E1M3N</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Payment Processed, TXN ID: TXN-GL-5E1M3N</Typography>
         </Card>
       </ComponentSection>
     </>
@@ -465,8 +576,27 @@ function ModerationCards() {
         <PlannedEventCard sessionType="Moderation" title="Ethics in Machine Learning" batch="PGP-AIML-BA-UTA-Nov25-C" contactEmail="gurus_support@greatlearning.in" startDateYmd="2026-04-05" endDateYmd="2026-04-15" />
       </ComponentSection>
 
-      {/* Completed */}
-      <ComponentSection title="Moderation — Completed" description="Past moderation. Star icons only (no numeric), Detailed Feedback button below stars, payment TXN.">
+      {/* Completed — Gathering feedback + payment pending */}
+      <ComponentSection title="Moderation — Completed (Gathering feedback)" description="Moderation done, learners haven't rated yet. Payment pending.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Impact of AI on Healthcare"
+            sessionType="Moderation"
+            batch="PGP-AIML-BA-UTA-Nov25-C"
+            dateYmd="2026-03-08"
+            start={minutes(0)}
+            end={minutes(23, 59)}
+            actions={
+              <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Open Discussion</Button>
+            }
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Gathering feedback!</Typography>
+          <Typography variant="caption" color="var(--gl-status-pending-text)" sx={{ display: "block" }}>Payment pending</Typography>
+        </Card>
+      </ComponentSection>
+
+      {/* Completed — with rating + payment processed */}
+      <ComponentSection title="Moderation — Completed" description="Past moderation. Star icons only (no numeric), Detailed Feedback button below stars, payment processed.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Impact of AI on Healthcare"
@@ -483,7 +613,7 @@ function ModerationCards() {
             <StarRatingIcons rating={5} />
             <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />} sx={{ alignSelf: "flex-start" }}>Detailed Feedback</Button>
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block", fontStyle: "italic" }}>Payment Processed, TXN ID: TXN-GL-9K4R2L</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Payment Processed, TXN ID: TXN-GL-9K4R2L</Typography>
         </Card>
       </ComponentSection>
     </>
@@ -546,8 +676,29 @@ function CapstoneCards() {
         </Card>
       </ComponentSection>
 
-      {/* Completed */}
-      <ComponentSection title="Capstone Project — Completed" description="Past capstone. No rating shown. Group name, domain, batch, PM contact, payment TXN.">
+      {/* Completed — payment pending */}
+      <ComponentSection title="Capstone Project — Completed (Payment pending)" description="Capstone done but payment not yet processed.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Capstone — PGPDS.O.JUL25.A"
+            sessionType="Capstone project mentoring session"
+            batch="PGPDS.O.JUL25.A"
+            dateYmd="2026-02-20"
+            start={minutes(10)}
+            end={minutes(12)}
+            actions={
+              <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View in payments</Button>
+            }
+          />
+          <Stack spacing={0.25} sx={{ mt: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">Group: Team Beta &bull; Domain: Computer Vision</Typography>
+            <Typography variant="caption" color="var(--gl-status-pending-text)">Payment pending</Typography>
+          </Stack>
+        </Card>
+      </ComponentSection>
+
+      {/* Completed — payment processed */}
+      <ComponentSection title="Capstone Project — Completed" description="Past capstone. No rating shown. Group, domain, batch, PM contact, payment processed.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Capstone — PGPDS.O.JUL25.A"
@@ -562,7 +713,7 @@ function CapstoneCards() {
           />
           <Stack spacing={0.25} sx={{ mt: 0.5 }}>
             <Typography variant="caption" color="text.secondary">Group: Team Beta &bull; Domain: Computer Vision</Typography>
-            <Typography variant="caption" color="text.secondary" fontStyle="italic">Payment Processed, TXN ID: TXN-GL-3C7W1P</Typography>
+            <Typography variant="caption" color="text.secondary">Payment Processed, TXN ID: TXN-GL-3C7W1P</Typography>
           </Stack>
         </Card>
       </ComponentSection>
