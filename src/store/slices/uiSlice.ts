@@ -66,7 +66,7 @@ const initialState: UiState = {
   markUnavailableTarget: null,
   helloBarDismissed: false,
   isDarkMode: false,
-  isNavCollapsed: false,
+  isNavCollapsed: true,
 };
 
 const uiSlice = createSlice({

@@ -22,7 +22,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import { FileText } from "lucide-react";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import TuneIcon from "@mui/icons-material/Tune";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { CoursePatternThumb } from "@/components/shared/CoursePatternThumb";
@@ -134,9 +134,9 @@ function CourseCard({
 
           {/* Thumbnail row: pattern left, chips right */}
           <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, mb: 1.5 }}>
-            <CoursePatternThumb   color={c.color ?? "#1976d2"} pattern={c.pattern ?? 0} size={72} />
+            <CoursePatternThumb color={c.color ?? "#1976d2"} pattern={c.pattern ?? 0} size={72} />
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, justifyContent: "flex-end", pt: 0.25 }}>
-              <Chip label={c.role} size="small" variant="outlined" sx={{ fontSize: "0.7rem", height: 22, fontWeight: 500 }} />
+              <Chip label={c.role} size="small" variant="outlined" />
               {c.isNew && !isPast && (
                 <Chip
                   label="New"
@@ -169,22 +169,6 @@ function CourseCard({
           <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.8rem", mb: 1.5 }}>
             {c.program} &bull; {c.batch}
           </Typography>
-
-          {/* Progress + stats (current courses only) */}
-          {!isPast && totalSections > 0 && (
-            <Box sx={{ mb: 1.5 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <LinearProgress
-                  variant="determinate"
-                  value={overallProgress}
-                  sx={{ flex: 1, height: 4, borderRadius: 2, bgcolor: "action.selected" }}
-                />
-                <Typography variant="caption" sx={{ flexShrink: 0, color: "text.secondary", fontSize: "0.7rem" }}>
-                  {overallProgress}%
-                </Typography>
-              </Box>
-            </Box>
-          )}
 
           {/* Mapped sessions */}
           <Box sx={{ mt: "auto" }}>
@@ -366,8 +350,8 @@ export default function CoursesPage() {
 
   /* ── Derive unique filter options from catalog ── */
   const allPrograms = useMemo(() => [...new Set(sortedCatalog.map((c) => c.program))], [sortedCatalog]);
-  const allRoles    = useMemo(() => [...new Set(sortedCatalog.map((c) => c.role))],    [sortedCatalog]);
-  const allBatches  = useMemo(() => [...new Set(sortedCatalog.map((c) => c.batch))],   [sortedCatalog]);
+  const allRoles = useMemo(() => [...new Set(sortedCatalog.map((c) => c.role))], [sortedCatalog]);
+  const allBatches = useMemo(() => [...new Set(sortedCatalog.map((c) => c.batch))], [sortedCatalog]);
 
   /* ── Loading skeleton ── */
   const [loading, setLoading] = useState(!_coursesInitialLoadDone);
@@ -385,14 +369,14 @@ export default function CoursesPage() {
 
   /* ── Applied filters (committed on "Apply") ── */
   const [appliedPrograms, setAppliedPrograms] = useState<string[]>([]);
-  const [appliedRoles,    setAppliedRoles]    = useState<string[]>([]);
-  const [appliedBatch,    setAppliedBatch]    = useState("");
+  const [appliedRoles, setAppliedRoles] = useState<string[]>([]);
+  const [appliedBatch, setAppliedBatch] = useState("");
 
   /* ── Pending filters (draft inside drawer) ── */
-  const [drawerOpen,      setDrawerOpen]      = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [pendingPrograms, setPendingPrograms] = useState<string[]>([]);
-  const [pendingRoles,    setPendingRoles]    = useState<string[]>([]);
-  const [pendingBatch,    setPendingBatch]    = useState("");
+  const [pendingRoles, setPendingRoles] = useState<string[]>([]);
+  const [pendingBatch, setPendingBatch] = useState("");
 
   const openDrawer = () => {
     setPendingPrograms(appliedPrograms);
@@ -427,15 +411,15 @@ export default function CoursesPage() {
     const q = searchQuery.trim().toLowerCase();
     return sortedCatalog.filter((c) => {
       if (appliedPrograms.length > 0 && !appliedPrograms.includes(c.program)) return false;
-      if (appliedRoles.length > 0    && !appliedRoles.includes(c.role))       return false;
-      if (appliedBatch               && c.batch !== appliedBatch)              return false;
+      if (appliedRoles.length > 0 && !appliedRoles.includes(c.role)) return false;
+      if (appliedBatch && c.batch !== appliedBatch) return false;
       if (q && !([c.title, c.program, c.role, c.batch].some((f) => f.toLowerCase().includes(q)))) return false;
       return true;
     });
   }, [sortedCatalog, searchQuery, appliedPrograms, appliedRoles, appliedBatch]);
 
   const currentCourses = useMemo(() => filteredCatalog.filter((c) => c.status === "current"), [filteredCatalog]);
-  const pastCourses    = useMemo(() => filteredCatalog.filter((c) => c.status === "past"),    [filteredCatalog]);
+  const pastCourses = useMemo(() => filteredCatalog.filter((c) => c.status === "past"), [filteredCatalog]);
 
   const [visiblePastCount, setVisiblePastCount] = useState(6);
   useEffect(() => { setVisiblePastCount(6); }, [searchQuery, appliedPrograms, appliedRoles, appliedBatch]);
@@ -463,7 +447,7 @@ export default function CoursesPage() {
   return (
     <>
       <PageHeader
-        icon={FileText}
+        icon={DescriptionOutlinedIcon}
         title="Courses"
         subtitle="Track your teaching assignments, sessions and learning content"
         action={
@@ -525,7 +509,7 @@ export default function CoursesPage() {
           <Box sx={{ mb: 4 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Current Courses</Typography>
-              <Chip label={currentCourses.length} size="small" sx={{ height: 20, fontSize: "0.7rem", fontWeight: 600 }} />
+              <Chip label={currentCourses.length} size="small" sx={{ fontWeight: 600 }} />
             </Box>
             <Grid container spacing={2}>
               {currentCourses.map((c) => (
@@ -540,7 +524,7 @@ export default function CoursesPage() {
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Completed Courses</Typography>
-              <Chip label={pastCourses.length} size="small" sx={{ height: 20, fontSize: "0.7rem", fontWeight: 600 }} />
+              <Chip label={pastCourses.length} size="small" sx={{ fontWeight: 600 }} />
             </Box>
             <Grid container spacing={2}>
               {visiblePastCourses.map((c) => (

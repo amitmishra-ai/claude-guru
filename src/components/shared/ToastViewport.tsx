@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { X } from "lucide-react";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import Box from "@mui/material/Box";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { dismissToast } from "@/store/slices/toastsSlice";
@@ -25,11 +25,17 @@ export function ToastViewport() {
       sx={{
         pointerEvents: "none",
         position: "fixed",
-        left: { xs: "50%", md: "276px" },
-        top: { xs: 16, md: "auto" },
-        bottom: { xs: "auto", md: 16 },
-        transform: { xs: "translateX(-50%)", md: "none" },
-        zIndex: 50,
+        right: 16,
+        top: 16,
+        zIndex: 1400,
+        "@keyframes toastSlideIn": {
+          "0%": { opacity: 0, transform: "translateX(12px) scale(0.96)" },
+          "100%": { opacity: 1, transform: "translateX(0) scale(1)" },
+        },
+        "@keyframes toastFadeOut": {
+          "0%": { opacity: 1, transform: "translateX(0) scale(1)" },
+          "100%": { opacity: 0, transform: "translateX(8px) scale(0.96)" },
+        },
       }}
     >
       <Box sx={{ width: "min(24rem, calc(100vw - 2rem))", display: "flex", flexDirection: "column", gap: 1 }}>
@@ -47,6 +53,7 @@ export function ToastViewport() {
               px: 2,
               py: 1.5,
               boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+              animation: "toastSlideIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both",
             }}
           >
             <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
@@ -87,7 +94,7 @@ export function ToastViewport() {
                   "&:hover": { backgroundColor: "hsl(var(--md-surface-container))" },
                 }}
               >
-                <X style={{ width: 16, height: 16 }} />
+                <CloseOutlinedIcon sx={{ fontSize: 16 }} />
               </Box>
             </Box>
           </Box>

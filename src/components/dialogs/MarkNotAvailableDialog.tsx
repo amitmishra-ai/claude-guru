@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { AlertTriangle } from "lucide-react";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
@@ -368,7 +368,7 @@ export function MarkNotAvailableDialog() {
                 borderColor: 'warning.main',
               }}
             >
-              <AlertTriangle style={{ width: 18, height: 18, flexShrink: 0, marginTop: 2, color: 'var(--gl-warning-icon)' }} />
+              <WarningAmberOutlinedIcon sx={{ fontSize: 18, flexShrink: 0, mt: "2px", color: 'var(--gl-warning-icon)' }} />
               <Box>
                 <Typography variant="subtitle2" sx={{ color: 'warning.dark', fontWeight: 600 }}>
                   {totalConflicts} conflicting item{totalConflicts > 1 ? "s" : ""} found
@@ -432,7 +432,6 @@ export function MarkNotAvailableDialog() {
               variant={autoDecline ? "filled" : "outlined"}
               onClick={() => setAutoDecline(!autoDecline)}
               sx={{
-                borderRadius: 9999,
                 cursor: 'pointer',
                 ...(autoDecline
                   ? { bgcolor: 'warning.main', color: 'warning.contrastText', '&:hover': { bgcolor: 'warning.dark' } }

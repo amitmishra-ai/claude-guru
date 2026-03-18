@@ -1,4 +1,6 @@
-import { Star, TrendingUp, Video } from "lucide-react";
+import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -77,24 +79,24 @@ export function CompletedSessionDetailDialog() {
             </Box>
             {avg && (
               <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0, ml: 2 }}>
-                <Star size={14} style={{ color: "var(--gl-star-color)" }} />
+                <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
                 <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
               </Stack>
             )}
           </Stack>
 
           <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
-            <Chip label={session.sessionType} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: "0.7rem" }} />
-            <Chip label={session.program} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: "0.7rem" }} />
+            <Chip label={session.sessionType} size="small" variant="outlined" />
+            <Chip label={session.program} size="small" variant="outlined" />
             {session.cohort && (
-              <Chip label={session.cohort} size="small" variant="outlined" sx={{ borderRadius: 9999, fontSize: "0.7rem" }} />
+              <Chip label={session.cohort} size="small" variant="outlined" />
             )}
           </Stack>
 
           <Stack direction="row" spacing={1} sx={{ mt: 2.5 }} flexWrap="wrap" useFlexGap>
             {session.recordingUrl && (
               <Button
-                startIcon={<Video size={14} />}
+                startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}
                 variant="soft"
                 size="small"
                 onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${session.title}` }))}
@@ -104,7 +106,7 @@ export function CompletedSessionDetailDialog() {
             )}
             {hasRatings && (
               <Button
-                startIcon={<Star size={14} />}
+                startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
                 variant="soft"
                 size="small"
                 onClick={() => {
@@ -116,7 +118,7 @@ export function CompletedSessionDetailDialog() {
               </Button>
             )}
             <Button
-              startIcon={<TrendingUp size={14} />}
+              startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
               variant="soft"
               size="small"
               onClick={() => { close(); navigate("/profile"); }}

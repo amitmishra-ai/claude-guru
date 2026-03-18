@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import {
-  Star, TrendingUp, Users, Eye, BarChart3,
-  Wallet, CreditCard, Pencil, FileText,
-} from "lucide-react";
+import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -26,7 +27,7 @@ import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip,
+  LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
 } from "recharts";
 import FlexBox from "@/components/Utils/FlexBox";
@@ -38,7 +39,7 @@ import {
   saveProfileEdits, populateDrafts,
 } from "@/store/slices/profileSlice";
 import { formatGMTOffsetFromMinutesAhead, getTimeZoneOffsetMinutes } from "@/lib/helpers";
-import { demoRatingHistory, demoMonthlyEarnings } from "@/data/demo-sessions";
+import { demoRatingHistory } from "@/data/demo-sessions";
 
 // ── Demo data for course performance ──────────────────────────────────────────
 const demoCoursePerf = [
@@ -63,20 +64,6 @@ const demoMatrix = [
   { course: "Computer Vision",            scores: [null, null, 4.2, 4.3, 4.3, 4.3] },
   { course: "Statistics for ML",          scores: [4.3, 4.3, 4.2, 4.2, 4.2, 4.2] },
 ];
-
-// ── Demo payments ─────────────────────────────────────────────────────────────
-const demoPayments = [
-  { session: "Deep Learning – Batch 12", type: "Live",     dur: "2h",   amount: 12000, status: "Completed", txn: "TXN-20260215-001", inv: "INV-001" },
-  { session: "NLP Advanced – Batch 8",   type: "Live",     dur: "2h",   amount: 12000, status: "Completed", txn: "TXN-20260210-002", inv: "INV-002" },
-  { session: "RL Workshop",              type: "Workshop", dur: "3h",   amount: 18000, status: "Pending",   txn: "–",                inv: "–" },
-  { session: "MLOps Masterclass",        type: "Live",     dur: "1.5h", amount: 9000,  status: "Completed", txn: "TXN-20260201-003", inv: "INV-003" },
-  { session: "Data Eng – Pipeline",      type: "Live",     dur: "2h",   amount: 12000, status: "Pending",   txn: "–",                inv: "–" },
-  { session: "CV Intro Session",         type: "Recorded", dur: "1h",   amount: 6000,  status: "Completed", txn: "TXN-20260120-004", inv: "INV-004" },
-];
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const fmtInr = (n: number) =>
-  `₹${n.toLocaleString("en-IN")}`;
 
 function DeltaLabel({ value }: { value: number }) {
   if (value === 0) return <Typography sx={{ fontSize: 11, color: "text.secondary" }}>0.00</Typography>;
@@ -133,18 +120,12 @@ export default function ProfilePage() {
     return (demoRatingHistory.reduce((a, r) => a + r.score, 0) / demoRatingHistory.length).toFixed(2);
   }, []);
 
-  const totalEarnings = demoMonthlyEarnings.reduce((a, m) => a + m.amount, 0);
-  const avgMonthly    = Math.round(totalEarnings / demoMonthlyEarnings.length);
-  const bestMonth     = demoMonthlyEarnings.reduce((a, b) => b.amount > a.amount ? b : a);
-  const lastTwo       = demoMonthlyEarnings.slice(-2);
-  const momTrend      = lastTwo.length === 2 ? lastTwo[1].amount - lastTwo[0].amount : 0;
-
   // KPI tiles config for Performance
   const kpiTiles = [
-    { icon: <Star size={14} />, label: "Avg rating",     value: avgRating,  delta: "+0.12 MoM", deltaColor: "success.main" },
-    { icon: <Eye size={14} />,  label: "Rated sessions", value: demoRatingHistory.length, delta: null },
-    { icon: <Users size={14} />,label: "Coverage",       value: "92%",      delta: null },
-    { icon: <TrendingUp size={14} />, label: "NPS proxy",value: 74,         delta: null },
+    { icon: <StarOutlinedIcon sx={{ fontSize: 14 }} />, label: "Avg rating",     value: avgRating,  delta: "+0.12 MoM", deltaColor: "success.main" },
+    { icon: <VisibilityOutlinedIcon sx={{ fontSize: 14 }} />,  label: "Rated sessions", value: demoRatingHistory.length, delta: null },
+    { icon: <GroupsOutlinedIcon sx={{ fontSize: 14 }} />, label: "Coverage",     value: "92%",      delta: null },
+    { icon: <TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />, label: "NPS proxy", value: 74,        delta: null },
   ];
 
   return (
@@ -160,7 +141,7 @@ export default function ProfilePage() {
         <Button
           variant="soft"
           size="small"
-          startIcon={<Pencil size={14} />}
+          startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
           sx={{ borderRadius: 1, flexShrink: 0, mt: 0.5 }}
           onClick={() => { dispatch(populateDrafts()); dispatch(setOpenProfileEdit(true)); }}
         >
@@ -294,7 +275,7 @@ export default function ProfilePage() {
 
           <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5 }}>
             <FlexBox sx={{ gap: 1, alignItems: "center" }}>
-              <Chip label={`Avg ${avgRating}`} size="small" sx={{ fontWeight: 600, fontSize: 11, height: 22, bgcolor: "action.selected" }} />
+              <Chip label={`Avg ${avgRating}`} size="small" sx={{ fontWeight: 600, bgcolor: "action.selected" }} />
               <Typography variant="caption" color="text.secondary">
                 Biggest gain: <strong style={{ color: "var(--gl-stat-sessions)" }}>+0.17</strong> from Nov 25 to Dec 25
               </Typography>
@@ -381,131 +362,6 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* ══ EARNINGS SECTION ═══════════════════════════════════════════════ */}
-      <FlexBox sx={{ justifyContent: "space-between", alignItems: "baseline", mb: 1.5 }}>
-        <Box>
-          <Typography variant="h6" fontWeight={700}>Earnings</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Track your month-on-month payouts and total earnings.
-          </Typography>
-        </Box>
-      </FlexBox>
-
-      {/* Earnings total + KPI row */}
-      <FlexBox sx={{ alignItems: "center", gap: 2, mb: 2, flexWrap: "wrap" }}>
-        <Box>
-          <Typography variant="h4" fontWeight={700}>{fmtInr(totalEarnings)}</Typography>
-          <Typography variant="caption" color="text.secondary">Total earnings</Typography>
-        </Box>
-        <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-        {[
-          { label: "Avg/month",  value: fmtInr(avgMonthly) },
-          { label: "Best month", value: `${bestMonth.label} (${fmtInr(bestMonth.amount)})` },
-          { label: "MoM trend",  value: (momTrend >= 0 ? "+" : "") + fmtInr(momTrend), color: momTrend >= 0 ? "success.main" : "error.main" },
-        ].map((k) => (
-          <Box key={k.label} sx={{ minWidth: 130 }}>
-            <Typography variant="caption" color="text.secondary">{k.label}</Typography>
-            <Typography variant="body2" fontWeight={600} sx={{ color: (k as any).color ?? "text.primary" }}>
-              {k.value}
-            </Typography>
-          </Box>
-        ))}
-      </FlexBox>
-
-      <Card variant="outlined" sx={{ mb: 4 }}>
-        <CardContent sx={{ p: 2.5 }}>
-          <Box sx={{ width: "100%", height: 200 }}>
-            <ResponsiveContainer>
-              <BarChart data={demoMonthlyEarnings} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
-                <Tooltip
-                  formatter={(value) => [fmtInr(Number(value ?? 0)), "Earnings"]}
-                  labelFormatter={(l) => `${l}`}
-                  contentStyle={{ backgroundColor: "hsl(var(--md-surface))", borderColor: "hsl(var(--md-outline-variant))", borderRadius: 8, color: "hsl(var(--md-on-surface))" }}
-                  labelStyle={{ color: "hsl(var(--md-on-surface))" }}
-                  itemStyle={{ color: "hsl(var(--md-on-surface))" }}
-                />
-                <Bar dataKey="amount" fill="var(--gl-stat-hours)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* ══ PAYMENTS SECTION ═══════════════════════════════════════════════ */}
-      <FlexBox sx={{ justifyContent: "space-between", alignItems: "baseline", mb: 1.5 }}>
-        <Box>
-          <Typography variant="h6" fontWeight={700}>Payments</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Session-wise payout details and status.
-          </Typography>
-        </Box>
-      </FlexBox>
-
-      <Card variant="outlined" sx={{ mb: 4 }}>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ bgcolor: "action.hover" }}>
-                {["Session", "Type", "Duration", "Amount", "Status", "Transaction ID", "Invoice"].map((h) => (
-                  <TableCell key={h} sx={{ fontWeight: 600, fontSize: 11, color: "text.secondary", py: 1.25 }}>
-                    {h}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {demoPayments.map((p, i) => (
-                <TableRow key={i} sx={{ "&:last-child td": { border: 0 } }}>
-                  <TableCell sx={{ fontSize: 12 }}>{p.session}</TableCell>
-                  <TableCell sx={{ fontSize: 12 }}>
-                    <Chip
-                      label={p.type}
-                      size="small"
-                      sx={{ height: 20, fontSize: 10, borderRadius: 1 }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ fontSize: 12 }}>{p.dur}</TableCell>
-                  <TableCell sx={{ fontSize: 12, fontWeight: 600 }}>{fmtInr(p.amount)}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={p.status}
-                      size="small"
-                      sx={{
-                        height: 20,
-                        fontSize: 10,
-                        borderRadius: 1,
-                        fontWeight: 500,
-                        ...(p.status === "Completed"
-                          ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" }
-                          : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)" }),
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ fontSize: 11, fontFamily: "monospace", color: "text.secondary" }}>
-                    {p.txn}
-                  </TableCell>
-                  <TableCell>
-                    {p.inv !== "–" ? (
-                      <Button
-                        size="small"
-                        startIcon={<FileText size={12} />}
-                        sx={{ fontSize: 11, textTransform: "none", p: 0, color: "text.secondary" }}
-                      >
-                        {p.inv}
-                      </Button>
-                    ) : (
-                      <Typography variant="caption" color="text.disabled">–</Typography>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
 
       {/* ── Edit profile dialog ───────────────────────────────────────────── */}
       <Dialog

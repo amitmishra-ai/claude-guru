@@ -4,7 +4,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import { Calendar, Clock, AlertTriangle } from "lucide-react";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
   setLeavePopoverNaId,
@@ -96,7 +98,7 @@ export function LeavePopover({
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1.5 }}>
-          <Calendar style={{ width: 14, height: 14, opacity: 0.6 }} />
+          <CalendarTodayOutlinedIcon sx={{ fontSize: 14, opacity: 0.6 }} />
           <Typography variant="body2" color="text.secondary">
             {isMultiDay
               ? `${fmtDateNice(groupBlocks[0].dateYmd)} – ${fmtDateNice(groupBlocks[groupBlocks.length - 1].dateYmd)}`
@@ -105,7 +107,7 @@ export function LeavePopover({
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.75 }}>
-          <Clock style={{ width: 14, height: 14, opacity: 0.6 }} />
+          <AccessTimeOutlinedIcon sx={{ fontSize: 14, opacity: 0.6 }} />
           <Typography variant="body2" color="text.secondary">
             {fmtTime12(na.start)} – {fmtTime12(na.end)}
           </Typography>
@@ -137,7 +139,7 @@ export function LeavePopover({
         ) : (
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.5 }}>
-              <AlertTriangle style={{ width: 14, height: 14, color: 'var(--gl-warning-icon)' }} />
+              <WarningAmberOutlinedIcon sx={{ fontSize: 14, color: 'var(--gl-warning-icon)' }} />
               <Typography variant="body2" fontWeight={500}>
                 Cancel this leave?
               </Typography>

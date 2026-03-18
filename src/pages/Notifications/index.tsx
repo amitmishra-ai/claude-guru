@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCheck } from "lucide-react";
+import DoneAllOutlinedIcon from "@mui/icons-material/DoneAllOutlined";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -112,7 +112,7 @@ export default function NotificationsPage() {
           <Button
             variant="text"
             size="small"
-            startIcon={<CheckCheck style={{ width: 14, height: 14 }} />}
+            startIcon={<DoneAllOutlinedIcon sx={{ fontSize: 14 }} />}
             sx={{ borderRadius: "4px", fontSize: "0.75rem", flexShrink: 0 }}
             onClick={() => dispatch(markAllRead())}
           >

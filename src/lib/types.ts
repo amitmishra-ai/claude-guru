@@ -9,6 +9,7 @@ export type SessionType =
   | "Schedule a call"
   | "Industry session"
   | "Online class"
+  | "Mentored Learning session"
   | "Others";
 
 export type AudienceType = "Individual" | "Group" | "Batch" | "Webinar";
@@ -33,6 +34,8 @@ export type LearnerContext = {
 export type Session = {
   id: string;
   title: string;
+  topic?: string;
+  batch?: string;
   program: string;
   cohort: string;
   group: string;
@@ -61,6 +64,20 @@ export type Session = {
   paymentModel?: PaymentModel;
   hourlyRateInr?: number;
   totalEarningsInr?: number;
+};
+
+// ─── Planned Event Types ────────────────────────────────────────────────────
+
+export type PlannedEvent = {
+  id: string;
+  sessionType: SessionType;
+  title: string;
+  batch: string;
+  program: string;
+  contactEmail: string;
+  startDateYmd: string;
+  endDateYmd: string;
+  status: "to_be_confirmed" | "confirmed";
 };
 
 // ─── Request Types ──────────────────────────────────────────────────────────
@@ -216,6 +233,8 @@ export type MonthlyEarning = {
 export type DeclinedSession = {
   id: string;
   title: string;
+  topic?: string;
+  batch?: string;
   program: string;
   cohort: string;
   dateYmd: string;

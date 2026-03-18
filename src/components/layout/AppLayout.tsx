@@ -6,6 +6,7 @@ import { MobileNav } from "./MobileNav";
 import { MobileAppBar } from "./MobileAppBar";
 import { ToastViewport } from "@/components/shared/ToastViewport";
 import { GlobalDialogs } from "@/components/dialogs";
+import { DevPanel } from "@/components/dev/DevPanel";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setIsDarkMode } from "@/store/slices/uiSlice";
 
@@ -42,7 +43,7 @@ export function AppLayout() {
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: isNavCollapsed ? "84px minmax(0, 1fr)" : "260px minmax(0, 1fr)" },
+        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: isNavCollapsed ? "80px minmax(0, 1fr)" : "256px minmax(0, 1fr)" },
         transition: "grid-template-columns 0.2s",
       }}
     >
@@ -65,6 +66,7 @@ export function AppLayout() {
       <MobileNav />
       <ToastViewport />
       <GlobalDialogs />
+      <DevPanel />
     </Box>
   );
 }

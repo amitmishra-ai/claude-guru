@@ -1,12 +1,12 @@
+import React from "react";
 import Box from "@mui/material/Box";
-import type { LucideIcon } from "lucide-react";
 
 export function SectionTitle({
   icon: Icon,
   title,
   subtitle,
 }: {
-  icon: LucideIcon;
+  icon: React.ElementType;
   title: string;
   subtitle?: string;
 }) {
@@ -23,7 +23,7 @@ export function SectionTitle({
             p: 1,
           }}
         >
-          <Icon style={{ width: 16, height: 16 }} />
+          <Icon sx={{ fontSize: 16 }} />
         </Box>
         <Box>
           <Box sx={{ fontSize: "1.125rem", fontWeight: 600 }}>{title}</Box>
