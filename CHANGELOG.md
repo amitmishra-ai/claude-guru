@@ -4,6 +4,16 @@ All notable changes to the Guru Dashboard are documented here.
 
 ---
 
+## 2026-03-18
+
+### Home Page
+- **Add Planned Events section** — New "Planned Events (subject to change)" section inside the Upcoming tab on the Home page. Shows date range, session type, batch, contact email, and "To be confirmed" status. Disappears when switching to Completed or Declined tabs. Added `PlannedEvent` type and demo data.
+
+### Components Page (Dev Mode)
+- **Add Components page** — New `/components` route accessible from the Dev Panel. Showcases all session card variants: Next Session, Confirmed Session, Scheduled Session, Declined Session, and Planned Event Card. Entry point added to Dev Panel under "Dev Tools" section.
+
+---
+
 ## 2026-03-17
 
 ### Course Page

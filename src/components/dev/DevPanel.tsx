@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Fab from "@mui/material/Fab";
@@ -15,6 +16,7 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import CodeOutlinedIcon from "@mui/icons-material/CodeOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
   toggleDevPanel,
@@ -28,6 +30,7 @@ const DRAWER_WIDTH = 320;
 
 export function DevPanel() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const isOpen = useAppSelector((s) => s.devPanel.isOpen);
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
 
@@ -166,12 +169,35 @@ export function DevPanel() {
 
         <Divider sx={{ my: 2, mx: 2.5 }} />
 
-        {/* Future features placeholder */}
-        <Box sx={{ px: 2.5 }}>
-          <Typography variant="caption" color="text.disabled">
-            More dev tools coming soon...
-          </Typography>
+        {/* Dev Tools */}
+        <Box sx={{ px: 2.5, pb: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.5 }}>
+            <CodeOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+            <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Dev Tools
+            </Typography>
+          </Stack>
         </Box>
+
+        <List dense sx={{ px: 1, py: 0 }}>
+          <ListItemButton
+            sx={{ borderRadius: 1.5, mx: 0.5, mb: 0.5, py: 0.75 }}
+            onClick={() => {
+              navigate("/components");
+              dispatch(setDevPanelOpen(false));
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <ViewListOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Components"
+              secondary="Session cards & variants"
+              primaryTypographyProps={{ variant: "body2", fontWeight: 500 }}
+              secondaryTypographyProps={{ variant: "caption" }}
+            />
+          </ListItemButton>
+        </List>
       </Drawer>
     </>
   );

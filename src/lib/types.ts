@@ -66,6 +66,20 @@ export type Session = {
   totalEarningsInr?: number;
 };
 
+// ─── Planned Event Types ────────────────────────────────────────────────────
+
+export type PlannedEvent = {
+  id: string;
+  sessionType: SessionType;
+  title: string;
+  batch: string;
+  program: string;
+  contactEmail: string;
+  startDateYmd: string;
+  endDateYmd: string;
+  status: "to_be_confirmed" | "confirmed";
+};
+
 // ─── Request Types ──────────────────────────────────────────────────────────
 
 export type RequestSlot = {

@@ -1,5 +1,5 @@
 import { minutes } from "@/lib/helpers";
-import type { Session, LearnerRating, SessionFeedbackSummary, RatingHistoryEntry, MonthlyEarning, DeclinedSession, Busy, CohortStart, CourseCatalogItem, CourseModuleData } from "@/lib/types";
+import type { Session, LearnerRating, SessionFeedbackSummary, RatingHistoryEntry, MonthlyEarning, DeclinedSession, Busy, CohortStart, CourseCatalogItem, CourseModuleData, PlannedEvent } from "@/lib/types";
 
 export const demoSessions: Session[] = [
   {
@@ -1445,4 +1445,18 @@ export const demoCourseCatalog: CourseCatalogItem[] = [
   { id: "p24", title: "Database design: Normalisation & ER modelling",              program: "PGP-SE",  batch: "Cohort May", role: "Course Mentor",    topics: ["database", "sql", "normalisation", "er model"],              isNew: false, status: "past", color: "#EF4444", pattern: 6  },
   { id: "p25", title: "Hypothesis testing in business decisions",                   program: "PGP-BA",  batch: "Cohort Apr", role: "Industry Expert",  topics: ["hypothesis testing", "statistics", "a/b testing"],           isNew: false, status: "past", color: "#0D9488", pattern: 9  },
   { id: "p26", title: "Computer vision: Object detection & image segmentation",     program: "AIML",    batch: "Cohort Apr", role: "Teacher",          topics: ["computer vision", "object detection", "deep learning"],      isNew: false, status: "past", color: "#1D4ED8", pattern: 4  },
+];
+
+export const demoPlannedEvents: PlannedEvent[] = [
+  {
+    id: "pe1",
+    sessionType: "Online session",
+    title: "Machine Learning",
+    batch: "PGP-AIML-BA-UTA-Nov25-C",
+    program: "PGP-AIML",
+    contactEmail: "gurus_support@greatlearning.in",
+    startDateYmd: "2026-01-22",
+    endDateYmd: "2026-02-14",
+    status: "to_be_confirmed",
+  },
 ];

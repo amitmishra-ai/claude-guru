@@ -9,7 +9,6 @@ import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
@@ -20,6 +19,7 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
@@ -78,7 +78,7 @@ import {
   fmtTime,
 } from "@/lib/helpers";
 import { demoNow, DOW_LONG, timeOptions12 } from "@/lib/constants";
-import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions } from "@/data/demo-sessions";
+import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions, demoPlannedEvents } from "@/data/demo-sessions";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import type { Session, SessionType } from "@/lib/types";
 
@@ -533,6 +533,50 @@ export default function DashboardPage() {
                         <Typography variant="body2" color="text.secondary">No upcoming sessions.</Typography>
                       )}
                     </Stack>
+
+                    {/* ── Planned Events (subject to change) ── */}
+                    <Divider sx={{ mt: 2.5, mb: 0 }} />
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 2, mb: 1.5 }}>
+                      <Typography variant="subtitle2" fontWeight={600}>Planned Events</Typography>
+                      <Typography variant="caption" color="text.secondary">(subject to change)</Typography>
+                    </Stack>
+                    {demoPlannedEvents.length > 0 ? (
+                      <Stack spacing={1.5}>
+                        {demoPlannedEvents.map((pe) => {
+                          const statusCfg = pe.status === "to_be_confirmed"
+                            ? { label: "To be confirmed", bg: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "var(--gl-status-pending-border)" }
+                            : { label: "Confirmed", bg: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "var(--gl-status-confirmed-border)" };
+                          return (
+                            <Card key={pe.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+                              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                                <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
+                                  {pe.sessionType}: {pe.title}
+                                </Typography>
+                                <Chip
+                                  label={statusCfg.label}
+                                  size="small"
+                                  sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }}
+                                />
+                              </Stack>
+                              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+                                <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+                                <Typography variant="caption" color="text.secondary">
+                                  {fmtDateNice(pe.startDateYmd)} &ndash; {fmtDateNice(pe.endDateYmd)} &bull; {pe.batch}
+                                </Typography>
+                              </Stack>
+                              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 0.25 }}>
+                                <MailOutlineIcon sx={{ fontSize: 12, color: "text.secondary" }} />
+                                <Typography variant="caption" color="text.secondary">{pe.contactEmail}</Typography>
+                              </Stack>
+                            </Card>
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
+                        No planned events at this moment!
+                      </Typography>
+                    )}
                   </Box>
                 )}
 
@@ -692,6 +736,7 @@ export default function DashboardPage() {
                     )}
                   </>
                 )}
+
               </Stack>
             </Card>
           </Stack>
