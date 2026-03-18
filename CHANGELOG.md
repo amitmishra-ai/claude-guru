@@ -10,7 +10,16 @@ All notable changes to the Guru Dashboard are documented here.
 - **Add Planned Events section** — New "Planned Events (subject to change)" section inside the Upcoming tab on the Home page. Shows date range, session type, batch, contact email, and "To be confirmed" status. Disappears when switching to Completed or Declined tabs. Added `PlannedEvent` type and demo data.
 
 ### Components Page (Dev Mode)
-- **Add Components page** — New `/components` route accessible from the Dev Panel. Showcases all session card variants: Next Session, Confirmed Session, Scheduled Session, Declined Session, and Planned Event Card. Entry point added to Dev Panel under "Dev Tools" section.
+- **Add Components page** — New `/components` route accessible from the Dev Panel. Entry point added under "Dev Tools" section.
+- **Persona-based card variants** — Components page now reacts to the selected Guru Role from the Dev Panel. Each role shows its relevant activity types with Confirmed, Tentative, Scheduled, and Completed card states:
+  - **Teacher**: Residency + Online Session
+  - **Course Mentor**: Online Session + Residency
+  - **Career Mentor**: Career/Mock Interview Sessions + CV Review
+  - **CV Review Mentor**: CV Review
+  - **Evaluator**: Evaluation (Assignment) with star-icons-only rating
+  - **Moderator**: Moderation (Discussion Question) with star-icons-only rating
+  - **Project Mentor**: Capstone Project with milestone dates
+  - **Industry Expert**: Online Session
 
 ---
 
