@@ -472,7 +472,7 @@ export default function CalendarPage() {
               Set your availability to get started
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto' }}>
-              Without marking your availability, no sessions will be scheduled with you. Let learners know when you're free so they can book time with you.
+              Without marking your availability, no events will be scheduled with you. Let learners know when you're free so they can book time with you.
             </Typography>
           </Box>
           <Button
@@ -1448,7 +1448,7 @@ export default function CalendarPage() {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>{weekStats.total}</Typography>
-                <Typography variant="caption" color="text.secondary">Sessions</Typography>
+                <Typography variant="caption" color="text.secondary">Events</Typography>
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -1492,7 +1492,7 @@ export default function CalendarPage() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <ErrorOutlineIcon sx={{ fontSize: 16, color: 'var(--gl-cal-session-scheduled-border)' }} />
                   <Typography variant="body2">
-                    {weekStats.unconfirmedCount} unconfirmed session{weekStats.unconfirmedCount > 1 ? "s" : ""}
+                    {weekStats.unconfirmedCount} unconfirmed event{weekStats.unconfirmedCount > 1 ? "s" : ""}
                   </Typography>
                 </Box>
               </Box>

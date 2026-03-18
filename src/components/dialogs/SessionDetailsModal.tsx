@@ -124,7 +124,7 @@ export function SessionDetailsModal() {
     >
       <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          Session details
+          Event details
           <IconButton size="small" onClick={handleClose} sx={{ color: "text.secondary" }}>
             <CloseOutlinedIcon sx={{ fontSize: 18 }} />
           </IconButton>
@@ -267,10 +267,10 @@ export function SessionDetailsModal() {
                 </SectionBox>
               )}
 
-              {/* Preparation / Session materials */}
+              {/* Preparation / Event materials */}
               {!isMentoring && session.prepMaterials && session.prepMaterials.length > 0 && (
                 <SectionBox>
-                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>Session materials</Typography>
+                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>Event materials</Typography>
                   <Stack spacing={0.75}>
                     {session.prepMaterials.map((m) => (
                       <Stack
@@ -371,7 +371,7 @@ export function SessionDetailsModal() {
                   {session.paymentModel === "hourly" && session.hourlyRateInr && (
                     <InfoRow label="Hourly rate">{fmtInr(session.hourlyRateInr)}/hr</InfoRow>
                   )}
-                  <InfoRow label="Session fee">{fmtInr(session.paymentAmountInr)}</InfoRow>
+                  <InfoRow label="Event fee">{fmtInr(session.paymentAmountInr)}</InfoRow>
 
                   {isCompleted && (
                     <>
@@ -447,7 +447,7 @@ export function SessionDetailsModal() {
               )}
             </Stack>
           ) : (
-            <Typography variant="body2" color="text.secondary">No session selected.</Typography>
+            <Typography variant="body2" color="text.secondary">No event selected.</Typography>
           )}
         </DialogContent>
 

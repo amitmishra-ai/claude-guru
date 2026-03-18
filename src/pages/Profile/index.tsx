@@ -123,7 +123,7 @@ export default function ProfilePage() {
   // KPI tiles config for Performance
   const kpiTiles = [
     { icon: <StarOutlinedIcon sx={{ fontSize: 14 }} />, label: "Avg rating",     value: avgRating,  delta: "+0.12 MoM", deltaColor: "success.main" },
-    { icon: <VisibilityOutlinedIcon sx={{ fontSize: 14 }} />,  label: "Rated sessions", value: demoRatingHistory.length, delta: null },
+    { icon: <VisibilityOutlinedIcon sx={{ fontSize: 14 }} />,  label: "Rated events", value: demoRatingHistory.length, delta: null },
     { icon: <GroupsOutlinedIcon sx={{ fontSize: 14 }} />, label: "Coverage",     value: "92%",      delta: null },
     { icon: <TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />, label: "NPS proxy", value: 74,        delta: null },
   ];

@@ -61,7 +61,7 @@ export function CompletedSessionDetailDialog() {
             bgcolor: "background.paper", px: 3, py: 2,
           }}
         >
-          Session details
+          Event details
         </DialogTitle>
 
         <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", p: "1.5rem" }}>

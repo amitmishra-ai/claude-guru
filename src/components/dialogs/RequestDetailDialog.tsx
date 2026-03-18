@@ -34,7 +34,7 @@ export function RequestDetailDialog() {
         dispatch(setRequestFocus(null));
       }}
     >
-      <DialogTitle>Session request</DialogTitle>
+      <DialogTitle>Event request</DialogTitle>
 
       <DialogContent>
         {requestFocus ? (

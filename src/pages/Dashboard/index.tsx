@@ -283,7 +283,7 @@ export default function DashboardPage() {
               Set your availability to get started
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto' }}>
-              Without marking your availability, no sessions will be scheduled with you. Let learners know when you're free so they can book time with you.
+              Without marking your availability, no events will be scheduled with you. Let learners know when you're free so they can book time with you.
             </Typography>
           </Box>
           <Button
@@ -332,7 +332,7 @@ export default function DashboardPage() {
                         chipColor="var(--gl-status-declined-text)"
                         chipBg="var(--gl-status-declined-bg)"
                         chipBorder="var(--gl-status-declined-border)"
-                        title="Confirm upcoming sessions"
+                        title="Confirm upcoming events"
                         description="Confirm by Wednesday 6 PM so our team can finalize allocations."
                         extra={<Chip label={`Confirmed ${confirmedCount} / ${upcomingSessions.length}`} size="small" />}
                         action={
@@ -350,9 +350,9 @@ export default function DashboardPage() {
             {/* ── Big container for entire left section ── */}
             <Card sx={{ p: 2 }}>
               <Stack spacing={2.5}>
-                {/* Next Session */}
+                {/* Next Event */}
                 <Box>
-                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Next Session</Typography>
+                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Next Event</Typography>
                   <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 }, bgcolor: 'hsl(var(--md-primary-container) / 0.12)', borderColor: 'hsl(var(--md-primary) / 0.4)' }}>
                     {nextSession ? (
                       <SessionCard
@@ -374,9 +374,9 @@ export default function DashboardPage() {
                                   size="small"
                                   startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}
                                   disabled={!joinEnabled}
-                                  onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
+                                  onClick={() => dispatch(pushToast({ title: "Joining event", description: "Launching join link..." }))}
                                 >
-                                  Join session
+                                  Join event
                                 </Button>
                               );
                             })()}
@@ -384,9 +384,9 @@ export default function DashboardPage() {
                               variant="soft"
                               size="small"
                               startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                              onClick={() => dispatch(pushToast({ title: "Session Materials", description: "Opening session materials..." }))}
+                              onClick={() => dispatch(pushToast({ title: "Event Materials", description: "Opening event materials..." }))}
                             >
-                              Session Materials
+                              Event Materials
                             </Button>
                           </>
                         }
@@ -400,7 +400,7 @@ export default function DashboardPage() {
                         }
                       />
                     ) : (
-                      <Typography variant="body2" color="text.secondary">No upcoming sessions.</Typography>
+                      <Typography variant="body2" color="text.secondary">No upcoming events.</Typography>
                     )}
                   </Card>
                 </Box>
@@ -434,7 +434,7 @@ export default function DashboardPage() {
                 {homeSessionsView === "next" && (
                   <Box>
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-                      <Typography variant="subtitle2" fontWeight={600}>Sessions</Typography>
+                      <Typography variant="subtitle2" fontWeight={600}>Events</Typography>
                       <Typography variant="caption" color="text.secondary">{confirmedCount}/{upcomingSessions.length} confirmed</Typography>
                     </Stack>
                     <Stack spacing={1.5}>
@@ -472,9 +472,9 @@ export default function DashboardPage() {
                                       variant="soft"
                                       size="small"
                                       startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                                      onClick={() => dispatch(pushToast({ title: "Downloading session materials", description: "Preparing download..." }))}
+                                      onClick={() => dispatch(pushToast({ title: "Downloading event materials", description: "Preparing download..." }))}
                                     >
-                                      Session Materials
+                                      Event Materials
                                     </Button>
                                     <Button
                                       variant="soft"
@@ -530,7 +530,7 @@ export default function DashboardPage() {
                           );
                         })
                       ) : (
-                        <Typography variant="body2" color="text.secondary">No upcoming sessions.</Typography>
+                        <Typography variant="body2" color="text.secondary">No upcoming events.</Typography>
                       )}
                     </Stack>
 
@@ -584,9 +584,9 @@ export default function DashboardPage() {
                 {homeSessionsView === "completed" && (
                   <>
                     <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220 } }}>
-                      <InputLabel>Filter by session type</InputLabel>
+                      <InputLabel>Filter by event type</InputLabel>
                       <Select
-                        label="Filter by session type"
+                        label="Filter by event type"
                         value={selectedSessionType}
                         onChange={(e) => dispatch(setSelectedSessionType(e.target.value as typeof selectedSessionType))}
                       >
@@ -661,7 +661,7 @@ export default function DashboardPage() {
                         })}
                       </Stack>
                     ) : (
-                      <Typography variant="body2" color="text.secondary">No completed sessions yet.</Typography>
+                      <Typography variant="body2" color="text.secondary">No completed events yet.</Typography>
                     )}
                   </>
                 )}
@@ -692,7 +692,7 @@ export default function DashboardPage() {
                                     onClick={() => {
                                       dispatch(acceptSession(s.id));
                                       dispatch(removeUnavailableBySessionId(s.id));
-                                      dispatch(pushToast({ title: "Session accepted", description: `${s.title} · ${fmtDateNice(s.dateYmd)}` }));
+                                      dispatch(pushToast({ title: "Event accepted", description: `${s.title} · ${fmtDateNice(s.dateYmd)}` }));
                                     }}
                                   >
                                     Accept
@@ -732,7 +732,7 @@ export default function DashboardPage() {
                     )}
 
                     {declinedSessions.length === 0 && demoPreviouslyDeclinedSessions.length === 0 && (
-                      <Typography variant="body2" color="text.secondary">No declined sessions.</Typography>
+                      <Typography variant="body2" color="text.secondary">No declined events.</Typography>
                     )}
                   </>
                 )}
@@ -748,14 +748,14 @@ export default function DashboardPage() {
             <Card sx={{ p: 2 }}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>Tasks</Typography>
               <Stack spacing={2}>
-                {/* Confirm sessions task */}
+                {/* Confirm events task */}
                 {needsWednesdayConfirm && (
                   <TaskCard
                     chipLabel="Action Needed"
                     chipColor="var(--gl-status-declined-text)"
                     chipBg="var(--gl-status-declined-bg)"
                     chipBorder="var(--gl-status-declined-border)"
-                    title="Confirm upcoming sessions"
+                    title="Confirm upcoming events"
                     description="Confirm by Wednesday 6 PM so our team can finalize allocations."
                     extra={<Chip label={`${confirmedCount} / ${upcomingSessions.length}`} size="small" />}
                     action={

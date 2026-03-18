@@ -62,7 +62,7 @@ export function SessionDetailDialog() {
     >
       <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2 }}>
-          Session details &amp; confirmation
+          Event details &amp; confirmation
         </DialogTitle>
 
         <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", p: 0 }}>
@@ -101,9 +101,9 @@ export function SessionDetailDialog() {
                             variant="soft"
                             size="small"
                             startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                            onClick={() => dispatch(pushToast({ title: "Downloading session materials", description: "Preparing download..." }))}
+                            onClick={() => dispatch(pushToast({ title: "Downloading event materials", description: "Preparing download..." }))}
                           >
-                            Session Materials
+                            Event Materials
                           </Button>
                           <Button
                             variant="soft"

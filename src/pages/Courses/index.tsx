@@ -175,12 +175,12 @@ function CourseCard({
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.75 }}>
               <CalendarMonthIcon sx={{ fontSize: 14, color: "text.secondary" }} />
               <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                {isPast ? "Sessions taught" : "Upcoming sessions"}
+                {isPast ? "Events taught" : "Upcoming events"}
               </Typography>
             </Box>
             {mapped.length === 0 ? (
               <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic" }}>
-                {isPast ? "No sessions yet." : "No sessions scheduled yet."}
+                {isPast ? "No events yet." : "No events scheduled yet."}
               </Typography>
             ) : (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, alignItems: "center" }}>
@@ -449,7 +449,7 @@ export default function CoursesPage() {
       <PageHeader
         icon={DescriptionOutlinedIcon}
         title="Courses"
-        subtitle="Track your teaching assignments, sessions and learning content"
+        subtitle="Track your teaching assignments, events and learning content"
         action={
           <Box sx={{ display: { xs: "none", sm: "flex" } }}>
             <SearchFilterBar

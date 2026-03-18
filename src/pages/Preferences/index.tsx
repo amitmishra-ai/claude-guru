@@ -14,11 +14,11 @@ import { setIsDarkMode } from "@/store/slices/uiSlice";
 import type { Preferences } from "@/lib/types";
 
 const commItems: Array<{ key: keyof Preferences; label: string; description: string }> = [
-  { key: "essential", label: "Essential updates", description: "Session confirmations, schedule changes, and ops-critical alerts." },
-  { key: "learnerCC", label: "Learner CC emails", description: "Get CC'd on emails sent to learners about your sessions." },
+  { key: "essential", label: "Essential updates", description: "Event confirmations, schedule changes, and ops-critical alerts." },
+  { key: "learnerCC", label: "Learner CC emails", description: "Get CC'd on emails sent to learners about your events." },
   { key: "batchChatter", label: "Batch chatter", description: "Group-level updates, cohort announcements, forum activity." },
   { key: "systemNoise", label: "System notifications", description: "Product updates, tips, and maintenance alerts." },
-  { key: "reminders", label: "Session reminders", description: "30-minute and 1-day reminders before your sessions." },
+  { key: "reminders", label: "Event reminders", description: "30-minute and 1-day reminders before your events." },
 ];
 
 export default function PreferencesPage() {
