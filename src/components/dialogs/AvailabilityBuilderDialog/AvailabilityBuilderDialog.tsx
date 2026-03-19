@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import FormControl from "@mui/material/FormControl";
@@ -178,16 +179,25 @@ const AvailabilityBuilderDialog = () => {
         </IconButton>
       </FlexBox>
 
-      <DialogContent sx={{ px: 3, pt: 2, pb: 1 }}>
+      <DialogContent sx={{ px: 3, pt: 2, pb: 1, overflow: "hidden" }}>
         {/* Stepper */}
         <Stepper activeStep={step - 1} sx={{ mb: 3 }}>
           <Step><StepLabel>Confirm timezone</StepLabel></Step>
           <Step><StepLabel>Weekly availability</StepLabel></Step>
         </Stepper>
 
-        {step === 1 ? (
-          /* ── Step 1: Timezone confirmation ── */
-          <FlexBox flexDirection="column" gap={3}>
+        <Box sx={{ overflow: "hidden" }}>
+          <Box
+            sx={{
+              display: "flex",
+              width: "200%",
+              transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+              transform: step === 1 ? "translateX(0)" : "translateX(-50%)",
+            }}
+          >
+            {/* ── Step 1: Timezone confirmation ── */}
+            <Box sx={{ width: "50%", flexShrink: 0 }}>
+            <FlexBox flexDirection="column" gap={3}>
             <Typography variant="body2" color="text.secondary">
               Confirm the timezone you'll be teaching in. You can update this later from your profile.
             </Typography>
@@ -212,9 +222,10 @@ const AvailabilityBuilderDialog = () => {
               </FlexBox>
             </FlexBox>
           </FlexBox>
-        ) : (
-          /* ── Step 2: Weekly availability ── */
-          <FlexBox flexDirection="column" gap={1.5}>
+            </Box>
+            {/* ── Step 2: Weekly availability ── */}
+            <Box sx={{ width: "50%", flexShrink: 0 }}>
+            <FlexBox flexDirection="column" gap={1.5}>
             <FlexBox sx={{ border: 1, borderColor: "divider", borderRadius: 1, px: 2, py: 1.5, mb: 1 }}>
               <Typography variant="body2" color="text.secondary">
                 Set recurring availability (office-hours style). Add exceptions later.
@@ -368,7 +379,9 @@ const AvailabilityBuilderDialog = () => {
               </FlexBox>
             )}
           </FlexBox>
-        )}
+            </Box>
+          </Box>
+        </Box>
       </DialogContent>
 
       {/* ── Footer ── */}
