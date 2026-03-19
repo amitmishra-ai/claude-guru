@@ -235,8 +235,6 @@ export default function DashboardPage() {
   const todaySessionIds = new Set(todaySessions.map((s) => s.id));
   const confirmedCount = upcomingSessions.filter((s) => confirmations[s.id] || todaySessionIds.has(s.id)).length;
   const scheduled = upcomingSessions.filter((s) => !confirmations[s.id] && !todaySessionIds.has(s.id));
-  const confirmedCount = upcomingSessions.filter((s) => confirmations[s.id] || s.id === nextSession?.id).length;
-  const scheduled = upcomingSessions.filter((s) => !confirmations[s.id] && s.id !== nextSession?.id);
   const confirmedUpcoming = upcomingSessions.filter((s) => confirmations[s.id]);
 
   // Display lists that account for the exit animation window:
