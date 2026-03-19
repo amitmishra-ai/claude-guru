@@ -64,6 +64,10 @@ export type Session = {
   paymentModel?: PaymentModel;
   hourlyRateInr?: number;
   totalEarningsInr?: number;
+  summary?: {
+    learnerEngagementNotes: string;
+    submittedAtMs: number;
+  };
 };
 
 // ─── Planned Event Types ────────────────────────────────────────────────────

@@ -56,6 +56,7 @@ import {
   setDeclineSessionFocus,
   setDeclineReason,
   setSelectedSessionType,
+  submitSummary,
 } from "@/store/slices/sessionsSlice";
 import { removeUnavailableBySessionId, setPatterns } from "@/store/slices/availabilitySlice";
 import {
@@ -79,7 +80,9 @@ import {
 } from "@/lib/helpers";
 import { demoNow, DOW_LONG, timeOptions12 } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions, demoPlannedEvents } from "@/data/demo-sessions";
-import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
+import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED, STATUS_SUMMARY_NEEDED, STATUS_SUMMARY_SUBMITTED } from "@/components/shared/SessionCard";
+import { InlineSummaryForm } from "@/components/shared/InlineSummaryForm";
+import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import type { Session, SessionType } from "@/lib/types";
 
 const slideOutDown = keyframes`
@@ -160,6 +163,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const sessions = useAppSelector((s) => s.sessions.items);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
+  const summaries = useAppSelector((s) => s.sessions.summaries);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
   const homeSessionsView = useAppSelector((s) => s.sessions.homeSessionsView);
   const hasUserConfiguredAvailability = useAppSelector((s) => s.availability.hasUserConfiguredAvailability);
@@ -175,6 +179,10 @@ export default function DashboardPage() {
 
   /* ── local state for exit animation ─────────────────────────────── */
   const [exitingId, setExitingId] = useState<string | null>(null);
+
+  /* ── inline summary state ──────────────────────────────────────── */
+  const [summarizingSessionId, setSummarizingSessionId] = useState<string | null>(null);
+  const [editingSummaryId, setEditingSummaryId] = useState<string | null>(null);
 
   /* ── inline availability editing state ───────────────────────────── */
   const [editingPatternId, setEditingPatternId] = useState<string | null>(null);
@@ -239,6 +247,7 @@ export default function DashboardPage() {
 
   const needsWednesdayConfirm = scheduled.length > 0;
   const pendingRequestsCount = requests.filter((r) => r.response === "pending").length;
+  const pendingSummaryCount = completedSessions.filter((s) => !summaries[s.id]).length;
 
   return (
     <Stack spacing={2}>
@@ -604,6 +613,9 @@ export default function DashboardPage() {
                           const avg = hasRatings
                             ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(1)
                             : null;
+                          const hasSummary = !!summaries[s.id];
+                          const isSummarizing = summarizingSessionId === s.id;
+                          const isEditing = editingSummaryId === s.id;
                           return (
                             <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
                               <SessionCard
@@ -614,6 +626,7 @@ export default function DashboardPage() {
                                 dateYmd={s.dateYmd}
                                 start={s.start}
                                 end={s.end}
+                                status={hasSummary ? STATUS_SUMMARY_SUBMITTED : STATUS_SUMMARY_NEEDED}
                                 topRight={avg ? (
                                   <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
                                     <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
@@ -622,7 +635,17 @@ export default function DashboardPage() {
                                 ) : undefined}
                                 actions={
                                   <>
-                                    {s.recordingUrl && (
+                                    {!hasSummary && !isSummarizing && (
+                                      <Button
+                                        startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
+                                        variant="contained"
+                                        size="small"
+                                        onClick={() => setSummarizingSessionId(s.id)}
+                                      >
+                                        Write summary
+                                      </Button>
+                                    )}
+                                                    {s.recordingUrl && (
                                       <Button
                                         startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}
                                         variant="soft"
@@ -645,17 +668,58 @@ export default function DashboardPage() {
                                         View ratings
                                       </Button>
                                     )}
-                                    <Button
-                                      startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
-                                      variant="soft"
-                                      size="small"
-                                      onClick={() => navigate("/profile")}
-                                    >
-                                      View in payments
-                                    </Button>
+                                    {hasSummary && (
+                                      <Button
+                                        startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
+                                        variant="soft"
+                                        size="small"
+                                        onClick={() => navigate("/profile")}
+                                      >
+                                        View in payments
+                                      </Button>
+                                    )}
                                   </>
                                 }
                               />
+                              {!hasSummary && !isSummarizing && (
+                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
+                                  Write summary to process invoice
+                                </Typography>
+                              )}
+                              {isSummarizing && (
+                                <InlineSummaryForm
+                                  sessionId={s.id}
+                                  sessionTitle={s.title}
+                                  onCancel={() => setSummarizingSessionId(null)}
+                                />
+                              )}
+                              {hasSummary && !isEditing && (
+                                <Paper variant="outlined" sx={{ p: 1.5, mt: 1.5, borderRadius: 1.5, bgcolor: "action.hover" }}>
+                                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                                    <Typography variant="caption" fontWeight={600}>Session summary</Typography>
+                                    <Button
+                                      startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
+                                      variant="text"
+                                      size="small"
+                                      sx={{ fontSize: 11, minWidth: "auto", p: 0 }}
+                                      onClick={() => setEditingSummaryId(s.id)}
+                                    >
+                                      Edit
+                                    </Button>
+                                  </Stack>
+                                  <Typography variant="body2" color="text.secondary">
+                                    {summaries[s.id].learnerEngagementNotes}
+                                  </Typography>
+                                </Paper>
+                              )}
+                              {isEditing && hasSummary && (
+                                <InlineSummaryForm
+                                  sessionId={s.id}
+                                  sessionTitle={s.title}
+                                  initialNotes={summaries[s.id].learnerEngagementNotes}
+                                  onCancel={() => setEditingSummaryId(null)}
+                                />
+                              )}
                             </Card>
                           );
                         })}
@@ -913,6 +977,23 @@ export default function DashboardPage() {
                     chipBorder="var(--gl-status-declined-border)"
                     title="Add your availability"
                     description={`Keep availability up-to-date for next ${rangeDays} days.`}
+                  />
+                )}
+
+                {/* Session summaries task */}
+                {pendingSummaryCount > 0 && (
+                  <TaskCard
+                    chipLabel={`${pendingSummaryCount} pending`}
+                    chipColor="var(--gl-status-pending-text)"
+                    chipBg="var(--gl-status-pending-bg)"
+                    chipBorder="var(--gl-status-pending-border)"
+                    title="Write session summaries"
+                    description="Capture learner impact to unlock invoice processing."
+                    action={
+                      <Button size="small" variant="soft" onClick={() => dispatch(setHomeSessionsView("completed"))}>
+                        Go to completed events
+                      </Button>
+                    }
                   />
                 )}
 
