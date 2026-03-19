@@ -27,8 +27,7 @@ export function AppLayout() {
       dispatch(setIsDarkMode(false));
       return;
     }
-    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
-    dispatch(setIsDarkMode(Boolean(prefersDark)));
+    dispatch(setIsDarkMode(true));
   }, [dispatch]);
 
   useEffect(() => {

@@ -65,7 +65,7 @@ const initialState: UiState = {
   learnerRatingsSessionId: null,
   markUnavailableTarget: null,
   helloBarDismissed: false,
-  isDarkMode: false,
+  isDarkMode: true,
   isNavCollapsed: true,
 };
 
