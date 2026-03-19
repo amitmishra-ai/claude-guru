@@ -230,7 +230,8 @@ export default function DashboardPage() {
   );
 
   const todayYmd = demoNow.toISOString().slice(0, 10);
-  const nextSession = upcomingSessions.find((s) => s.dateYmd === todayYmd) ?? null;
+  const todaySessions = upcomingSessions.filter((s) => s.dateYmd === todayYmd);
+  const nextSession = todaySessions[0] ?? null;
   const confirmedCount = upcomingSessions.filter((s) => confirmations[s.id] || s.id === nextSession?.id).length;
   const scheduled = upcomingSessions.filter((s) => !confirmations[s.id] && s.id !== nextSession?.id);
   const confirmedUpcoming = upcomingSessions.filter((s) => confirmations[s.id]);
@@ -359,59 +360,90 @@ export default function DashboardPage() {
             {/* ── Big container for entire left section ── */}
             <Card sx={{ p: 2 }}>
               <Stack spacing={2.5}>
-                {/* Next Event */}
+                {/* Next Events */}
                 <Box>
-                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Next Event</Typography>
-                  <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 }, bgcolor: 'hsl(var(--md-primary-container) / 0.12)', borderColor: 'hsl(var(--md-primary) / 0.4)' }}>
-                    {nextSession ? (
-                      <SessionCard
-                        title={nextSession.title}
-                        sessionType={nextSession.sessionType}
-                        topic={nextSession.topic}
-                        batch={nextSession.batch}
-                        dateYmd={nextSession.dateYmd}
-                        start={nextSession.start}
-                        end={nextSession.end}
-                        actions={
-                          <>
-                            {(() => {
-                              const sessionStartMs = dateTimeMs(nextSession.dateYmd, nextSession.start);
-                              const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
-                              return (
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}
-                                  disabled={!joinEnabled}
-                                  onClick={() => dispatch(pushToast({ title: "Joining event", description: "Launching join link..." }))}
-                                >
-                                  Join event
+                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
+                    {todaySessions.length > 0 ? `Next Event${todaySessions.length > 1 ? "s" : ""}` : "Next Event"}
+                  </Typography>
+                  {todaySessions.length > 0 ? (
+                    <Stack spacing={1.5}>
+                      {todaySessions.map((s) => {
+                        const sessionStartMs = dateTimeMs(s.dateYmd, s.start);
+                        const startsWithin30 = sessionStartMs - nowMs <= 30 * 60 * 1000 && sessionStartMs >= nowMs;
+                        const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
+                        return (
+                          <Card
+                            key={s.id}
+                            variant="outlined"
+                            sx={{
+                              p: { xs: 1.5, sm: 2 },
+                              ...(startsWithin30
+                                ? { bgcolor: 'hsl(var(--md-primary-container) / 0.12)', borderColor: 'hsl(var(--md-primary) / 0.4)' }
+                                : {}),
+                            }}
+                          >
+                            {startsWithin30 && (
+                              <Chip
+                                label="Starting soon"
+                                size="small"
+                                sx={{
+                                  mb: 1,
+                                  height: 20,
+                                  fontSize: 10,
+                                  fontWeight: 600,
+                                  borderRadius: 1,
+                                  bgcolor: "var(--gl-status-declined-bg)",
+                                  color: "var(--gl-status-declined-text)",
+                                }}
+                              />
+                            )}
+                            <SessionCard
+                              title={s.title}
+                              sessionType={s.sessionType}
+                              topic={s.topic}
+                              batch={s.batch}
+                              dateYmd={s.dateYmd}
+                              start={s.start}
+                              end={s.end}
+                              actions={
+                                <>
+                                  <Button
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}
+                                    disabled={!joinEnabled}
+                                    onClick={() => dispatch(pushToast({ title: "Joining event", description: "Launching join link..." }))}
+                                  >
+                                    Join event
+                                  </Button>
+                                  <Button
+                                    variant="soft"
+                                    size="small"
+                                    startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                                    onClick={() => dispatch(pushToast({ title: "Event Materials", description: "Opening event materials..." }))}
+                                  >
+                                    Event Materials
+                                  </Button>
+                                </>
+                              }
+                              secondaryAction={
+                                <Button variant="text" size="small" onClick={() => {
+                                  dispatch(setSessionFocus(s));
+                                  dispatch(setOpenSessionDetails(true));
+                                }}>
+                                  View details
                                 </Button>
-                              );
-                            })()}
-                            <Button
-                              variant="soft"
-                              size="small"
-                              startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                              onClick={() => dispatch(pushToast({ title: "Event Materials", description: "Opening event materials..." }))}
-                            >
-                              Event Materials
-                            </Button>
-                          </>
-                        }
-                        secondaryAction={
-                          <Button variant="text" size="small" onClick={() => {
-                            dispatch(setSessionFocus(nextSession));
-                            dispatch(setOpenSessionDetails(true));
-                          }}>
-                            View details
-                          </Button>
-                        }
-                      />
-                    ) : (
+                              }
+                            />
+                          </Card>
+                        );
+                      })}
+                    </Stack>
+                  ) : (
+                    <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
                       <Typography variant="body2" color="text.secondary">No upcoming events.</Typography>
-                    )}
-                  </Card>
+                    </Card>
+                  )}
                 </Box>
 
                 {/* Tabs */}
