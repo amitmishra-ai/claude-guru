@@ -8,6 +8,8 @@ export function ToastViewport() {
   const dispatch = useAppDispatch();
   const toasts = useAppSelector((s) => s.toasts.items);
 
+  const MAX_VISIBLE = 2;
+
   // Auto-dismiss after 3.5 seconds
   useEffect(() => {
     if (!toasts.length) return;
@@ -18,7 +20,16 @@ export function ToastViewport() {
     return () => clearTimeout(timer);
   }, [toasts, dispatch]);
 
+  // Auto-dismiss overflow toasts
+  useEffect(() => {
+    if (toasts.length <= MAX_VISIBLE) return;
+    const overflow = toasts.slice(0, toasts.length - MAX_VISIBLE);
+    overflow.forEach((t) => dispatch(dismissToast(t.id)));
+  }, [toasts, dispatch]);
+
   if (!toasts.length) return null;
+
+  const visibleToasts = toasts.slice(-MAX_VISIBLE);
 
   return (
     <Box
@@ -39,7 +50,7 @@ export function ToastViewport() {
       }}
     >
       <Box sx={{ width: "min(24rem, calc(100vw - 2rem))", display: "flex", flexDirection: "column", gap: 1 }}>
-        {toasts.map((t) => (
+        {visibleToasts.map((t) => (
           <Box
             key={t.id}
             role="status"
