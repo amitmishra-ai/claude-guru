@@ -232,6 +232,9 @@ export default function DashboardPage() {
   const todayYmd = demoNow.toISOString().slice(0, 10);
   const todaySessions = upcomingSessions.filter((s) => s.dateYmd === todayYmd);
   const nextSession = todaySessions[0] ?? null;
+  const todaySessionIds = new Set(todaySessions.map((s) => s.id));
+  const confirmedCount = upcomingSessions.filter((s) => confirmations[s.id] || todaySessionIds.has(s.id)).length;
+  const scheduled = upcomingSessions.filter((s) => !confirmations[s.id] && !todaySessionIds.has(s.id));
   const confirmedCount = upcomingSessions.filter((s) => confirmations[s.id] || s.id === nextSession?.id).length;
   const scheduled = upcomingSessions.filter((s) => !confirmations[s.id] && s.id !== nextSession?.id);
   const confirmedUpcoming = upcomingSessions.filter((s) => confirmations[s.id]);
