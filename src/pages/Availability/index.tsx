@@ -54,7 +54,7 @@ export default function AvailabilityPage() {
             py: 1,
           }}
         >
-          <Box sx={{ fontSize: "11px", color: "hsl(var(--md-on-surface-variant))" }}>Max sessions / week</Box>
+          <Box sx={{ fontSize: "11px", color: "hsl(var(--md-on-surface-variant))" }}>Max events / week</Box>
           <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{maxPerWeek}</Box>
         </Box>
         <Box

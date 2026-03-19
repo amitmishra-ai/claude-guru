@@ -23,12 +23,12 @@ import { demoMonthlyEarnings } from "@/data/demo-sessions";
 
 // ── Demo payments ─────────────────────────────────────────────────────────────
 const demoPayments = [
-  { session: "Deep Learning – Batch 12", type: "Live",     dur: "2h",   amount: 12000, status: "Completed", txn: "TXN-20260215-001", inv: "INV-001" },
-  { session: "NLP Advanced – Batch 8",   type: "Live",     dur: "2h",   amount: 12000, status: "Completed", txn: "TXN-20260210-002", inv: "INV-002" },
-  { session: "RL Workshop",              type: "Workshop", dur: "3h",   amount: 18000, status: "Pending",   txn: "–",                inv: "–" },
-  { session: "MLOps Masterclass",        type: "Live",     dur: "1.5h", amount: 9000,  status: "Completed", txn: "TXN-20260201-003", inv: "INV-003" },
-  { session: "Data Eng – Pipeline",      type: "Live",     dur: "2h",   amount: 12000, status: "Pending",   txn: "–",                inv: "–" },
-  { session: "CV Intro Session",         type: "Recorded", dur: "1h",   amount: 6000,  status: "Completed", txn: "TXN-20260120-004", inv: "INV-004" },
+  { event: "Deep Learning – Batch 12", type: "Live",     dur: "2h",   amount: 12000, status: "Completed", txn: "TXN-20260215-001", inv: "INV-001" },
+  { event: "NLP Advanced – Batch 8",   type: "Live",     dur: "2h",   amount: 12000, status: "Completed", txn: "TXN-20260210-002", inv: "INV-002" },
+  { event: "RL Workshop",              type: "Workshop", dur: "3h",   amount: 18000, status: "Pending",   txn: "–",                inv: "–" },
+  { event: "MLOps Masterclass",        type: "Live",     dur: "1.5h", amount: 9000,  status: "Completed", txn: "TXN-20260201-003", inv: "INV-003" },
+  { event: "Data Eng – Pipeline",      type: "Live",     dur: "2h",   amount: 12000, status: "Pending",   txn: "–",                inv: "–" },
+  { event: "CV Intro Session",         type: "Recorded", dur: "1h",   amount: 6000,  status: "Completed", txn: "TXN-20260120-004", inv: "INV-004" },
 ];
 
 const fmtInr = (n: number) =>
@@ -50,7 +50,7 @@ export default function PaymentsPage() {
         <Box>
           <Typography variant="h5" fontWeight={700}>Payments</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Track your month-on-month payouts and session-wise details.
+            Track your month-on-month payouts and event-wise details.
           </Typography>
         </Box>
       </FlexBox>
@@ -108,7 +108,7 @@ export default function PaymentsPage() {
           <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: "action.hover" }}>
-                {["Session", "Type", "Duration", "Amount", "Status", "Transaction ID", "Invoice"].map((h) => (
+                {["Event", "Type", "Duration", "Amount", "Status", "Transaction ID", "Invoice"].map((h) => (
                   <TableCell key={h} sx={{ fontWeight: 600, fontSize: 11, color: "text.secondary", py: 1.25 }}>
                     {h}
                   </TableCell>
@@ -118,7 +118,7 @@ export default function PaymentsPage() {
             <TableBody>
               {demoPayments.map((p, i) => (
                 <TableRow key={i} sx={{ "&:last-child td": { border: 0 } }}>
-                  <TableCell sx={{ fontSize: 12 }}>{p.session}</TableCell>
+                  <TableCell sx={{ fontSize: 12 }}>{p.event}</TableCell>
                   <TableCell sx={{ fontSize: 12 }}>
                     <Chip
                       label={p.type}

@@ -163,7 +163,7 @@ export function LearnerRatingsDialog() {
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ pb: 0.5 }}>Online session feedback</DialogTitle>
+      <DialogTitle sx={{ pb: 0.5 }}>Online event feedback</DialogTitle>
       <DialogContent
         sx={{
           "&::-webkit-scrollbar": { width: 4 },
@@ -324,7 +324,7 @@ export function LearnerRatingsDialog() {
             </Box>
           </Box>
         ) : (
-          <Typography variant="body2" color="text.secondary">No session selected.</Typography>
+          <Typography variant="body2" color="text.secondary">No event selected.</Typography>
         )}
       </DialogContent>
       <DialogActions>

@@ -59,7 +59,7 @@ export function MarkUnavailableModal() {
         dispatch(declineSession({ id: session.id, dateYmd: session.dateYmd }));
         dispatch(
           pushToast({
-            title: "Session declined",
+            title: "Event declined",
             description: `${session.title} — ${reason}`,
           })
         );

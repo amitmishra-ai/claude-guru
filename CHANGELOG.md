@@ -4,6 +4,21 @@ All notable changes to the Guru Dashboard are documented here.
 
 ---
 
+## 2026-03-19
+
+### Home Page
+- **Rename "Sessions" to "Events" throughout Dashboard** — Changed all user-facing labels: "Next Session" → "Next Event", "Sessions" → "Events", etc.
+
+### Components Page (Dev Mode) — UX Audit
+- **Consistent card structure** — All cards now follow the same 3-row layout: title + status, date/batch info line, actions + View details. No more floating secondary info.
+- **View Details dialogs for all types** — Every activity type (Residency, Online Session, Career, Evaluation, Moderation, Capstone, CV Review) now has a working View Details dialog showing secondary info (group, topic, contact, course link, milestone dates, etc.).
+- **Status chips replace floating text** — "Gathering feedback", "No feedback collected", "Payment pending", "Payment processed" are now consistent Chips with proper styling instead of loose Typography.
+- **Secondary info moved to dialogs** — Group name, topic, contact email, city/map, LMS links, Create Poll, Student Progress, View LinkedIn/CV, milestone dates all moved into View Details.
+- **Disabled state for pending payments** — "View in payments" button is now disabled when payment is pending.
+- **View details button always right-aligned** — Consistent positioning across all card types.
+
+---
+
 ## 2026-03-18
 
 ### Home Page

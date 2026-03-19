@@ -36,7 +36,7 @@ function executeCtaAction(action: string, navigate: (path: string) => void, disp
       navigate("/preferences");
       break;
     case "joinSession":
-      dispatch(pushToast({ title: "Joining session", description: "Launching session link..." }));
+      dispatch(pushToast({ title: "Joining event", description: "Launching event link..." }));
       break;
     default:
       break;

@@ -284,7 +284,7 @@ export function MarkNotAvailableDialog() {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
             <Box sx={{ border: 1, borderColor: 'divider', bgcolor: 'action.hover', p: 1.5 }}>
               <Typography variant="body2" color="text.secondary">
-                Block off a date or period when you are not available for sessions.
+                Block off a date or period when you are not available for events.
               </Typography>
             </Box>
 
@@ -374,7 +374,7 @@ export function MarkNotAvailableDialog() {
                   {totalConflicts} conflicting item{totalConflicts > 1 ? "s" : ""} found
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'warning.dark', mt: 0.5 }}>
-                  The following sessions/requests overlap with your leave period:
+                  The following events/requests overlap with your leave period:
                 </Typography>
               </Box>
             </Box>
@@ -427,7 +427,7 @@ export function MarkNotAvailableDialog() {
             </Box>
 
             <Chip
-              label="Auto-decline sessions & mark requests unavailable"
+              label="Auto-decline events & mark requests unavailable"
               size="small"
               variant={autoDecline ? "filled" : "outlined"}
               onClick={() => setAutoDecline(!autoDecline)}

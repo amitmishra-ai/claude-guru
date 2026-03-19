@@ -217,10 +217,10 @@ const AvailabilityBuilderDialog = () => {
 
         {step === 1 ? (
           <FlexBox flexDirection="column" gap={3}>
-            {/* Max sessions / week */}
+            {/* Max events / week */}
             <FlexBox justifyContent="space-between" alignItems="center" gap={2}>
               <FlexBox flexDirection="column" sx={{ flex: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 700 }}>Max sessions / week</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 700 }}>Max events / week</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Most Gurus are available for 6 sessions a week.
                 </Typography>

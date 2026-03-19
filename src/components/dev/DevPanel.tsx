@@ -192,7 +192,7 @@ export function DevPanel() {
             </ListItemIcon>
             <ListItemText
               primary="Components"
-              secondary="Session cards & variants"
+              secondary="Event cards & variants"
               primaryTypographyProps={{ variant: "body2", fontWeight: 500 }}
               secondaryTypographyProps={{ variant: "caption" }}
             />
