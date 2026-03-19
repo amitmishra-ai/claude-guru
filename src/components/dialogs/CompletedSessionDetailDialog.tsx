@@ -23,6 +23,7 @@ export function CompletedSessionDetailDialog() {
   const navigate = useNavigate();
   const open = useAppSelector((s) => s.ui.openCompletedSession);
   const session = useAppSelector((s) => s.sessions.sessionFocus);
+  const summaries = useAppSelector((s) => s.sessions.summaries);
 
   const close = () => {
     dispatch(setOpenCompletedSession(false));
@@ -126,6 +127,20 @@ export function CompletedSessionDetailDialog() {
               View in payments
             </Button>
           </Stack>
+
+          {/* ── Session summary ── */}
+          {session && summaries[session.id] ? (
+            <Box sx={{ mt: 2.5 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Session summary</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {summaries[session.id].learnerEngagementNotes}
+              </Typography>
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2.5, fontStyle: "italic" }}>
+              No summary written yet. Write one from the Completed tab to unlock invoice processing.
+            </Typography>
+          )}
         </DialogContent>
 
         <DialogActions

@@ -16,6 +16,7 @@ interface SessionsState {
   declineSessionFocus: Session | null;
   declineReason: string;
   recentlyConfirmedIds: Record<string, number>;
+  summaries: Record<string, { learnerEngagementNotes: string; submittedAtMs: number }>;
 }
 
 const initialState: SessionsState = {
@@ -32,6 +33,7 @@ const initialState: SessionsState = {
   declineSessionFocus: null,
   declineReason: "",
   recentlyConfirmedIds: {},
+  summaries: {},
 };
 
 const sessionsSlice = createSlice({
@@ -85,6 +87,12 @@ const sessionsSlice = createSlice({
     setDeclineReason(state, action: PayloadAction<string>) {
       state.declineReason = action.payload;
     },
+    submitSummary(state, action: PayloadAction<{ sessionId: string; learnerEngagementNotes: string }>) {
+      state.summaries[action.payload.sessionId] = {
+        learnerEngagementNotes: action.payload.learnerEngagementNotes,
+        submittedAtMs: Date.now(),
+      };
+    },
   },
 });
 
@@ -103,6 +111,7 @@ export const {
   setDeclineMoveSessionId,
   setDeclineSessionFocus,
   setDeclineReason,
+  submitSummary,
 } = sessionsSlice.actions;
 
 export default sessionsSlice.reducer;
