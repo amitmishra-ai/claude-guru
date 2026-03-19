@@ -1,7 +1,6 @@
 import { useState } from "react";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -27,8 +26,6 @@ import {
   setBuilderDays,
   setBuilderStart,
   setBuilderEnd,
-  setMaxPerWeek,
-  setRangeDays,
   setPatterns,
   setHasUserConfiguredAvailability,
 } from "@/store/slices/availabilitySlice";
@@ -44,8 +41,6 @@ const defaultPresets: PresetCard[] = [
   { key: "weekendAfternoons", label: "Weekend afternoon", days: ["Saturday", "Sunday"], start: "14:00", end: "16:00", enabled: false },
   { key: "weekdayEvenings", label: "Weekday evenings", days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], start: "18:00", end: "20:00", enabled: false },
 ];
-
-const RANGE_OPTIONS = [30, 60, 90, 120, 180];
 
 function fmtTimezoneDisplay(tz: string): string {
   try {
@@ -63,23 +58,17 @@ function fmtTimezoneDisplay(tz: string): string {
 const AvailabilityBuilderDialog = () => {
   const dispatch = useAppDispatch();
 
-  // ── Redux state (UI + domain) ──────────────────────────────────────────────
-  const open         = useAppSelector((s) => s.ui.openAvailability);
-  const step         = useAppSelector((s) => s.availability.availabilityStep);
-  const maxPerWeek   = useAppSelector((s) => s.availability.maxPerWeek);
-  const rangeDays    = useAppSelector((s) => s.availability.rangeDays);
-  const presetCards  = useAppSelector((s) => s.availability.presetCards);
+  const open = useAppSelector((s) => s.ui.openAvailability);
+  const step = useAppSelector((s) => s.availability.availabilityStep);
+  const presetCards = useAppSelector((s) => s.availability.presetCards);
   const draftPatterns = useAppSelector((s) => s.availability.availabilityDraftPatterns);
-  const builderDays  = useAppSelector((s) => s.availability.builderDays);
+  const builderDays = useAppSelector((s) => s.availability.builderDays);
   const builderStart = useAppSelector((s) => s.availability.builderStart);
-  const builderEnd   = useAppSelector((s) => s.availability.builderEnd);
-  const timeZoneMode   = useAppSelector((s) => s.profile.timeZoneMode);
+  const builderEnd = useAppSelector((s) => s.availability.builderEnd);
+  const timeZoneMode = useAppSelector((s) => s.profile.timeZoneMode);
   const manualTimeZone = useAppSelector((s) => s.profile.manualTimeZone);
 
-  // ── RTK Query mutation ─────────────────────────────────────────────────────
   const [saveAvailability, { isLoading: isSaving }] = useSaveAvailabilityMutation();
-
-  // showCustomForm is transient UI — no need to persist to Redux
   const [showCustomForm, setShowCustomForm] = useState(false);
 
   const effectiveTimezone =
@@ -89,7 +78,7 @@ const AvailabilityBuilderDialog = () => {
 
   const cards = presetCards.length ? presetCards : defaultPresets;
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────────────────────
   const handleClose = () => {
     dispatch(setOpenAvailability(false));
     dispatch(setAvailabilityStep(1));
@@ -99,8 +88,6 @@ const AvailabilityBuilderDialog = () => {
   };
 
   const handleNext = () => {
-    dispatch(setMaxPerWeek(maxPerWeek));
-    dispatch(setRangeDays(rangeDays));
     if (!presetCards.length) dispatch(setPresetCards(defaultPresets));
     dispatch(setAvailabilityStep(2));
   };
@@ -132,7 +119,7 @@ const AvailabilityBuilderDialog = () => {
       end: parseHHMM(builderEnd),
     };
     dispatch(setAvailabilityDraftPatterns([...draftPatterns, newPattern]));
-    dispatch(setBuilderDays(["Saturday", "Sunday"]));
+    dispatch(setBuilderDays([]));
     dispatch(setBuilderStart("10:00"));
     dispatch(setBuilderEnd("12:00"));
     setShowCustomForm(false);
@@ -158,10 +145,7 @@ const AvailabilityBuilderDialog = () => {
     ];
 
     try {
-      // RTK Query mutation — calls availabilityApi.saveAvailability
-      await saveAvailability({ patterns: allPatterns, maxPerWeek, rangeDays }).unwrap();
-
-      // Persist confirmed patterns to the Redux availability slice
+      await saveAvailability({ patterns: allPatterns, maxPerWeek: 6, rangeDays: 60 }).unwrap();
       dispatch(setPatterns(allPatterns));
       dispatch(setHasUserConfiguredAvailability(true));
       dispatch(pushToast({
@@ -179,13 +163,8 @@ const AvailabilityBuilderDialog = () => {
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-    >
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      {/* ── Header ── */}
       <FlexBox sx={{ px: 3, pt: 3, pb: 0 }} justifyContent="space-between" alignItems="flex-start">
         <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1.25rem" }}>
           Update availability
@@ -200,77 +179,19 @@ const AvailabilityBuilderDialog = () => {
       </FlexBox>
 
       <DialogContent sx={{ px: 3, pt: 2, pb: 1 }}>
-        {/* Step 2: info banner (above step indicator) */}
-        {step === 2 && (
-          <FlexBox sx={{ border: 1, borderColor: "divider", borderRadius: 1, px: 2, py: 1.5, mb: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Set recurring availability (office-hours style). Add exceptions later.
-            </Typography>
-          </FlexBox>
-        )}
-
         {/* Stepper */}
         <Stepper activeStep={step - 1} sx={{ mb: 3 }}>
-          <Step><StepLabel>Pattern</StepLabel></Step>
+          <Step><StepLabel>Confirm timezone</StepLabel></Step>
           <Step><StepLabel>Weekly availability</StepLabel></Step>
         </Stepper>
 
         {step === 1 ? (
+          /* ── Step 1: Timezone confirmation ── */
           <FlexBox flexDirection="column" gap={3}>
-            {/* Max events / week */}
-            <FlexBox justifyContent="space-between" alignItems="center" gap={2}>
-              <FlexBox flexDirection="column" sx={{ flex: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 700 }}>Max events / week</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Most Gurus are available for 6 sessions a week.
-                </Typography>
-              </FlexBox>
-              <FlexBox
-                alignItems="center"
-                sx={{ border: 1, borderColor: "divider", borderRadius: 1, overflow: "hidden" }}
-              >
-                <IconButton
-                  size="small"
-                  onClick={() => dispatch(setMaxPerWeek(Math.max(1, maxPerWeek - 1)))}
-                  sx={{ borderRadius: 0, px: 1.5, py: 1 }}
-                >
-                  <RemoveOutlinedIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-                <Typography sx={{ minWidth: 36, textAlign: "center", fontWeight: 600, fontSize: "1rem", userSelect: "none" }}>
-                  {maxPerWeek}
-                </Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => dispatch(setMaxPerWeek(maxPerWeek + 1))}
-                  sx={{ borderRadius: 0, px: 1.5, py: 1 }}
-                >
-                  <AddOutlinedIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-              </FlexBox>
-            </FlexBox>
+            <Typography variant="body2" color="text.secondary">
+              Confirm the timezone you'll be teaching in. You can update this later from your profile.
+            </Typography>
 
-            {/* Availability for */}
-            <FlexBox justifyContent="space-between" alignItems="center" gap={2}>
-              <FlexBox flexDirection="column" sx={{ flex: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 700 }}>Availability for</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  How far ahead you want to share your availability.
-                </Typography>
-              </FlexBox>
-              <Select
-                value={RANGE_OPTIONS.includes(rangeDays) ? rangeDays : 60}
-                onChange={(e) => dispatch(setRangeDays(Number(e.target.value)))}
-                size="small"
-                sx={{ borderRadius: 1, minWidth: 140 }}
-                renderValue={(v) => `${v} days`}
-              >
-                {RANGE_OPTIONS.map((opt) => (
-                  <MenuItem key={opt} value={opt}>{opt} days</MenuItem>
-                ))}
-              </Select>
-            </FlexBox>
-
-            {/* Timezone */}
             <FlexBox justifyContent="space-between" alignItems="center" gap={2}>
               <FlexBox flexDirection="column" sx={{ flex: 1 }}>
                 <Typography variant="body1" sx={{ fontWeight: 700 }}>Timezone</Typography>
@@ -292,8 +213,14 @@ const AvailabilityBuilderDialog = () => {
             </FlexBox>
           </FlexBox>
         ) : (
+          /* ── Step 2: Weekly availability ── */
           <FlexBox flexDirection="column" gap={1.5}>
-            {/* Section label */}
+            <FlexBox sx={{ border: 1, borderColor: "divider", borderRadius: 1, px: 2, py: 1.5, mb: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                Set recurring availability (office-hours style). Add exceptions later.
+              </Typography>
+            </FlexBox>
+
             <Typography variant="body2" sx={{ fontWeight: 600, color: "primary.main", mb: 0.5 }}>
               Recommended time slots
             </Typography>
@@ -321,10 +248,7 @@ const AvailabilityBuilderDialog = () => {
                   >
                     {card.enabled ? "Added" : "Add"}
                   </Button>
-                  <Button
-                    variant="text"
-                    size="small"
-                  >
+                  <Button variant="text" size="small">
                     Edit
                   </Button>
                   <IconButton
@@ -375,11 +299,14 @@ const AvailabilityBuilderDialog = () => {
                       label={day.slice(0, 3)}
                       size="small"
                       variant={builderDays.includes(day) ? "filled" : "outlined"}
-                      sx={
-                        builderDays.includes(day)
+                      sx={{
+                        height: 26,
+                        fontSize: "0.7rem",
+                        "& .MuiChip-label": { px: 1 },
+                        ...(builderDays.includes(day)
                           ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }
-                          : {}
-                      }
+                          : {}),
+                      }}
                       onClick={() => toggleDay(day)}
                     />
                   ))}
@@ -433,9 +360,10 @@ const AvailabilityBuilderDialog = () => {
               <FlexBox justifyContent="flex-end" sx={{ mt: 0.5 }}>
                 <Button
                   variant="soft"
+                  startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
                   onClick={() => setShowCustomForm(true)}
                 >
-                  Add another time slot
+                  Add time
                 </Button>
               </FlexBox>
             )}
@@ -443,7 +371,7 @@ const AvailabilityBuilderDialog = () => {
         )}
       </DialogContent>
 
-      {/* ── Footer ─────────────────────────────────────────────────────── */}
+      {/* ── Footer ── */}
       <DialogActions sx={{ px: 3, pb: 3, pt: 2, justifyContent: "space-between" }}>
         {step === 1 ? (
           <>

@@ -299,7 +299,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Main layout ── */}
-      {hasUserConfiguredAvailability && <Grid container spacing={{ xs: 2, md: 3 }}>
+      {hasUserConfiguredAvailability && <Grid container spacing={{ xs: 2, md: 3 }} alignItems="flex-start">
         {/* Left column (2/3) */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Stack>
@@ -743,8 +743,7 @@ export default function DashboardPage() {
         </Grid>
 
         {/* Right column: Tasks sidebar (desktop only) */}
-        <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' } }}>
-          <Box sx={{ position: 'sticky', top: 24 }}>
+        <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' }, alignSelf: 'flex-start', position: 'sticky', top: 24 }}>
             <Card sx={{ p: 2 }}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>Tasks</Typography>
               <Stack spacing={2}>
@@ -935,7 +934,6 @@ export default function DashboardPage() {
                 )}
               </Stack>
             </Card>
-          </Box>
         </Grid>
       </Grid>}
 

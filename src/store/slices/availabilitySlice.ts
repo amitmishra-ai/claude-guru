@@ -54,7 +54,7 @@ const initialState: AvailabilityState = {
   showExternalBusy: true,
   availabilityPreviewMode: "week",
   builderPreset: "weekends",
-  builderDays: ["Saturday", "Sunday"],
+  builderDays: [] as string[],
   builderStart: "10:00",
   builderEnd: "12:00",
   availabilityStep: 1,
