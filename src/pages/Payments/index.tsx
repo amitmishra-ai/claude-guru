@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
@@ -19,6 +19,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import TableHead from "@mui/material/TableHead";
 import Pagination from "@mui/material/Pagination";
 import TableRow from "@mui/material/TableRow";
+import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -99,7 +100,22 @@ type PaymentFilter = "All" | "Completed" | "Pending";
 export default function PaymentsPage() {
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("All");
   const [page, setPage] = useState(0);
+  const [chartLoading, setChartLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(true);
   const rowsPerPage = 30;
+
+  // Simulate initial page load
+  useEffect(() => {
+    const t = setTimeout(() => setChartLoading(false), 800);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Simulate table loading on page/filter change
+  useEffect(() => {
+    setTableLoading(true);
+    const t = setTimeout(() => setTableLoading(false), 600);
+    return () => clearTimeout(t);
+  }, [page, paymentFilter]);
 
   type SortKey = "event" | "type" | "dur" | "amount" | "status" | "txn" | "inv";
   const [sortBy, setSortBy] = useState<SortKey>("event");
@@ -139,26 +155,45 @@ export default function PaymentsPage() {
       {/* ── Earnings overview + chart ── */}
       <Card variant="outlined" sx={{ mb: 2 }}>
         <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-          <FlexBox sx={{ alignItems: "center", gap: 2, mb: 1.5, flexWrap: "wrap" }}>
-            <Box>
-              <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1.2 }}>{fmtInr(totalEarnings)}</Typography>
-              <Typography variant="caption" color="text.secondary">Total earnings</Typography>
-            </Box>
-            <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
-            {[
-              { label: "Avg/month",  value: fmtInr(avgMonthly) },
-              { label: "Best month", value: `${bestMonth.label} (${fmtInr(bestMonth.amount)})` },
-              { label: "MoM trend",  value: (momTrend >= 0 ? "+" : "") + fmtInr(momTrend), color: momTrend >= 0 ? "success.main" : "error.main" },
-            ].map((k) => (
-              <Box key={k.label} sx={{ minWidth: 100 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>{k.label}</Typography>
-                <Typography variant="body2" fontWeight={600} sx={{ color: (k as any).color ?? "text.primary", fontSize: "0.8rem" }}>
-                  {k.value}
-                </Typography>
-              </Box>
-            ))}
-          </FlexBox>
-          <Box sx={{ width: "100%", height: 160 }}>
+          {chartLoading ? (
+            <>
+              <FlexBox sx={{ alignItems: "center", gap: 2, mb: 1.5, flexWrap: "wrap" }}>
+                <Box>
+                  <Skeleton variant="text" width={160} height={36} />
+                  <Skeleton variant="text" width={80} height={16} />
+                </Box>
+                <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+                {[1, 2, 3].map((k) => (
+                  <Box key={k} sx={{ minWidth: 100 }}>
+                    <Skeleton variant="text" width={60} height={14} />
+                    <Skeleton variant="text" width={90} height={18} />
+                  </Box>
+                ))}
+              </FlexBox>
+              <Skeleton variant="rounded" width="100%" height={160} />
+            </>
+          ) : (
+            <>
+              <FlexBox sx={{ alignItems: "center", gap: 2, mb: 1.5, flexWrap: "wrap" }}>
+                <Box>
+                  <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1.2 }}>{fmtInr(totalEarnings)}</Typography>
+                  <Typography variant="caption" color="text.secondary">Total earnings</Typography>
+                </Box>
+                <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+                {[
+                  { label: "Avg/month",  value: fmtInr(avgMonthly) },
+                  { label: "Best month", value: `${bestMonth.label} (${fmtInr(bestMonth.amount)})` },
+                  { label: "MoM trend",  value: (momTrend >= 0 ? "+" : "") + fmtInr(momTrend), color: momTrend >= 0 ? "success.main" : "error.main" },
+                ].map((k) => (
+                  <Box key={k.label} sx={{ minWidth: 100 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>{k.label}</Typography>
+                    <Typography variant="body2" fontWeight={600} sx={{ color: (k as any).color ?? "text.primary", fontSize: "0.8rem" }}>
+                      {k.value}
+                    </Typography>
+                  </Box>
+                ))}
+              </FlexBox>
+              <Box sx={{ width: "100%", height: 160 }}>
             <ResponsiveContainer>
               <BarChart data={chartData} margin={{ top: 8, right: 12, left: -20, bottom: 0 }} barCategoryGap="20%">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
@@ -175,12 +210,26 @@ export default function PaymentsPage() {
                   tickLine={false}
                 />
                 <Tooltip
-                  formatter={(value) => [Number(value) > 0 ? fmtInr(Number(value)) : "No data", "Earnings"]}
-                  labelFormatter={(l) => `${l}`}
-                  contentStyle={{ backgroundColor: "hsl(var(--md-surface))", borderColor: "hsl(var(--md-outline-variant))", borderRadius: 8, color: "hsl(var(--md-on-surface))" }}
-                  labelStyle={{ color: "hsl(var(--md-on-surface))" }}
-                  itemStyle={{ color: "hsl(var(--md-on-surface))" }}
-                  cursor={{ fill: "hsl(var(--md-outline-variant))", opacity: 0.3 }}
+                  cursor={{ fill: "hsl(var(--md-outline-variant))", opacity: 0.15 }}
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length) return null;
+                    const val = Number(payload[0].value ?? 0);
+                    return (
+                      <Chip
+                        size="small"
+                        label={val > 0 ? `${label} · ${fmtInr(val)}` : `${label} · –`}
+                        sx={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          height: 24,
+                          bgcolor: "background.paper",
+                          border: 1,
+                          borderColor: "divider",
+                          boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                        }}
+                      />
+                    );
+                  }}
                 />
                 <Bar
                   dataKey="amount"
@@ -192,6 +241,8 @@ export default function PaymentsPage() {
               </BarChart>
             </ResponsiveContainer>
           </Box>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -238,7 +289,19 @@ export default function PaymentsPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {demoPayments
+              {tableLoading ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton variant="text" width="80%" /></TableCell>
+                    <TableCell><Skeleton variant="rounded" width={48} height={20} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={30} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={60} /></TableCell>
+                    <TableCell><Skeleton variant="rounded" width={64} height={20} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={120} /></TableCell>
+                    <TableCell><Skeleton variant="text" width={56} /></TableCell>
+                  </TableRow>
+                ))
+              ) : demoPayments
                 .filter((p) => paymentFilter === "All" || p.status === paymentFilter)
                 .sort((a, b) => {
                   const av = a[sortBy];
@@ -298,6 +361,7 @@ export default function PaymentsPage() {
                 </TableRow>
               ))}
             </TableBody>
+
           </Table>
         </TableContainer>
         <FlexBox sx={{ justifyContent: "center", py: 1.5, borderTop: 1, borderColor: "divider" }}>
