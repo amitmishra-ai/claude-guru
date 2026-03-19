@@ -706,7 +706,7 @@ export default function DashboardPage() {
                                         startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
                                         variant="soft"
                                         size="small"
-                                        onClick={() => navigate("/profile")}
+                                        onClick={() => navigate(`/payments?highlight=${s.id}`)}
                                       >
                                         View in payments
                                       </Button>

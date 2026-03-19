@@ -30,6 +30,8 @@ import TableRow from "@mui/material/TableRow";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useSearchParams } from "react-router-dom";
+import { keyframes } from "@mui/system";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { submitSummary } from "@/store/slices/sessionsSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
@@ -122,14 +124,32 @@ function build12MonthChart(earnings: typeof demoMonthlyEarnings) {
 
 type PaymentFilter = "All" | "Completed" | "Pending";
 
+const highlightFade = keyframes`
+  0%   { background-color: hsl(var(--md-primary) / 0.18); }
+  100% { background-color: transparent; }
+`;
+
 export default function PaymentsPage() {
   const dispatch = useAppDispatch();
   const summaries = useAppSelector((s) => s.sessions.summaries);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [highlightSessionId, setHighlightSessionId] = useState<string | null>(null);
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("All");
   const [page, setPage] = useState(0);
   const [chartLoading, setChartLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(true);
   const rowsPerPage = 30;
+
+  // Pick up highlight param from URL
+  useEffect(() => {
+    const id = searchParams.get("highlight");
+    if (id) {
+      setHighlightSessionId(id);
+      setSearchParams({}, { replace: true });
+      const t = setTimeout(() => setHighlightSessionId(null), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams, setSearchParams]);
 
   // Summary modal state
   const [summaryModalSessionId, setSummaryModalSessionId] = useState<string | null>(null);
@@ -303,7 +323,13 @@ export default function PaymentsPage() {
                 {pendingReview.map((p) => (
                   <FlexBox
                     key={p.sessionId}
-                    sx={{ border: 1, borderColor: "divider", borderRadius: 1, px: 2, py: 1.25, justifyContent: "space-between", alignItems: "center" }}
+                    sx={{
+                      border: 1, borderColor: "divider", borderRadius: 1, px: 2, py: 1.25,
+                      justifyContent: "space-between", alignItems: "center",
+                      ...(highlightSessionId && p.sessionId === highlightSessionId
+                        ? { animation: `${highlightFade} 1s ease-out forwards` }
+                        : {}),
+                    }}
                   >
                     <Box>
                       <Typography variant="body2" fontWeight={600} sx={{ fontSize: 12 }}>{p.event}</Typography>
@@ -405,7 +431,15 @@ export default function PaymentsPage() {
                 })
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((p, i) => (
-                <TableRow key={i} sx={{ "&:last-child td": { border: 0 } }}>
+                <TableRow
+                  key={i}
+                  sx={{
+                    "&:last-child td": { border: 0 },
+                    ...(highlightSessionId && p.sessionId === highlightSessionId
+                      ? { animation: `${highlightFade} 1s ease-out forwards` }
+                      : {}),
+                  }}
+                >
                   <TableCell sx={{ fontSize: 12 }}>{p.event}</TableCell>
                   <TableCell sx={{ fontSize: 12 }}>
                     <Chip
