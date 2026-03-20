@@ -10,6 +10,10 @@ export type SessionType =
   | "Industry session"
   | "Online class"
   | "Mentored Learning session"
+  | "Residency"
+  | "Evaluation"
+  | "Moderation"
+  | "CV Review"
   | "Others";
 
 export type AudienceType = "Individual" | "Group" | "Batch" | "Webinar";
@@ -241,6 +245,7 @@ export type DeclinedSession = {
   batch?: string;
   program: string;
   cohort: string;
+  sessionType: SessionType;
   dateYmd: string;
   start: number;
   end: number;

@@ -83,7 +83,11 @@ import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDecline
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED, STATUS_SUMMARY_NEEDED, STATUS_SUMMARY_SUBMITTED } from "@/components/shared/SessionCard";
 import { InlineSummaryForm } from "@/components/shared/InlineSummaryForm";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import type { Session, SessionType } from "@/lib/types";
+import { filterSessionsByRole } from "@/lib/role-config";
 
 const slideOutDown = keyframes`
   0%   { opacity: 1; transform: translateY(0)     scale(1);   }
@@ -104,6 +108,10 @@ const SESSION_TYPES: Array<"All" | SessionType> = [
   "Industry session",
   "Online class",
   "Mentored Learning session",
+  "Residency",
+  "Evaluation",
+  "Moderation",
+  "CV Review",
   "Others",
 ];
 
@@ -161,7 +169,9 @@ function TaskCard({
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const sessions = useAppSelector((s) => s.sessions.items);
+  const allSessions = useAppSelector((s) => s.sessions.items);
+  const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
+  const sessions = useMemo(() => filterSessionsByRole(allSessions, selectedRole), [allSessions, selectedRole]);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
   const summaries = useAppSelector((s) => s.sessions.summaries);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
@@ -183,6 +193,10 @@ export default function DashboardPage() {
   /* ── inline summary state ──────────────────────────────────────── */
   const [summarizingSessionId, setSummarizingSessionId] = useState<string | null>(null);
   const [editingSummaryId, setEditingSummaryId] = useState<string | null>(null);
+
+  /* ── planned event detail dialog state ───────────────────────── */
+  const [plannedEventDetailId, setPlannedEventDetailId] = useState<string | null>(null);
+  const plannedEventDetail = demoPlannedEvents.find((pe) => pe.id === plannedEventDetailId) ?? null;
 
   /* ── inline availability editing state ───────────────────────────── */
   const [editingPatternId, setEditingPatternId] = useState<string | null>(null);
@@ -214,7 +228,7 @@ export default function DashboardPage() {
     [sessions, sessionDeclined, nowMs]
   );
   const completedSessions = useMemo(
-    () => sortByDateTime(sessions).filter((s) => isSessionCompleted(s, nowMs)),
+    () => sortByDateTime(sessions).filter((s) => isSessionCompleted(s, nowMs)).reverse(),
     [sessions, nowMs]
   );
   const filteredCompletedSessions = useMemo(
@@ -228,6 +242,9 @@ export default function DashboardPage() {
     () => sessions.filter((s) => sessionDeclined[s.id]),
     [sessions, sessionDeclined]
   );
+
+  const rolePlannedEvents = useMemo(() => filterSessionsByRole(demoPlannedEvents, selectedRole), [selectedRole]);
+  const rolePreviouslyDeclined = useMemo(() => filterSessionsByRole(demoPreviouslyDeclinedSessions, selectedRole), [selectedRole]);
 
   const todayYmd = demoNow.toISOString().slice(0, 10);
   const todaySessions = upcomingSessions.filter((s) => s.dateYmd === todayYmd);
@@ -339,13 +356,12 @@ export default function DashboardPage() {
                   {needsWednesdayConfirm && (
                     <Box sx={{ minWidth: 280, flexShrink: 0 }}>
                       <TaskCard
-                        chipLabel="Action needed"
+                        chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
                         chipColor="var(--gl-status-declined-text)"
                         chipBg="var(--gl-status-declined-bg)"
                         chipBorder="var(--gl-status-declined-border)"
                         title="Confirm upcoming events"
                         description="Confirm by Wednesday 6 PM so our team can finalize allocations."
-                        extra={<Chip label={`Confirmed ${confirmedCount} / ${upcomingSessions.length}`} size="small" />}
                         action={
                           <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
                             Review confirmations
@@ -361,12 +377,12 @@ export default function DashboardPage() {
             {/* ── Big container for entire left section ── */}
             <Card sx={{ p: 2 }}>
               <Stack spacing={2.5}>
-                {/* Next Events */}
+                {/* Next Events — hidden when no today sessions */}
+                {todaySessions.length > 0 && (
                 <Box>
                   <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
-                    {todaySessions.length > 0 ? `Next Event${todaySessions.length > 1 ? "s" : ""}` : "Next Event"}
+                    {todaySessions.length > 1 ? "Next Events" : "Next Event"}
                   </Typography>
-                  {todaySessions.length > 0 ? (
                     <Stack spacing={1.5}>
                       {todaySessions.map((s) => {
                         const sessionStartMs = dateTimeMs(s.dateYmd, s.start);
@@ -440,12 +456,8 @@ export default function DashboardPage() {
                         );
                       })}
                     </Stack>
-                  ) : (
-                    <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-                      <Typography variant="body2" color="text.secondary">No upcoming events.</Typography>
-                    </Card>
-                  )}
                 </Box>
+                )}
 
                 {/* Tabs */}
                 <Tabs
@@ -582,38 +594,119 @@ export default function DashboardPage() {
                       <Typography variant="subtitle2" fontWeight={600}>Planned Events</Typography>
                       <Typography variant="caption" color="text.secondary">(subject to change)</Typography>
                     </Stack>
-                    {demoPlannedEvents.length > 0 ? (
-                      <Stack spacing={1.5}>
-                        {demoPlannedEvents.map((pe) => {
-                          const statusCfg = pe.status === "to_be_confirmed"
-                            ? { label: "To be confirmed", bg: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "var(--gl-status-pending-border)" }
-                            : { label: "Confirmed", bg: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "var(--gl-status-confirmed-border)" };
-                          return (
-                            <Card key={pe.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-                              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-                                <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
-                                  {pe.sessionType}: {pe.title}
-                                </Typography>
-                                <Chip
-                                  label={statusCfg.label}
-                                  size="small"
-                                  sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }}
-                                />
-                              </Stack>
-                              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
-                                <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-                                <Typography variant="caption" color="text.secondary">
-                                  {fmtDateNice(pe.startDateYmd)} &ndash; {fmtDateNice(pe.endDateYmd)} &bull; {pe.batch}
-                                </Typography>
-                              </Stack>
-                              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 0.25 }}>
-                                <MailOutlineIcon sx={{ fontSize: 12, color: "text.secondary" }} />
-                                <Typography variant="caption" color="text.secondary">{pe.contactEmail}</Typography>
-                              </Stack>
-                            </Card>
-                          );
-                        })}
-                      </Stack>
+                    {rolePlannedEvents.length > 0 ? (
+                      <>
+                        {/* Planned Event Detail Dialog */}
+                        <Dialog
+                          open={plannedEventDetail !== null}
+                          onClose={() => setPlannedEventDetailId(null)}
+                          maxWidth="sm"
+                          fullWidth
+                          PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}
+                        >
+                          {plannedEventDetail && (
+                            <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
+                              <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                Event details
+                                <IconButton size="small" onClick={() => setPlannedEventDetailId(null)} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
+                              </DialogTitle>
+                              <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+                                <Stack spacing={2.5}>
+                                  <Box>
+                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+                                      <Chip
+                                        label={plannedEventDetail.status === "to_be_confirmed" ? "To be confirmed" : "Confirmed"}
+                                        size="small"
+                                        sx={{
+                                          bgcolor: plannedEventDetail.status === "to_be_confirmed" ? "var(--gl-status-pending-bg)" : "var(--gl-status-confirmed-bg)",
+                                          color: plannedEventDetail.status === "to_be_confirmed" ? "var(--gl-status-pending-text)" : "var(--gl-status-confirmed-text)",
+                                          border: `1px solid ${plannedEventDetail.status === "to_be_confirmed" ? "var(--gl-status-pending-border)" : "var(--gl-status-confirmed-border)"}`,
+                                          fontWeight: 600,
+                                        }}
+                                      />
+                                      <Chip label={plannedEventDetail.program} size="small" />
+                                      <Chip label={plannedEventDetail.sessionType} size="small" />
+                                    </Stack>
+                                    <Typography variant="h6" fontWeight={600}>{plannedEventDetail.title}</Typography>
+                                  </Box>
+
+                                  {/* Schedule */}
+                                  <Paper variant="outlined" sx={{ borderRadius: "16px", p: 2 }}>
+                                    <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
+                                    <Divider sx={{ mb: 0.5 }} />
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Date range</Typography>
+                                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                                        <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
+                                        <Typography variant="body2" fontWeight={500}>{fmtDateNice(plannedEventDetail.startDateYmd)} &ndash; {fmtDateNice(plannedEventDetail.endDateYmd)}</Typography>
+                                      </Stack>
+                                    </Stack>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Time</Typography>
+                                      <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500}>To be confirmed</Typography>
+                                    </Stack>
+                                  </Paper>
+
+                                  {/* Details */}
+                                  <Paper variant="outlined" sx={{ borderRadius: "16px", p: 2 }}>
+                                    <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
+                                    <Divider sx={{ mb: 0.5 }} />
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Batch</Typography>
+                                      <Typography variant="body2" fontWeight={500}>{plannedEventDetail.batch}</Typography>
+                                    </Stack>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Program</Typography>
+                                      <Typography variant="body2" fontWeight={500}>{plannedEventDetail.program}</Typography>
+                                    </Stack>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Contact</Typography>
+                                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                                        <MailOutlineIcon sx={{ fontSize: 13 }} />
+                                        <Typography variant="body2" fontWeight={500}>{plannedEventDetail.contactEmail}</Typography>
+                                      </Stack>
+                                    </Stack>
+                                  </Paper>
+                                </Stack>
+                              </DialogContent>
+                              <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2 }}>
+                                <Button variant="text" color="inherit" onClick={() => setPlannedEventDetailId(null)}>Close</Button>
+                              </DialogActions>
+                            </Box>
+                          )}
+                        </Dialog>
+
+                        <Stack spacing={1.5}>
+                          {rolePlannedEvents.map((pe) => {
+                            const statusCfg = pe.status === "to_be_confirmed"
+                              ? { label: "To be confirmed", bg: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "var(--gl-status-pending-border)" }
+                              : { label: "Confirmed", bg: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "var(--gl-status-confirmed-border)" };
+                            return (
+                              <Card key={pe.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+                                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                                  <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
+                                    {pe.sessionType}: {pe.title}
+                                  </Typography>
+                                  <Chip
+                                    label={statusCfg.label}
+                                    size="small"
+                                    sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }}
+                                  />
+                                </Stack>
+                                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+                                  <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+                                  <Typography variant="caption" color="text.secondary">
+                                    {fmtDateNice(pe.startDateYmd)} &ndash; {fmtDateNice(pe.endDateYmd)} &bull; {pe.batch}
+                                  </Typography>
+                                </Stack>
+                                <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}>
+                                  <Button variant="text" size="small" onClick={() => setPlannedEventDetailId(pe.id)}>View details</Button>
+                                </Stack>
+                              </Card>
+                            );
+                          })}
+                        </Stack>
+                      </>
                     ) : (
                       <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
                         No planned events at this moment!
@@ -646,87 +739,217 @@ export default function DashboardPage() {
                           const avg = hasRatings
                             ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(1)
                             : null;
+                          const avgNum = hasRatings
+                            ? ratings.reduce((a, r) => a + r.rating, 0) / ratings.length
+                            : 0;
                           const hasSummary = !!summaries[s.id];
                           const isSummarizing = summarizingSessionId === s.id;
                           const isEditing = editingSummaryId === s.id;
+                          const daysSinceSession = (nowMs - new Date(s.dateYmd).getTime()) / (1000 * 60 * 60 * 24);
+                          const feedbackLabel = daysSinceSession > 30 ? "No feedback collected" : "Gathering feedback";
+                          const isMockInterview = s.title.toLowerCase().includes("mock");
+                          const isPaid = s.paymentStatus === "paid";
+                          const hasPaymentStatus = !!s.paymentStatus;
+                          const st = s.sessionType;
+                          const isOnlineType = ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"].includes(st);
+                          const isResidency = st === "Residency";
+                          const isEvaluation = st === "Evaluation";
+                          const isModeration = st === "Moderation";
+                          const isCapstone = st === "Capstone project mentoring session";
+                          const isCVReview = st === "CV Review";
+                          const hasSummaryFlow = isOnlineType; // only online-type sessions have summary
+
+                          // Payment chip helper
+                          const paymentChip = isPaid
+                            ? <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                            : hasPaymentStatus
+                              ? <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                              : null;
+
+                          // Feedback chip helper
+                          const feedbackChip = (
+                            <Chip label={feedbackLabel} size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", ...(daysSinceSession > 30 ? { opacity: 0.7 } : {}) }} />
+                          );
+
+                          // Star rating helpers — numeric for Online/Residency, icons-only for Evaluation/Moderation
+                          const numericRating = avg ? (
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
+                              <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
+                            </Stack>
+                          ) : null;
+
+                          const iconRating = hasRatings ? (
+                            <Stack direction="row" spacing={0.25} alignItems="center">
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <StarOutlinedIcon key={i} sx={{ fontSize: 14, color: i <= Math.round(avgNum) ? "var(--gl-star-color)" : "action.disabled" }} />
+                              ))}
+                            </Stack>
+                          ) : null;
+
+                          // Build top-right per activity type
+                          let topRightContent: React.ReactNode;
+                          if (isCapstone || isCVReview) {
+                            // No rating — just payment chip
+                            topRightContent = paymentChip;
+                          } else if (isEvaluation || isModeration) {
+                            // Star icons only (no numeric)
+                            topRightContent = (
+                              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                                {paymentChip}
+                                {numericRating ?? feedbackChip}
+                              </Stack>
+                            );
+                          } else {
+                            // Online/Residency — numeric star rating
+                            topRightContent = (
+                              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                                {paymentChip}
+                                {numericRating ?? feedbackChip}
+                              </Stack>
+                            );
+                          }
+
+                          // Build actions per activity type
+                          const viewDetailsBtn = (
+                            <Button variant="text" size="small" onClick={() => {
+                              dispatch(setSessionFocus(s));
+                              dispatch(setOpenSessionDetails(true));
+                            }}>
+                              View details
+                            </Button>
+                          );
+
+                          let cardActions: React.ReactNode;
+                          if (isCapstone) {
+                            cardActions = (
+                              <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => dispatch(pushToast({ title: "Student Progress", description: "Loading student progress..." }))}>
+                                View Student Progress
+                              </Button>
+                            );
+                          } else if (isCVReview) {
+                            cardActions = (
+                              <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => dispatch(pushToast({ title: "View CV", description: "Opening reviewed CV..." }))}>
+                                View Reviewed CV
+                              </Button>
+                            );
+                          } else if (isEvaluation || isModeration) {
+                            cardActions = hasRatings ? (
+                              <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => { dispatch(setLearnerRatingsSessionId(s.id)); dispatch(setOpenLearnerRatings(true)); }}>
+                                Detailed Feedback
+                              </Button>
+                            ) : null;
+                          } else if (isResidency) {
+                            cardActions = hasRatings ? (
+                              <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => { dispatch(setLearnerRatingsSessionId(s.id)); dispatch(setOpenLearnerRatings(true)); }}>
+                                Detailed Feedback
+                              </Button>
+                            ) : null;
+                          } else {
+                            // Online session types — full summary flow
+                            cardActions = (
+                              <>
+                                {!hasSummary && !isSummarizing && (
+                                  <Button startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />} variant="contained" size="small"
+                                    onClick={() => setSummarizingSessionId(s.id)}>
+                                    Write summary
+                                  </Button>
+                                )}
+                                {s.recordingUrl && (
+                                  <Button startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
+                                    onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}>
+                                    Watch recording
+                                  </Button>
+                                )}
+                                {hasRatings && (
+                                  <Button startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
+                                    onClick={() => { dispatch(setLearnerRatingsSessionId(s.id)); dispatch(setOpenLearnerRatings(true)); }}>
+                                    Detailed Feedback
+                                  </Button>
+                                )}
+                                {isMockInterview && (
+                                  <Button startIcon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
+                                    onClick={() => dispatch(pushToast({ title: "Share Feedback", description: "Opening mock interview feedback form..." }))}>
+                                    Share Feedback
+                                  </Button>
+                                )}
+                                {hasSummary && (
+                                  <Button startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
+                                    onClick={() => navigate(`/payments?highlight=${s.id}`)}>
+                                    View in payments
+                                  </Button>
+                                )}
+                              </>
+                            );
+                          }
+
+                          // Card title — Residency/Capstone use custom prefix
+                          const cardTitle = isResidency
+                            ? s.title
+                            : isCapstone
+                              ? `Capstone — ${s.batch}`
+                              : isCVReview
+                                ? "CV Review"
+                                : isEvaluation
+                                  ? `Evaluation: ${s.title}`
+                                  : isModeration
+                                    ? `Moderation: ${s.title}`
+                                    : s.title;
+
                           return (
                             <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-                              <SessionCard
-                                title={s.title}
-                                sessionType={s.sessionType}
-                                topic={s.topic}
-                                batch={s.batch}
-                                dateYmd={s.dateYmd}
-                                start={s.start}
-                                end={s.end}
-                                status={hasSummary ? STATUS_SUMMARY_SUBMITTED : STATUS_SUMMARY_NEEDED}
-                                topRight={avg ? (
-                                  <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
-                                    <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
-                                    <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
+                              {/* Card header: title row + date + actions — custom for non-SessionCard types */}
+                              {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
+                                <>
+                                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
+                                    <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>{cardTitle}</Typography>
+                                    <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                                      {topRightContent}
+                                    </Stack>
                                   </Stack>
-                                ) : undefined}
-                                actions={
-                                  <>
-                                    {!hasSummary && !isSummarizing && (
-                                      <Button
-                                        startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
-                                        variant="contained"
-                                        size="small"
-                                        onClick={() => setSummarizingSessionId(s.id)}
-                                      >
-                                        Write summary
-                                      </Button>
-                                    )}
-                                                    {s.recordingUrl && (
-                                      <Button
-                                        startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}
-                                        variant="soft"
-                                        size="small"
-                                        onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
-                                      >
-                                        Watch recording
-                                      </Button>
-                                    )}
-                                    {hasRatings && (
-                                      <Button
-                                        startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
-                                        variant="soft"
-                                        size="small"
-                                        onClick={() => {
-                                          dispatch(setLearnerRatingsSessionId(s.id));
-                                          dispatch(setOpenLearnerRatings(true));
-                                        }}
-                                      >
-                                        View ratings
-                                      </Button>
-                                    )}
-                                    {hasSummary && (
-                                      <Button
-                                        startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
-                                        variant="soft"
-                                        size="small"
-                                        onClick={() => navigate(`/payments?highlight=${s.id}`)}
-                                      >
-                                        View in payments
-                                      </Button>
-                                    )}
-                                  </>
-                                }
-                              />
-                              {!hasSummary && !isSummarizing && (
+                                  <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
+                                    <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+                                    <Typography variant="caption" color="text.secondary">
+                                      {fmtDateNice(s.dateYmd)} &bull; {s.batch}
+                                    </Typography>
+                                  </Stack>
+                                  <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
+                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>{cardActions}</Stack>
+                                    {viewDetailsBtn}
+                                  </Stack>
+                                </>
+                              ) : (
+                                <SessionCard
+                                  title={s.title}
+                                  sessionType={s.sessionType}
+                                  topic={s.topic}
+                                  batch={s.batch}
+                                  dateYmd={s.dateYmd}
+                                  start={s.start}
+                                  end={s.end}
+                                  topRight={topRightContent}
+                                  actions={cardActions}
+                                  secondaryAction={viewDetailsBtn}
+                                />
+                              )}
+                              {/* Summary flow — only for online-type sessions */}
+                              {hasSummaryFlow && !hasSummary && !isSummarizing && (
                                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
                                   Write summary to process invoice
                                 </Typography>
                               )}
-                              {isSummarizing && (
+                              {hasSummaryFlow && isSummarizing && (
                                 <InlineSummaryForm
                                   sessionId={s.id}
                                   sessionTitle={s.title}
                                   onCancel={() => setSummarizingSessionId(null)}
                                 />
                               )}
-                              {hasSummary && !isEditing && (
+                              {hasSummaryFlow && hasSummary && !isEditing && (
                                 <Paper variant="outlined" sx={{ p: 1.5, mt: 1.5, borderRadius: 1.5, bgcolor: "action.hover" }}>
                                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
                                     <Typography variant="caption" fontWeight={600}>Session summary</Typography>
@@ -745,7 +968,7 @@ export default function DashboardPage() {
                                   </Typography>
                                 </Paper>
                               )}
-                              {isEditing && hasSummary && (
+                              {hasSummaryFlow && isEditing && hasSummary && (
                                 <InlineSummaryForm
                                   sessionId={s.id}
                                   sessionTitle={s.title}
@@ -768,7 +991,7 @@ export default function DashboardPage() {
                   <>
                     {declinedSessions.length > 0 && (
                       <Box>
-                        <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>Active declined</Typography>
+                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Active declined</Typography>
                         <Stack spacing={1.5}>
                           {declinedSessions.map((s) => (
                             <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
@@ -802,11 +1025,11 @@ export default function DashboardPage() {
                       </Box>
                     )}
 
-                    {demoPreviouslyDeclinedSessions.length > 0 && (
+                    {rolePreviouslyDeclined.length > 0 && (
                       <Box>
-                        <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>Previously declined</Typography>
+                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Previously declined</Typography>
                         <Stack spacing={1.5}>
-                          {demoPreviouslyDeclinedSessions.map((s) => (
+                          {rolePreviouslyDeclined.map((s) => (
                             <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 }, opacity: 0.6 }}>
                               <SessionCard
                                 title={s.title}
@@ -828,7 +1051,7 @@ export default function DashboardPage() {
                       </Box>
                     )}
 
-                    {declinedSessions.length === 0 && demoPreviouslyDeclinedSessions.length === 0 && (
+                    {declinedSessions.length === 0 && rolePreviouslyDeclined.length === 0 && (
                       <Typography variant="body2" color="text.secondary">No declined events.</Typography>
                     )}
                   </>
@@ -842,18 +1065,17 @@ export default function DashboardPage() {
         {/* Right column: Tasks sidebar (desktop only) */}
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' }, alignSelf: 'flex-start', position: 'sticky', top: 24 }}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>Tasks</Typography>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Tasks</Typography>
               <Stack spacing={2}>
                 {/* Confirm events task */}
                 {needsWednesdayConfirm && (
                   <TaskCard
-                    chipLabel="Action Needed"
+                    chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
                     chipColor="var(--gl-status-declined-text)"
                     chipBg="var(--gl-status-declined-bg)"
                     chipBorder="var(--gl-status-declined-border)"
                     title="Confirm upcoming events"
                     description="Confirm by Wednesday 6 PM so our team can finalize allocations."
-                    extra={<Chip label={`${confirmedCount} / ${upcomingSessions.length}`} size="small" />}
                     action={
                       <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
                         Review Confirmations

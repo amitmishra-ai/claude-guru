@@ -24,6 +24,7 @@ export const GURU_ROLES: GuruRole[] = [
 interface DevPanelState {
   isOpen: boolean;
   selectedRole: GuruRole;
+  isRoleSwitching: boolean;
 }
 
 const savedRole =
@@ -34,6 +35,7 @@ const savedRole =
 const initialState: DevPanelState = {
   isOpen: false,
   selectedRole: savedRole && GURU_ROLES.includes(savedRole) ? savedRole : "Teacher",
+  isRoleSwitching: false,
 };
 
 const devPanelSlice = createSlice({
@@ -47,13 +49,19 @@ const devPanelSlice = createSlice({
       state.isOpen = action.payload;
     },
     setSelectedRole(state, action: PayloadAction<GuruRole>) {
+      if (state.selectedRole !== action.payload) {
+        state.isRoleSwitching = true;
+      }
       state.selectedRole = action.payload;
       if (typeof window !== "undefined") {
         window.localStorage.setItem("guru-dev-role", action.payload);
       }
     },
+    clearRoleSwitching(state) {
+      state.isRoleSwitching = false;
+    },
   },
 });
 
-export const { toggleDevPanel, setDevPanelOpen, setSelectedRole } = devPanelSlice.actions;
+export const { toggleDevPanel, setDevPanelOpen, setSelectedRole, clearRoleSwitching } = devPanelSlice.actions;
 export default devPanelSlice.reducer;

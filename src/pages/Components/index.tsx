@@ -31,6 +31,8 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
+import Paper from "@mui/material/Paper";
+import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import { minutes, fmtDateNice } from "@/lib/helpers";
 import { useAppSelector } from "@/store";
@@ -148,8 +150,9 @@ function StarRatingIcons({ rating }: { rating: number }) {
 
 /* ── Planned Event Card (Tentative) ── */
 
-function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd }: {
+function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd, contactEmail, program, onViewDetails }: {
   sessionType: string; title: string; batch: string; startDateYmd: string; endDateYmd: string;
+  contactEmail?: string; program?: string; onViewDetails?: () => void;
 }) {
   return (
     <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
@@ -165,6 +168,11 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd 
           {fmtDateNice(startDateYmd)} &ndash; {fmtDateNice(endDateYmd)} &bull; {batch}
         </Typography>
       </Stack>
+      {onViewDetails && (
+        <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}>
+          <Button variant="text" size="small" onClick={onViewDetails}>View details</Button>
+        </Stack>
+      )}
     </Card>
   );
 }
@@ -193,6 +201,78 @@ function SectionBox({ children }: { children: React.ReactNode }) {
 /* ══════════════════════════════════════════════════════════════════════════
    VIEW DETAILS DIALOGS
    ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Planned Event View Details Dialog ── */
+
+function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, program, contactEmail, startDateYmd, endDateYmd }: {
+  open: boolean;
+  onClose: () => void;
+  sessionType: string;
+  title: string;
+  batch: string;
+  program: string;
+  contactEmail: string;
+  startDateYmd: string;
+  endDateYmd: string;
+}) {
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}>
+      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
+        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          Event details
+          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
+        </DialogTitle>
+
+        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+          <Stack spacing={2.5}>
+            {/* Header: chips + title */}
+            <Box>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+                <Chip label="To be confirmed" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
+                <Chip label={program} size="small" />
+                <Chip label={sessionType} size="small" />
+              </Stack>
+              <Typography variant="h6" fontWeight={600}>{title}</Typography>
+            </Box>
+
+            {/* Schedule section */}
+            <SectionBox>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
+              <Divider sx={{ mb: 0.5 }} />
+              <InfoRow label="Date range">
+                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
+                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
+                  <span>{fmtDateNice(startDateYmd)} &ndash; {fmtDateNice(endDateYmd)}</span>
+                </Stack>
+              </InfoRow>
+              <InfoRow label="Time">
+                <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500}>To be confirmed</Typography>
+              </InfoRow>
+            </SectionBox>
+
+            {/* Details section */}
+            <SectionBox>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
+              <Divider sx={{ mb: 0.5 }} />
+              <InfoRow label="Batch">{batch}</InfoRow>
+              <InfoRow label="Program">{program}</InfoRow>
+              <InfoRow label="Contact">
+                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
+                  <MailOutlineIcon sx={{ fontSize: 13 }} />
+                  <span>{contactEmail}</span>
+                </Stack>
+              </InfoRow>
+            </SectionBox>
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, justifyContent: "space-between" }}>
+          <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
+  );
+}
 
 /* ── Residency View Details Dialog ── */
 
@@ -684,6 +764,9 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
                 <Divider sx={{ mb: 0.5 }} />
                 <InfoRow label="Submissions">42 / 63</InfoRow>
                 <InfoRow label="Graded">18 / 42</InfoRow>
+                <Typography variant="caption" color="primary.main" sx={{ cursor: "pointer", mt: 0.5, display: "inline-block", "&:hover": { textDecoration: "underline" } }}>
+                  Reload
+                </Typography>
               </SectionBox>
             )}
 
@@ -855,6 +938,9 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
                   <Typography variant="body2" fontWeight={500} sx={{ color: "success.main" }}>54 / 63</Typography>
                 </InfoRow>
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Stats shown in green (guru replied within 30 hrs). Turns red if inactive.</Typography>
+                <Typography variant="caption" color="primary.main" sx={{ cursor: "pointer", mt: 0.5, display: "inline-block", "&:hover": { textDecoration: "underline" } }}>
+                  Reload
+                </Typography>
               </SectionBox>
             )}
 
@@ -1288,21 +1374,21 @@ function ResidencyCards() {
       {/* ── Completed — Gathering feedback ── */}
       <ComponentSection
         title="Residency — Completed (Gathering feedback)"
-        description="Residency done, no feedback yet. Gathering feedback chip + Payment pending chip on card."
+        description="Residency done, no feedback yet. Payment pending + Gathering feedback chips top-right."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Residency: Program Overview (All)</Typography>
-            {CHIP_GATHERING}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+              {CHIP_PAYMENT_PENDING}
+              {CHIP_GATHERING}
+            </Stack>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">5 – 7 Mar, 2026 &bull; AIML Online March 26 A</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PENDING}
-          </Stack>
-          <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1.5 }}>
+          <Stack direction="row" justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>
           </Stack>
         </Card>
@@ -1311,21 +1397,21 @@ function ResidencyCards() {
       {/* ── Completed — with rating ── */}
       <ComponentSection
         title="Residency — Completed (with feedback)"
-        description="Past residency with rating. Star + score top-right. Detailed Feedback + Payment processed chip on card. Secondary in View Details."
+        description="Past residency with rating. Payment processed chip + star rating top-right. Detailed Feedback on card."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Residency: Program Overview (All)</Typography>
-            <StarRatingNumeric rating={4.2} />
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+              {CHIP_PAYMENT_PROCESSED}
+              <StarRatingNumeric rating={4.2} />
+            </Stack>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">5 – 7 Mar, 2026 &bull; AIML Online March 26 A</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1} sx={{ mt: 1.5 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
             <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
           </Stack>
@@ -1339,10 +1425,22 @@ function ResidencyCards() {
 
 function OnlineSessionCards() {
   const [detailOpen, setDetailOpen] = useState<OnlineEventDialogVariant | null>(null);
+  const [plannedDetailOpen, setPlannedDetailOpen] = useState(false);
 
   return (
     <>
       <OnlineEventDetailDialog open={detailOpen !== null} onClose={() => setDetailOpen(null)} variant={detailOpen ?? "mentoring-confirmed"} />
+      <PlannedEventDetailDialog
+        open={plannedDetailOpen}
+        onClose={() => setPlannedDetailOpen(false)}
+        sessionType="Online session"
+        title="Machine Learning"
+        batch="PGP-AIML-BA-UTA-Nov25-C"
+        program="PGP-AIML"
+        contactEmail="gurus_support@greatlearning.in"
+        startDateYmd="2026-01-22"
+        endDateYmd="2026-02-14"
+      />
 
       {/* 1. Mentoring — Confirmed */}
       <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Join event + Event Materials on card.">
@@ -1457,12 +1555,21 @@ function OnlineSessionCards() {
       </ComponentSection>
 
       {/* 6. Mentoring — Tentative */}
-      <ComponentSection title="Mentoring — Tentative" description="Planned mentoring event, time not yet confirmed.">
-        <PlannedEventCard sessionType="Online session" title="Machine Learning" batch="PGP-AIML-BA-UTA-Nov25-C" startDateYmd="2026-01-22" endDateYmd="2026-02-14" />
+      <ComponentSection title="Mentoring — Tentative" description="Planned mentoring event, time not yet confirmed. View details opens dialog with schedule (to be confirmed), batch, program, contact.">
+        <PlannedEventCard
+          sessionType="Online session"
+          title="Machine Learning"
+          batch="PGP-AIML-BA-UTA-Nov25-C"
+          program="PGP-AIML"
+          contactEmail="gurus_support@greatlearning.in"
+          startDateYmd="2026-01-22"
+          endDateYmd="2026-02-14"
+          onViewDetails={() => setPlannedDetailOpen(true)}
+        />
       </ComponentSection>
 
       {/* 7. Mentoring — Completed (Gathering feedback) */}
-      <ComponentSection title="Mentoring — Completed (Gathering feedback)" description="Event done, learners haven't rated yet. Payment pending chip, Watch recording on card.">
+      <ComponentSection title="Mentoring — Completed (Gathering feedback)" description="Event done, learners haven't rated yet. Payment pending + Gathering feedback chips top-right. Watch recording on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1471,20 +1578,22 @@ function OnlineSessionCards() {
             dateYmd="2026-03-12"
             start={minutes(18)}
             end={minutes(20)}
-            topRight={CHIP_GATHERING}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PENDING}
+                {CHIP_GATHERING}
+              </Stack>
+            }
             actions={
               <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-gathering")}>View details</Button>}
           />
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PENDING}
-          </Stack>
         </Card>
       </ComponentSection>
 
       {/* 8. Mentoring — Completed (No feedback) */}
-      <ComponentSection title="Mentoring — Completed (No feedback)" description="Event older than 30 days, no learner ratings. Payment processed chip on card.">
+      <ComponentSection title="Mentoring — Completed (No feedback)" description="Event older than 30 days, no learner ratings. Payment processed + No feedback collected chips top-right.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Python Fundamentals"
@@ -1493,22 +1602,22 @@ function OnlineSessionCards() {
             dateYmd="2026-01-15"
             start={minutes(9, 30)}
             end={minutes(11)}
-            topRight={CHIP_NO_FEEDBACK}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PROCESSED}
+                {CHIP_NO_FEEDBACK}
+              </Stack>
+            }
             actions={
-              <>
-                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
-              </>
+              <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-noFeedback")}>View details</Button>}
           />
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
         </Card>
       </ComponentSection>
 
       {/* 9. Mentoring — Completed (with rating) */}
-      <ComponentSection title="Mentoring — Completed (with rating)" description="Past mentoring event. Star rating top-right. Watch recording + Detailed Feedback on card. Payment processed chip.">
+      <ComponentSection title="Mentoring — Completed (with rating)" description="Past mentoring event. Payment processed chip + star rating top-right. Watch recording + Detailed Feedback on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1517,7 +1626,12 @@ function OnlineSessionCards() {
             dateYmd="2026-03-05"
             start={minutes(18)}
             end={minutes(20)}
-            topRight={<StarRatingNumeric rating={4.5} />}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PROCESSED}
+                <StarRatingNumeric rating={4.5} />
+              </Stack>
+            }
             actions={
               <>
                 <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
@@ -1526,14 +1640,92 @@ function OnlineSessionCards() {
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-completed")}>View details</Button>}
           />
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
         </Card>
       </ComponentSection>
 
-      {/* 10. Mock Interview — Completed */}
-      <ComponentSection title="Mock Interview — Completed" description="Past mock interview. Star rating top-right. Watch recording + Detailed Feedback + Share Feedback. Payment processed chip.">
+      {/* 10. Mentoring — Completed (Summary needed) */}
+      <ComponentSection title="Mentoring — Completed (Summary needed)" description="Event done, summary not yet written. Payment pending chip + star rating top-right. Write summary button + Watch recording + Detailed Feedback. Italic hint for invoice.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Statistics for Data Science"
+            sessionType="Online session"
+            batch="PGPDS.O.MAR26.A"
+            dateYmd="2026-03-12"
+            start={minutes(18)}
+            end={minutes(20)}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PENDING}
+                <StarRatingNumeric rating={4.5} />
+              </Stack>
+            }
+            actions={
+              <>
+                <Button
+                  startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
+                  variant="contained"
+                  size="small"
+                >
+                  Write summary
+                </Button>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+              </>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-completed")}>View details</Button>}
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
+            Write summary to process invoice
+          </Typography>
+        </Card>
+      </ComponentSection>
+
+      {/* 11. Mentoring — Completed (Summary submitted) */}
+      <ComponentSection title="Mentoring — Completed (Summary submitted)" description="Summary written. Payment processed chip + star rating top-right. Summary panel with Edit link. View in payments + Watch recording + Detailed Feedback.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Statistics for Data Science"
+            sessionType="Online session"
+            batch="PGPDS.O.MAR26.A"
+            dateYmd="2026-03-12"
+            start={minutes(18)}
+            end={minutes(20)}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PROCESSED}
+                <StarRatingNumeric rating={4.5} />
+              </Stack>
+            }
+            actions={
+              <>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View in payments</Button>
+              </>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-completed")}>View details</Button>}
+          />
+          <Paper variant="outlined" sx={{ p: 1.5, mt: 1.5, borderRadius: 1.5, bgcolor: "action.hover" }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+              <Typography variant="caption" fontWeight={600}>Session summary</Typography>
+              <Button
+                startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
+                variant="text"
+                size="small"
+                sx={{ fontSize: 11, minWidth: "auto", p: 0 }}
+              >
+                Edit
+              </Button>
+            </Stack>
+            <Typography variant="body2" color="text.secondary">
+              Great session with high learner engagement. Students asked insightful questions about statistical distributions and hypothesis testing. Overall, learners were engaged and the session met its objectives.
+            </Typography>
+          </Paper>
+        </Card>
+      </ComponentSection>
+
+      {/* 12. Mock Interview — Completed */}
+      <ComponentSection title="Mock Interview — Completed" description="Past mock interview. Payment processed chip + star rating top-right. Watch recording + Detailed Feedback + Share Feedback.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
@@ -1542,7 +1734,12 @@ function OnlineSessionCards() {
             dateYmd="2026-02-25"
             start={minutes(16)}
             end={minutes(17)}
-            topRight={<StarRatingNumeric rating={4.2} />}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PROCESSED}
+                <StarRatingNumeric rating={4.2} />
+              </Stack>
+            }
             actions={
               <>
                 <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
@@ -1552,9 +1749,6 @@ function OnlineSessionCards() {
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mock-completed")}>View details</Button>}
           />
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
         </Card>
       </ComponentSection>
     </>
@@ -1637,7 +1831,7 @@ function CareerMentorOnlineSessionCards() {
       </ComponentSection>
 
       {/* 4. Career — Completed (Gathering feedback) */}
-      <ComponentSection title="Career — Completed (Gathering feedback)" description="Event done, no ratings yet. Gathering feedback chip + Payment pending chip.">
+      <ComponentSection title="Career — Completed (Gathering feedback)" description="Event done, no ratings yet. Payment pending + Gathering feedback chips top-right.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -1646,20 +1840,22 @@ function CareerMentorOnlineSessionCards() {
             dateYmd="2026-03-10"
             start={minutes(14)}
             end={minutes(15)}
-            topRight={CHIP_GATHERING}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PENDING}
+                {CHIP_GATHERING}
+              </Stack>
+            }
             actions={
               <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-gathering")}>View details</Button>}
           />
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PENDING}
-          </Stack>
         </Card>
       </ComponentSection>
 
       {/* 5. Career — Completed (with rating) */}
-      <ComponentSection title="Career — Completed (with rating)" description="Past career event. Star rating, Detailed Feedback on card. Payment processed chip.">
+      <ComponentSection title="Career — Completed (with rating)" description="Past career event. Payment processed chip + star rating top-right. Detailed Feedback on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -1668,20 +1864,103 @@ function CareerMentorOnlineSessionCards() {
             dateYmd="2026-02-20"
             start={minutes(14)}
             end={minutes(15)}
-            topRight={<StarRatingNumeric rating={4.8} />}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PROCESSED}
+                <StarRatingNumeric rating={4.8} />
+              </Stack>
+            }
             actions={
               <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-completed")}>View details</Button>}
           />
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
         </Card>
       </ComponentSection>
 
-      {/* 6. Mock — Completed (with Share Feedback) */}
-      <ComponentSection title="Mock — Completed (with Share Feedback)" description="Past mock interview. Star rating, Watch recording + Detailed Feedback + Share Feedback. Payment processed chip.">
+      {/* 6. Career — Completed (Summary needed) */}
+      <ComponentSection title="Career — Completed (Summary needed)" description="Career session done, summary not yet written. Payment pending chip + star rating top-right. Write summary + Watch recording + Detailed Feedback. Italic hint for invoice.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Career Mentoring"
+            sessionType="Career mentoring session"
+            batch="PGP-AIML-BA-UTA-Nov25-C"
+            dateYmd="2026-03-10"
+            start={minutes(14)}
+            end={minutes(15)}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PENDING}
+                <StarRatingNumeric rating={4.8} />
+              </Stack>
+            }
+            actions={
+              <>
+                <Button
+                  startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
+                  variant="contained"
+                  size="small"
+                >
+                  Write summary
+                </Button>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+              </>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-completed")}>View details</Button>}
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
+            Write summary to process invoice
+          </Typography>
+        </Card>
+      </ComponentSection>
+
+      {/* 7. Career — Completed (Summary submitted) */}
+      <ComponentSection title="Career — Completed (Summary submitted)" description="Career summary written. Payment processed chip + star rating top-right. Summary panel with Edit link. View in payments + Watch recording + Detailed Feedback.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Career Mentoring"
+            sessionType="Career mentoring session"
+            batch="PGP-AIML-BA-UTA-Nov25-C"
+            dateYmd="2026-03-10"
+            start={minutes(14)}
+            end={minutes(15)}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PROCESSED}
+                <StarRatingNumeric rating={4.8} />
+              </Stack>
+            }
+            actions={
+              <>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View in payments</Button>
+              </>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-completed")}>View details</Button>}
+          />
+          <Paper variant="outlined" sx={{ p: 1.5, mt: 1.5, borderRadius: 1.5, bgcolor: "action.hover" }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+              <Typography variant="caption" fontWeight={600}>Session summary</Typography>
+              <Button
+                startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
+                variant="text"
+                size="small"
+                sx={{ fontSize: 11, minWidth: "auto", p: 0 }}
+              >
+                Edit
+              </Button>
+            </Stack>
+            <Typography variant="body2" color="text.secondary">
+              Productive career mentoring session. Discussed career transition strategies and resume optimization. The learner was highly engaged and left with clear next steps.
+            </Typography>
+          </Paper>
+        </Card>
+      </ComponentSection>
+
+      {/* 8. Mock — Completed (with Share Feedback) */}
+      <ComponentSection title="Mock — Completed (with Share Feedback)" description="Past mock interview. Payment processed chip + star rating top-right. Watch recording + Detailed Feedback + Share Feedback.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
@@ -1690,7 +1969,12 @@ function CareerMentorOnlineSessionCards() {
             dateYmd="2026-02-18"
             start={minutes(16)}
             end={minutes(17)}
-            topRight={<StarRatingNumeric rating={4.0} />}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PROCESSED}
+                <StarRatingNumeric rating={4.0} />
+              </Stack>
+            }
             actions={
               <>
                 <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
@@ -1700,9 +1984,6 @@ function CareerMentorOnlineSessionCards() {
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mock-completed")}>View details</Button>}
           />
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
         </Card>
       </ComponentSection>
     </>
@@ -1721,12 +2002,15 @@ function EvaluationCards() {
       {/* ── Confirmed ── */}
       <ComponentSection
         title="Evaluation — Confirmed"
-        description="Date range (assessment due → grading due), assignment link to SpeedGrader, course template, batch, contact, student progress. No action buttons."
+        description="Date range (assessment due → grading due), assignment link to SpeedGrader, course template, batch, contact, student progress. Late submission badge if applicable."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Evaluation: Linear Regression Assignment</Typography>
-            {CHIP_CONFIRMED}
+            <Stack direction="row" spacing={0.75}>
+              <Chip label="Late submission" size="small" sx={{ bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+              {CHIP_CONFIRMED}
+            </Stack>
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -1761,21 +2045,21 @@ function EvaluationCards() {
       {/* ── Completed — Gathering feedback ── */}
       <ComponentSection
         title="Evaluation — Completed (Gathering feedback)"
-        description="Grading done, no ratings yet. Gathering feedback chip. Payment pending chip. No Detailed Feedback button."
+        description="Grading done, no ratings yet. Payment pending + Gathering feedback chips top-right."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Evaluation: Linear Regression Assignment</Typography>
-            {CHIP_GATHERING}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+              {CHIP_PAYMENT_PENDING}
+              {CHIP_GATHERING}
+            </Stack>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PENDING}
-          </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} justifyContent="flex-end">
+          <Stack direction="row" justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>
           </Stack>
         </Card>
@@ -1784,21 +2068,21 @@ function EvaluationCards() {
       {/* ── Completed — with rating ── */}
       <ComponentSection
         title="Evaluation — Completed (with rating)"
-        description="Star icons only (no numeric score). Detailed Feedback button shown alongside rating. Payment processed chip."
+        description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Detailed Feedback button."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Evaluation: Linear Regression Assignment</Typography>
-            <StarRatingIcons rating={4} />
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+              {CHIP_PAYMENT_PROCESSED}
+              <StarRatingNumeric rating={4.0} />
+            </Stack>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">1 Mar – 8 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1} sx={{ mt: 1.5 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
             <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
           </Stack>
@@ -1860,21 +2144,21 @@ function ModerationCards() {
       {/* ── Completed — Gathering feedback ── */}
       <ComponentSection
         title="Moderation — Completed (Gathering feedback)"
-        description="Moderation done, no ratings yet. Gathering feedback chip. Payment pending chip. No Detailed Feedback button."
+        description="Moderation done, no ratings yet. Payment pending + Gathering feedback chips top-right."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Moderation: Impact of AI on Healthcare</Typography>
-            {CHIP_GATHERING}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+              {CHIP_PAYMENT_PENDING}
+              {CHIP_GATHERING}
+            </Stack>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PENDING}
-          </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} justifyContent="flex-end">
+          <Stack direction="row" justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>
           </Stack>
         </Card>
@@ -1883,21 +2167,21 @@ function ModerationCards() {
       {/* ── Completed — with rating ── */}
       <ComponentSection
         title="Moderation — Completed (with rating)"
-        description="Star icons only (no numeric score). Detailed Feedback button shown alongside rating. Payment processed chip. Identical layout to Evaluation completed."
+        description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Detailed Feedback button."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Moderation: Impact of AI on Healthcare</Typography>
-            <StarRatingIcons rating={5} />
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+              {CHIP_PAYMENT_PROCESSED}
+              <StarRatingNumeric rating={4.5} />
+            </Stack>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">25 Feb – 5 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1} sx={{ mt: 1.5 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
             <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
           </Stack>
@@ -1939,20 +2223,18 @@ function CapstoneCards() {
       {/* ── Completed — payment pending ── */}
       <ComponentSection
         title="Capstone Project — Completed (Payment pending)"
-        description="No rating for capstones. View Student Progress button always shown. Payment pending chip."
+        description="No rating for capstones. Payment pending chip top-right. View Student Progress button always shown."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Capstone &mdash; PGPDS.O.JUL25.A</Typography>
+            {CHIP_PAYMENT_PENDING}
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Jul – 20 Nov, 2025</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PENDING}
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1} sx={{ mt: 1.5 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
             <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View Student Progress</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("paymentPending")}>View details</Button>
           </Stack>
@@ -1962,20 +2244,18 @@ function CapstoneCards() {
       {/* ── Completed — payment processed ── */}
       <ComponentSection
         title="Capstone Project — Completed"
-        description="No rating. View Student Progress always shown. Payment processed chip. Group, domain, milestones in View Details."
+        description="No rating. Payment processed chip top-right. View Student Progress always shown."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Capstone &mdash; PGPDS.O.JUL25.A</Typography>
+            {CHIP_PAYMENT_PROCESSED}
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Jul – 20 Nov, 2025</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1} sx={{ mt: 1.5 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
             <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View Student Progress</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
           </Stack>
@@ -2041,20 +2321,18 @@ function CVReviewCards() {
       {/* ── Completed ── */}
       <ComponentSection
         title="CV Review — Completed"
-        description="No LinkedIn, no comments, no submit. 'View CV' becomes 'View Reviewed CV'. Contact email appears. No rating, no feedback. Payment TXN if applicable."
+        description="No LinkedIn, no comments, no submit. 'View CV' becomes 'View Reviewed CV'. Payment processed chip top-right. No rating, no feedback."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
             <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>CV Review</Typography>
+            {CHIP_PAYMENT_PROCESSED}
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">5 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1} sx={{ mt: 1.5 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
             <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}>View Reviewed CV</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
           </Stack>

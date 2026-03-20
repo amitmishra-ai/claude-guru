@@ -8,10 +8,18 @@ import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "@/store";
 import { startOfWeekMonday, addDays, startOfMonth, toYmd } from "@/lib/helpers";
 import { demoExternalBusy } from "@/data/demo-sessions";
+import { filterSessionsByRole } from "@/lib/role-config";
 
 // ─── Raw state slices ────────────────────────────────────────────────────────
 
-const selectSessions = (s: RootState) => s.sessions.items;
+const selectAllSessions = (s: RootState) => s.sessions.items;
+const selectSelectedRole = (s: RootState) => s.devPanel.selectedRole;
+
+const selectSessions = createSelector(
+  selectAllSessions,
+  selectSelectedRole,
+  (sessions, role) => filterSessionsByRole(sessions, role),
+);
 const selectConfirmations = (s: RootState) => s.sessions.confirmations;
 const selectSessionDeclined = (s: RootState) => s.sessions.sessionDeclined;
 const selectRequests = (s: RootState) => s.requests.items;

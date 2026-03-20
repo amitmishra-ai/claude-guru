@@ -33,6 +33,7 @@ interface UiState {
   markUnavailableTarget: { type: "session" | "request"; id: string } | null;
   helloBarDismissed: boolean;
   isDarkMode: boolean;
+  themeMode: "system" | "dark" | "light";
   isNavCollapsed: boolean;
 }
 
@@ -65,7 +66,15 @@ const initialState: UiState = {
   learnerRatingsSessionId: null,
   markUnavailableTarget: null,
   helloBarDismissed: false,
-  isDarkMode: true,
+  isDarkMode: (() => {
+    if (typeof window === "undefined") return true;
+    const saved = window.localStorage.getItem("guru-theme");
+    if (saved === "light") return false;
+    if (saved === "dark") return true;
+    // system or no saved value — check OS preference
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  })(),
+  themeMode: (typeof window !== "undefined" ? window.localStorage.getItem("guru-theme") as "system" | "dark" | "light" : null) || "system",
   isNavCollapsed: true,
 };
 
@@ -136,6 +145,9 @@ const uiSlice = createSlice({
     setIsDarkMode(state, action: PayloadAction<boolean>) {
       state.isDarkMode = action.payload;
     },
+    setThemeMode(state, action: PayloadAction<"system" | "dark" | "light">) {
+      state.themeMode = action.payload;
+    },
     setIsNavCollapsed(state, action: PayloadAction<boolean>) {
       state.isNavCollapsed = action.payload;
     },
@@ -188,6 +200,7 @@ export const {
   setLearnerRatingsSessionId,
   setHelloBarDismissed,
   setIsDarkMode,
+  setThemeMode,
   setIsNavCollapsed,
   setOpenMarkUnavailable,
   setOpenAddAvailability,
