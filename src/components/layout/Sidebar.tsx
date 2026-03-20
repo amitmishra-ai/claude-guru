@@ -18,6 +18,10 @@ import { setIsNavCollapsed } from "@/store/slices/uiSlice";
 // ── Expanded: pill is full-width row, borderRadius 28px, icon + label.
 
 function GLLogo({ size = 32 }: { size?: number }) {
+  const isDark = useAppSelector((s) => s.ui.isDarkMode);
+  const primary = isDark ? "#FFFFFF" : "#0E39A9";
+  const accent = isDark ? "#FFFFFF" : "#1974D2";
+
   return (
     <svg
       width={size}
@@ -29,15 +33,15 @@ function GLLogo({ size = 32 }: { size?: number }) {
     >
       <path
         d="M19.9338 30.4595L20.0177 30.3608L23.4279 26.2037H18.8904C13.201 26.2037 8.57217 21.6262 8.57217 15.9998C8.57217 10.3731 13.201 5.79565 18.8904 5.79565H24.1907L27.7173 1.54004H18.8904C10.8277 1.54004 4.26855 8.02664 4.26855 15.9998C4.26855 23.9729 10.8277 30.4595 18.8904 30.4595H19.9338Z"
-        fill="#0E39A9"
+        fill={primary}
       />
       <path
         d="M4.26855 15.9998C4.26855 19.6784 5.66696 23.0386 7.96278 25.5933L10.726 22.2286C9.37739 20.5039 8.57193 18.3438 8.57193 15.9998C8.57193 10.3733 13.201 5.79588 18.8904 5.79588H24.2224L27.7173 1.54004H18.8904C10.8277 1.54004 4.26855 8.02664 4.26855 15.9998Z"
-        fill="#1974D2"
+        fill={accent}
       />
       <path
         d="M23.4277 26.2038L27.7311 20.9576V13.7129H18.5888L15.1025 17.9687H23.4277V26.2038Z"
-        fill="#0E39A9"
+        fill={primary}
       />
     </svg>
   );

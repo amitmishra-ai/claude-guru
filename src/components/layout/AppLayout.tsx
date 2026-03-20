@@ -15,28 +15,30 @@ export function AppLayout() {
   const dispatch = useAppDispatch();
   const isNavCollapsed = useAppSelector((s) => s.ui.isNavCollapsed);
   const isDarkMode = useAppSelector((s) => s.ui.isDarkMode);
+  const themeMode = useAppSelector((s) => s.ui.themeMode);
 
-  // Sync dark mode with <html> class + localStorage
+  // Resolve themeMode → isDarkMode and persist to localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem("guru-theme");
-    if (saved === "dark") {
+    window.localStorage.setItem("guru-theme", themeMode);
+
+    if (themeMode === "dark") {
       dispatch(setIsDarkMode(true));
-      return;
-    }
-    if (saved === "light") {
+    } else if (themeMode === "light") {
       dispatch(setIsDarkMode(false));
-      return;
+    } else {
+      // system
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      dispatch(setIsDarkMode(mq.matches));
+      const handler = (e: MediaQueryListEvent) => dispatch(setIsDarkMode(e.matches));
+      mq.addEventListener("change", handler);
+      return () => mq.removeEventListener("change", handler);
     }
-    dispatch(setIsDarkMode(true));
-  }, [dispatch]);
+  }, [themeMode, dispatch]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
     document.documentElement.classList.toggle("dark", isDarkMode);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("guru-theme", isDarkMode ? "dark" : "light");
-    }
   }, [isDarkMode]);
 
   return (

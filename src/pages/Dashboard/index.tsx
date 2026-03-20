@@ -83,6 +83,9 @@ import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDecline
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED, STATUS_SUMMARY_NEEDED, STATUS_SUMMARY_SUBMITTED } from "@/components/shared/SessionCard";
 import { InlineSummaryForm } from "@/components/shared/InlineSummaryForm";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import type { Session, SessionType } from "@/lib/types";
 import { filterSessionsByRole } from "@/lib/role-config";
 
@@ -105,6 +108,10 @@ const SESSION_TYPES: Array<"All" | SessionType> = [
   "Industry session",
   "Online class",
   "Mentored Learning session",
+  "Residency",
+  "Evaluation",
+  "Moderation",
+  "CV Review",
   "Others",
 ];
 
@@ -732,89 +739,217 @@ export default function DashboardPage() {
                           const avg = hasRatings
                             ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(1)
                             : null;
+                          const avgNum = hasRatings
+                            ? ratings.reduce((a, r) => a + r.rating, 0) / ratings.length
+                            : 0;
                           const hasSummary = !!summaries[s.id];
                           const isSummarizing = summarizingSessionId === s.id;
                           const isEditing = editingSummaryId === s.id;
+                          const daysSinceSession = (nowMs - new Date(s.dateYmd).getTime()) / (1000 * 60 * 60 * 24);
+                          const feedbackLabel = daysSinceSession > 30 ? "No feedback collected" : "Gathering feedback";
+                          const isMockInterview = s.title.toLowerCase().includes("mock");
+                          const isPaid = s.paymentStatus === "paid";
+                          const hasPaymentStatus = !!s.paymentStatus;
+                          const st = s.sessionType;
+                          const isOnlineType = ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"].includes(st);
+                          const isResidency = st === "Residency";
+                          const isEvaluation = st === "Evaluation";
+                          const isModeration = st === "Moderation";
+                          const isCapstone = st === "Capstone project mentoring session";
+                          const isCVReview = st === "CV Review";
+                          const hasSummaryFlow = isOnlineType; // only online-type sessions have summary
+
+                          // Payment chip helper
+                          const paymentChip = isPaid
+                            ? <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                            : hasPaymentStatus
+                              ? <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                              : null;
+
+                          // Feedback chip helper
+                          const feedbackChip = (
+                            <Chip label={feedbackLabel} size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", ...(daysSinceSession > 30 ? { opacity: 0.7 } : {}) }} />
+                          );
+
+                          // Star rating helpers — numeric for Online/Residency, icons-only for Evaluation/Moderation
+                          const numericRating = avg ? (
+                            <Stack direction="row" spacing={0.5} alignItems="center">
+                              <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
+                              <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
+                            </Stack>
+                          ) : null;
+
+                          const iconRating = hasRatings ? (
+                            <Stack direction="row" spacing={0.25} alignItems="center">
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <StarOutlinedIcon key={i} sx={{ fontSize: 14, color: i <= Math.round(avgNum) ? "var(--gl-star-color)" : "action.disabled" }} />
+                              ))}
+                            </Stack>
+                          ) : null;
+
+                          // Build top-right per activity type
+                          let topRightContent: React.ReactNode;
+                          if (isCapstone || isCVReview) {
+                            // No rating — just payment chip
+                            topRightContent = paymentChip;
+                          } else if (isEvaluation || isModeration) {
+                            // Star icons only (no numeric)
+                            topRightContent = (
+                              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                                {paymentChip}
+                                {numericRating ?? feedbackChip}
+                              </Stack>
+                            );
+                          } else {
+                            // Online/Residency — numeric star rating
+                            topRightContent = (
+                              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                                {paymentChip}
+                                {numericRating ?? feedbackChip}
+                              </Stack>
+                            );
+                          }
+
+                          // Build actions per activity type
+                          const viewDetailsBtn = (
+                            <Button variant="text" size="small" onClick={() => {
+                              dispatch(setSessionFocus(s));
+                              dispatch(setOpenSessionDetails(true));
+                            }}>
+                              View details
+                            </Button>
+                          );
+
+                          let cardActions: React.ReactNode;
+                          if (isCapstone) {
+                            cardActions = (
+                              <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => dispatch(pushToast({ title: "Student Progress", description: "Loading student progress..." }))}>
+                                View Student Progress
+                              </Button>
+                            );
+                          } else if (isCVReview) {
+                            cardActions = (
+                              <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => dispatch(pushToast({ title: "View CV", description: "Opening reviewed CV..." }))}>
+                                View Reviewed CV
+                              </Button>
+                            );
+                          } else if (isEvaluation || isModeration) {
+                            cardActions = hasRatings ? (
+                              <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => { dispatch(setLearnerRatingsSessionId(s.id)); dispatch(setOpenLearnerRatings(true)); }}>
+                                Detailed Feedback
+                              </Button>
+                            ) : null;
+                          } else if (isResidency) {
+                            cardActions = hasRatings ? (
+                              <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => { dispatch(setLearnerRatingsSessionId(s.id)); dispatch(setOpenLearnerRatings(true)); }}>
+                                Detailed Feedback
+                              </Button>
+                            ) : null;
+                          } else {
+                            // Online session types — full summary flow
+                            cardActions = (
+                              <>
+                                {!hasSummary && !isSummarizing && (
+                                  <Button startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />} variant="contained" size="small"
+                                    onClick={() => setSummarizingSessionId(s.id)}>
+                                    Write summary
+                                  </Button>
+                                )}
+                                {s.recordingUrl && (
+                                  <Button startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
+                                    onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}>
+                                    Watch recording
+                                  </Button>
+                                )}
+                                {hasRatings && (
+                                  <Button startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
+                                    onClick={() => { dispatch(setLearnerRatingsSessionId(s.id)); dispatch(setOpenLearnerRatings(true)); }}>
+                                    Detailed Feedback
+                                  </Button>
+                                )}
+                                {isMockInterview && (
+                                  <Button startIcon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
+                                    onClick={() => dispatch(pushToast({ title: "Share Feedback", description: "Opening mock interview feedback form..." }))}>
+                                    Share Feedback
+                                  </Button>
+                                )}
+                                {hasSummary && (
+                                  <Button startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
+                                    onClick={() => navigate(`/payments?highlight=${s.id}`)}>
+                                    View in payments
+                                  </Button>
+                                )}
+                              </>
+                            );
+                          }
+
+                          // Card title — Residency/Capstone use custom prefix
+                          const cardTitle = isResidency
+                            ? s.title
+                            : isCapstone
+                              ? `Capstone — ${s.batch}`
+                              : isCVReview
+                                ? "CV Review"
+                                : isEvaluation
+                                  ? `Evaluation: ${s.title}`
+                                  : isModeration
+                                    ? `Moderation: ${s.title}`
+                                    : s.title;
+
                           return (
                             <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-                              <SessionCard
-                                title={s.title}
-                                sessionType={s.sessionType}
-                                topic={s.topic}
-                                batch={s.batch}
-                                dateYmd={s.dateYmd}
-                                start={s.start}
-                                end={s.end}
-                                status={hasSummary ? STATUS_SUMMARY_SUBMITTED : STATUS_SUMMARY_NEEDED}
-                                topRight={avg ? (
-                                  <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
-                                    <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
-                                    <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
+                              {/* Card header: title row + date + actions — custom for non-SessionCard types */}
+                              {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
+                                <>
+                                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
+                                    <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>{cardTitle}</Typography>
+                                    <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                                      {topRightContent}
+                                    </Stack>
                                   </Stack>
-                                ) : (
-                                  <Chip label="Gathering feedback" size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }} />
-                                )}
-                                actions={
-                                  <>
-                                    {!hasSummary && !isSummarizing && (
-                                      <Button
-                                        startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
-                                        variant="contained"
-                                        size="small"
-                                        onClick={() => setSummarizingSessionId(s.id)}
-                                      >
-                                        Write summary
-                                      </Button>
-                                    )}
-                                                    {s.recordingUrl && (
-                                      <Button
-                                        startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}
-                                        variant="soft"
-                                        size="small"
-                                        onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}
-                                      >
-                                        Watch recording
-                                      </Button>
-                                    )}
-                                    {hasRatings && (
-                                      <Button
-                                        startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
-                                        variant="soft"
-                                        size="small"
-                                        onClick={() => {
-                                          dispatch(setLearnerRatingsSessionId(s.id));
-                                          dispatch(setOpenLearnerRatings(true));
-                                        }}
-                                      >
-                                        View ratings
-                                      </Button>
-                                    )}
-                                    {hasSummary && (
-                                      <Button
-                                        startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
-                                        variant="soft"
-                                        size="small"
-                                        onClick={() => navigate(`/payments?highlight=${s.id}`)}
-                                      >
-                                        View in payments
-                                      </Button>
-                                    )}
-                                  </>
-                                }
-                              />
-                              {!hasSummary && !isSummarizing && (
+                                  <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
+                                    <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+                                    <Typography variant="caption" color="text.secondary">
+                                      {fmtDateNice(s.dateYmd)} &bull; {s.batch}
+                                    </Typography>
+                                  </Stack>
+                                  <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
+                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>{cardActions}</Stack>
+                                    {viewDetailsBtn}
+                                  </Stack>
+                                </>
+                              ) : (
+                                <SessionCard
+                                  title={s.title}
+                                  sessionType={s.sessionType}
+                                  topic={s.topic}
+                                  batch={s.batch}
+                                  dateYmd={s.dateYmd}
+                                  start={s.start}
+                                  end={s.end}
+                                  topRight={topRightContent}
+                                  actions={cardActions}
+                                  secondaryAction={viewDetailsBtn}
+                                />
+                              )}
+                              {/* Summary flow — only for online-type sessions */}
+                              {hasSummaryFlow && !hasSummary && !isSummarizing && (
                                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
                                   Write summary to process invoice
                                 </Typography>
                               )}
-                              {isSummarizing && (
+                              {hasSummaryFlow && isSummarizing && (
                                 <InlineSummaryForm
                                   sessionId={s.id}
                                   sessionTitle={s.title}
                                   onCancel={() => setSummarizingSessionId(null)}
                                 />
                               )}
-                              {hasSummary && !isEditing && (
+                              {hasSummaryFlow && hasSummary && !isEditing && (
                                 <Paper variant="outlined" sx={{ p: 1.5, mt: 1.5, borderRadius: 1.5, bgcolor: "action.hover" }}>
                                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
                                     <Typography variant="caption" fontWeight={600}>Session summary</Typography>
@@ -833,7 +968,7 @@ export default function DashboardPage() {
                                   </Typography>
                                 </Paper>
                               )}
-                              {isEditing && hasSummary && (
+                              {hasSummaryFlow && isEditing && hasSummary && (
                                 <InlineSummaryForm
                                   sessionId={s.id}
                                   sessionTitle={s.title}
@@ -930,7 +1065,7 @@ export default function DashboardPage() {
         {/* Right column: Tasks sidebar (desktop only) */}
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' }, alignSelf: 'flex-start', position: 'sticky', top: 24 }}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>Tasks</Typography>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Tasks</Typography>
               <Stack spacing={2}>
                 {/* Confirm events task */}
                 {needsWednesdayConfirm && (

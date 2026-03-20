@@ -170,6 +170,8 @@ function CourseCard({
             {c.program} &bull; {c.batch}
           </Typography>
 
+          <Divider sx={{ mb: 1.5 }} />
+
           {/* Mapped sessions */}
           <Box sx={{ mt: "auto" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.75 }}>

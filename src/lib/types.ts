@@ -10,6 +10,10 @@ export type SessionType =
   | "Industry session"
   | "Online class"
   | "Mentored Learning session"
+  | "Residency"
+  | "Evaluation"
+  | "Moderation"
+  | "CV Review"
   | "Others";
 
 export type AudienceType = "Individual" | "Group" | "Batch" | "Webinar";

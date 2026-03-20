@@ -1,8 +1,11 @@
 import SettingsIcon from "@mui/icons-material/Settings";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import Box from "@mui/material/Box";
 import Switch from "@mui/material/Switch";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Card from "@mui/material/Card";
@@ -10,7 +13,7 @@ import CardContent from "@mui/material/CardContent";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { togglePref } from "@/store/slices/preferencesSlice";
-import { setIsDarkMode } from "@/store/slices/uiSlice";
+import { setThemeMode } from "@/store/slices/uiSlice";
 import type { Preferences } from "@/lib/types";
 
 const commItems: Array<{ key: keyof Preferences; label: string; description: string }> = [
@@ -24,7 +27,7 @@ const commItems: Array<{ key: keyof Preferences; label: string; description: str
 export default function PreferencesPage() {
   const dispatch = useAppDispatch();
   const prefs = useAppSelector((s) => s.preferences.prefs);
-  const isDarkMode = useAppSelector((s) => s.ui.isDarkMode);
+  const themeMode = useAppSelector((s) => s.ui.themeMode);
 
   return (
     <>
@@ -33,24 +36,42 @@ export default function PreferencesPage() {
       {/* ── Appearance ── */}
       <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 3, mb: 1.5 }}>Appearance</Typography>
       <Card variant="outlined" sx={{ mb: 4 }}>
-        <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
-              {isDarkMode
-                ? <DarkModeOutlinedIcon sx={{ fontSize: 20, color: "text.secondary" }} />
-                : <LightModeOutlinedIcon sx={{ fontSize: 20, color: "text.secondary" }} />
-              }
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>Dark mode</Typography>
-                <Box sx={{ mt: 0.25, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
-                  Switch between light and dark theme.
-                </Box>
+        <CardContent sx={{ py: 2, "&:last-child": { pb: 2 } }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>Theme</Typography>
+              <Box sx={{ mt: 0.25, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
+                Choose your preferred appearance.
               </Box>
             </Box>
-            <Switch
-              checked={isDarkMode}
-              onChange={() => dispatch(setIsDarkMode(!isDarkMode))}
-            />
+            <ToggleButtonGroup
+              value={themeMode}
+              exclusive
+              onChange={(_e, val) => { if (val) dispatch(setThemeMode(val)); }}
+              size="small"
+              sx={{
+                "& .MuiToggleButton-root": {
+                  textTransform: "none",
+                  fontWeight: 500,
+                  fontSize: "0.8rem",
+                  px: 1.5,
+                  gap: 0.5,
+                },
+              }}
+            >
+              <ToggleButton value="system">
+                <SettingsBrightnessOutlinedIcon sx={{ fontSize: 16 }} />
+                System
+              </ToggleButton>
+              <ToggleButton value="light">
+                <LightModeOutlinedIcon sx={{ fontSize: 16 }} />
+                Light
+              </ToggleButton>
+              <ToggleButton value="dark">
+                <DarkModeOutlinedIcon sx={{ fontSize: 16 }} />
+                Dark
+              </ToggleButton>
+            </ToggleButtonGroup>
           </Box>
         </CardContent>
       </Card>
