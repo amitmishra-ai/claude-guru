@@ -196,17 +196,25 @@ export function SessionCard({
 
   return (
     <Box sx={sx}>
-      {topRight && (
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            {titleRow}
-            {dateRow}
-            {chipsRow}
-          </Box>
-          {topRight}
-        </Stack>
-      )}
-      {!topRight && (
+      {topRight ? (
+        <>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
+            <Typography
+              variant={titleVariant}
+              fontWeight={600}
+              sx={{ fontSize: titleVariant === "h5" ? { xs: "1rem", md: "1.125rem" } : "0.875rem", minWidth: 0 }}
+            >
+              {displayTitle}
+            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
+              {statusChip}
+              {topRight}
+            </Stack>
+          </Stack>
+          {dateRow}
+          {chipsRow}
+        </>
+      ) : (
         <>
           {titleRow}
           {dateRow}

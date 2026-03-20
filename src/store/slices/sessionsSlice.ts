@@ -33,7 +33,10 @@ const initialState: SessionsState = {
   declineSessionFocus: null,
   declineReason: "",
   recentlyConfirmedIds: {},
-  summaries: {},
+  summaries: {
+    c3: { learnerEngagementNotes: "Covered descriptive statistics and distributions with real-world datasets. High engagement — several learners stayed back for extra doubt-clearing. Overall, learners were engaged and the session met its objectives.", submittedAtMs: 1739030400000 },
+    c4: { learnerEngagementNotes: "Excellent deep learning workshop. Learners were highly engaged during the backpropagation walkthrough. Several students stayed back for additional Q&A on neural network architectures.", submittedAtMs: 1738771200000 },
+  },
 };
 
 const sessionsSlice = createSlice({

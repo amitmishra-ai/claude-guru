@@ -241,6 +241,7 @@ export type DeclinedSession = {
   batch?: string;
   program: string;
   cohort: string;
+  sessionType: SessionType;
   dateYmd: string;
   start: number;
   end: number;

@@ -84,6 +84,7 @@ import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED, STATU
 import { InlineSummaryForm } from "@/components/shared/InlineSummaryForm";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import type { Session, SessionType } from "@/lib/types";
+import { filterSessionsByRole } from "@/lib/role-config";
 
 const slideOutDown = keyframes`
   0%   { opacity: 1; transform: translateY(0)     scale(1);   }
@@ -161,7 +162,9 @@ function TaskCard({
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const sessions = useAppSelector((s) => s.sessions.items);
+  const allSessions = useAppSelector((s) => s.sessions.items);
+  const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
+  const sessions = useMemo(() => filterSessionsByRole(allSessions, selectedRole), [allSessions, selectedRole]);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
   const summaries = useAppSelector((s) => s.sessions.summaries);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
@@ -183,6 +186,10 @@ export default function DashboardPage() {
   /* ── inline summary state ──────────────────────────────────────── */
   const [summarizingSessionId, setSummarizingSessionId] = useState<string | null>(null);
   const [editingSummaryId, setEditingSummaryId] = useState<string | null>(null);
+
+  /* ── planned event detail dialog state ───────────────────────── */
+  const [plannedEventDetailId, setPlannedEventDetailId] = useState<string | null>(null);
+  const plannedEventDetail = demoPlannedEvents.find((pe) => pe.id === plannedEventDetailId) ?? null;
 
   /* ── inline availability editing state ───────────────────────────── */
   const [editingPatternId, setEditingPatternId] = useState<string | null>(null);
@@ -214,7 +221,7 @@ export default function DashboardPage() {
     [sessions, sessionDeclined, nowMs]
   );
   const completedSessions = useMemo(
-    () => sortByDateTime(sessions).filter((s) => isSessionCompleted(s, nowMs)),
+    () => sortByDateTime(sessions).filter((s) => isSessionCompleted(s, nowMs)).reverse(),
     [sessions, nowMs]
   );
   const filteredCompletedSessions = useMemo(
@@ -228,6 +235,9 @@ export default function DashboardPage() {
     () => sessions.filter((s) => sessionDeclined[s.id]),
     [sessions, sessionDeclined]
   );
+
+  const rolePlannedEvents = useMemo(() => filterSessionsByRole(demoPlannedEvents, selectedRole), [selectedRole]);
+  const rolePreviouslyDeclined = useMemo(() => filterSessionsByRole(demoPreviouslyDeclinedSessions, selectedRole), [selectedRole]);
 
   const todayYmd = demoNow.toISOString().slice(0, 10);
   const todaySessions = upcomingSessions.filter((s) => s.dateYmd === todayYmd);
@@ -339,13 +349,12 @@ export default function DashboardPage() {
                   {needsWednesdayConfirm && (
                     <Box sx={{ minWidth: 280, flexShrink: 0 }}>
                       <TaskCard
-                        chipLabel="Action needed"
+                        chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
                         chipColor="var(--gl-status-declined-text)"
                         chipBg="var(--gl-status-declined-bg)"
                         chipBorder="var(--gl-status-declined-border)"
                         title="Confirm upcoming events"
                         description="Confirm by Wednesday 6 PM so our team can finalize allocations."
-                        extra={<Chip label={`Confirmed ${confirmedCount} / ${upcomingSessions.length}`} size="small" />}
                         action={
                           <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
                             Review confirmations
@@ -361,12 +370,12 @@ export default function DashboardPage() {
             {/* ── Big container for entire left section ── */}
             <Card sx={{ p: 2 }}>
               <Stack spacing={2.5}>
-                {/* Next Events */}
+                {/* Next Events — hidden when no today sessions */}
+                {todaySessions.length > 0 && (
                 <Box>
                   <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
-                    {todaySessions.length > 0 ? `Next Event${todaySessions.length > 1 ? "s" : ""}` : "Next Event"}
+                    {todaySessions.length > 1 ? "Next Events" : "Next Event"}
                   </Typography>
-                  {todaySessions.length > 0 ? (
                     <Stack spacing={1.5}>
                       {todaySessions.map((s) => {
                         const sessionStartMs = dateTimeMs(s.dateYmd, s.start);
@@ -440,12 +449,8 @@ export default function DashboardPage() {
                         );
                       })}
                     </Stack>
-                  ) : (
-                    <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-                      <Typography variant="body2" color="text.secondary">No upcoming events.</Typography>
-                    </Card>
-                  )}
                 </Box>
+                )}
 
                 {/* Tabs */}
                 <Tabs
@@ -582,38 +587,119 @@ export default function DashboardPage() {
                       <Typography variant="subtitle2" fontWeight={600}>Planned Events</Typography>
                       <Typography variant="caption" color="text.secondary">(subject to change)</Typography>
                     </Stack>
-                    {demoPlannedEvents.length > 0 ? (
-                      <Stack spacing={1.5}>
-                        {demoPlannedEvents.map((pe) => {
-                          const statusCfg = pe.status === "to_be_confirmed"
-                            ? { label: "To be confirmed", bg: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "var(--gl-status-pending-border)" }
-                            : { label: "Confirmed", bg: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "var(--gl-status-confirmed-border)" };
-                          return (
-                            <Card key={pe.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-                              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-                                <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
-                                  {pe.sessionType}: {pe.title}
-                                </Typography>
-                                <Chip
-                                  label={statusCfg.label}
-                                  size="small"
-                                  sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }}
-                                />
-                              </Stack>
-                              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
-                                <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-                                <Typography variant="caption" color="text.secondary">
-                                  {fmtDateNice(pe.startDateYmd)} &ndash; {fmtDateNice(pe.endDateYmd)} &bull; {pe.batch}
-                                </Typography>
-                              </Stack>
-                              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 0.25 }}>
-                                <MailOutlineIcon sx={{ fontSize: 12, color: "text.secondary" }} />
-                                <Typography variant="caption" color="text.secondary">{pe.contactEmail}</Typography>
-                              </Stack>
-                            </Card>
-                          );
-                        })}
-                      </Stack>
+                    {rolePlannedEvents.length > 0 ? (
+                      <>
+                        {/* Planned Event Detail Dialog */}
+                        <Dialog
+                          open={plannedEventDetail !== null}
+                          onClose={() => setPlannedEventDetailId(null)}
+                          maxWidth="sm"
+                          fullWidth
+                          PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}
+                        >
+                          {plannedEventDetail && (
+                            <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
+                              <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                Event details
+                                <IconButton size="small" onClick={() => setPlannedEventDetailId(null)} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
+                              </DialogTitle>
+                              <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+                                <Stack spacing={2.5}>
+                                  <Box>
+                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+                                      <Chip
+                                        label={plannedEventDetail.status === "to_be_confirmed" ? "To be confirmed" : "Confirmed"}
+                                        size="small"
+                                        sx={{
+                                          bgcolor: plannedEventDetail.status === "to_be_confirmed" ? "var(--gl-status-pending-bg)" : "var(--gl-status-confirmed-bg)",
+                                          color: plannedEventDetail.status === "to_be_confirmed" ? "var(--gl-status-pending-text)" : "var(--gl-status-confirmed-text)",
+                                          border: `1px solid ${plannedEventDetail.status === "to_be_confirmed" ? "var(--gl-status-pending-border)" : "var(--gl-status-confirmed-border)"}`,
+                                          fontWeight: 600,
+                                        }}
+                                      />
+                                      <Chip label={plannedEventDetail.program} size="small" />
+                                      <Chip label={plannedEventDetail.sessionType} size="small" />
+                                    </Stack>
+                                    <Typography variant="h6" fontWeight={600}>{plannedEventDetail.title}</Typography>
+                                  </Box>
+
+                                  {/* Schedule */}
+                                  <Paper variant="outlined" sx={{ borderRadius: "16px", p: 2 }}>
+                                    <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
+                                    <Divider sx={{ mb: 0.5 }} />
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Date range</Typography>
+                                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                                        <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
+                                        <Typography variant="body2" fontWeight={500}>{fmtDateNice(plannedEventDetail.startDateYmd)} &ndash; {fmtDateNice(plannedEventDetail.endDateYmd)}</Typography>
+                                      </Stack>
+                                    </Stack>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Time</Typography>
+                                      <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500}>To be confirmed</Typography>
+                                    </Stack>
+                                  </Paper>
+
+                                  {/* Details */}
+                                  <Paper variant="outlined" sx={{ borderRadius: "16px", p: 2 }}>
+                                    <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
+                                    <Divider sx={{ mb: 0.5 }} />
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Batch</Typography>
+                                      <Typography variant="body2" fontWeight={500}>{plannedEventDetail.batch}</Typography>
+                                    </Stack>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Program</Typography>
+                                      <Typography variant="body2" fontWeight={500}>{plannedEventDetail.program}</Typography>
+                                    </Stack>
+                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
+                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Contact</Typography>
+                                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                                        <MailOutlineIcon sx={{ fontSize: 13 }} />
+                                        <Typography variant="body2" fontWeight={500}>{plannedEventDetail.contactEmail}</Typography>
+                                      </Stack>
+                                    </Stack>
+                                  </Paper>
+                                </Stack>
+                              </DialogContent>
+                              <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2 }}>
+                                <Button variant="text" color="inherit" onClick={() => setPlannedEventDetailId(null)}>Close</Button>
+                              </DialogActions>
+                            </Box>
+                          )}
+                        </Dialog>
+
+                        <Stack spacing={1.5}>
+                          {rolePlannedEvents.map((pe) => {
+                            const statusCfg = pe.status === "to_be_confirmed"
+                              ? { label: "To be confirmed", bg: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "var(--gl-status-pending-border)" }
+                              : { label: "Confirmed", bg: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "var(--gl-status-confirmed-border)" };
+                            return (
+                              <Card key={pe.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+                                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                                  <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
+                                    {pe.sessionType}: {pe.title}
+                                  </Typography>
+                                  <Chip
+                                    label={statusCfg.label}
+                                    size="small"
+                                    sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }}
+                                  />
+                                </Stack>
+                                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+                                  <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+                                  <Typography variant="caption" color="text.secondary">
+                                    {fmtDateNice(pe.startDateYmd)} &ndash; {fmtDateNice(pe.endDateYmd)} &bull; {pe.batch}
+                                  </Typography>
+                                </Stack>
+                                <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}>
+                                  <Button variant="text" size="small" onClick={() => setPlannedEventDetailId(pe.id)}>View details</Button>
+                                </Stack>
+                              </Card>
+                            );
+                          })}
+                        </Stack>
+                      </>
                     ) : (
                       <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
                         No planned events at this moment!
@@ -665,7 +751,9 @@ export default function DashboardPage() {
                                     <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
                                     <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
                                   </Stack>
-                                ) : undefined}
+                                ) : (
+                                  <Chip label="Gathering feedback" size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }} />
+                                )}
                                 actions={
                                   <>
                                     {!hasSummary && !isSummarizing && (
@@ -768,7 +856,7 @@ export default function DashboardPage() {
                   <>
                     {declinedSessions.length > 0 && (
                       <Box>
-                        <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>Active declined</Typography>
+                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Active declined</Typography>
                         <Stack spacing={1.5}>
                           {declinedSessions.map((s) => (
                             <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
@@ -802,11 +890,11 @@ export default function DashboardPage() {
                       </Box>
                     )}
 
-                    {demoPreviouslyDeclinedSessions.length > 0 && (
+                    {rolePreviouslyDeclined.length > 0 && (
                       <Box>
-                        <Typography variant="overline" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>Previously declined</Typography>
+                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Previously declined</Typography>
                         <Stack spacing={1.5}>
-                          {demoPreviouslyDeclinedSessions.map((s) => (
+                          {rolePreviouslyDeclined.map((s) => (
                             <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 }, opacity: 0.6 }}>
                               <SessionCard
                                 title={s.title}
@@ -828,7 +916,7 @@ export default function DashboardPage() {
                       </Box>
                     )}
 
-                    {declinedSessions.length === 0 && demoPreviouslyDeclinedSessions.length === 0 && (
+                    {declinedSessions.length === 0 && rolePreviouslyDeclined.length === 0 && (
                       <Typography variant="body2" color="text.secondary">No declined events.</Typography>
                     )}
                   </>
@@ -847,13 +935,12 @@ export default function DashboardPage() {
                 {/* Confirm events task */}
                 {needsWednesdayConfirm && (
                   <TaskCard
-                    chipLabel="Action Needed"
+                    chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
                     chipColor="var(--gl-status-declined-text)"
                     chipBg="var(--gl-status-declined-bg)"
                     chipBorder="var(--gl-status-declined-border)"
                     title="Confirm upcoming events"
                     description="Confirm by Wednesday 6 PM so our team can finalize allocations."
-                    extra={<Chip label={`${confirmedCount} / ${upcomingSessions.length}`} size="small" />}
                     action={
                       <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
                         Review Confirmations

@@ -7,6 +7,7 @@ import { MobileAppBar } from "./MobileAppBar";
 import { ToastViewport } from "@/components/shared/ToastViewport";
 import { GlobalDialogs } from "@/components/dialogs";
 import { DevPanel } from "@/components/dev/DevPanel";
+import { RoleSwitchOverlay } from "@/components/shared/RoleSwitchOverlay";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setIsDarkMode } from "@/store/slices/uiSlice";
 
@@ -66,6 +67,7 @@ export function AppLayout() {
       <ToastViewport />
       <GlobalDialogs />
       <DevPanel />
+      <RoleSwitchOverlay />
     </Box>
   );
 }
