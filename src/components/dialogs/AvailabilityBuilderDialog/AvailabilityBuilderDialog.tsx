@@ -71,6 +71,9 @@ const AvailabilityBuilderDialog = () => {
 
   const [saveAvailability, { isLoading: isSaving }] = useSaveAvailabilityMutation();
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [editingPresetKey, setEditingPresetKey] = useState<string | null>(null);
+  const [editPresetStart, setEditPresetStart] = useState("");
+  const [editPresetEnd, setEditPresetEnd] = useState("");
 
   const effectiveTimezone =
     timeZoneMode === "manual"
@@ -237,41 +240,104 @@ const AvailabilityBuilderDialog = () => {
             </Typography>
 
             {/* Preset cards */}
-            {cards.map((card) => (
-              <FlexBox
-                key={card.key}
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: 2, gap: 2 }}
-              >
-                <FlexBox flexDirection="column" sx={{ flex: 1, minWidth: 0 }}>
+            {cards.map((card) =>
+              editingPresetKey === card.key ? (
+                <FlexBox
+                  key={card.key}
+                  flexDirection="column"
+                  gap={1.5}
+                  sx={{ border: 1, borderColor: "primary.main", borderRadius: 1, p: 2 }}
+                >
                   <Typography variant="body2" sx={{ fontWeight: 700 }}>{card.label}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {formatDayGroupShort(card.days)} &bull; {fmtTime(parseHHMM(card.start))}–{fmtTime(parseHHMM(card.end))}
-                  </Typography>
+                  <FlexBox sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Start time</InputLabel>
+                      <Select
+                        label="Start time"
+                        value={editPresetStart}
+                        onChange={(e) => setEditPresetStart(e.target.value)}
+                      >
+                        {timeOptions12.map((opt) => (
+                          <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>End time</InputLabel>
+                      <Select
+                        label="End time"
+                        value={editPresetEnd}
+                        onChange={(e) => setEditPresetEnd(e.target.value)}
+                      >
+                        {timeOptions12.map((opt) => (
+                          <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </FlexBox>
+                  <FlexBox gap={1}>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => {
+                        const updated = cards.map((c) =>
+                          c.key === card.key ? { ...c, start: editPresetStart, end: editPresetEnd, enabled: true } : c
+                        );
+                        dispatch(setPresetCards(updated));
+                        setEditingPresetKey(null);
+                      }}
+                    >
+                      Save
+                    </Button>
+                    <Button size="small" variant="text" color="inherit" onClick={() => setEditingPresetKey(null)}>
+                      Cancel
+                    </Button>
+                  </FlexBox>
                 </FlexBox>
-                <FlexBox alignItems="center" gap={1} sx={{ flexShrink: 0 }}>
-                  <Button
-                    variant={card.enabled ? "soft" : "contained"}
-                    size="small"
-                    onClick={() => togglePreset(card.key)}
-                    sx={card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" } : { px: 2 }}
-                  >
-                    {card.enabled ? "Added" : "Add"}
-                  </Button>
-                  <Button variant="text" size="small">
-                    Edit
-                  </Button>
-                  <IconButton
-                    size="small"
-                    onClick={() => dispatch(setPresetCards(cards.filter((c) => c.key !== card.key)))}
-                    sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
-                  >
-                    <CloseOutlinedIcon sx={{ fontSize: 14 }} />
-                  </IconButton>
+              ) : (
+                <FlexBox
+                  key={card.key}
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: 2, gap: 2 }}
+                >
+                  <FlexBox flexDirection="column" sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{card.label}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {formatDayGroupShort(card.days)} &bull; {fmtTime(parseHHMM(card.start))}–{fmtTime(parseHHMM(card.end))}
+                    </Typography>
+                  </FlexBox>
+                  <FlexBox alignItems="center" gap={1} sx={{ flexShrink: 0 }}>
+                    <Button
+                      variant={card.enabled ? "soft" : "contained"}
+                      size="small"
+                      onClick={() => togglePreset(card.key)}
+                      sx={card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" } : { px: 2 }}
+                    >
+                      {card.enabled ? "Added" : "Add"}
+                    </Button>
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={() => {
+                        setEditingPresetKey(card.key);
+                        setEditPresetStart(card.start);
+                        setEditPresetEnd(card.end);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <IconButton
+                      size="small"
+                      onClick={() => dispatch(setPresetCards(cards.filter((c) => c.key !== card.key)))}
+                      sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
+                    >
+                      <CloseOutlinedIcon sx={{ fontSize: 14 }} />
+                    </IconButton>
+                  </FlexBox>
                 </FlexBox>
-              </FlexBox>
-            ))}
+              )
+            )}
 
             {/* Custom slots */}
             {draftPatterns.map((p) => (
