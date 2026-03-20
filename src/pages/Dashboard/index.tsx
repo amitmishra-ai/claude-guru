@@ -862,6 +862,40 @@ export default function DashboardPage() {
                   />
                 )}
 
+                {/* Session summaries task */}
+                {pendingSummaryCount > 0 && (
+                  <TaskCard
+                    chipLabel={`${pendingSummaryCount} pending`}
+                    chipColor="var(--gl-status-pending-text)"
+                    chipBg="var(--gl-status-pending-bg)"
+                    chipBorder="var(--gl-status-pending-border)"
+                    title="Write session summaries"
+                    description="Capture learner impact to unlock invoice processing."
+                    action={
+                      <Button size="small" variant="soft" onClick={() => dispatch(setHomeSessionsView("completed"))}>
+                        Go to completed events
+                      </Button>
+                    }
+                  />
+                )}
+
+                {/* Calendar connection task */}
+                {!calendarConnected && (
+                  <TaskCard
+                    chipLabel="Not connected"
+                    chipColor="var(--gl-status-pending-text)"
+                    chipBg="var(--gl-status-pending-bg)"
+                    chipBorder="var(--gl-status-pending-border)"
+                    title="Avoid double booking"
+                    description="Connect calendar to detect conflicts."
+                    action={
+                      <Button size="small" variant="contained">
+                        Connect Google Calendar
+                      </Button>
+                    }
+                  />
+                )}
+
                 {/* Availability task */}
                 {hasUserConfiguredAvailability ? (
                   <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
@@ -889,7 +923,6 @@ export default function DashboardPage() {
                         <Stack spacing={1}>
                           {patterns.map((p) =>
                             editingPatternId === p.id ? (
-                              /* ── Inline edit form ── */
                               <Paper key={p.id} variant="outlined" sx={{ p: 1.5, borderRadius: 1.5, borderColor: "primary.main" }}>
                                 <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 1 }}>Edit slot</Typography>
                                 <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mb: 1 }}>
@@ -930,13 +963,10 @@ export default function DashboardPage() {
                                 </Stack>
                               </Paper>
                             ) : (
-                              /* ── Display row ── */
                               <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
                                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                                   <Box>
-                                    <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>
-                                      {p.label}
-                                    </Typography>
+                                    <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>{p.label}</Typography>
                                     <Typography variant="caption" color="text.secondary">
                                       {formatDayGroupShort(p.days)} · {fmtTime12(p.start)} – {fmtTime12(p.end)}
                                     </Typography>
@@ -958,8 +988,6 @@ export default function DashboardPage() {
                               </Paper>
                             )
                           )}
-
-                          {/* ── Preset suggestions (shown when not all 3 presets are active) ── */}
                           {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).length > 0 && (
                             <>
                               <Divider sx={{ my: 0.5 }} />
@@ -972,23 +1000,15 @@ export default function DashboardPage() {
                                       {formatDayGroupShort(ps.days)} · {fmtTime12(parseHHMM(ps.start))} – {fmtTime12(parseHHMM(ps.end))}
                                     </Typography>
                                   </Box>
-                                  <Button
-                                    size="small"
-                                    variant="soft"
-                                    onClick={() => {
-                                      const newPattern = { id: `preset-${ps.key}-${Date.now()}`, label: ps.label, days: [...ps.days], start: parseHHMM(ps.start), end: parseHHMM(ps.end) };
-                                      dispatch(setPatterns([...patterns, newPattern]));
-                                      dispatch(pushToast({ title: "Slot added", description: ps.label }));
-                                    }}
-                                  >
-                                    Add
-                                  </Button>
+                                  <Button size="small" variant="soft" onClick={() => {
+                                    const newPattern = { id: `preset-${ps.key}-${Date.now()}`, label: ps.label, days: [...ps.days], start: parseHHMM(ps.start), end: parseHHMM(ps.end) };
+                                    dispatch(setPatterns([...patterns, newPattern]));
+                                    dispatch(pushToast({ title: "Slot added", description: ps.label }));
+                                  }}>Add</Button>
                                 </Stack>
                               ))}
                             </>
                           )}
-
-                          {/* ── Add custom slot button ── */}
                           <Button
                             size="small"
                             variant="soft"
@@ -1010,40 +1030,6 @@ export default function DashboardPage() {
                     chipBorder="var(--gl-status-declined-border)"
                     title="Add your availability"
                     description={`Keep availability up-to-date for next ${rangeDays} days.`}
-                  />
-                )}
-
-                {/* Session summaries task */}
-                {pendingSummaryCount > 0 && (
-                  <TaskCard
-                    chipLabel={`${pendingSummaryCount} pending`}
-                    chipColor="var(--gl-status-pending-text)"
-                    chipBg="var(--gl-status-pending-bg)"
-                    chipBorder="var(--gl-status-pending-border)"
-                    title="Write session summaries"
-                    description="Capture learner impact to unlock invoice processing."
-                    action={
-                      <Button size="small" variant="soft" onClick={() => dispatch(setHomeSessionsView("completed"))}>
-                        Go to completed events
-                      </Button>
-                    }
-                  />
-                )}
-
-                {/* Calendar connection task */}
-                {!calendarConnected && (
-                  <TaskCard
-                    chipLabel="Not connected"
-                    chipColor="var(--gl-status-pending-text)"
-                    chipBg="var(--gl-status-pending-bg)"
-                    chipBorder="var(--gl-status-pending-border)"
-                    title="Avoid double booking"
-                    description="Connect calendar to detect conflicts."
-                    action={
-                      <Button size="small" variant="contained">
-                        Connect Google Calendar
-                      </Button>
-                    }
                   />
                 )}
               </Stack>
