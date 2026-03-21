@@ -178,9 +178,6 @@ export default function ProfilePage() {
               <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25 }}>{guruPrograms}</Typography>
             </Box>
           </FlexBox>
-          <Typography variant="caption" color="text.disabled" sx={{ mt: 2, display: "block" }}>
-            Profile editing is not yet available in this prototype. Use the Edit button to update name, mode, and programs.
-          </Typography>
         </CardContent>
       </Card>
 
