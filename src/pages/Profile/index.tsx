@@ -30,6 +30,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
 } from "recharts";
+import MentorImpactCard from "@/components/shared/MentorImpactCard";
 import FlexBox from "@/components/Utils/FlexBox";
 import { ScoreCell } from "@/components/shared/ScoreCell";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -182,6 +183,9 @@ export default function ProfilePage() {
           </Typography>
         </CardContent>
       </Card>
+
+      {/* ── Mentor Impact Card ──────────────────────────────────────────── */}
+      <MentorImpactCard guruName={guruName} />
 
       {/* ══ PERFORMANCE SECTION ════════════════════════════════════════════ */}
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "baseline", mb: 1.5 }}>
