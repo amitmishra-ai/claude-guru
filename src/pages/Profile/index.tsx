@@ -60,6 +60,19 @@ const borderRotate = keyframes`
   100% { transform: rotate(360deg); }
 `;
 
+// ── Demo data for contracts ──────────────────────────────────────────────────
+const demoContracts = [
+  { program: "PGP-AIML", role: "Teacher", start: "21-01-2025", end: "31-03-2026", active: true },
+  { program: "PGP-DSBA", role: "Course Mentor", start: "27-03-2025", end: "31-03-2026", active: true },
+  { program: "PGP-DS", role: "Course Mentor", start: "27-03-2025", end: "31-03-2026", active: true },
+  { program: "GL-DS", role: "Teacher", start: "29-05-2025", end: "10-08-2025", active: true },
+  { program: "UoA-MSBA", role: "Teacher", start: "15-05-2025", end: "30-11-2025", active: true },
+  { program: "IITB-CSE", role: "Teacher", start: "01-09-2025", end: "31-01-2026", active: true },
+  { program: "MCA-Unified", role: "Teacher", start: "11-10-2023", end: "11-10-2025", active: false },
+  { program: "PGP-AIML", role: "Course Mentor", start: "27-06-2024", end: "31-03-2025", active: false },
+  { program: "Deloitte", role: "Teacher", start: "20-12-2024", end: "31-12-2024", active: false },
+];
+
 // ── Demo data for course performance ──────────────────────────────────────────
 const demoCoursePerf = [
   { name: "Deep Learning Fundamentals", rating: 4.8, delta: +0.15 },
@@ -685,6 +698,66 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
+
+      {/* ══ CONTRACTS SECTION ═══════════════════════════════════════════════ */}
+      <FlexBox sx={{ justifyContent: "space-between", alignItems: "baseline", mb: 1.5 }}>
+        <Box>
+          <Typography variant="h6" fontWeight={700}>Contracts</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Your active and past program contracts.
+          </Typography>
+        </Box>
+      </FlexBox>
+
+      <Card variant="outlined" sx={{ mb: 4 }}>
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>Program</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>Role</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>Start date</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>End date</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: 12 }} align="right">Contract</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {demoContracts.map((c, i) => (
+                <TableRow key={i} sx={{ "&:last-child td": { border: 0 } }}>
+                  <TableCell sx={{ fontSize: 12, fontWeight: 600 }}>{c.program}</TableCell>
+                  <TableCell sx={{ fontSize: 12, color: "text.secondary" }}>{c.role}</TableCell>
+                  <TableCell sx={{ fontSize: 12, color: "text.secondary" }}>{c.start}</TableCell>
+                  <TableCell sx={{ fontSize: 12, color: "text.secondary" }}>{c.end}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={c.active ? "Active" : "Expired"}
+                      size="small"
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: "0.65rem",
+                        height: 22,
+                        bgcolor: c.active ? "var(--gl-status-confirmed-bg)" : "action.hover",
+                        color: c.active ? "var(--gl-status-confirmed-text)" : "text.disabled",
+                        border: c.active ? "1px solid var(--gl-status-confirmed-border)" : "none",
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <Button
+                      size="small"
+                      variant="text"
+                      sx={{ fontSize: 12, textTransform: "none", p: 0, color: "primary.main", minWidth: 0 }}
+                    >
+                      View Contract
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Card>
 
       {/* ── Edit profile dialog ───────────────────────────────────────────── */}
       <Dialog
