@@ -56,6 +56,7 @@ import {
   setDeclineSessionFocus,
   setDeclineReason,
   setSelectedSessionType,
+  setSelectedTimePeriod,
   submitSummary,
 } from "@/store/slices/sessionsSlice";
 import { removeUnavailableBySessionId, setPatterns } from "@/store/slices/availabilitySlice";
@@ -185,6 +186,7 @@ export default function DashboardPage() {
   const guruName = useAppSelector((s) => s.profile.guruName);
   const polls = useAppSelector((s) => s.polls.items);
   const selectedSessionType = useAppSelector((s) => s.sessions.selectedSessionType);
+  const selectedTimePeriod = useAppSelector((s) => s.sessions.selectedTimePeriod);
   const recentlyConfirmedIds = useAppSelector((s) => s.sessions.recentlyConfirmedIds);
 
   /* ── local state for exit animation ─────────────────────────────── */
@@ -231,13 +233,24 @@ export default function DashboardPage() {
     () => sortByDateTime(sessions).filter((s) => isSessionCompleted(s, nowMs)).reverse(),
     [sessions, nowMs]
   );
-  const filteredCompletedSessions = useMemo(
-    () =>
-      selectedSessionType === "All"
-        ? completedSessions
-        : completedSessions.filter((s) => s.sessionType === selectedSessionType),
-    [completedSessions, selectedSessionType]
-  );
+  const filteredCompletedSessions = useMemo(() => {
+    let filtered = selectedSessionType === "All"
+      ? completedSessions
+      : completedSessions.filter((s) => s.sessionType === selectedSessionType);
+
+    if (selectedTimePeriod === "Pending Summaries") {
+      const onlineTypes = ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"];
+      filtered = filtered.filter((s) => onlineTypes.includes(s.sessionType) && !summaries[s.id]);
+    } else if (selectedTimePeriod === "Last 6 months") {
+      const sixMonthsAgo = new Date(demoNow);
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      filtered = filtered.filter((s) => new Date(s.dateYmd) >= sixMonthsAgo);
+    } else if (["2025", "2024", "2023", "2022"].includes(selectedTimePeriod)) {
+      filtered = filtered.filter((s) => s.dateYmd.startsWith(selectedTimePeriod));
+    }
+
+    return filtered;
+  }, [completedSessions, selectedSessionType, selectedTimePeriod, summaries]);
   const declinedSessions = useMemo(
     () => sessions.filter((s) => sessionDeclined[s.id]),
     [sessions, sessionDeclined]
@@ -718,18 +731,42 @@ export default function DashboardPage() {
                 {/* ── Completed tab ── */}
                 {homeSessionsView === "completed" && (
                   <>
-                    <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220 } }}>
-                      <InputLabel>Filter by event type</InputLabel>
-                      <Select
-                        label="Filter by event type"
-                        value={selectedSessionType}
-                        onChange={(e) => dispatch(setSelectedSessionType(e.target.value as typeof selectedSessionType))}
-                      >
-                        {SESSION_TYPES.map((t) => (
-                          <MenuItem key={t} value={t}>{t}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ width: "100%" }}>
+                      <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+                        <InputLabel>Summaries</InputLabel>
+                        <Select
+                          label="Summaries"
+                          value={selectedTimePeriod === "Pending Summaries" ? "Pending Summaries" : "All"}
+                          onChange={(e) => {
+                            const val = e.target.value as string;
+                            if (val === "Pending Summaries") {
+                              dispatch(setSelectedTimePeriod("Pending Summaries"));
+                            } else {
+                              if (selectedTimePeriod === "Pending Summaries") dispatch(setSelectedTimePeriod("All"));
+                            }
+                          }}
+                        >
+                          <MenuItem value="All">All Sessions</MenuItem>
+                          <MenuItem value="Pending Summaries">Pending Summaries ({completedSessions.filter((s) => ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"].includes(s.sessionType) && !summaries[s.id]).length})</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+                        <InputLabel>Time period</InputLabel>
+                        <Select
+                          label="Time period"
+                          value={selectedTimePeriod === "Pending Summaries" ? "All" : selectedTimePeriod}
+                          onChange={(e) => dispatch(setSelectedTimePeriod(e.target.value as typeof selectedTimePeriod))}
+                        >
+                          <MenuItem value="All">All time</MenuItem>
+                          <MenuItem value="Last 6 months">Last 6 months</MenuItem>
+                          <MenuItem value="2025">2025</MenuItem>
+                          <MenuItem value="2024">2024</MenuItem>
+                          <MenuItem value="2023">2023</MenuItem>
+                          <MenuItem value="2022">2022</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Stack>
 
                     {filteredCompletedSessions.length > 0 ? (
                       <Stack spacing={1.5}>
