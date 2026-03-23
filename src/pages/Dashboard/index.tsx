@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { Fragment, useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
@@ -45,6 +45,8 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import IconButton from "@mui/material/IconButton";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { keyframes } from "@mui/system";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
@@ -731,46 +733,47 @@ export default function DashboardPage() {
                 {/* ── Completed tab ── */}
                 {homeSessionsView === "completed" && (
                   <>
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ width: "100%" }}>
-                      <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 200 } }}>
-                        <InputLabel>Summaries</InputLabel>
-                        <Select
-                          label="Summaries"
-                          value={selectedTimePeriod === "Pending Summaries" ? "Pending Summaries" : "All"}
-                          onChange={(e) => {
-                            const val = e.target.value as string;
-                            if (val === "Pending Summaries") {
-                              dispatch(setSelectedTimePeriod("Pending Summaries"));
-                            } else {
-                              if (selectedTimePeriod === "Pending Summaries") dispatch(setSelectedTimePeriod("All"));
-                            }
-                          }}
-                        >
-                          <MenuItem value="All">All Sessions</MenuItem>
-                          <MenuItem value="Pending Summaries">Pending Summaries ({completedSessions.filter((s) => ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"].includes(s.sessionType) && !summaries[s.id]).length})</MenuItem>
-                        </Select>
-                      </FormControl>
+                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="center" justifyContent="space-between" sx={{ width: "100%" }}>
+                      <ToggleButtonGroup
+                        size="small"
+                        value={selectedTimePeriod === "Pending Summaries" ? "pending" : "all"}
+                        exclusive
+                        onChange={(_e: unknown, val: string | null) => {
+                          if (val === "pending") dispatch(setSelectedTimePeriod("Pending Summaries"));
+                          else if (val === "all") { if (selectedTimePeriod === "Pending Summaries") dispatch(setSelectedTimePeriod("Last 6 months")); }
+                        }}
+                        sx={{ "& .MuiToggleButton-root": { textTransform: "none", px: 2, py: 0.5, fontSize: "0.8rem" } }}
+                      >
+                        <ToggleButton value="all">All sessions</ToggleButton>
+                        <ToggleButton value="pending">
+                          Pending summaries ({completedSessions.filter((s) => ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"].includes(s.sessionType) && !summaries[s.id]).length})
+                        </ToggleButton>
+                      </ToggleButtonGroup>
 
-                      <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 200 } }}>
-                        <InputLabel>Time period</InputLabel>
-                        <Select
-                          label="Time period"
-                          value={selectedTimePeriod === "Pending Summaries" ? "All" : selectedTimePeriod}
-                          onChange={(e) => dispatch(setSelectedTimePeriod(e.target.value as typeof selectedTimePeriod))}
-                        >
-                          <MenuItem value="All">All time</MenuItem>
-                          <MenuItem value="Last 6 months">Last 6 months</MenuItem>
-                          <MenuItem value="2025">2025</MenuItem>
-                          <MenuItem value="2024">2024</MenuItem>
-                          <MenuItem value="2023">2023</MenuItem>
-                          <MenuItem value="2022">2022</MenuItem>
-                        </Select>
-                      </FormControl>
+                      <Select
+                        size="small"
+                        variant="standard"
+                        disableUnderline
+                        value={selectedTimePeriod === "Pending Summaries" ? "Last 6 months" : selectedTimePeriod}
+                        onChange={(e) => dispatch(setSelectedTimePeriod(e.target.value as typeof selectedTimePeriod))}
+                        sx={{ fontSize: "0.85rem", fontWeight: 600, color: "text.secondary", "& .MuiSelect-select": { py: 0.5 } }}
+                      >
+                        <MenuItem value="Last 6 months">Last 6 months</MenuItem>
+                        <MenuItem value="2025">2025</MenuItem>
+                        <MenuItem value="2024">2024</MenuItem>
+                        <MenuItem value="2023">2023</MenuItem>
+                        <MenuItem value="2022">2022</MenuItem>
+                      </Select>
                     </Stack>
 
                     {filteredCompletedSessions.length > 0 ? (
                       <Stack spacing={1.5}>
-                        {filteredCompletedSessions.map((s) => {
+                        {filteredCompletedSessions.map((s, idx) => {
+                          // Month divider logic
+                          const sessionMonth = s.dateYmd.slice(0, 7); // "YYYY-MM"
+                          const prevMonth = idx > 0 ? filteredCompletedSessions[idx - 1].dateYmd.slice(0, 7) : null;
+                          const showMonthDivider = sessionMonth !== prevMonth;
+                          const monthLabel = new Date(s.dateYmd + "T00:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" });
                           const ratings = demoLearnerRatingsBySessionId[s.id];
                           const hasRatings = ratings && ratings.length > 0;
                           const avg = hasRatings
@@ -938,7 +941,16 @@ export default function DashboardPage() {
                                     : s.title;
 
                           return (
-                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+                            <Fragment key={s.id}>
+                              {showMonthDivider && (
+                                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ pt: idx === 0 ? 0 : 1, pb: 0.5 }}>
+                                  <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ whiteSpace: "nowrap", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                                    {monthLabel}
+                                  </Typography>
+                                  <Divider sx={{ flex: 1 }} />
+                                </Stack>
+                              )}
+                            <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
                               {/* Card header: title row + date + actions — custom for non-SessionCard types */}
                               {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
                                 <>
@@ -1014,6 +1026,7 @@ export default function DashboardPage() {
                                 />
                               )}
                             </Card>
+                            </Fragment>
                           );
                         })}
                       </Stack>

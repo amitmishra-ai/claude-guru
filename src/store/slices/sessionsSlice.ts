@@ -28,7 +28,7 @@ const initialState: SessionsState = {
   sessionFocus: null,
   homeSessionsView: "next",
   selectedSessionType: "All",
-  selectedTimePeriod: "All",
+  selectedTimePeriod: "Last 6 months",
   confirmMoveSessionId: null,
   recentlyMovedConfirmedId: null,
   declineMoveSessionId: null,
