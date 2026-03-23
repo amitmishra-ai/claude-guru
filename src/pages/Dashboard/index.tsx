@@ -45,8 +45,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import IconButton from "@mui/material/IconButton";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Switch from "@mui/material/Switch";
 import { keyframes } from "@mui/system";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
@@ -734,21 +733,19 @@ export default function DashboardPage() {
                 {homeSessionsView === "completed" && (
                   <>
                     <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="center" justifyContent="space-between" sx={{ width: "100%" }}>
-                      <ToggleButtonGroup
-                        size="small"
-                        value={selectedTimePeriod === "Pending Summaries" ? "pending" : "all"}
-                        exclusive
-                        onChange={(_e: unknown, val: string | null) => {
-                          if (val === "pending") dispatch(setSelectedTimePeriod("Pending Summaries"));
-                          else if (val === "all") { if (selectedTimePeriod === "Pending Summaries") dispatch(setSelectedTimePeriod("Last 6 months")); }
-                        }}
-                        sx={{ "& .MuiToggleButton-root": { textTransform: "none", px: 2, py: 0.5, fontSize: "0.8rem" } }}
-                      >
-                        <ToggleButton value="all">All sessions</ToggleButton>
-                        <ToggleButton value="pending">
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Typography variant="body2" color={selectedTimePeriod === "Pending Summaries" ? "primary" : "text.secondary"} sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
                           Pending summaries ({completedSessions.filter((s) => ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"].includes(s.sessionType) && !summaries[s.id]).length})
-                        </ToggleButton>
-                      </ToggleButtonGroup>
+                        </Typography>
+                        <Switch
+                          size="small"
+                          checked={selectedTimePeriod === "Pending Summaries"}
+                          onChange={(_e: unknown, checked: boolean) => {
+                            if (checked) dispatch(setSelectedTimePeriod("Pending Summaries"));
+                            else dispatch(setSelectedTimePeriod("Last 6 months"));
+                          }}
+                        />
+                      </Stack>
 
                       <Select
                         size="small"
@@ -756,7 +753,7 @@ export default function DashboardPage() {
                         disableUnderline
                         value={selectedTimePeriod === "Pending Summaries" ? "Last 6 months" : selectedTimePeriod}
                         onChange={(e) => dispatch(setSelectedTimePeriod(e.target.value as typeof selectedTimePeriod))}
-                        sx={{ fontSize: "0.85rem", fontWeight: 600, color: "text.secondary", "& .MuiSelect-select": { py: 0.5 } }}
+                        sx={{ fontSize: "0.85rem", fontWeight: 600, color: "primary.main", "& .MuiSelect-select": { py: 0.5 }, "& .MuiSvgIcon-root": { color: "primary.main" } }}
                       >
                         <MenuItem value="Last 6 months">Last 6 months</MenuItem>
                         <MenuItem value="2025">2025</MenuItem>
