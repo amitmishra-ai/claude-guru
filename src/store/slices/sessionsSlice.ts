@@ -10,6 +10,7 @@ interface SessionsState {
   sessionFocus: Session | null;
   homeSessionsView: "next" | "completed" | "declined";
   selectedSessionType: "All" | SessionType;
+  selectedTimePeriod: "All" | "Pending Summaries" | "Last 6 months" | "2025" | "2024" | "2023" | "2022";
   confirmMoveSessionId: string | null;
   recentlyMovedConfirmedId: string | null;
   declineMoveSessionId: string | null;
@@ -27,6 +28,7 @@ const initialState: SessionsState = {
   sessionFocus: null,
   homeSessionsView: "next",
   selectedSessionType: "All",
+  selectedTimePeriod: "All",
   confirmMoveSessionId: null,
   recentlyMovedConfirmedId: null,
   declineMoveSessionId: null,
@@ -75,6 +77,9 @@ const sessionsSlice = createSlice({
     setSelectedSessionType(state, action: PayloadAction<"All" | SessionType>) {
       state.selectedSessionType = action.payload;
     },
+    setSelectedTimePeriod(state, action: PayloadAction<SessionsState["selectedTimePeriod"]>) {
+      state.selectedTimePeriod = action.payload;
+    },
     setConfirmMoveSessionId(state, action: PayloadAction<string | null>) {
       state.confirmMoveSessionId = action.payload;
     },
@@ -109,6 +114,7 @@ export const {
   setSessionFocus,
   setHomeSessionsView,
   setSelectedSessionType,
+  setSelectedTimePeriod,
   setConfirmMoveSessionId,
   setRecentlyMovedConfirmedId,
   setDeclineMoveSessionId,
