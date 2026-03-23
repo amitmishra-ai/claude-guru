@@ -286,30 +286,31 @@ export default function ProfilePage() {
       ],
     },
     {
-      label: "NPS PROXY",
-      value: "74",
-      description: "Learner satisfaction score derived from 4 & 5 star ratings.",
-      delta: "+4",
+      label: "SESSION QUALITY",
+      value: "98.8%",
+      description: "Sessions rated 4.4 or above.",
+      delta: "+0.3%",
       deltaLabel: "vs last month",
       deltaPositive: true,
-      bars: [55, 60, 68, 72, 70, 74],
+      bars: [96.5, 97.2, 97.9, 98.2, 98.5, 98.8],
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
       bg: "rgba(156, 39, 176, 0.06)",
       accent: "#9c27b0",
-      reportTitle: "NPS Proxy Report",
-      reportSummary: "Net Promoter Score proxy based on 4 & 5 star rating percentage minus 1-3 star percentage.",
+      reportTitle: "Session Quality Report",
+      reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
       chartData: [
-        { month: "Sep 25", value: 58 }, { month: "Oct 25", value: 62 }, { month: "Nov 25", value: 68 },
-        { month: "Dec 25", value: 72 }, { month: "Jan 26", value: 70 }, { month: "Feb 26", value: 74 },
+        { month: "Sep 25", value: 96.5 }, { month: "Oct 25", value: 97.2 }, { month: "Nov 25", value: 97.9 },
+        { month: "Dec 25", value: 98.2 }, { month: "Jan 26", value: 98.5 }, { month: "Feb 26", value: 98.8 },
       ],
       chartKey: "value",
       breakdown: [
-        { name: "5-star ratings", value: "62%" },
-        { name: "4-star ratings", value: "32%" },
-        { name: "3-star ratings", value: "4%" },
-        { name: "2-star ratings", value: "1.5%" },
-        { name: "1-star ratings", value: "0.5%" },
+        { name: "4.4+ threshold", value: "98.8% (Target: > 98%)" },
+        { name: "4.0+ threshold", value: "99.2% (Target: > 90%)" },
       ],
+      primaryBenchmark: "Target: > 98%",
+      secondaryValue: "99.2%",
+      secondaryLabel: "Rated 4.0+",
+      secondaryBenchmark: "Target: > 90%",
     },
     {
       label: "AVG CONFIRM TIME",
@@ -474,14 +475,36 @@ export default function ProfilePage() {
                   {card.description}
                 </Typography>
 
-                {/* Delta */}
+                {/* Delta + benchmark */}
                 {card.delta && (
-                  <Box sx={{ mb: 1.5 }}>
+                  <Box sx={{ mb: card.primaryBenchmark ? 0.5 : 1.5 }}>
                     <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600 }}>
                       {card.deltaPositive ? "↗" : "↘"} {card.delta}
                     </Typography>
                     <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5, fontSize: "0.65rem" }}>
                       {card.deltaLabel}
+                    </Typography>
+                  </Box>
+                )}
+                {card.primaryBenchmark && (
+                  <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem", mb: 0.5 }}>
+                    {card.primaryBenchmark}
+                  </Typography>
+                )}
+
+                {/* Secondary metric (e.g. < 4.0 threshold) */}
+                {card.secondaryValue && (
+                  <Box sx={{ mb: 1.5, pt: 0.75, borderTop: "1px dashed", borderColor: "divider" }}>
+                    <Stack direction="row" alignItems="baseline" spacing={0.5}>
+                      <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontSize: "0.7rem" }}>
+                        {card.secondaryLabel}:
+                      </Typography>
+                      <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.85rem" }}>
+                        {card.secondaryValue}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem" }}>
+                      {card.secondaryBenchmark}
                     </Typography>
                   </Box>
                 )}
