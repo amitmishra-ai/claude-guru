@@ -283,20 +283,20 @@ export default function DashboardPage() {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 2.5,
-            py: 12,
+            gap: { xs: 2, md: 2.5 },
+            py: { xs: 6, md: 12 },
             borderRadius: 3,
             border: '2px dashed',
             borderColor: 'divider',
             bgcolor: 'action.hover',
             textAlign: 'center',
-            px: 4,
+            px: { xs: 2, sm: 4 },
           }}
         >
           <Box
             sx={{
-              width: 72,
-              height: 72,
+              width: { xs: 56, md: 72 },
+              height: { xs: 56, md: 72 },
               borderRadius: '50%',
               bgcolor: 'primary.main',
               display: 'flex',
@@ -304,21 +304,20 @@ export default function DashboardPage() {
               justifyContent: 'center',
             }}
           >
-            <EventNoteOutlinedIcon sx={{ fontSize: 36, color: 'primary.contrastText' }} />
+            <EventNoteOutlinedIcon sx={{ fontSize: { xs: 28, md: 36 }, color: 'primary.contrastText' }} />
           </Box>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.75 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.75, fontSize: { xs: '1rem', md: '1.25rem' } }}>
               Set your availability to get started
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto', fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
               Without marking your availability, no events will be scheduled with you. Let learners know when you're free so they can book time with you.
             </Typography>
           </Box>
           <Button
             variant="contained"
-            size="large"
             startIcon={<EditCalendarOutlinedIcon sx={{ fontSize: 18 }} />}
-            sx={{ textTransform: 'none', px: 4 }}
+            sx={{ textTransform: 'none', px: { xs: 3, md: 4 } }}
             onClick={() => dispatch(setOpenAvailability(true))}
           >
             Set your availability
@@ -335,9 +334,9 @@ export default function DashboardPage() {
             {(needsWednesdayConfirm || !hasUserConfiguredAvailability) && (
               <Box sx={{ display: { xs: 'block', md: 'none' } }}>
                 <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><AssignmentOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Tasks</Typography></Stack>
-                <Stack direction="row" spacing={2} sx={{ overflowX: 'auto', pb: 1 }}>
+                <Stack spacing={1.5}>
                   {!hasUserConfiguredAvailability && (
-                    <Box sx={{ minWidth: 280, flexShrink: 0 }}>
+                    <Box>
                       <TaskCard
                         chipLabel="Needs update"
                         chipColor="var(--gl-status-declined-text)"
@@ -354,7 +353,7 @@ export default function DashboardPage() {
                     </Box>
                   )}
                   {needsWednesdayConfirm && (
-                    <Box sx={{ minWidth: 280, flexShrink: 0 }}>
+                    <Box>
                       <TaskCard
                         chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
                         chipColor="var(--gl-status-declined-text)"
@@ -375,8 +374,8 @@ export default function DashboardPage() {
             )}
 
             {/* ── Big container for entire left section ── */}
-            <Card sx={{ p: 2 }}>
-              <Stack spacing={2.5}>
+            <Card sx={{ p: { xs: 1.5, sm: 2 } }}>
+              <Stack spacing={{ xs: 2, md: 2.5 }}>
                 {/* Next Events — hidden when no today sessions */}
                 {todaySessions.length > 0 && (
                 <Box>
@@ -466,22 +465,23 @@ export default function DashboardPage() {
                   variant="fullWidth"
                   data-testid="home-sessions-card"
                   sx={{
-                  minHeight: 40,
+                  minHeight: { xs: 36, sm: 40 },
                   '& .MuiTab-root': {
                     textTransform: 'none',
-                    fontSize: '0.875rem',
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
                     fontWeight: 600,
-                    minHeight: 40,
+                    minHeight: { xs: 36, sm: 40 },
                     py: 1,
+                    px: { xs: 0.5, sm: 1.5 },
                     gap: 0.5,
                     borderBottom: '1px solid',
                     borderColor: 'hsl(var(--md-outline-variant) / 0.5)',
                   },
                   }}
                 >
-                  <Tab icon={<EventNoteOutlinedIcon sx={{ fontSize: 18 }} />} iconPosition="start" label={`Upcoming (${upcomingSessions.length})`} value="next" />
-                  <Tab icon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} iconPosition="start" label={`Completed (${completedSessions.length})`} value="completed" />
-                  <Tab icon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} iconPosition="start" label={`Declined (${declinedSessions.length})`} value="declined" />
+                  <Tab icon={<EventNoteOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Upcoming (${upcomingSessions.length})`} value="next" />
+                  <Tab icon={<TaskAltOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Completed (${completedSessions.length})`} value="completed" />
+                  <Tab icon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Declined (${declinedSessions.length})`} value="declined" />
                 </Tabs>
 
                 {/* ── Upcoming tab ── */}

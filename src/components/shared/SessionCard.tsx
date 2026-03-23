@@ -198,15 +198,15 @@ export function SessionCard({
     <Box sx={sx}>
       {topRight ? (
         <>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: { xs: 0.75, sm: 1 } }}>
             <Typography
               variant={titleVariant}
               fontWeight={600}
-              sx={{ fontSize: titleVariant === "h5" ? { xs: "1rem", md: "1.125rem" } : "0.875rem", minWidth: 0 }}
+              sx={{ fontSize: titleVariant === "h5" ? { xs: "0.9rem", sm: "1rem", md: "1.125rem" } : { xs: "0.8rem", sm: "0.875rem" }, minWidth: 0 }}
             >
               {displayTitle}
             </Typography>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
+            <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1 }} flexWrap="wrap" useFlexGap justifyContent="flex-end" sx={{ flexShrink: 0, maxWidth: { xs: "55%", sm: "auto" } }}>
               {statusChip}
               {topRight}
             </Stack>

@@ -2,6 +2,9 @@ import { useState } from "react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -13,12 +16,12 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
-import FlexBox from "@/components/Utils/FlexBox";
+import Divider from "@mui/material/Divider";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
   setAvailabilityStep,
@@ -56,8 +59,47 @@ function fmtTimezoneDisplay(tz: string): string {
   }
 }
 
+/* ── Step indicator pill ── */
+function StepPill({ stepNum, label, active, done }: { stepNum: number; label: string; active: boolean; done: boolean }) {
+  return (
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1 }}>
+      <Box
+        sx={{
+          width: 28,
+          height: 28,
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "0.75rem",
+          fontWeight: 700,
+          flexShrink: 0,
+          bgcolor: done ? "var(--gl-status-confirmed-bg)" : active ? "primary.main" : "action.hover",
+          color: done ? "var(--gl-status-confirmed-text)" : active ? "primary.contrastText" : "text.secondary",
+          border: !active && !done ? "1px solid" : "none",
+          borderColor: "divider",
+        }}
+      >
+        {done ? <CheckCircleOutlinedIcon sx={{ fontSize: 16 }} /> : stepNum}
+      </Box>
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: active || done ? 600 : 400,
+          color: active ? "text.primary" : "text.secondary",
+          fontSize: { xs: "0.7rem", sm: "0.75rem" },
+        }}
+      >
+        {label}
+      </Typography>
+    </Stack>
+  );
+}
+
 const AvailabilityBuilderDialog = () => {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const open = useAppSelector((s) => s.ui.openAvailability);
   const step = useAppSelector((s) => s.availability.availabilityStep);
@@ -82,7 +124,6 @@ const AvailabilityBuilderDialog = () => {
 
   const cards = presetCards.length ? presetCards : defaultPresets;
 
-  // ── Handlers ─────────────────────────────────────────────────────────────
   const handleClose = () => {
     dispatch(setOpenAvailability(false));
     dispatch(setAvailabilityStep(1));
@@ -167,228 +208,300 @@ const AvailabilityBuilderDialog = () => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      fullScreen={isMobile}
+      PaperProps={{
+        sx: {
+          borderRadius: isMobile ? 0 : 3,
+          maxHeight: isMobile ? "100%" : "90vh",
+          display: "flex",
+          flexDirection: "column",
+        },
+      }}
+    >
       {/* ── Header ── */}
-      <FlexBox sx={{ px: 3, pt: 3, pb: 0 }} justifyContent="space-between" alignItems="flex-start">
-        <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1.25rem" }}>
-          Update availability
-        </Typography>
-        <IconButton
-          onClick={handleClose}
-          size="small"
-          sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.75 }}
-        >
-          <CloseOutlinedIcon sx={{ fontSize: 16 }} />
-        </IconButton>
-      </FlexBox>
-
-      <DialogContent sx={{ px: 3, pt: 2, pb: 1, overflow: "hidden" }}>
-        {/* Stepper */}
-        <Stepper activeStep={step - 1} sx={{ mb: 3 }}>
-          <Step><StepLabel>Confirm timezone</StepLabel></Step>
-          <Step><StepLabel>Weekly availability</StepLabel></Step>
-        </Stepper>
-
-        <Box sx={{ overflow: "hidden" }}>
-          <Box
-            sx={{
-              display: "flex",
-              width: "200%",
-              transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
-              transform: step === 1 ? "translateX(0)" : "translateX(-50%)",
-            }}
+      <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 3 }, pb: 0, flexShrink: 0 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: "1.1rem", sm: "1.25rem" } }}>
+            Update availability
+          </Typography>
+          <IconButton
+            onClick={handleClose}
+            size="small"
+            sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.75 }}
           >
-            {/* ── Step 1: Timezone confirmation ── */}
-            <Box sx={{ width: "50%", flexShrink: 0 }}>
-            <FlexBox flexDirection="column" gap={3}>
-            <Typography variant="body2" color="text.secondary">
-              Confirm the timezone you'll be teaching in. You can update this later from your profile.
-            </Typography>
+            <CloseOutlinedIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Stack>
 
-            <FlexBox justifyContent="space-between" alignItems="center" gap={2}>
-              <FlexBox flexDirection="column" sx={{ flex: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 700 }}>Timezone</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Timezone you will be teaching.
+        {/* Step indicators */}
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+          <StepPill stepNum={1} label="Timezone" active={step === 1} done={step > 1} />
+          <Box sx={{ width: 24, height: 1, bgcolor: step > 1 ? "primary.main" : "divider", flexShrink: 0 }} />
+          <StepPill stepNum={2} label="Weekly slots" active={step === 2} done={false} />
+        </Stack>
+        <Divider />
+      </Box>
+
+      {/* ── Content ── */}
+      <DialogContent
+        className="themed-scrollbar"
+        sx={{
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 2.5 },
+          pb: 2,
+          flex: 1,
+          overflowY: "auto",
+        }}
+      >
+        {step === 1 && (
+          /* ── Step 1: Timezone ── */
+          <Stack spacing={3}>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Box sx={{ width: 40, height: 40, borderRadius: "50%", bgcolor: "action.hover", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <PublicOutlinedIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+              </Box>
+              <Box>
+                <Typography variant="body2" fontWeight={600}>Confirm your timezone</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  This ensures your availability shows the correct times to learners.
                 </Typography>
-              </FlexBox>
-              <FlexBox
-                alignItems="center"
-                sx={{ border: 1, borderColor: "divider", borderRadius: 1, px: 2, py: 1, gap: 1, minWidth: 140 }}
-              >
-                <Typography variant="body2" sx={{ flex: 1, whiteSpace: "nowrap" }}>
-                  {fmtTimezoneDisplay(effectiveTimezone)}
-                </Typography>
-                <IconButton size="small" sx={{ p: 0.25 }}>
-                  <EditOutlinedIcon sx={{ fontSize: 14 }} />
-                </IconButton>
-              </FlexBox>
-            </FlexBox>
-          </FlexBox>
+              </Box>
+            </Stack>
+
+            {/* Timezone card */}
+            <Box
+              sx={{
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 2,
+                p: { xs: 2, sm: 2.5 },
+                bgcolor: "action.hover",
+              }}
+            >
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Stack spacing={0.25}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                    Current timezone
+                  </Typography>
+                  <Typography variant="body1" fontWeight={700} sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}>
+                    {effectiveTimezone}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {fmtTimezoneDisplay(effectiveTimezone).split("(")[1]?.replace(")", "") || ""}
+                  </Typography>
+                </Stack>
+                <Button
+                  variant="soft"
+                  size="small"
+                  startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
+                >
+                  Change
+                </Button>
+              </Stack>
             </Box>
-            {/* ── Step 2: Weekly availability ── */}
-            <Box sx={{ width: "50%", flexShrink: 0 }}>
-            <FlexBox flexDirection="column" gap={1.5}>
-            <FlexBox sx={{ border: 1, borderColor: "divider", borderRadius: 1, px: 2, py: 1.5, mb: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                Set recurring availability (office-hours style). Add exceptions later.
-              </Typography>
-            </FlexBox>
 
-            <Typography variant="body2" sx={{ fontWeight: 600, color: "primary.main", mb: 0.5 }}>
-              Recommended time slots
+            <Typography variant="caption" color="text.secondary" sx={{ textAlign: "center" }}>
+              You can update this later from your profile settings.
             </Typography>
+          </Stack>
+        )}
 
-            {/* Preset cards */}
-            {cards.map((card) =>
-              editingPresetKey === card.key ? (
-                <FlexBox
-                  key={card.key}
-                  flexDirection="column"
-                  gap={1.5}
-                  sx={{ border: 1, borderColor: "primary.main", borderRadius: 1, p: 2 }}
-                >
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>{card.label}</Typography>
-                  <FlexBox sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-                    <FormControl fullWidth size="small">
-                      <InputLabel>Start time</InputLabel>
-                      <Select
-                        label="Start time"
-                        value={editPresetStart}
-                        onChange={(e) => setEditPresetStart(e.target.value)}
-                      >
-                        {timeOptions12.map((opt) => (
-                          <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <FormControl fullWidth size="small">
-                      <InputLabel>End time</InputLabel>
-                      <Select
-                        label="End time"
-                        value={editPresetEnd}
-                        onChange={(e) => setEditPresetEnd(e.target.value)}
-                      >
-                        {timeOptions12.map((opt) => (
-                          <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </FlexBox>
-                  <FlexBox gap={1}>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => {
-                        const updated = cards.map((c) =>
-                          c.key === card.key ? { ...c, start: editPresetStart, end: editPresetEnd, enabled: true } : c
-                        );
-                        dispatch(setPresetCards(updated));
-                        setEditingPresetKey(null);
+        {step === 2 && (
+          /* ── Step 2: Weekly availability ── */
+          <Stack spacing={2}>
+            {/* Info */}
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Box sx={{ width: 40, height: 40, borderRadius: "50%", bgcolor: "action.hover", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <AccessTimeOutlinedIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+              </Box>
+              <Box>
+                <Typography variant="body2" fontWeight={600}>Set your weekly slots</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Choose from recommended times or add your own.
+                </Typography>
+              </Box>
+            </Stack>
+
+            {/* Recommended slots */}
+            <Box>
+              <Typography variant="caption" fontWeight={600} color="primary.main" sx={{ mb: 1, display: "block", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                Recommended
+              </Typography>
+
+              <Stack spacing={1}>
+                {cards.map((card) =>
+                  editingPresetKey === card.key ? (
+                    /* ── Editing preset ── */
+                    <Box
+                      key={card.key}
+                      sx={{ border: 2, borderColor: "primary.main", borderRadius: 2, p: { xs: 1.5, sm: 2 } }}
+                    >
+                      <Typography variant="body2" fontWeight={700} sx={{ mb: 1.5 }}>{card.label}</Typography>
+                      <Stack spacing={1.5}>
+                        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Start</InputLabel>
+                            <Select label="Start" value={editPresetStart} onChange={(e) => setEditPresetStart(e.target.value)}>
+                              {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                            </Select>
+                          </FormControl>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>End</InputLabel>
+                            <Select label="End" value={editPresetEnd} onChange={(e) => setEditPresetEnd(e.target.value)}>
+                              {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                            </Select>
+                          </FormControl>
+                        </Stack>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => {
+                              const updated = cards.map((c) =>
+                                c.key === card.key ? { ...c, start: editPresetStart, end: editPresetEnd, enabled: true } : c
+                              );
+                              dispatch(setPresetCards(updated));
+                              setEditingPresetKey(null);
+                            }}
+                          >
+                            Save
+                          </Button>
+                          <Button size="small" variant="text" color="inherit" onClick={() => setEditingPresetKey(null)}>
+                            Cancel
+                          </Button>
+                        </Stack>
+                      </Stack>
+                    </Box>
+                  ) : (
+                    /* ── Preset card ── */
+                    <Box
+                      key={card.key}
+                      sx={{
+                        border: 1,
+                        borderColor: card.enabled ? "var(--gl-status-confirmed-border)" : "divider",
+                        borderRadius: 2,
+                        p: { xs: 1.5, sm: 2 },
+                        bgcolor: card.enabled ? "var(--gl-status-confirmed-bg)" : "transparent",
+                        transition: "all 150ms",
                       }}
                     >
-                      Save
-                    </Button>
-                    <Button size="small" variant="text" color="inherit" onClick={() => setEditingPresetKey(null)}>
-                      Cancel
-                    </Button>
-                  </FlexBox>
-                </FlexBox>
-              ) : (
-                <FlexBox
-                  key={card.key}
-                  alignItems="center"
-                  justifyContent="space-between"
-                  sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: 2, gap: 2 }}
-                >
-                  <FlexBox flexDirection="column" sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>{card.label}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {formatDayGroupShort(card.days)} &bull; {fmtTime(parseHHMM(card.start))}–{fmtTime(parseHHMM(card.end))}
-                    </Typography>
-                  </FlexBox>
-                  <FlexBox alignItems="center" gap={1} sx={{ flexShrink: 0 }}>
-                    <Button
-                      variant={card.enabled ? "soft" : "contained"}
-                      size="small"
-                      onClick={() => togglePreset(card.key)}
-                      sx={card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" } : { px: 2 }}
-                    >
-                      {card.enabled ? "Added" : "Add"}
-                    </Button>
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={() => {
-                        setEditingPresetKey(card.key);
-                        setEditPresetStart(card.start);
-                        setEditPresetEnd(card.end);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <IconButton
-                      size="small"
-                      onClick={() => dispatch(setPresetCards(cards.filter((c) => c.key !== card.key)))}
-                      sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
-                    >
-                      <CloseOutlinedIcon sx={{ fontSize: 14 }} />
-                    </IconButton>
-                  </FlexBox>
-                </FlexBox>
-              )
-            )}
+                      {/* Top row: info */}
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="body2" fontWeight={700} sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
+                            {card.label}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {formatDayGroupShort(card.days)} &bull; {fmtTime(parseHHMM(card.start))}–{fmtTime(parseHHMM(card.end))}
+                          </Typography>
+                        </Box>
+                        {card.enabled && (
+                          <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: "var(--gl-status-confirmed-text)", flexShrink: 0, mt: 0.25 }} />
+                        )}
+                      </Stack>
+                      {/* Bottom row: actions */}
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Button
+                          variant={card.enabled ? "soft" : "contained"}
+                          size="small"
+                          onClick={() => togglePreset(card.key)}
+                          sx={{
+                            minHeight: 32,
+                            fontSize: "0.75rem",
+                            ...(card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" } : {}),
+                          }}
+                        >
+                          {card.enabled ? "Remove" : "Add"}
+                        </Button>
+                        <Button
+                          variant="text"
+                          size="small"
+                          sx={{ minHeight: 32, fontSize: "0.75rem" }}
+                          onClick={() => {
+                            setEditingPresetKey(card.key);
+                            setEditPresetStart(card.start);
+                            setEditPresetEnd(card.end);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </Stack>
+                    </Box>
+                  )
+                )}
+              </Stack>
+            </Box>
 
             {/* Custom slots */}
-            {draftPatterns.map((p) => (
-              <FlexBox
-                key={p.id}
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{ border: 1, borderColor: "primary.main", borderRadius: 1, p: 2, gap: 2 }}
-              >
-                <FlexBox flexDirection="column" sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>{p.label}</Typography>
-                  <Typography variant="caption" color="text.secondary">Custom slot</Typography>
-                </FlexBox>
-                <IconButton
-                  size="small"
-                  onClick={() => removeCustomSlot(p.id)}
-                  sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
-                >
-                  <CloseOutlinedIcon sx={{ fontSize: 14 }} />
-                </IconButton>
-              </FlexBox>
-            ))}
-
-            {/* Add custom slot form */}
-            {showCustomForm ? (
-              <FlexBox
-                flexDirection="column"
-                gap={2}
-                sx={{ border: 1, borderColor: "divider", borderRadius: 1, p: 2 }}
-              >
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>Add custom slot</Typography>
-                <FlexBox flexWrap="wrap" gap={0.75}>
-                  {DOW_LONG.map((day) => (
-                    <Chip
-                      key={day}
-                      label={day.slice(0, 3)}
-                      size="small"
-                      variant={builderDays.includes(day) ? "filled" : "outlined"}
-                      sx={{
-                        height: 26,
-                        fontSize: "0.7rem",
-                        "& .MuiChip-label": { px: 1 },
-                        ...(builderDays.includes(day)
-                          ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }
-                          : {}),
-                      }}
-                      onClick={() => toggleDay(day)}
-                    />
+            {draftPatterns.length > 0 && (
+              <Box>
+                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: "block", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  Custom slots
+                </Typography>
+                <Stack spacing={1}>
+                  {draftPatterns.map((p) => (
+                    <Box
+                      key={p.id}
+                      sx={{ border: 1, borderColor: "primary.main", borderRadius: 2, p: { xs: 1.5, sm: 2 } }}
+                    >
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="body2" fontWeight={700} sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>{p.label}</Typography>
+                          <Typography variant="caption" color="primary.main">Custom slot</Typography>
+                        </Box>
+                        <IconButton
+                          size="small"
+                          onClick={() => removeCustomSlot(p.id)}
+                          sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
+                        >
+                          <CloseOutlinedIcon sx={{ fontSize: 14 }} />
+                        </IconButton>
+                      </Stack>
+                    </Box>
                   ))}
-                </FlexBox>
-                <FlexBox sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                </Stack>
+              </Box>
+            )}
+
+            {/* Add custom slot */}
+            {showCustomForm ? (
+              <Box sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: { xs: 1.5, sm: 2 } }}>
+                <Typography variant="body2" fontWeight={600} sx={{ mb: 1.5, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
+                  Add custom slot
+                </Typography>
+
+                {/* Day chips — larger touch targets on mobile */}
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mb: 2 }}>
+                  {DOW_LONG.map((day) => {
+                    const selected = builderDays.includes(day);
+                    return (
+                      <Chip
+                        key={day}
+                        label={day.slice(0, 3)}
+                        size="small"
+                        variant={selected ? "filled" : "outlined"}
+                        onClick={() => toggleDay(day)}
+                        sx={{
+                          height: { xs: 32, sm: 28 },
+                          fontSize: { xs: "0.75rem", sm: "0.7rem" },
+                          fontWeight: 500,
+                          "& .MuiChip-label": { px: { xs: 1.5, sm: 1 } },
+                          ...(selected
+                            ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }
+                            : {}),
+                        }}
+                      />
+                    );
+                  })}
+                </Box>
+
+                {/* Time selectors — stacked on mobile */}
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mb: 2 }}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Start time</InputLabel>
                     <Select
@@ -413,51 +526,60 @@ const AvailabilityBuilderDialog = () => {
                       ))}
                     </Select>
                   </FormControl>
-                </FlexBox>
-                <FlexBox gap={1}>
+                </Stack>
+
+                <Stack direction="row" spacing={1}>
                   <Button
                     size="small"
                     variant="contained"
                     onClick={addCustomSlot}
                     disabled={!builderDays.length}
+                    sx={{ minHeight: 36 }}
                   >
-                    Add
+                    Add slot
                   </Button>
                   <Button
                     size="small"
                     variant="text"
                     color="inherit"
                     onClick={() => setShowCustomForm(false)}
+                    sx={{ minHeight: 36 }}
                   >
                     Cancel
                   </Button>
-                </FlexBox>
-              </FlexBox>
+                </Stack>
+              </Box>
             ) : (
-              <FlexBox justifyContent="flex-end" sx={{ mt: 0.5 }}>
-                <Button
-                  variant="soft"
-                  startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
-                  onClick={() => setShowCustomForm(true)}
-                >
-                  Add time
-                </Button>
-              </FlexBox>
+              <Button
+                variant="soft"
+                startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
+                onClick={() => setShowCustomForm(true)}
+                sx={{ alignSelf: "flex-start", minHeight: 36 }}
+              >
+                Add custom time
+              </Button>
             )}
-          </FlexBox>
-            </Box>
-          </Box>
-        </Box>
+          </Stack>
+        )}
       </DialogContent>
 
       {/* ── Footer ── */}
-      <DialogActions sx={{ px: 3, pb: 3, pt: 2, justifyContent: "space-between" }}>
+      <Divider />
+      <DialogActions
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.5, sm: 2 },
+          justifyContent: "space-between",
+          flexShrink: 0,
+          gap: 1,
+        }}
+      >
         {step === 1 ? (
           <>
             <Button variant="text" color="inherit" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleNext}>
+            <Button variant="contained" onClick={handleNext} sx={{ minHeight: { xs: 40, sm: 36 }, px: 3 }}>
               Next
             </Button>
           </>
@@ -466,8 +588,8 @@ const AvailabilityBuilderDialog = () => {
             <Button variant="text" color="inherit" onClick={handleClose} disabled={isSaving}>
               Cancel
             </Button>
-            <FlexBox gap={1}>
-              <Button variant="soft" onClick={handleBack} disabled={isSaving}>
+            <Stack direction="row" spacing={1}>
+              <Button variant="soft" onClick={handleBack} disabled={isSaving} sx={{ minHeight: { xs: 40, sm: 36 } }}>
                 Back
               </Button>
               <Button
@@ -475,10 +597,11 @@ const AvailabilityBuilderDialog = () => {
                 onClick={handleSave}
                 disabled={isSaving || (!cards.some((c) => c.enabled) && !draftPatterns.length)}
                 startIcon={isSaving ? <CircularProgress size={14} color="inherit" /> : undefined}
+                sx={{ minHeight: { xs: 40, sm: 36 }, px: 3 }}
               >
                 {isSaving ? "Saving…" : "Update"}
               </Button>
-            </FlexBox>
+            </Stack>
           </>
         )}
       </DialogActions>

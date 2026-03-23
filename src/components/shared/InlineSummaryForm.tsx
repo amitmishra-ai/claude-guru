@@ -65,9 +65,9 @@ export function InlineSummaryForm({ sessionId, sessionTitle, initialNotes = "", 
   return (
     <Paper
       variant="outlined"
-      sx={{ p: 2, borderColor: "primary.main", borderRadius: 1.5, mt: 1.5 }}
+      sx={{ p: { xs: 1.5, sm: 2 }, borderColor: "primary.main", borderRadius: 1.5, mt: 1.5 }}
     >
-      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5, fontSize: { xs: "0.7rem", sm: "0.75rem" } }}>
         Help us capture the impact you made — your notes help learners revisit key takeaways
         and help ops improve future sessions.
       </Typography>
@@ -80,10 +80,10 @@ export function InlineSummaryForm({ sessionId, sessionTitle, initialNotes = "", 
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         disabled={isRefining}
-        sx={{ mb: 1.5, "& .MuiInputBase-input": { fontSize: "0.85rem" } }}
+        sx={{ mb: 1.5, "& .MuiInputBase-input": { fontSize: { xs: "0.8rem", sm: "0.85rem" } } }}
       />
-      <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-        <Stack direction="row" spacing={1} alignItems="center">
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between">
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
           <Button
             size="small"
             variant="contained"
@@ -102,7 +102,7 @@ export function InlineSummaryForm({ sessionId, sessionTitle, initialNotes = "", 
             {isRefining ? "Refining..." : "Refine with AI"}
           </Button>
         </Stack>
-        <Button size="small" variant="text" color="inherit" onClick={onCancel} disabled={isRefining}>
+        <Button size="small" variant="text" color="inherit" onClick={onCancel} disabled={isRefining} sx={{ alignSelf: { xs: "flex-end", sm: "auto" } }}>
           Cancel
         </Button>
       </Stack>
