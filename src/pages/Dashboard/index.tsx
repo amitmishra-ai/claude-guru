@@ -18,6 +18,7 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import Box from "@mui/material/Box";
@@ -436,9 +437,9 @@ export default function DashboardPage() {
                                     variant="soft"
                                     size="small"
                                     startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                                    onClick={() => dispatch(pushToast({ title: "Event Materials", description: "Opening event materials..." }))}
+                                    onClick={() => dispatch(pushToast({ title: "Session Materials", description: "Opening event materials..." }))}
                                   >
-                                    Event Materials
+                                    Session Materials
                                   </Button>
                                 </>
                               }
@@ -520,6 +521,7 @@ export default function DashboardPage() {
                                   ? STATUS_CONFIRMED()
                                   : STATUS_SCHEDULED
                                 }
+                                chips={s.combinedBatches ? ["Combined session"] : undefined}
                                 actions={isConfirmed ? (
                                   <>
                                     <Button
@@ -528,7 +530,7 @@ export default function DashboardPage() {
                                       startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
                                       onClick={() => dispatch(pushToast({ title: "Downloading event materials", description: "Preparing download..." }))}
                                     >
-                                      Event Materials
+                                      Session Materials
                                     </Button>
                                     <Button
                                       variant="soft"
@@ -580,6 +582,24 @@ export default function DashboardPage() {
                                   </Button>
                                 }
                               />
+                              {s.combinedBatches && (
+                                <Box sx={{ mt: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider", overflow: "hidden" }}>
+                                  <Box sx={{ px: 1.5, py: 0.75, bgcolor: "hsl(var(--md-surface-container) / 0.5)", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", gap: 0.75 }}>
+                                    <CallMergeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+                                    <Typography variant="caption" fontWeight={600} color="text.secondary">Combined batches</Typography>
+                                    <Chip label={s.combinedBatches.length} size="small" sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, bgcolor: "action.selected", "& .MuiChip-label": { px: 0.5 } }} />
+                                  </Box>
+                                  <Stack divider={<Divider />}>
+                                    {s.combinedBatches.map((cb) => (
+                                      <Stack key={cb.batch} direction="row" alignItems="center" spacing={1} sx={{ px: 1.5, py: 0.75 }}>
+                                        <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
+                                        <Typography variant="caption" fontWeight={500}>{cb.batch}</Typography>
+                                        {cb.group && <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>}
+                                      </Stack>
+                                    ))}
+                                  </Stack>
+                                </Box>
+                              )}
                             </Card>
                           );
                         })
@@ -932,6 +952,7 @@ export default function DashboardPage() {
                                   start={s.start}
                                   end={s.end}
                                   topRight={topRightContent}
+                                  chips={s.combinedBatches ? ["Combined session"] : undefined}
                                   actions={cardActions}
                                   secondaryAction={viewDetailsBtn}
                                 />

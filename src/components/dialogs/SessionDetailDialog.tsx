@@ -103,7 +103,7 @@ export function SessionDetailDialog() {
                             startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
                             onClick={() => dispatch(pushToast({ title: "Downloading event materials", description: "Preparing download..." }))}
                           >
-                            Event Materials
+                            Session Materials
                           </Button>
                           <Button
                             variant="soft"

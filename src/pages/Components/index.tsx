@@ -10,6 +10,9 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import Drawer from "@mui/material/Drawer";
+import TextField from "@mui/material/TextField";
+import Collapse from "@mui/material/Collapse";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
@@ -26,17 +29,24 @@ import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import PollOutlinedIcon from "@mui/icons-material/PollOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import Paper from "@mui/material/Paper";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import { minutes, fmtDateNice } from "@/lib/helpers";
 import { useAppSelector } from "@/store";
 import type { GuruRole } from "@/store/slices/devPanelSlice";
+import type { Poll } from "@/lib/types";
 
 /* ══════════════════════════════════════════════════════════════════════════
    CHIP PRESETS
@@ -107,7 +117,21 @@ const CHIP_PAYMENT_PROCESSED = <Chip label="Payment processed" size="small" sx={
 const CHIP_CONFIRMED = <Chip label="Confirmed" size="small" sx={chipSx.confirmed} />;
 const CHIP_SCHEDULED = <Chip label="Scheduled" size="small" sx={chipSx.scheduled} />;
 const CHIP_TO_BE_CONFIRMED = <Chip label="To be confirmed" size="small" sx={chipSx.toBeConfirmed} />;
-const CHIP_COMBINED = <Chip label="Combined event" size="small" variant="outlined" sx={chipSx.combined} />;
+const CHIP_COMBINED = (
+  <Chip
+    icon={<CallMergeOutlinedIcon sx={{ fontSize: 13 }} />}
+    label="Combined session"
+    size="small"
+    sx={{
+      fontWeight: 600,
+      fontSize: "0.7rem",
+      bgcolor: "hsl(var(--md-surface-container) / 0.6)",
+      border: "1px solid",
+      borderColor: "divider",
+      "& .MuiChip-icon": { color: "inherit", ml: 0.5 },
+    }}
+  />
+);
 const CHIP_ALREADY_SUBMITTED = <Chip label="Already submitted" size="small" sx={chipSx.confirmed} />;
 
 /* ── Section wrapper ── */
@@ -145,6 +169,126 @@ function StarRatingIcons({ rating }: { rating: number }) {
         />
       ))}
     </Stack>
+  );
+}
+
+/* ── Combined Batches Panel (shared across card types) ── */
+
+function CombinedBatchesPanel({ batches, compact }: { batches: { batch: string; group?: string }[]; compact?: boolean }) {
+  return (
+    <Box
+      sx={{
+        mt: 1.5,
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "divider",
+        overflow: "hidden",
+      }}
+    >
+      {/* Accent header */}
+      <Box
+        sx={{
+          px: 1.5,
+          py: 0.75,
+          bgcolor: "hsl(var(--md-surface-container) / 0.5)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+        }}
+      >
+        <CallMergeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+        <Typography variant="caption" fontWeight={600} color="text.secondary">
+          Combined batches
+        </Typography>
+        <Chip
+          label={batches.length}
+          size="small"
+          sx={{
+            height: 18,
+            minWidth: 18,
+            fontSize: "0.65rem",
+            fontWeight: 700,
+            bgcolor: "action.selected",
+            "& .MuiChip-label": { px: 0.5 },
+          }}
+        />
+      </Box>
+      {/* Batch rows */}
+      <Stack divider={<Divider />}>
+        {batches.map((b) => (
+          <Stack
+            key={b.batch}
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            sx={{
+              px: 1.5,
+              py: compact ? 0.5 : 0.75,
+            }}
+          >
+            <Box
+              sx={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                bgcolor: "text.disabled",
+                flexShrink: 0,
+              }}
+            />
+            <Typography variant="caption" fontWeight={500}>
+              {b.batch}
+            </Typography>
+            {b.group && (
+              <Typography variant="caption" color="text.secondary">
+                &mdash; {b.group}
+              </Typography>
+            )}
+          </Stack>
+        ))}
+      </Stack>
+    </Box>
+  );
+}
+
+/* ── Completed Combined Group wrapper ── */
+
+function CombinedCompletedGroup({ children }: { children: React.ReactNode }) {
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        pl: { xs: 0, sm: 2 },
+        "&::before": {
+          content: '""',
+          display: { xs: "none", sm: "block" },
+          position: "absolute",
+          left: 0,
+          top: 8,
+          bottom: 8,
+          width: 3,
+          borderRadius: 2,
+          bgcolor: "divider",
+        },
+      }}
+    >
+      {/* Group header */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={0.75}
+        sx={{ mb: 1.5 }}
+      >
+        <CallMergeOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+        <Typography variant="caption" fontWeight={600} color="text.secondary">
+          Combined session &mdash; split per batch
+        </Typography>
+      </Stack>
+      <Stack spacing={2}>
+        {children}
+      </Stack>
+    </Box>
   );
 }
 
@@ -225,12 +369,13 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
 
         <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
           <Stack spacing={2.5}>
-            {/* Header: chips + title */}
+            {/* Header: breadcrumb + status + title */}
             <Box>
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
+                  {program} · {sessionType}
+                </Typography>
                 <Chip label="To be confirmed" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-                <Chip label={program} size="small" />
-                <Chip label={sessionType} size="small" />
               </Stack>
               <Typography variant="h6" fontWeight={600}>{title}</Typography>
             </Box>
@@ -304,12 +449,13 @@ function ResidencyDetailDialog({ open, onClose, variant }: { open: boolean; onCl
 
         <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
           <Stack spacing={2.5}>
-            {/* Header: chips + title */}
+            {/* Header: breadcrumb + status + title */}
             <Box>
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
+                  PGP-AIML · Residency
+                </Typography>
                 {statusChip}
-                <Chip label="PGP-AIML" size="small" />
-                <Chip label="Residency" size="small" />
               </Stack>
               <Typography variant="h6" fontWeight={600}>Program Overview (All)</Typography>
             </Box>
@@ -367,11 +513,11 @@ function ResidencyDetailDialog({ open, onClose, variant }: { open: boolean; onCl
               )}
             </SectionBox>
 
-            {/* Combined event section */}
+            {/* Combined session section */}
             {variant === "combined" && (
               <SectionBox>
                 <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <Chip label="Combined event" size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.7rem" }} />
+                  <Chip label="Combined session" size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.7rem" }} />
                   <Typography variant="subtitle2" fontWeight={600}>Deep Learning Fundamentals</Typography>
                 </Stack>
                 <Divider sx={{ mb: 0.5 }} />
@@ -442,8 +588,266 @@ function ResidencyDetailDialog({ open, onClose, variant }: { open: boolean; onCl
 type OnlineEventDialogVariant =
   | "mentoring-confirmed" | "mentoring-combined" | "mentoring-scheduled" | "mentoring-tentative"
   | "mentoring-gathering" | "mentoring-noFeedback" | "mentoring-completed"
+  | "mentoring-combinedScheduled"
+  | "mentoring-combinedCompleted"
   | "career-confirmed" | "career-scheduled" | "career-gathering" | "career-completed"
   | "mock-confirmed" | "mock-gathering" | "mock-completed";
+
+/* ── Inline Poll Card ── */
+
+function PollCard({ poll, onEdit, onDelete, onToggleStatus }: {
+  poll: Poll;
+  onEdit: () => void;
+  onDelete: () => void;
+  onToggleStatus: () => void;
+}) {
+  const isDraft = poll.status === "draft";
+  return (
+    <Box
+      sx={{
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "divider",
+        overflow: "hidden",
+        transition: "box-shadow 0.15s ease",
+        "&:hover": { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" },
+      }}
+    >
+      {/* Poll header */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{
+          px: 1.5,
+          py: 0.75,
+          bgcolor: isDraft
+            ? "hsl(var(--md-surface-container) / 0.4)"
+            : "var(--gl-status-confirmed-bg)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Stack direction="row" alignItems="center" spacing={0.75}>
+          <PollOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+          <Chip
+            label={isDraft ? "Draft" : "Queued"}
+            size="small"
+            sx={{
+              height: 20,
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              bgcolor: isDraft ? "action.selected" : "var(--gl-status-confirmed-bg)",
+              color: isDraft ? "text.secondary" : "var(--gl-status-confirmed-text)",
+              border: isDraft ? "none" : "1px solid var(--gl-status-confirmed-border)",
+              "& .MuiChip-label": { px: 0.75 },
+            }}
+          />
+        </Stack>
+        <Stack direction="row" spacing={0.25}>
+          <IconButton size="small" onClick={onEdit} sx={{ color: "text.secondary", p: 0.5 }}>
+            <EditOutlinedIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+          <IconButton size="small" onClick={onDelete} sx={{ color: "text.secondary", p: 0.5 }}>
+            <DeleteOutlineOutlinedIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+        </Stack>
+      </Stack>
+      {/* Poll body */}
+      <Box sx={{ px: 1.5, py: 1.25 }}>
+        <Typography variant="body2" fontWeight={600} sx={{ mb: 1, fontSize: "0.8125rem" }}>
+          {poll.question}
+        </Typography>
+        <Stack spacing={0.5}>
+          {poll.options.map((opt, i) => (
+            <Stack
+              key={i}
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{
+                px: 1.25,
+                py: 0.5,
+                borderRadius: 1.5,
+                bgcolor: "hsl(var(--md-surface-container) / 0.3)",
+                border: "1px solid transparent",
+              }}
+            >
+              <Box
+                sx={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  border: "2px solid",
+                  borderColor: "divider",
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.6rem",
+                  fontWeight: 700,
+                  color: "text.disabled",
+                }}
+              >
+                {String.fromCharCode(65 + i)}
+              </Box>
+              <Typography variant="caption" fontWeight={500}>{opt}</Typography>
+            </Stack>
+          ))}
+        </Stack>
+        {/* Toggle status action */}
+        <Button
+          size="small"
+          variant="text"
+          onClick={onToggleStatus}
+          sx={{ mt: 1, fontSize: "0.7rem", fontWeight: 600 }}
+          startIcon={<SendOutlinedIcon sx={{ fontSize: 12 }} />}
+        >
+          {isDraft ? "Queue to Zoom" : "Move to draft"}
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
+/* ── Inline Poll Creation Form ── */
+
+function PollCreationForm({ onSave, onCancel, editingPoll }: {
+  onSave: (poll: { question: string; options: string[]; status: "draft" | "queued" }) => void;
+  onCancel: () => void;
+  editingPoll?: Poll | null;
+}) {
+  const [question, setQuestion] = useState(editingPoll?.question ?? "");
+  const [options, setOptions] = useState<string[]>(editingPoll?.options ?? ["", ""]);
+
+  const updateOption = (index: number, value: string) => {
+    const next = [...options];
+    next[index] = value;
+    setOptions(next);
+  };
+
+  const removeOption = (index: number) => {
+    setOptions(options.filter((_, i) => i !== index));
+  };
+
+  const canSave = question.trim().length > 0 && options.filter((o) => o.trim()).length >= 2;
+
+  return (
+    <Box
+      sx={{
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "primary.main",
+        bgcolor: "hsl(var(--md-surface-container) / 0.2)",
+        overflow: "hidden",
+      }}
+    >
+      {/* Form header */}
+      <Box
+        sx={{
+          px: 1.5,
+          py: 1,
+          bgcolor: "hsl(var(--md-surface-container) / 0.5)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+        }}
+      >
+        <PollOutlinedIcon sx={{ fontSize: 14, color: "primary.main" }} />
+        <Typography variant="caption" fontWeight={700} color="primary.main">
+          {editingPoll ? "Edit poll" : "New poll"}
+        </Typography>
+      </Box>
+
+      {/* Form body */}
+      <Stack spacing={1.5} sx={{ px: 1.5, py: 1.5 }}>
+        <TextField
+          label="Question"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          size="small"
+          fullWidth
+          placeholder="E.g., Which topic should we cover next?"
+          variant="outlined"
+          sx={{
+            "& .MuiOutlinedInput-root": { fontSize: "0.8125rem" },
+            "& .MuiInputLabel-root": { fontSize: "0.8125rem" },
+          }}
+        />
+
+        <Box>
+          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 0.75, display: "block" }}>
+            Options ({options.filter((o) => o.trim()).length} of {options.length})
+          </Typography>
+          <Stack spacing={0.75}>
+            {options.map((opt, i) => (
+              <Stack key={i} direction="row" alignItems="center" spacing={0.5}>
+                <DragIndicatorOutlinedIcon sx={{ fontSize: 14, color: "text.disabled", flexShrink: 0 }} />
+                <TextField
+                  value={opt}
+                  onChange={(e) => updateOption(i, e.target.value)}
+                  size="small"
+                  fullWidth
+                  placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root": { fontSize: "0.8125rem" },
+                  }}
+                />
+                {options.length > 2 && (
+                  <IconButton size="small" onClick={() => removeOption(i)} sx={{ p: 0.5 }}>
+                    <DeleteOutlineOutlinedIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
+                )}
+              </Stack>
+            ))}
+          </Stack>
+          {options.length < 5 && (
+            <Button
+              size="small"
+              variant="text"
+              startIcon={<AddOutlinedIcon sx={{ fontSize: 13 }} />}
+              onClick={() => setOptions([...options, ""])}
+              sx={{ mt: 0.5, fontSize: "0.7rem" }}
+            >
+              Add option
+            </Button>
+          )}
+        </Box>
+
+        {/* Form actions */}
+        <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ pt: 0.5 }}>
+          <Button variant="text" size="small" color="inherit" onClick={onCancel} sx={{ fontSize: "0.75rem" }}>
+            Cancel
+          </Button>
+          <Button
+            variant="soft"
+            size="small"
+            onClick={() => onSave({ question, options: options.filter((o) => o.trim()), status: "draft" })}
+            disabled={!canSave}
+            sx={{ fontSize: "0.75rem" }}
+          >
+            Save draft
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => onSave({ question, options: options.filter((o) => o.trim()), status: "queued" })}
+            disabled={!canSave}
+            startIcon={<SendOutlinedIcon sx={{ fontSize: 13 }} />}
+            sx={{ fontSize: "0.75rem" }}
+          >
+            Queue to Zoom
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
+  );
+}
+
+/* ── Online Event Detail Drawer (right-side panel) ── */
 
 function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; onClose: () => void; variant: OnlineEventDialogVariant }) {
   const category = variant.split("-")[0] as "mentoring" | "career" | "mock";
@@ -454,16 +858,56 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
   const isMock = category === "mock";
 
   const sessionTypeLabel = isMentoring ? "Online session" : isCareer ? "Career mentoring session" : "Mock Interview";
-  const programLabel = isMentoring ? "PGP-DS" : "PGP-AIML";
+  const batchLabel = isMentoring ? "PGPDS.O.MAR26.A" : "PGP-AIML-BA-UTA-Nov25-C";
   const title = isMentoring
     ? "M5 W2 | Hypothesis Testing"
     : isCareer
       ? "Resume Review & Interview Prep"
       : "Technical Round — Data Structures";
 
-  const isCompletedState = subType === "completed" || subType === "gathering" || subType === "noFeedback";
-  const isScheduledState = subType === "scheduled";
+  const isCombinedVariant = subType === "combined" || subType === "combinedScheduled" || subType === "combinedCompleted";
+  const isCompletedState = subType === "completed" || subType === "gathering" || subType === "noFeedback" || subType === "combinedCompleted";
+  const isScheduledState = subType === "scheduled" || subType === "combinedScheduled";
   const isConfirmedState = subType === "confirmed" || subType === "combined";
+
+  // Show polls section for mentoring confirmed (the state where guru would create polls)
+  const showPolls = isMentoring && isConfirmedState;
+
+  // ── Local poll state for the Components showcase ──
+  const [polls, setPolls] = useState<Poll[]>([
+    {
+      id: "poll-demo-1",
+      sessionId: "demo-session",
+      question: "Which topic should we deep-dive into next week?",
+      options: ["Neural Networks", "Decision Trees", "Ensemble Methods"],
+      status: "queued",
+    },
+  ]);
+  const [showPollForm, setShowPollForm] = useState(false);
+  const [editingPollId, setEditingPollId] = useState<string | null>(null);
+
+  const handleSavePoll = (data: { question: string; options: string[]; status: "draft" | "queued" }) => {
+    if (editingPollId) {
+      setPolls((prev) => prev.map((p) => p.id === editingPollId ? { ...p, ...data } : p));
+    } else {
+      setPolls((prev) => [...prev, { id: `poll-${Date.now()}`, sessionId: "demo-session", ...data }]);
+    }
+    setShowPollForm(false);
+    setEditingPollId(null);
+  };
+
+  const handleDeletePoll = (id: string) => {
+    setPolls((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const handleToggleStatus = (id: string) => {
+    setPolls((prev) => prev.map((p) => p.id === id ? { ...p, status: p.status === "draft" ? "queued" as const : "draft" as const } : p));
+  };
+
+  const handleEditPoll = (id: string) => {
+    setEditingPollId(id);
+    setShowPollForm(true);
+  };
 
   const statusChip = isCompletedState ? (
     <Chip label="Completed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
@@ -473,22 +917,55 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
     <Chip label="Confirmed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
   );
 
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          Event details
-          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
-        </DialogTitle>
+  const drawerWidth = { xs: "100vw", sm: 520 };
 
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+  return (
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      sx={{
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          maxWidth: "100vw",
+          boxShadow: "-8px 0 32px rgba(0,0,0,0.08)",
+        },
+      }}
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        {/* ── Sticky header ── */}
+        <Box
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            borderBottom: 1,
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            px: 3,
+            py: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
+          }}
+        >
+          <Typography variant="subtitle1" fontWeight={700}>Event details</Typography>
+          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}>
+            <CloseOutlinedIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Box>
+
+        {/* ── Scrollable content ── */}
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2.5 }}>
           <Stack spacing={2.5}>
-            {/* Header: chips + title */}
+            {/* Header: breadcrumb + status + title */}
             <Box>
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.75 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
+                  {batchLabel} · {sessionTypeLabel}
+                </Typography>
                 {statusChip}
-                <Chip label={programLabel} size="small" />
-                <Chip label={sessionTypeLabel} size="small" />
               </Stack>
               <Typography variant="h6" fontWeight={600}>{title}</Typography>
             </Box>
@@ -543,9 +1020,9 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
             </SectionBox>
 
             {/* Combined batches section (mentoring combined) */}
-            {isMentoring && subType === "combined" && (
+            {isMentoring && isCombinedVariant && (
               <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Combined event</Typography>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Combined session</Typography>
                 <Divider sx={{ mb: 0.5 }} />
                 <InfoRow label="Participants">48 students (combined)</InfoRow>
                 <InfoRow label="Batch A">PGPDS.O.MAR26.A &mdash; Group 07</InfoRow>
@@ -569,6 +1046,93 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
                   </Stack>
                 </Stack>
               </SectionBox>
+            )}
+
+            {/* ═══ POLLS SECTION (mentoring confirmed) ═══ */}
+            {showPolls && (
+              <Box>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                  <Stack direction="row" alignItems="center" spacing={0.75}>
+                    <PollOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
+                    <Typography variant="subtitle2" fontWeight={700}>Polls</Typography>
+                    {polls.length > 0 && (
+                      <Chip
+                        label={polls.length}
+                        size="small"
+                        sx={{
+                          height: 20,
+                          minWidth: 20,
+                          fontSize: "0.65rem",
+                          fontWeight: 700,
+                          bgcolor: "primary.main",
+                          color: "primary.contrastText",
+                          "& .MuiChip-label": { px: 0.5 },
+                        }}
+                      />
+                    )}
+                  </Stack>
+                  {!showPollForm && (
+                    <Button
+                      size="small"
+                      variant="soft"
+                      startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
+                      onClick={() => { setEditingPollId(null); setShowPollForm(true); }}
+                      sx={{ fontSize: "0.75rem" }}
+                    >
+                      Add poll
+                    </Button>
+                  )}
+                </Stack>
+
+                <Stack spacing={1.5}>
+                  {/* Existing polls */}
+                  {polls.map((poll) => (
+                    <PollCard
+                      key={poll.id}
+                      poll={poll}
+                      onEdit={() => handleEditPoll(poll.id)}
+                      onDelete={() => handleDeletePoll(poll.id)}
+                      onToggleStatus={() => handleToggleStatus(poll.id)}
+                    />
+                  ))}
+
+                  {/* Inline creation / edit form */}
+                  <Collapse in={showPollForm} unmountOnExit>
+                    <PollCreationForm
+                      editingPoll={editingPollId ? polls.find((p) => p.id === editingPollId) : null}
+                      onSave={handleSavePoll}
+                      onCancel={() => { setShowPollForm(false); setEditingPollId(null); }}
+                    />
+                  </Collapse>
+
+                  {/* Empty state */}
+                  {polls.length === 0 && !showPollForm && (
+                    <Box
+                      sx={{
+                        py: 3,
+                        px: 2,
+                        borderRadius: 2,
+                        border: "1px dashed",
+                        borderColor: "divider",
+                        textAlign: "center",
+                      }}
+                    >
+                      <PollOutlinedIcon sx={{ fontSize: 28, color: "text.disabled", mb: 0.5 }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        No polls created yet
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="soft"
+                        startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
+                        onClick={() => setShowPollForm(true)}
+                      >
+                        Create your first poll
+                      </Button>
+                    </Box>
+                  )}
+                </Stack>
+              </Box>
             )}
 
             {/* Learner context section (career 1:1) */}
@@ -622,7 +1186,7 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
               </SectionBox>
             )}
 
-            {(subType === "noFeedback" || subType === "completed") && (
+            {(subType === "noFeedback" || subType === "completed" || subType === "combinedCompleted") && (
               <SectionBox>
                 <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
                   <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-confirmed-text)" }} />
@@ -651,19 +1215,32 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
               </SectionBox>
             )}
           </Stack>
-        </DialogContent>
+        </Box>
 
-        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, justifyContent: "space-between" }}>
+        {/* ── Sticky footer ── */}
+        <Box
+          sx={{
+            position: "sticky",
+            bottom: 0,
+            zIndex: 10,
+            borderTop: 1,
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            px: 3,
+            py: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexShrink: 0,
+          }}
+        >
           <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
           <Stack direction="row" spacing={1}>
             {isMentoring && isConfirmedState && (
-              <>
-                <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join</Button>
-                <Button variant="outlined" size="small" startIcon={<PollOutlinedIcon sx={{ fontSize: 16 }} />}>Create Poll</Button>
-              </>
+              <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
             )}
             {isCareer && isConfirmedState && (
-              <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join</Button>
+              <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
             )}
             {isScheduledState && (
               <>
@@ -672,9 +1249,9 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
               </>
             )}
           </Stack>
-        </DialogActions>
+        </Box>
       </Box>
-    </Dialog>
+    </Drawer>
   );
 }
 
@@ -706,12 +1283,13 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
 
         <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
           <Stack spacing={2.5}>
-            {/* Header: chips + title */}
+            {/* Header: breadcrumb + status + title */}
             <Box>
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
+                  PGP-AIML · Evaluation
+                </Typography>
                 {statusChip}
-                <Chip label="PGP-AIML" size="small" />
-                <Chip label="Evaluation" size="small" />
               </Stack>
               <Typography variant="h6" fontWeight={600}>Linear Regression Assignment</Typography>
             </Box>
@@ -866,12 +1444,13 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
 
         <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
           <Stack spacing={2.5}>
-            {/* Header: chips + title */}
+            {/* Header: breadcrumb + status + title */}
             <Box>
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
+                  PGP-AIML · Moderation
+                </Typography>
                 {statusChip}
-                <Chip label="PGP-AIML" size="small" />
-                <Chip label="Moderation" size="small" />
               </Stack>
               <Typography variant="h6" fontWeight={600}>{isTentative ? "Ethics in Machine Learning" : "Impact of AI on Healthcare"}</Typography>
             </Box>
@@ -1037,12 +1616,13 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
 
         <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
           <Stack spacing={2.5}>
-            {/* Header: chips + title */}
+            {/* Header: breadcrumb + status + title */}
             <Box>
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
+                  PGP-DS · Capstone
+                </Typography>
                 {statusChip}
-                <Chip label="PGP-DS" size="small" />
-                <Chip label="Capstone" size="small" />
               </Stack>
               <Typography variant="h6" fontWeight={600}>Capstone &mdash; {(isPaymentPending || isCompleted) ? "PGPDS.O.JUL25.A" : "PGPDS.O.MAR26.A"}</Typography>
             </Box>
@@ -1161,12 +1741,13 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
 
         <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
           <Stack spacing={2.5}>
-            {/* Header: chips + title */}
+            {/* Header: breadcrumb + status + title */}
             <Box>
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
+                  PGP-AIML · CV Review
+                </Typography>
                 {statusChip}
-                <Chip label="PGP-AIML" size="small" />
-                <Chip label="CV Review" size="small" />
               </Stack>
               <Typography variant="h6" fontWeight={600}>CV Review</Typography>
             </Box>
@@ -1306,8 +1887,8 @@ function ResidencyCards() {
 
       {/* ── Confirmed (Combined Session) ── */}
       <ComponentSection
-        title="Residency — Confirmed (Combined event)"
-        description="Multi-batch combined residency. Combined event chip on card. Combined batch details inside View Details."
+        title="Residency — Confirmed (Combined session)"
+        description="Multi-batch combined residency. Combined session chip on card. Combined batch details shown upfront."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
@@ -1324,6 +1905,13 @@ function ResidencyCards() {
           <Stack direction="row" justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("combined")}>View details</Button>
           </Stack>
+          <CombinedBatchesPanel
+            compact
+            batches={[
+              { batch: "AIML Online March 26 A" },
+              { batch: "AIML Online Feb 26 B" },
+            ]}
+          />
         </Card>
       </ComponentSection>
 
@@ -1443,7 +2031,7 @@ function OnlineSessionCards() {
       />
 
       {/* 1. Mentoring — Confirmed */}
-      <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Join event + Event Materials on card.">
+      <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Join event + Session Materials on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1456,7 +2044,7 @@ function OnlineSessionCards() {
             actions={
               <>
                 <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
-                <Button variant="soft" size="small" startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}>Event Materials</Button>
+                <Button variant="soft" size="small" startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}>Session Materials</Button>
               </>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-confirmed")}>View details</Button>}
@@ -1465,7 +2053,7 @@ function OnlineSessionCards() {
       </ComponentSection>
 
       {/* 2. Mentoring — Combined (Confirmed) */}
-      <ComponentSection title="Mentoring — Combined (Confirmed)" description="Combined event across batches. Combined event chip alongside Confirmed.">
+      <ComponentSection title="Mentoring — Combined (Confirmed)" description="Combined session across batches. Combined session chip alongside Confirmed. Combined batch details shown upfront.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1478,11 +2066,17 @@ function OnlineSessionCards() {
             actions={
               <>
                 <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
-                <Button variant="soft" size="small" startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}>Event Materials</Button>
+                <Button variant="soft" size="small" startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}>Session Materials</Button>
               </>
             }
-            chips={["Combined event"]}
+            chips={["Combined session"]}
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combined")}>View details</Button>}
+          />
+          <CombinedBatchesPanel
+            batches={[
+              { batch: "PGPDS.O.MAR26.A", group: "Group 07" },
+              { batch: "PGPDS.O.MAR26.B", group: "Group 03" },
+            ]}
           />
         </Card>
       </ComponentSection>
@@ -1509,6 +2103,35 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
+      {/* 3b. Mentoring — Combined (Scheduled) */}
+      <ComponentSection title="Mentoring — Combined (Scheduled)" description="Unconfirmed combined event awaiting guru action. Combined batch details shown upfront.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Statistics for Data Science"
+            sessionType="Online session"
+            batch="PGPDS.O.MAR26.A"
+            dateYmd="2026-03-20"
+            start={minutes(18)}
+            end={minutes(20)}
+            status={STATUS_SCHEDULED}
+            actions={
+              <>
+                <Button startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="contained">Confirm</Button>
+                <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
+              </>
+            }
+            chips={["Combined session"]}
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combinedScheduled")}>View details</Button>}
+          />
+          <CombinedBatchesPanel
+            batches={[
+              { batch: "PGPDS.O.MAR26.A", group: "Group 07" },
+              { batch: "PGPDS.O.MAR26.B", group: "Group 03" },
+            ]}
+          />
+        </Card>
+      </ComponentSection>
+
       {/* 4. Career 1:1 — Confirmed */}
       <ComponentSection title="Career 1:1 — Confirmed" description="1:1 career mentoring. Join online session on card. Student info in View Details.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
@@ -1521,10 +2144,7 @@ function OnlineSessionCards() {
             end={minutes(15)}
             status={STATUS_CONFIRMED()}
             actions={
-              <>
-                <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
-                <Button variant="soft" size="small" startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}>Event Materials</Button>
-              </>
+              <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-confirmed")}>View details</Button>}
           />
@@ -1724,6 +2344,62 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
+      {/* 11b. Mentoring — Combined (Completed) */}
+      <ComponentSection title="Mentoring — Combined (Completed)" description="Combined session splits into separate cards per batch when completed — each batch has its own rating. Two cards shown below for Batch A and Batch B.">
+        <CombinedCompletedGroup>
+          {/* Batch A card */}
+          <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+            <SessionCard
+              title="Statistics for Data Science"
+              sessionType="Online session"
+              batch="PGPDS.O.MAR26.A"
+              dateYmd="2026-03-05"
+              start={minutes(18)}
+              end={minutes(20)}
+              topRight={
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                  {CHIP_PAYMENT_PROCESSED}
+                  <StarRatingNumeric rating={4.5} />
+                </Stack>
+              }
+              actions={
+                <>
+                  <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+                  <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                </>
+              }
+              chips={["Combined session"]}
+              secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combinedCompleted")}>View details</Button>}
+            />
+          </Card>
+          {/* Batch B card */}
+          <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+            <SessionCard
+              title="Statistics for Data Science"
+              sessionType="Online session"
+              batch="PGPDS.O.MAR26.B"
+              dateYmd="2026-03-05"
+              start={minutes(18)}
+              end={minutes(20)}
+              topRight={
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                  {CHIP_PAYMENT_PROCESSED}
+                  <StarRatingNumeric rating={3.8} />
+                </Stack>
+              }
+              actions={
+                <>
+                  <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+                  <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                </>
+              }
+              chips={["Combined session"]}
+              secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combinedCompleted")}>View details</Button>}
+            />
+          </Card>
+        </CombinedCompletedGroup>
+      </ComponentSection>
+
       {/* 12. Mock Interview — Completed */}
       <ComponentSection title="Mock Interview — Completed" description="Past mock interview. Payment processed chip + star rating top-right. Watch recording + Detailed Feedback + Share Feedback.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
@@ -1776,10 +2452,7 @@ function CareerMentorOnlineSessionCards() {
             end={minutes(15)}
             status={STATUS_CONFIRMED()}
             actions={
-              <>
-                <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
-                <Button variant="soft" size="small" startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}>Event Materials</Button>
-              </>
+              <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-confirmed")}>View details</Button>}
           />

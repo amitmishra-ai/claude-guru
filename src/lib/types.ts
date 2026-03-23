@@ -72,6 +72,8 @@ export type Session = {
     learnerEngagementNotes: string;
     submittedAtMs: number;
   };
+  /** Combined session — lists the batches merged into this session */
+  combinedBatches?: { batch: string; group: string }[];
 };
 
 // ─── Planned Event Types ────────────────────────────────────────────────────

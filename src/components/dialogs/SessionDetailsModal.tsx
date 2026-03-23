@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
@@ -15,18 +16,22 @@ import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
 import MailOutlinedIcon from "@mui/icons-material/MailOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import PollOutlinedIcon from "@mui/icons-material/PollOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
+import Collapse from "@mui/material/Collapse";
 import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import PollOutlinedIcon from "@mui/icons-material/PollOutlined";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
   setSessionFocus,
@@ -34,14 +39,14 @@ import {
   setDeclineSessionFocus,
   setDeclineReason,
 } from "@/store/slices/sessionsSlice";
-import { setOpenSessionDetails, setOpenDeclineReason, setOpenPollBuilder } from "@/store/slices/uiSlice";
-import { setPollSessionId, setPollEditingId, setPollQuestion, setPollOptions } from "@/store/slices/pollsSlice";
+import { setOpenSessionDetails, setOpenDeclineReason } from "@/store/slices/uiSlice";
+import { addPoll, updatePoll, removePoll } from "@/store/slices/pollsSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import { fmtDateNice, fmtTime12, fmtDuration, fmtInr, getTimeZoneOffsetMinutes, formatGMTOffsetFromMinutesAhead } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
 import { demoCourseCatalog } from "@/data/demo-sessions";
 import { dateTimeMs, sortByDateTime } from "@/lib/helpers";
-import type { SessionPrepMaterial } from "@/lib/types";
+import type { SessionPrepMaterial, Poll } from "@/lib/types";
 
 const MATERIAL_ICONS: Record<SessionPrepMaterial["type"], React.ReactNode> = {
   slides: <SlideshowOutlinedIcon sx={{ fontSize: 14 }} />,
@@ -79,6 +84,377 @@ function SectionBox({ children }: { children: React.ReactNode }) {
   );
 }
 
+/* ── Inline Poll Card ── */
+
+function PollCard({ poll, onEdit, onDelete, onToggleStatus }: {
+  poll: Poll;
+  onEdit: () => void;
+  onDelete: () => void;
+  onToggleStatus: () => void;
+}) {
+  const isDraft = poll.status === "draft";
+  return (
+    <Box
+      sx={{
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "divider",
+        overflow: "hidden",
+        transition: "box-shadow 0.15s ease",
+        "&:hover": { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" },
+      }}
+    >
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{
+          px: 1.5,
+          py: 0.75,
+          bgcolor: isDraft
+            ? "hsl(var(--md-surface-container) / 0.4)"
+            : "var(--gl-status-confirmed-bg)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Stack direction="row" alignItems="center" spacing={0.75}>
+          <PollOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+          <Chip
+            label={isDraft ? "Draft" : "Queued"}
+            size="small"
+            sx={{
+              height: 20,
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              bgcolor: isDraft ? "action.selected" : "var(--gl-status-confirmed-bg)",
+              color: isDraft ? "text.secondary" : "var(--gl-status-confirmed-text)",
+              border: isDraft ? "none" : "1px solid var(--gl-status-confirmed-border)",
+              "& .MuiChip-label": { px: 0.75 },
+            }}
+          />
+        </Stack>
+        <Stack direction="row" spacing={0.25}>
+          <IconButton size="small" onClick={onEdit} sx={{ color: "text.secondary", p: 0.5 }}>
+            <EditOutlinedIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+          <IconButton size="small" onClick={onDelete} sx={{ color: "text.secondary", p: 0.5 }}>
+            <DeleteOutlineOutlinedIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+        </Stack>
+      </Stack>
+      <Box sx={{ px: 1.5, py: 1.25 }}>
+        <Typography variant="body2" fontWeight={600} sx={{ mb: 1, fontSize: "0.8125rem" }}>
+          {poll.question}
+        </Typography>
+        <Stack spacing={0.5}>
+          {poll.options.map((opt, i) => (
+            <Stack
+              key={i}
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{
+                px: 1.25,
+                py: 0.5,
+                borderRadius: 1.5,
+                bgcolor: "hsl(var(--md-surface-container) / 0.3)",
+              }}
+            >
+              <Box
+                sx={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  border: "2px solid",
+                  borderColor: "divider",
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.6rem",
+                  fontWeight: 700,
+                  color: "text.disabled",
+                }}
+              >
+                {String.fromCharCode(65 + i)}
+              </Box>
+              <Typography variant="caption" fontWeight={500}>{opt}</Typography>
+            </Stack>
+          ))}
+        </Stack>
+        <Button
+          size="small"
+          variant="text"
+          onClick={onToggleStatus}
+          sx={{ mt: 1, fontSize: "0.7rem", fontWeight: 600 }}
+          startIcon={<SendOutlinedIcon sx={{ fontSize: 12 }} />}
+        >
+          {isDraft ? "Queue to Zoom" : "Move to draft"}
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
+/* ── Inline Poll Creation Form ── */
+
+function PollCreationForm({ onSave, onCancel, editingPoll }: {
+  onSave: (data: { question: string; options: string[]; status: "draft" | "queued" }) => void;
+  onCancel: () => void;
+  editingPoll?: Poll | null;
+}) {
+  const [question, setQuestion] = useState(editingPoll?.question ?? "");
+  const [options, setOptions] = useState<string[]>(editingPoll?.options ?? ["", ""]);
+
+  const updateOption = (index: number, value: string) => {
+    const next = [...options];
+    next[index] = value;
+    setOptions(next);
+  };
+
+  const removeOption = (index: number) => {
+    setOptions(options.filter((_, i) => i !== index));
+  };
+
+  const canSave = question.trim().length > 0 && options.filter((o) => o.trim()).length >= 2;
+
+  return (
+    <Box
+      sx={{
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "primary.main",
+        bgcolor: "hsl(var(--md-surface-container) / 0.2)",
+        overflow: "hidden",
+      }}
+    >
+      <Box
+        sx={{
+          px: 1.5,
+          py: 1,
+          bgcolor: "hsl(var(--md-surface-container) / 0.5)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+        }}
+      >
+        <PollOutlinedIcon sx={{ fontSize: 14, color: "primary.main" }} />
+        <Typography variant="caption" fontWeight={700} color="primary.main">
+          {editingPoll ? "Edit poll" : "New poll"}
+        </Typography>
+      </Box>
+
+      <Stack spacing={1.5} sx={{ px: 1.5, py: 1.5 }}>
+        <TextField
+          label="Question"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          size="small"
+          fullWidth
+          placeholder="E.g., Which topic should we cover next?"
+          variant="outlined"
+          sx={{
+            "& .MuiOutlinedInput-root": { fontSize: "0.8125rem" },
+            "& .MuiInputLabel-root": { fontSize: "0.8125rem" },
+          }}
+        />
+
+        <Box>
+          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 0.75, display: "block" }}>
+            Options ({options.filter((o) => o.trim()).length} of {options.length})
+          </Typography>
+          <Stack spacing={0.75}>
+            {options.map((opt, i) => (
+              <Stack key={i} direction="row" alignItems="center" spacing={0.5}>
+                <DragIndicatorOutlinedIcon sx={{ fontSize: 14, color: "text.disabled", flexShrink: 0 }} />
+                <TextField
+                  value={opt}
+                  onChange={(e) => updateOption(i, e.target.value)}
+                  size="small"
+                  fullWidth
+                  placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                  variant="outlined"
+                  sx={{ "& .MuiOutlinedInput-root": { fontSize: "0.8125rem" } }}
+                />
+                {options.length > 2 && (
+                  <IconButton size="small" onClick={() => removeOption(i)} sx={{ p: 0.5 }}>
+                    <DeleteOutlineOutlinedIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
+                )}
+              </Stack>
+            ))}
+          </Stack>
+          {options.length < 5 && (
+            <Button
+              size="small"
+              variant="text"
+              startIcon={<AddOutlinedIcon sx={{ fontSize: 13 }} />}
+              onClick={() => setOptions([...options, ""])}
+              sx={{ mt: 0.5, fontSize: "0.7rem" }}
+            >
+              Add option
+            </Button>
+          )}
+        </Box>
+
+        <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ pt: 0.5 }}>
+          <Button variant="text" size="small" color="inherit" onClick={onCancel} sx={{ fontSize: "0.75rem" }}>
+            Cancel
+          </Button>
+          <Button
+            variant="soft"
+            size="small"
+            onClick={() => onSave({ question, options: options.filter((o) => o.trim()), status: "draft" })}
+            disabled={!canSave}
+            sx={{ fontSize: "0.75rem" }}
+          >
+            Save draft
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => onSave({ question, options: options.filter((o) => o.trim()), status: "queued" })}
+            disabled={!canSave}
+            startIcon={<SendOutlinedIcon sx={{ fontSize: 13 }} />}
+            sx={{ fontSize: "0.75rem" }}
+          >
+            Queue to Zoom
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
+  );
+}
+
+/* ── Polls Section (Redux-connected) ── */
+
+function PollsSection({ sessionId }: { sessionId: string }) {
+  const dispatch = useAppDispatch();
+  const allPolls = useAppSelector((s) => s.polls.items);
+  const sessionPolls = allPolls.filter((p) => p.sessionId === sessionId);
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingPollId, setEditingPollId] = useState<string | null>(null);
+
+  const handleSave = (data: { question: string; options: string[]; status: "draft" | "queued" }) => {
+    if (editingPollId) {
+      dispatch(updatePoll({ id: editingPollId, sessionId, ...data }));
+      dispatch(pushToast({ title: "Poll updated" }));
+    } else {
+      dispatch(addPoll({ id: `poll-${Date.now()}`, sessionId, ...data }));
+      dispatch(pushToast({ title: data.status === "queued" ? "Poll queued to Zoom" : "Poll saved as draft" }));
+    }
+    setShowForm(false);
+    setEditingPollId(null);
+  };
+
+  const handleDelete = (id: string) => {
+    dispatch(removePoll(id));
+    dispatch(pushToast({ title: "Poll deleted" }));
+  };
+
+  const handleToggleStatus = (poll: Poll) => {
+    const newStatus = poll.status === "draft" ? "queued" as const : "draft" as const;
+    dispatch(updatePoll({ ...poll, status: newStatus }));
+    dispatch(pushToast({ title: newStatus === "queued" ? "Poll queued to Zoom" : "Poll moved to draft" }));
+  };
+
+  const handleEdit = (id: string) => {
+    setEditingPollId(id);
+    setShowForm(true);
+  };
+
+  return (
+    <Box>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+        <Stack direction="row" alignItems="center" spacing={0.75}>
+          <PollOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
+          <Typography variant="subtitle2" fontWeight={700}>Polls</Typography>
+          {sessionPolls.length > 0 && (
+            <Chip
+              label={sessionPolls.length}
+              size="small"
+              sx={{
+                height: 20,
+                minWidth: 20,
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                bgcolor: "primary.main",
+                color: "primary.contrastText",
+                "& .MuiChip-label": { px: 0.5 },
+              }}
+            />
+          )}
+        </Stack>
+        {!showForm && (
+          <Button
+            size="small"
+            variant="soft"
+            startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
+            onClick={() => { setEditingPollId(null); setShowForm(true); }}
+            sx={{ fontSize: "0.75rem" }}
+          >
+            Add poll
+          </Button>
+        )}
+      </Stack>
+
+      <Stack spacing={1.5}>
+        {sessionPolls.map((poll) => (
+          <PollCard
+            key={poll.id}
+            poll={poll}
+            onEdit={() => handleEdit(poll.id)}
+            onDelete={() => handleDelete(poll.id)}
+            onToggleStatus={() => handleToggleStatus(poll)}
+          />
+        ))}
+
+        <Collapse in={showForm} unmountOnExit>
+          <PollCreationForm
+            editingPoll={editingPollId ? sessionPolls.find((p) => p.id === editingPollId) : null}
+            onSave={handleSave}
+            onCancel={() => { setShowForm(false); setEditingPollId(null); }}
+          />
+        </Collapse>
+
+        {sessionPolls.length === 0 && !showForm && (
+          <Box
+            sx={{
+              py: 3,
+              px: 2,
+              borderRadius: 2,
+              border: "1px dashed",
+              borderColor: "divider",
+              textAlign: "center",
+            }}
+          >
+            <PollOutlinedIcon sx={{ fontSize: 28, color: "text.disabled", mb: 0.5 }} />
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              No polls created yet
+            </Typography>
+            <Button
+              size="small"
+              variant="soft"
+              startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
+              onClick={() => setShowForm(true)}
+            >
+              Create your first poll
+            </Button>
+          </Box>
+        )}
+      </Stack>
+    </Box>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SESSION DETAILS DRAWER (right-side panel)
+   ══════════════════════════════════════════════════════════════════════════ */
+
 export function SessionDetailsModal() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -106,36 +482,57 @@ export function SessionDetailsModal() {
     : null;
   const isMentoring = session?.sessionType === "Career mentoring session";
 
+  // Show polls for confirmed, non-completed sessions
+  const showPolls = session && isConfirmed && !isCompleted;
+
   return (
-    <Dialog
+    <Drawer
+      anchor="right"
       open={open}
       onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          p: 0,
-          maxHeight: "85vh",
-          overflow: "hidden",
-          width: { xs: "calc(100vw - 1.5rem)", sm: "100%" },
-          maxWidth: { xs: "calc(100vw - 1.5rem)", sm: "600px" },
+      SlideProps={{ onExited: () => dispatch(setSessionFocus(null)) }}
+      sx={{
+        "& .MuiDrawer-paper": {
+          width: { xs: "100vw", sm: 520 },
+          maxWidth: "100vw",
+          boxShadow: "-8px 0 32px rgba(0,0,0,0.08)",
         },
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          Event details
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        {/* ── Sticky header ── */}
+        <Box
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            borderBottom: 1,
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            px: 3,
+            py: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
+          }}
+        >
+          <Typography variant="subtitle1" fontWeight={700}>Event details</Typography>
           <IconButton size="small" onClick={handleClose} sx={{ color: "text.secondary" }}>
             <CloseOutlinedIcon sx={{ fontSize: 18 }} />
           </IconButton>
-        </DialogTitle>
+        </Box>
 
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+        {/* ── Scrollable content ── */}
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2.5 }}>
           {session ? (
             <Stack spacing={2.5}>
-              {/* Header: Title + chips */}
+              {/* Header: breadcrumb + status + title */}
               <Box>
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.75 }}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
+                    {[session.batch || session.program, session.sessionType].filter(Boolean).join(" · ")}
+                  </Typography>
                   {isConfirmed && (
                     <Chip
                       label="Confirmed"
@@ -157,10 +554,6 @@ export function SessionDetailsModal() {
                       sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }}
                     />
                   )}
-                  {session.program && <Chip label={session.program} size="small" />}
-                  {session.cohort && <Chip label={session.cohort} size="small" />}
-                  {session.sessionType && <Chip label={session.sessionType} size="small" />}
-                  {session.audienceType && <Chip label={session.audienceType} size="small" />}
                 </Stack>
                 <Typography variant="h6" fontWeight={600}>{session.title}</Typography>
               </Box>
@@ -223,6 +616,9 @@ export function SessionDetailsModal() {
                     )}
                   </InfoRow>
                 )}
+                {session.cohort && (
+                  <InfoRow label="Batch">{session.cohort}</InfoRow>
+                )}
                 {session.group && (
                   <InfoRow label="Group">
                     <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
@@ -230,6 +626,9 @@ export function SessionDetailsModal() {
                       <span>{session.group}</span>
                     </Stack>
                   </InfoRow>
+                )}
+                {session.audienceType && (
+                  <InfoRow label="Audience">{session.audienceType}</InfoRow>
                 )}
               </SectionBox>
 
@@ -352,6 +751,9 @@ export function SessionDetailsModal() {
                 </SectionBox>
               )}
 
+              {/* ═══ POLLS SECTION ═══ */}
+              {showPolls && <PollsSection sessionId={session.id} />}
+
               {/* Remuneration (confirmed or completed sessions) */}
               {(isConfirmed || isCompleted) && session.paymentAmountInr && (
                 <SectionBox>
@@ -449,31 +851,30 @@ export function SessionDetailsModal() {
           ) : (
             <Typography variant="body2" color="text.secondary">No event selected.</Typography>
           )}
-        </DialogContent>
+        </Box>
 
-        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, justifyContent: "space-between" }}>
+        {/* ── Sticky footer ── */}
+        <Box
+          sx={{
+            position: "sticky",
+            bottom: 0,
+            zIndex: 10,
+            borderTop: 1,
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            px: 3,
+            py: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexShrink: 0,
+          }}
+        >
           <Button variant="text" color="inherit" onClick={handleClose}>
             Close
           </Button>
           {session && !isCompleted && (
             <Stack direction="row" spacing={1}>
-              {isConfirmed && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<PollOutlinedIcon sx={{ fontSize: 16 }} />}
-                  onClick={() => {
-                    dispatch(setPollSessionId(session.id));
-                    dispatch(setPollEditingId(null));
-                    dispatch(setPollQuestion(""));
-                    dispatch(setPollOptions(["", ""]));
-                    dispatch(setOpenSessionDetails(false));
-                    dispatch(setOpenPollBuilder(true));
-                  }}
-                >
-                  Create New Poll
-                </Button>
-              )}
               <Button
                 variant="soft"
                 size="small"
@@ -502,8 +903,8 @@ export function SessionDetailsModal() {
               )}
             </Stack>
           )}
-        </DialogActions>
+        </Box>
       </Box>
-    </Dialog>
+    </Drawer>
   );
 }

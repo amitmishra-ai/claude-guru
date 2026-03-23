@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
@@ -128,9 +129,26 @@ export function SessionCard({
 
   const chipsRow = (chips && chips.length > 0) && (
     <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
-      {chips.map((c) => (
-        <Chip key={c} label={c} size="small" />
-      ))}
+      {chips.map((c) =>
+        c === "Combined session" ? (
+          <Chip
+            key={c}
+            icon={<CallMergeOutlinedIcon sx={{ fontSize: 13 }} />}
+            label={c}
+            size="small"
+            sx={{
+              fontWeight: 600,
+              fontSize: "0.7rem",
+              bgcolor: "hsl(var(--md-surface-container) / 0.6)",
+              border: "1px solid",
+              borderColor: "divider",
+              "& .MuiChip-icon": { color: "inherit", ml: 0.5 },
+            }}
+          />
+        ) : (
+          <Chip key={c} label={c} size="small" />
+        ),
+      )}
     </Stack>
   );
 
