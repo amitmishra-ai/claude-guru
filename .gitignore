@@ -1,3 +1,6 @@
 /node_modules
 /screenshots
 /android/app/build/
+.claude/worktrees/intelligent-mendel/
+.claude/worktrees/nifty-franklin/
+.claude/worktrees/romantic-ishizaka/
