@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { Fragment, useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
@@ -46,6 +46,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import IconButton from "@mui/material/IconButton";
+import Switch from "@mui/material/Switch";
 import { keyframes } from "@mui/system";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
@@ -57,6 +58,7 @@ import {
   setDeclineSessionFocus,
   setDeclineReason,
   setSelectedSessionType,
+  setSelectedTimePeriod,
   submitSummary,
 } from "@/store/slices/sessionsSlice";
 import { removeUnavailableBySessionId, setPatterns } from "@/store/slices/availabilitySlice";
@@ -186,6 +188,7 @@ export default function DashboardPage() {
   const guruName = useAppSelector((s) => s.profile.guruName);
   const polls = useAppSelector((s) => s.polls.items);
   const selectedSessionType = useAppSelector((s) => s.sessions.selectedSessionType);
+  const selectedTimePeriod = useAppSelector((s) => s.sessions.selectedTimePeriod);
   const recentlyConfirmedIds = useAppSelector((s) => s.sessions.recentlyConfirmedIds);
 
   /* ── local state for exit animation ─────────────────────────────── */
@@ -232,13 +235,24 @@ export default function DashboardPage() {
     () => sortByDateTime(sessions).filter((s) => isSessionCompleted(s, nowMs)).reverse(),
     [sessions, nowMs]
   );
-  const filteredCompletedSessions = useMemo(
-    () =>
-      selectedSessionType === "All"
-        ? completedSessions
-        : completedSessions.filter((s) => s.sessionType === selectedSessionType),
-    [completedSessions, selectedSessionType]
-  );
+  const filteredCompletedSessions = useMemo(() => {
+    let filtered = selectedSessionType === "All"
+      ? completedSessions
+      : completedSessions.filter((s) => s.sessionType === selectedSessionType);
+
+    if (selectedTimePeriod === "Pending Summaries") {
+      const onlineTypes = ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"];
+      filtered = filtered.filter((s) => onlineTypes.includes(s.sessionType) && !summaries[s.id]);
+    } else if (selectedTimePeriod === "Last 6 months") {
+      const sixMonthsAgo = new Date(demoNow);
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      filtered = filtered.filter((s) => new Date(s.dateYmd) >= sixMonthsAgo);
+    } else if (["2025", "2024", "2023", "2022"].includes(selectedTimePeriod)) {
+      filtered = filtered.filter((s) => s.dateYmd.startsWith(selectedTimePeriod));
+    }
+
+    return filtered;
+  }, [completedSessions, selectedSessionType, selectedTimePeriod, summaries]);
   const declinedSessions = useMemo(
     () => sessions.filter((s) => sessionDeclined[s.id]),
     [sessions, sessionDeclined]
@@ -738,22 +752,45 @@ export default function DashboardPage() {
                 {/* ── Completed tab ── */}
                 {homeSessionsView === "completed" && (
                   <>
-                    <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 220 } }}>
-                      <InputLabel>Filter by event type</InputLabel>
+                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="center" justifyContent="space-between" sx={{ width: "100%" }}>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Typography variant="body2" color={selectedTimePeriod === "Pending Summaries" ? "primary" : "text.secondary"} sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
+                          Pending summaries ({completedSessions.filter((s) => ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"].includes(s.sessionType) && !summaries[s.id]).length})
+                        </Typography>
+                        <Switch
+                          size="small"
+                          checked={selectedTimePeriod === "Pending Summaries"}
+                          onChange={(_e: unknown, checked: boolean) => {
+                            if (checked) dispatch(setSelectedTimePeriod("Pending Summaries"));
+                            else dispatch(setSelectedTimePeriod("Last 6 months"));
+                          }}
+                        />
+                      </Stack>
+
                       <Select
-                        label="Filter by event type"
-                        value={selectedSessionType}
-                        onChange={(e) => dispatch(setSelectedSessionType(e.target.value as typeof selectedSessionType))}
+                        size="small"
+                        variant="standard"
+                        disableUnderline
+                        value={selectedTimePeriod === "Pending Summaries" ? "Last 6 months" : selectedTimePeriod}
+                        onChange={(e) => dispatch(setSelectedTimePeriod(e.target.value as typeof selectedTimePeriod))}
+                        sx={{ fontSize: "0.85rem", fontWeight: 600, color: "primary.main", "& .MuiSelect-select": { py: 0.5 }, "& .MuiSvgIcon-root": { color: "primary.main" } }}
                       >
-                        {SESSION_TYPES.map((t) => (
-                          <MenuItem key={t} value={t}>{t}</MenuItem>
-                        ))}
+                        <MenuItem value="Last 6 months">Last 6 months</MenuItem>
+                        <MenuItem value="2025">2025</MenuItem>
+                        <MenuItem value="2024">2024</MenuItem>
+                        <MenuItem value="2023">2023</MenuItem>
+                        <MenuItem value="2022">2022</MenuItem>
                       </Select>
-                    </FormControl>
+                    </Stack>
 
                     {filteredCompletedSessions.length > 0 ? (
                       <Stack spacing={1.5}>
-                        {filteredCompletedSessions.map((s) => {
+                        {filteredCompletedSessions.map((s, idx) => {
+                          // Month divider logic
+                          const sessionMonth = s.dateYmd.slice(0, 7); // "YYYY-MM"
+                          const prevMonth = idx > 0 ? filteredCompletedSessions[idx - 1].dateYmd.slice(0, 7) : null;
+                          const showMonthDivider = sessionMonth !== prevMonth;
+                          const monthLabel = new Date(s.dateYmd + "T00:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" });
                           const ratings = demoLearnerRatingsBySessionId[s.id];
                           const hasRatings = ratings && ratings.length > 0;
                           const avg = hasRatings
@@ -921,7 +958,16 @@ export default function DashboardPage() {
                                     : s.title;
 
                           return (
-                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+                            <Fragment key={s.id}>
+                              {showMonthDivider && (
+                                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ pt: idx === 0 ? 0 : 1, pb: 0.5 }}>
+                                  <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ whiteSpace: "nowrap", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                                    {monthLabel}
+                                  </Typography>
+                                  <Divider sx={{ flex: 1 }} />
+                                </Stack>
+                              )}
+                            <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
                               {/* Card header: title row + date + actions — custom for non-SessionCard types */}
                               {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
                                 <>
@@ -998,6 +1044,7 @@ export default function DashboardPage() {
                                 />
                               )}
                             </Card>
+                            </Fragment>
                           );
                         })}
                       </Stack>

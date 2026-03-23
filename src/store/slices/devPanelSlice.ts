@@ -34,7 +34,7 @@ const savedRole =
 
 const initialState: DevPanelState = {
   isOpen: false,
-  selectedRole: savedRole && GURU_ROLES.includes(savedRole) ? savedRole : "Teacher",
+  selectedRole: savedRole && GURU_ROLES.includes(savedRole) ? savedRole : "Course Mentor",
   isRoleSwitching: false,
 };
 
