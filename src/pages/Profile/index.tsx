@@ -126,8 +126,12 @@ export default function ProfilePage() {
   const [showCourseReport, setShowCourseReport] = useState(false);
   const testimonialRef = useRef<HTMLDivElement>(null);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [shareMonth, setShareMonth] = useState("2026-02");
+  const [shareMonth, setShareMonth] = useState(() => {
+    const d = new Date("2026-02-16");
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  });
 
+  // Generate last 6 months for the share card dropdown
   const shareMonthOptions = useMemo(() => {
     const base = new Date("2026-02-16");
     const months: { value: string; label: string }[] = [];
@@ -140,6 +144,7 @@ export default function ProfilePage() {
     return months;
   }, []);
 
+  // Seasonal theme config per month
   const MONTH_THEMES: Record<string, {
     bg: string; circles: [string, string, string];
     chipBg: string; chipColor: string;
@@ -167,18 +172,21 @@ export default function ProfilePage() {
       chipBg: "#f48fb1", chipColor: "#880e4f",
       stats: [{ bg: "#f48fb1", color: "#fff" }, { bg: "#ce93d8", color: "#fff" }, { bg: "#fce4ec", color: "#880e4f" }, { bg: "#e1bee7", color: "#4a148c" }],
       headingColor: "#880e4f", taglineColor: "#ad1457", spotlightColor: "#ad1457", nameColor: "#4a148c", subtitleColor: "#ce93d8",
+      pattern: "radial-gradient(circle 40px at 20% 30%, rgba(136,14,79,0.03) 0%, transparent 60%), radial-gradient(circle 30px at 70% 60%, rgba(74,20,140,0.03) 0%, transparent 60%)",
     },
     "2025-12": {
       bg: "#e8eaf6", circles: ["#81d4fa", "#b0bec5", "#c5cae9"],
       chipBg: "#81d4fa", chipColor: "#0d47a1",
       stats: [{ bg: "#81d4fa", color: "#0d47a1" }, { bg: "#b0bec5", color: "#263238" }, { bg: "#e3f2fd", color: "#1565c0" }, { bg: "#cfd8dc", color: "#37474f" }],
       headingColor: "#1a237e", taglineColor: "#283593", spotlightColor: "#1565c0", nameColor: "#0d47a1", subtitleColor: "#7986cb",
+      pattern: "radial-gradient(circle 2px at 15% 20%, rgba(13,71,161,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 45% 70%, rgba(13,71,161,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 75% 35%, rgba(13,71,161,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 90% 80%, rgba(13,71,161,0.06) 0%, transparent 50%)",
     },
     "2026-01": {
       bg: "#eceff1", circles: ["#90a4ae", "#b0bec5", "#cfd8dc"],
       chipBg: "#b0bec5", chipColor: "#263238",
       stats: [{ bg: "#90a4ae", color: "#fff" }, { bg: "#78909c", color: "#fff" }, { bg: "#eceff1", color: "#37474f" }, { bg: "#b0bec5", color: "#263238" }],
       headingColor: "#263238", taglineColor: "#37474f", spotlightColor: "#455a64", nameColor: "#263238", subtitleColor: "#78909c",
+      pattern: "radial-gradient(circle 1.5px at 10% 15%, rgba(38,50,56,0.05) 0%, transparent 50%), radial-gradient(circle 1.5px at 35% 55%, rgba(38,50,56,0.05) 0%, transparent 50%), radial-gradient(circle 1.5px at 60% 25%, rgba(38,50,56,0.05) 0%, transparent 50%), radial-gradient(circle 1.5px at 85% 75%, rgba(38,50,56,0.05) 0%, transparent 50%)",
     },
     "2026-02": {
       bg: "#dbeafe", circles: ["#fde68a", "#bfdbfe", "#93c5fd"],
@@ -188,6 +196,7 @@ export default function ProfilePage() {
     },
   };
 
+  // Mock monthly data for the share card
   const shareMonthData = useMemo(() => {
     const dataByMonth: Record<string, { learners: string; hours: string; completion: string; sessions: string; rating: string; monthLabel: string }> = {
       "2026-02": { learners: "1,240", hours: "38", completion: "96", sessions: "42", rating: "4.54", monthLabel: "FEB 2026" },
