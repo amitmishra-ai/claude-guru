@@ -211,32 +211,6 @@ export default function ProfilePage() {
       ],
     },
     {
-      label: "COVERAGE",
-      value: "92%",
-      description: "Percentage of scheduled sessions with ratings submitted.",
-      delta: "+3%",
-      deltaLabel: "vs last quarter",
-      deltaPositive: true,
-      bars: [65, 70, 75, 85, 90, 92],
-      barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-      bg: "rgba(34, 187, 52, 0.06)",
-      accent: "#22bb34",
-      reportTitle: "Coverage Report",
-      reportSummary: "Percentage of scheduled sessions that received feedback each month.",
-      chartData: [
-        { month: "Sep 25", value: 68 }, { month: "Oct 25", value: 72 }, { month: "Nov 25", value: 78 },
-        { month: "Dec 25", value: 85 }, { month: "Jan 26", value: 90 }, { month: "Feb 26", value: 92 },
-      ],
-      chartKey: "value",
-      breakdown: [
-        { name: "PGP-DS", value: "96%" },
-        { name: "PGP-AIML", value: "93%" },
-        { name: "PGP-SE", value: "90%" },
-        { name: "Core Programs", value: "88%" },
-        { name: "Workshops", value: "85%" },
-      ],
-    },
-    {
       label: "NPS PROXY",
       value: "74",
       description: "Learner satisfaction score derived from 4 & 5 star ratings.",
@@ -260,6 +234,32 @@ export default function ProfilePage() {
         { name: "3-star ratings", value: "4%" },
         { name: "2-star ratings", value: "1.5%" },
         { name: "1-star ratings", value: "0.5%" },
+      ],
+    },
+    {
+      label: "AVG CONFIRM TIME",
+      value: "4.2h",
+      description: "How fast you confirm assigned sessions. Lower is better.",
+      delta: "-1.3h",
+      deltaLabel: "vs last quarter",
+      deltaPositive: true,
+      bars: [12, 9, 7, 6, 5, 4.2],
+      barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+      bg: "rgba(34, 187, 52, 0.06)",
+      accent: "#22bb34",
+      reportTitle: "Confirmation Time Report",
+      reportSummary: "Average hours taken to confirm scheduled sessions each month. Lower is better.",
+      chartData: [
+        { month: "Sep 25", value: 12 }, { month: "Oct 25", value: 9 }, { month: "Nov 25", value: 7 },
+        { month: "Dec 25", value: 6 }, { month: "Jan 26", value: 5 }, { month: "Feb 26", value: 4.2 },
+      ],
+      chartKey: "value",
+      breakdown: [
+        { name: "PGP-DS", value: "3.8h" },
+        { name: "PGP-AIML", value: "4.5h" },
+        { name: "PGP-SE", value: "5.1h" },
+        { name: "Core Programs", value: "3.2h" },
+        { name: "Workshops", value: "4.8h" },
       ],
     },
   ];
@@ -552,7 +552,7 @@ export default function ProfilePage() {
               }}
             >
               <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", height: "100%", "&:last-child": { pb: 2.5 } }}>
-                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic", lineHeight: 1.6, flex: 1, mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "normal", lineHeight: 1.6, flex: 1, mb: 2 }}>
                   &ldquo;{t.quote}&rdquo;
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing={1.25}>
@@ -847,140 +847,75 @@ export default function ProfilePage() {
             sx={{
               borderRadius: 3,
               mb: 3,
-              background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 40%, #93c5fd 100%)",
+              bgcolor: "#dbeafe",
               position: "relative",
               overflow: "hidden",
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                inset: 0,
-                background: `
-                  radial-gradient(ellipse 120% 80% at 20% 80%, rgba(255,255,255,0.4) 0%, transparent 60%),
-                  radial-gradient(ellipse 100% 60% at 80% 20%, rgba(255,255,255,0.3) 0%, transparent 50%),
-                  radial-gradient(ellipse 80% 100% at 60% 50%, rgba(255,255,255,0.15) 0%, transparent 50%)
-                `,
-                filter: "blur(40px)",
-              },
               color: "#0f172a",
               aspectRatio: "4 / 3",
             }}
           >
-            <Box sx={{ p: 2.5, height: "100%", display: "flex", flexDirection: "column", position: "relative", zIndex: 1 }}>
-              {/* Header: Logo + Title + FY */}
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-                <Box>
-                  <Typography sx={{ color: "#1e40af", letterSpacing: "0.1em", fontWeight: 600, fontSize: "0.45rem" }}>
-                    MENTOR IMPACT REPORT
-                  </Typography>
-                  <Typography sx={{ color: "#0f172a", fontWeight: 700, fontSize: "0.95rem", lineHeight: 1.1 }}>
-                    {guruName}
-                  </Typography>
-                </Box>
-                <Stack alignItems="flex-end" spacing={0.5}>
-                  <Box component="img" src="/gl-logo-navy.svg" alt="Great Learning" sx={{ height: 18 }} />
-                  <Typography sx={{ color: "#1e3a5f", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.05em" }}>2025–26</Typography>
-                </Stack>
+            {/* Decorative circles */}
+            <Box sx={{ position: "absolute", top: -60, right: -40, width: 220, height: 220, borderRadius: "50%", bgcolor: "#fde68a", opacity: 0.6 }} />
+            <Box sx={{ position: "absolute", bottom: -50, right: -30, width: 140, height: 140, borderRadius: "50%", bgcolor: "#bfdbfe", opacity: 0.7 }} />
+            <Box sx={{ position: "absolute", bottom: -20, left: "40%", width: 80, height: 80, borderRadius: "50%", bgcolor: "#bfdbfe", opacity: 0.5 }} />
+
+            <Box sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column", position: "relative", zIndex: 1 }}>
+              {/* Header: Logo left + Month badge right */}
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Box component="img" src="/gl-logo-navy.svg" alt="Great Learning" sx={{ height: 24 }} />
+                <Chip
+                  label="FEB 2026"
+                  size="small"
+                  sx={{ bgcolor: "#fde68a", color: "#1e3a5f", fontWeight: 700, fontSize: "0.7rem", borderRadius: 9999, px: 1 }}
+                />
               </Stack>
 
-              {/* Main content: 2 columns */}
-              <Stack direction="row" spacing={1.5} sx={{ flex: 1, minHeight: 0 }}>
-                {/* Left column: Stats */}
-                <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-                  {/* 6-stat grid: 4 main + 2 secondary */}
-                  <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gridTemplateRows: "repeat(3, 1fr)", gap: 0.75, flex: 1 }}>
-                    {[
-                      { label: "Learners", value: "1,240", delta: "+213", accent: "#3b82f6" },
-                      { label: "Hours", value: "186h", delta: "+32h", accent: "#22c55e" },
-                      { label: "Avg rating", value: avgRating, delta: "+0.12", accent: "#f59e0b" },
-                      { label: "NPS proxy", value: "74", delta: null, accent: "#a855f7" },
-                      { label: "Coverage", value: "92%", delta: "+3%", accent: "#22c55e" },
-                      { label: "Rated events", value: String(demoRatingHistory.length), delta: null, accent: "#3b82f6" },
-                    ].map((s) => (
-                      <Box key={s.label} sx={{ bgcolor: "rgba(255,255,255,0.5)", borderRadius: 1.5, backdropFilter: "blur(8px)", px: 1.25, py: 0.75, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                        <Stack direction="row" alignItems="center" spacing={0.4} sx={{ mb: 0.15 }}>
-                          <Box sx={{ width: 5, height: 5, borderRadius: "50%", bgcolor: s.accent }} />
-                          <Typography sx={{ color: "#475569", fontSize: "0.5rem" }}>{s.label}</Typography>
-                        </Stack>
-                        <Stack direction="row" alignItems="baseline" spacing={0.5}>
-                          <Typography sx={{ color: "#0f172a", fontWeight: 700, fontSize: "1rem", lineHeight: 1 }}>{s.value}</Typography>
-                          {s.delta && <Typography sx={{ color: "#22c55e", fontWeight: 600, fontSize: "0.5rem" }}>{s.delta}</Typography>}
-                        </Stack>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
+              {/* Guru Spotlight heading */}
+              <Typography sx={{ color: "#2563eb", letterSpacing: "0.15em", fontWeight: 700, fontSize: "0.55rem", mb: 0.5 }}>
+                GURU SPOTLIGHT
+              </Typography>
+              <Typography sx={{ color: "#0f172a", fontWeight: 800, fontSize: "1.5rem", lineHeight: 1.1, mb: 0.25 }}>
+                {guruName}
+              </Typography>
+              <Typography sx={{ color: "#64748b", fontSize: "0.75rem", mb: 2 }}>
+                Machine Learning · Data Science
+              </Typography>
 
-                {/* Right column: Courses + Sparkline */}
-                <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-                  {/* Top courses */}
-                  <Box sx={{ bgcolor: "rgba(255,255,255,0.5)", borderRadius: 1.5, backdropFilter: "blur(8px)", px: 1.25, py: 0.75, flex: 1 }}>
-                    <Typography sx={{ color: "rgba(148,163,184,0.7)", fontSize: "0.45rem", letterSpacing: "0.08em", mb: 0.5 }}>
-                      TOP COURSES
-                    </Typography>
-                    {demoCoursePerf.slice(0, 4).map((c) => (
-                      <Stack key={c.name} direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.15 }}>
-                        <Typography sx={{ color: "#334155", fontSize: "0.55rem" }}>{c.name}</Typography>
-                        <Stack direction="row" alignItems="center" spacing={0.3}>
-                          <Typography sx={{ color: "#0f172a", fontWeight: 700, fontSize: "0.55rem" }}>{c.rating.toFixed(1)}</Typography>
-                          <Typography sx={{ color: c.delta >= 0 ? "#22c55e" : "#ef4444", fontSize: "0.45rem" }}>
-                            {c.delta > 0 ? "↗" : c.delta < 0 ? "↘" : "—"}
-                          </Typography>
-                        </Stack>
-                      </Stack>
-                    ))}
-                  </Box>
+              {/* Monthly Achievements heading */}
+              <Typography sx={{ color: "#2563eb", letterSpacing: "0.12em", fontWeight: 700, fontSize: "0.5rem", mb: 1 }}>
+                MONTHLY ACHIEVEMENTS
+              </Typography>
 
-                  {/* Rating sparkline */}
-                  <Box sx={{ bgcolor: "rgba(255,255,255,0.5)", borderRadius: 1.5, backdropFilter: "blur(8px)", px: 1.25, py: 0.75 }}>
-                    <Typography sx={{ color: "rgba(148,163,184,0.7)", fontSize: "0.45rem", letterSpacing: "0.08em", mb: 0.25 }}>
-                      RATING TREND
-                    </Typography>
-                    {(() => {
-                      const vals = ratingChartData.filter((d) => d.avg !== null).map((d) => d.avg as number);
-                      if (vals.length < 2) return null;
-                      const minV = Math.min(...vals);
-                      const maxV = Math.max(...vals);
-                      const range = maxV - minV || 0.1;
-                      const h = 28;
-                      const w = 200;
-                      const pts = vals.map((v, i) => {
-                        const x = (i / (vals.length - 1)) * w;
-                        const y = h - ((v - minV) / range) * (h - 4) - 2;
-                        return `${x},${y}`;
-                      });
-                      const areaPoints = `0,${h} ${pts.join(" ")} ${w},${h}`;
-                      return (
-                        <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
-                          <polygon points={areaPoints} fill="#3b82f6" opacity={0.08} />
-                          <polyline points={pts.join(" ")} fill="none" stroke="#3b82f6" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-                          {vals.map((v, i) => {
-                            const x = (i / (vals.length - 1)) * w;
-                            const y = h - ((v - minV) / range) * (h - 4) - 2;
-                            return <circle key={i} cx={x} cy={y} r={1.5} fill="#3b82f6" />;
-                          })}
-                        </svg>
-                      );
-                    })()}
-                    <Stack direction="row" justifyContent="space-between" sx={{ mt: 0.15 }}>
-                      {ratingChartData.filter((d) => d.avg !== null).map((d) => (
-                        <Typography key={d.month} sx={{ color: "#64748b", fontSize: "0.4rem" }}>
-                          {d.month.split(" ")[0]}
-                        </Typography>
-                      ))}
+              {/* 2x2 stat grid */}
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, flex: 1, minHeight: 0 }}>
+                {[
+                  { value: "1,240", unit: "learners", sub: "Enrolled this month", bg: "#fde68a", color: "#1e3a5f" },
+                  { value: "38", unit: "hrs", sub: "Live sessions delivered", bg: "#60a5fa", color: "#fff" },
+                  { value: "96", unit: "%", sub: "Completion rate", bg: "#bfdbfe", color: "#1e3a5f" },
+                  { value: "312", unit: "certs", sub: "Certificates issued", bg: "#93c5fd", color: "#1e3a5f" },
+                ].map((s) => (
+                  <Box key={s.sub} sx={{ bgcolor: s.bg, borderRadius: 2, px: 1.5, py: 1.25, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                    <Stack direction="row" alignItems="baseline" spacing={0.5}>
+                      <Typography sx={{ color: s.color, fontWeight: 800, fontSize: "1.4rem", lineHeight: 1, fontStyle: "normal" }}>{s.value}</Typography>
+                      <Typography sx={{ color: s.color, fontWeight: 600, fontSize: "0.65rem", opacity: 0.85 }}>{s.unit}</Typography>
                     </Stack>
+                    <Typography sx={{ color: s.color, fontSize: "0.6rem", fontWeight: 500, opacity: 0.8, mt: 0.25 }}>{s.sub}</Typography>
                   </Box>
-                </Box>
-              </Stack>
+                ))}
+              </Box>
 
               {/* Footer */}
-              <Divider sx={{ borderColor: "rgba(0,0,0,0.08)", mt: 1, mb: 0.5 }} />
+              <Divider sx={{ borderColor: "rgba(0,0,0,0.1)", borderStyle: "dashed", mt: 1.5, mb: 1 }} />
               <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography sx={{ color: "#334155", fontSize: "0.55rem", fontWeight: 500 }}>
-                  {demoCoursePerf.length} courses · {primaryMode}
+                <Typography sx={{ color: "#2563eb", fontSize: "0.65rem", fontWeight: 600, fontStyle: "normal" }}>
+                  Empowering careers, one lesson at a time.
                 </Typography>
-                <Typography sx={{ color: "#475569", fontSize: "0.55rem", fontWeight: 500 }}>
-                  mygreatlearning.com
-                </Typography>
+                <Stack direction="row" alignItems="center" spacing={0.3}>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Typography key={i} sx={{ color: "#f59e0b", fontSize: "0.75rem", lineHeight: 1 }}>★</Typography>
+                  ))}
+                  <Typography sx={{ color: "#0f172a", fontWeight: 700, fontSize: "0.75rem", ml: 0.5 }}>{avgRating}</Typography>
+                </Stack>
               </Stack>
             </Box>
           </Card>
