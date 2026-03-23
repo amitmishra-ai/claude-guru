@@ -55,9 +55,9 @@ export function AppLayout() {
         sx={{
           minWidth: 0,
           overflowX: "clip",
-          p: { xs: 2, md: 3 },
-          pt: { xs: "calc(56px + 16px + env(safe-area-inset-top))", md: 3 },
-          pb: { xs: "calc(6rem + env(safe-area-inset-bottom))", md: 3 },
+          p: { xs: 1.5, sm: 2, md: 3 },
+          pt: { xs: "calc(56px + 12px + env(safe-area-inset-top))", md: 3 },
+          pb: { xs: "calc(5rem + env(safe-area-inset-bottom))", md: 3 },
         }}
       >
         <Box sx={{ mx: "auto", maxWidth: "72rem", display: "flex", flexDirection: "column", gap: 2.5 }}>
