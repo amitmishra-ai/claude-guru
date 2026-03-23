@@ -390,47 +390,98 @@ const AvailabilityBuilderDialog = () => {
                         transition: "all 150ms",
                       }}
                     >
-                      {/* Top row: info */}
-                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+                      {/* Desktop (sm+): single row — info left, actions right */}
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        sx={{ display: { xs: "none", sm: "flex" }, gap: 2 }}
+                      >
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight={700} sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
-                            {card.label}
-                          </Typography>
+                          <Typography variant="body2" fontWeight={700}>{card.label}</Typography>
                           <Typography variant="caption" color="text.secondary">
                             {formatDayGroupShort(card.days)} &bull; {fmtTime(parseHHMM(card.start))}–{fmtTime(parseHHMM(card.end))}
                           </Typography>
                         </Box>
-                        {card.enabled && (
-                          <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: "var(--gl-status-confirmed-text)", flexShrink: 0, mt: 0.25 }} />
-                        )}
+                        <Stack direction="row" alignItems="center" gap={1} sx={{ flexShrink: 0 }}>
+                          <Button
+                            variant={card.enabled ? "soft" : "contained"}
+                            size="small"
+                            onClick={() => togglePreset(card.key)}
+                            sx={card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" } : { px: 2 }}
+                          >
+                            {card.enabled ? "Added" : "Add"}
+                          </Button>
+                          <Button
+                            variant="text"
+                            size="small"
+                            onClick={() => {
+                              setEditingPresetKey(card.key);
+                              setEditPresetStart(card.start);
+                              setEditPresetEnd(card.end);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <IconButton
+                            size="small"
+                            onClick={() => dispatch(setPresetCards(cards.filter((c) => c.key !== card.key)))}
+                            sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
+                          >
+                            <CloseOutlinedIcon sx={{ fontSize: 14 }} />
+                          </IconButton>
+                        </Stack>
                       </Stack>
-                      {/* Bottom row: actions */}
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Button
-                          variant={card.enabled ? "soft" : "contained"}
-                          size="small"
-                          onClick={() => togglePreset(card.key)}
-                          sx={{
-                            minHeight: 32,
-                            fontSize: "0.75rem",
-                            ...(card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" } : {}),
-                          }}
-                        >
-                          {card.enabled ? "Remove" : "Add"}
-                        </Button>
-                        <Button
-                          variant="text"
-                          size="small"
-                          sx={{ minHeight: 32, fontSize: "0.75rem" }}
-                          onClick={() => {
-                            setEditingPresetKey(card.key);
-                            setEditPresetStart(card.start);
-                            setEditPresetEnd(card.end);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                      </Stack>
+
+                      {/* Mobile (xs): stacked — info top, actions bottom */}
+                      <Box sx={{ display: { xs: "block", sm: "none" } }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.8rem" }}>
+                              {card.label}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {formatDayGroupShort(card.days)} &bull; {fmtTime(parseHHMM(card.start))}–{fmtTime(parseHHMM(card.end))}
+                            </Typography>
+                          </Box>
+                          {card.enabled && (
+                            <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: "var(--gl-status-confirmed-text)", flexShrink: 0, mt: 0.25 }} />
+                          )}
+                        </Stack>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Button
+                            variant={card.enabled ? "soft" : "contained"}
+                            size="small"
+                            onClick={() => togglePreset(card.key)}
+                            sx={{
+                              minHeight: 32,
+                              fontSize: "0.75rem",
+                              ...(card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" } : {}),
+                            }}
+                          >
+                            {card.enabled ? "Remove" : "Add"}
+                          </Button>
+                          <Button
+                            variant="text"
+                            size="small"
+                            sx={{ minHeight: 32, fontSize: "0.75rem" }}
+                            onClick={() => {
+                              setEditingPresetKey(card.key);
+                              setEditPresetStart(card.start);
+                              setEditPresetEnd(card.end);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <IconButton
+                            size="small"
+                            onClick={() => dispatch(setPresetCards(cards.filter((c) => c.key !== card.key)))}
+                            sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5, ml: "auto !important" }}
+                          >
+                            <CloseOutlinedIcon sx={{ fontSize: 14 }} />
+                          </IconButton>
+                        </Stack>
+                      </Box>
                     </Box>
                   )
                 )}
