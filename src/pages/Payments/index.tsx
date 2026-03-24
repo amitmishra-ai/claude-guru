@@ -2,19 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import CircularProgress from "@mui/material/CircularProgress";
-import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
@@ -33,7 +25,6 @@ import Typography from "@mui/material/Typography";
 import { useSearchParams } from "react-router-dom";
 import { keyframes } from "@mui/system";
 import { useAppSelector, useAppDispatch } from "@/store";
-import { submitSummary } from "@/store/slices/sessionsSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -131,7 +122,6 @@ const highlightFade = keyframes`
 
 export default function PaymentsPage() {
   const dispatch = useAppDispatch();
-  const summaries = useAppSelector((s) => s.sessions.summaries);
   const [searchParams, setSearchParams] = useSearchParams();
   const [highlightSessionId, setHighlightSessionId] = useState<string | null>(null);
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("All");
@@ -150,12 +140,6 @@ export default function PaymentsPage() {
       return () => clearTimeout(t);
     }
   }, [searchParams, setSearchParams]);
-
-  // Summary modal state
-  const [summaryModalSessionId, setSummaryModalSessionId] = useState<string | null>(null);
-  const [summaryModalTitle, setSummaryModalTitle] = useState("");
-  const [summaryNotes, setSummaryNotes] = useState("");
-  const [isRefining, setIsRefining] = useState(false);
 
   // Simulate initial page load
   useEffect(() => {
@@ -299,64 +283,6 @@ export default function PaymentsPage() {
         </CardContent>
       </Card>
 
-      {/* ── Pending summary card ── */}
-      {(() => {
-        const pendingReview = completedSessionPayments.filter(
-          (p) => p.sessionId && !summaries[p.sessionId]
-        );
-        if (!pendingReview.length) return null;
-        return (
-          <Card variant="outlined" sx={{ mb: 2 }}>
-            <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-              <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                <FlexBox alignItems="center" gap={1}>
-                  <Typography variant="subtitle2" fontWeight={700}>Pending session summaries</Typography>
-                  <Chip
-                    label={`${pendingReview.length} pending`}
-                    size="small"
-                    sx={{ height: 20, fontSize: 10, borderRadius: 1, fontWeight: 600, bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)" }}
-                  />
-                </FlexBox>
-                <Typography variant="caption" color="text.secondary">Write summaries to unlock invoice processing</Typography>
-              </FlexBox>
-              <Stack spacing={1}>
-                {pendingReview.map((p) => (
-                  <FlexBox
-                    key={p.sessionId}
-                    sx={{
-                      border: 1, borderColor: "divider", borderRadius: 1, px: 2, py: 1.25,
-                      justifyContent: "space-between", alignItems: "center",
-                      ...(highlightSessionId && p.sessionId === highlightSessionId
-                        ? { animation: `${highlightFade} 1s ease-out forwards` }
-                        : {}),
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: 12 }}>{p.event}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {p.type} · {p.dur} · {fmtInr(p.amount)}
-                      </Typography>
-                    </Box>
-                    <Button
-                      size="small"
-                      variant="soft"
-                      startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
-                      onClick={() => {
-                        setSummaryModalSessionId(p.sessionId);
-                        setSummaryModalTitle(p.event);
-                        setSummaryNotes("");
-                      }}
-                    >
-                      Write summary
-                    </Button>
-                  </FlexBox>
-                ))}
-              </Stack>
-            </CardContent>
-          </Card>
-        );
-      })()}
-
       {/* ── Payment details table ── */}
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 1 }}>
         <Typography variant="subtitle1" fontWeight={700}>Payment details</Typography>
@@ -413,15 +339,7 @@ export default function PaymentsPage() {
                   </TableRow>
                 ))
               ) : demoPayments
-                .map((p) => {
-                  // If session summary was submitted, upgrade "Pending review" → "Pending"
-                  if (p.status === "Pending review" && p.sessionId && summaries[p.sessionId]) {
-                    return { ...p, status: "Pending" };
-                  }
-                  return p;
-                })
-                // Exclude unsolved "Pending review" — shown in separate card above
-                .filter((p) => p.status !== "Pending review")
+                .map((p) => p.status === "Pending review" ? { ...p, status: "Pending" } : p)
                 .filter((p) => paymentFilter === "All" || p.status === paymentFilter)
                 .sort((a, b) => {
                   const av = a[sortBy];
@@ -495,8 +413,7 @@ export default function PaymentsPage() {
         <FlexBox sx={{ justifyContent: "center", py: 1.5, borderTop: 1, borderColor: "divider" }}>
           <Pagination
             count={Math.ceil(demoPayments
-              .map((p) => (p.status === "Pending review" && p.sessionId && summaries[p.sessionId]) ? { ...p, status: "Pending" } : p)
-              .filter((p) => p.status !== "Pending review")
+              .map((p) => p.status === "Pending review" ? { ...p, status: "Pending" } : p)
               .filter((p) => paymentFilter === "All" || p.status === paymentFilter).length / rowsPerPage)}
             page={page + 1}
             onChange={(_e, v) => setPage(v - 1)}
@@ -506,77 +423,6 @@ export default function PaymentsPage() {
         </FlexBox>
       </Card>
 
-      {/* ── Write summary modal ── */}
-      <Dialog
-        open={!!summaryModalSessionId}
-        onClose={() => setSummaryModalSessionId(null)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle sx={{ fontWeight: 700, fontSize: "1.1rem", pb: 0 }}>
-          Write session summary
-        </DialogTitle>
-        <DialogContent sx={{ pt: 2, pb: 1 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            {summaryModalTitle}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1.5 }}>
-            Help us capture the impact you made — your notes help learners revisit key takeaways
-            and help ops improve future sessions.
-          </Typography>
-          <TextField
-            multiline
-            rows={4}
-            fullWidth
-            size="small"
-            placeholder="What stood out in this session? Note attendance, participation level, questions asked, or anything memorable..."
-            value={summaryNotes}
-            onChange={(e) => setSummaryNotes(e.target.value)}
-            disabled={isRefining}
-            sx={{ "& .MuiInputBase-input": { fontSize: "0.85rem" } }}
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, justifyContent: "space-between" }}>
-          <Button variant="text" color="inherit" onClick={() => setSummaryModalSessionId(null)} disabled={isRefining}>
-            Cancel
-          </Button>
-          <Stack direction="row" spacing={1}>
-          <Button
-            size="small"
-            variant="soft"
-            startIcon={isRefining ? <CircularProgress size={14} color="inherit" /> : <AutoAwesomeOutlinedIcon sx={{ fontSize: 14 }} />}
-            disabled={summaryNotes.trim().length < 10 || isRefining}
-            onClick={async () => {
-              setIsRefining(true);
-              await new Promise((r) => setTimeout(r, 1200));
-              const sentences = summaryNotes.trim().split(/(?<=[.!?])\s+/).filter(Boolean);
-              const refined = sentences.length > 0
-                ? sentences.map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ") +
-                  (summaryNotes.trim().endsWith(".") ? "" : ".") +
-                  " Overall, learners were engaged and the session met its objectives."
-                : summaryNotes.trim() + ". The session covered key topics with good learner participation and engagement.";
-              setSummaryNotes(refined);
-              setIsRefining(false);
-              dispatch(pushToast({ title: "Summary refined", description: "Review the updated text before submitting." }));
-            }}
-          >
-            {isRefining ? "Refining..." : "Refine with AI"}
-          </Button>
-          <Button
-            variant="contained"
-            disabled={summaryNotes.trim().length < 10 || isRefining}
-            onClick={() => {
-              if (!summaryModalSessionId) return;
-              dispatch(submitSummary({ sessionId: summaryModalSessionId, learnerEngagementNotes: summaryNotes.trim() }));
-              dispatch(pushToast({ title: "Summary submitted", description: summaryModalTitle }));
-              setSummaryModalSessionId(null);
-            }}
-          >
-            Submit
-          </Button>
-          </Stack>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }

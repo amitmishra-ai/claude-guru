@@ -1,4 +1,5 @@
 /node_modules
+/dist
 /screenshots
 /android/app/build/
 .claude/

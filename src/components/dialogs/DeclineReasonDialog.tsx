@@ -134,12 +134,13 @@ export function DeclineReasonDialog() {
             )}
 
             <TextField
-              label="Reason"
+              label="Reason (required)"
               value={declineReason}
               onChange={(e) => dispatch(setDeclineReason(e.target.value))}
               placeholder="E.g., travel / personal commitment / overlap"
               size="small"
               fullWidth
+              required
             />
           </Box>
         ) : null}
@@ -152,6 +153,7 @@ export function DeclineReasonDialog() {
           variant="contained"
           color="error"
           onClick={handleSubmit}
+          disabled={!declineReason.trim()}
         >
           I'm unavailable
         </Button>

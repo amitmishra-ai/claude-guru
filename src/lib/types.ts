@@ -68,10 +68,6 @@ export type Session = {
   paymentModel?: PaymentModel;
   hourlyRateInr?: number;
   totalEarningsInr?: number;
-  summary?: {
-    learnerEngagementNotes: string;
-    submittedAtMs: number;
-  };
   /** Combined session — lists the batches merged into this session */
   combinedBatches?: { batch: string; group: string }[];
 };
