@@ -2,6 +2,7 @@ import { Fragment, useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
+import Skeleton from "@mui/material/Skeleton";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
@@ -185,6 +186,12 @@ export default function DashboardPage() {
   const selectedTimePeriod = useAppSelector((s) => s.sessions.selectedTimePeriod);
   const recentlyConfirmedIds = useAppSelector((s) => s.sessions.recentlyConfirmedIds);
 
+  /* ── loading states ─────────────────────────────── */
+  const [pageLoading, setPageLoading] = useState(true);
+  const [tabLoading, setTabLoading] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setPageLoading(false), 800); return () => clearTimeout(t); }, []);
+  useEffect(() => { setTabLoading(true); const t = setTimeout(() => setTabLoading(false), 500); return () => clearTimeout(t); }, [homeSessionsView]);
+
   /* ── local state for exit animation ─────────────────────────────── */
   const [exitingId, setExitingId] = useState<string | null>(null);
 
@@ -295,6 +302,87 @@ export default function DashboardPage() {
     { label: "Avg Quality", value: "96.8%", delta: "+0.5%", positive: true, accent: "#9c27b0", bg: "rgba(156,39,176,0.06)", bars: [95.2, 96.0, 96.8, 97.1, 97.5, 98.0] },
     { label: "Avg Confirm", value: "7.2h", delta: "-1.3h", positive: true, accent: "#22bb34", bg: "rgba(34,187,52,0.06)", bars: [12, 9, 7, 6, 5, 4.2] },
   ];
+
+  if (pageLoading) {
+    return (
+      <Stack spacing={2}>
+        {/* Welcome skeleton */}
+        <Skeleton variant="text" width={220} height={32} />
+
+        {/* Next Event skeleton */}
+        <Card variant="outlined" sx={{ p: 2 }}>
+          <Skeleton variant="text" width={100} height={20} sx={{ mb: 1 }} />
+          <Card variant="outlined" sx={{ p: 2 }}>
+            <Skeleton variant="rounded" width={80} height={22} sx={{ mb: 1, borderRadius: 9999 }} />
+            <Skeleton variant="text" width="70%" height={20} />
+            <Skeleton variant="text" width="50%" height={16} sx={{ mt: 0.5 }} />
+            <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+              <Skeleton variant="rounded" width={100} height={30} />
+              <Skeleton variant="rounded" width={120} height={30} />
+            </Stack>
+          </Card>
+        </Card>
+
+        <Grid container spacing={2}>
+          {/* Left column skeleton */}
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Card variant="outlined" sx={{ p: 2 }}>
+              {/* Tabs skeleton */}
+              <Stack direction="row" spacing={3} sx={{ mb: 2, borderBottom: 1, borderColor: "divider", pb: 1 }}>
+                {[140, 130, 110].map((w, i) => (
+                  <Skeleton key={i} variant="text" width={w} height={24} />
+                ))}
+              </Stack>
+              {/* Session cards skeleton */}
+              {[0, 1, 2, 3].map((i) => (
+                <Card key={i} variant="outlined" sx={{ p: 2, mb: 1.5 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                    <Box sx={{ flex: 1 }}>
+                      <Skeleton variant="text" width="60%" height={20} />
+                      <Skeleton variant="text" width="40%" height={16} sx={{ mt: 0.5 }} />
+                    </Box>
+                    <Skeleton variant="rounded" width={70} height={22} sx={{ borderRadius: 9999 }} />
+                  </Stack>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                    <Skeleton variant="rounded" width={90} height={28} />
+                    <Skeleton variant="rounded" width={110} height={28} />
+                  </Stack>
+                </Card>
+              ))}
+            </Card>
+          </Grid>
+
+          {/* Right column skeleton */}
+          <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: "none", md: "block" } }}>
+            {/* Performance skeleton */}
+            <Card sx={{ p: 2, mb: 2 }}>
+              <Skeleton variant="text" width={140} height={20} sx={{ mb: 1.5 }} />
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
+                {[0, 1, 2, 3].map((i) => (
+                  <Box key={i} sx={{ p: 1.25, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+                    <Skeleton variant="text" width={60} height={12} />
+                    <Skeleton variant="text" width={50} height={22} sx={{ mt: 0.25 }} />
+                    <Skeleton variant="rectangular" width="100%" height={20} sx={{ mt: 0.5, borderRadius: 1 }} />
+                  </Box>
+                ))}
+              </Box>
+            </Card>
+            {/* Tasks skeleton */}
+            <Card sx={{ p: 2 }}>
+              <Skeleton variant="text" width={60} height={20} sx={{ mb: 1.5 }} />
+              {[0, 1, 2].map((i) => (
+                <Card key={i} variant="outlined" sx={{ p: 1.5, mb: 1.5 }}>
+                  <Skeleton variant="text" width="70%" height={18} />
+                  <Skeleton variant="text" width="90%" height={14} sx={{ mt: 0.5 }} />
+                  <Skeleton variant="rounded" width="100%" height={30} sx={{ mt: 1 }} />
+                </Card>
+              ))}
+            </Card>
+          </Grid>
+        </Grid>
+      </Stack>
+    );
+  }
 
   return (
     <Stack spacing={2}>
@@ -516,8 +604,29 @@ export default function DashboardPage() {
                   <Tab icon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Declined (${declinedSessions.length})`} value="declined" />
                 </Tabs>
 
+                {/* ── Tab loading skeleton ── */}
+                {tabLoading ? (
+                  <Stack spacing={1.5} sx={{ pt: 1 }}>
+                    {[0, 1, 2].map((i) => (
+                      <Card key={i} variant="outlined" sx={{ p: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                          <Box sx={{ flex: 1 }}>
+                            <Skeleton variant="text" width="55%" height={20} />
+                            <Skeleton variant="text" width="35%" height={16} sx={{ mt: 0.5 }} />
+                          </Box>
+                          <Skeleton variant="rounded" width={70} height={22} sx={{ borderRadius: 9999 }} />
+                        </Stack>
+                        <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                          <Skeleton variant="rounded" width={85} height={28} />
+                          <Skeleton variant="rounded" width={105} height={28} />
+                        </Stack>
+                      </Card>
+                    ))}
+                  </Stack>
+                ) : null}
+
                 {/* ── Upcoming tab ── */}
-                {homeSessionsView === "next" && (
+                {!tabLoading && homeSessionsView === "next" && (
                   <Box>
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
                       <Typography variant="subtitle2" fontWeight={600}>Events</Typography>
@@ -771,7 +880,7 @@ export default function DashboardPage() {
                 )}
 
                 {/* ── Completed tab ── */}
-                {homeSessionsView === "completed" && (
+                {!tabLoading && homeSessionsView === "completed" && (
                   <>
                     <Stack direction="row" justifyContent="flex-end">
                       <Select
@@ -1017,7 +1126,7 @@ export default function DashboardPage() {
                 )}
 
                 {/* ── Declined tab ── */}
-                {homeSessionsView === "declined" && (
+                {!tabLoading && homeSessionsView === "declined" && (
                   <>
                     {declinedSessions.length > 0 && (
                       <Box>

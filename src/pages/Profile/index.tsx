@@ -1,10 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -112,6 +113,9 @@ function DeltaLabel({ value }: { value: number }) {
 
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { const t = setTimeout(() => setLoading(false), 800); return () => clearTimeout(t); }, []);
+
   const guruName      = useAppSelector((s) => s.profile.guruName);
   const primaryMode   = useAppSelector((s) => s.profile.primaryMode);
   const guruPrograms  = useAppSelector((s) => s.profile.guruPrograms);
@@ -353,6 +357,97 @@ export default function ProfilePage() {
       ],
     },
   ];
+
+  if (loading) {
+    return (
+      <>
+        {/* Header skeleton */}
+        <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+          <Box>
+            <Skeleton variant="text" width={120} height={32} />
+            <Skeleton variant="text" width={260} height={18} />
+          </Box>
+          <Stack direction="row" spacing={1}>
+            <Skeleton variant="rounded" width={100} height={32} />
+            <Skeleton variant="rounded" width={80} height={32} />
+          </Stack>
+        </FlexBox>
+
+        {/* Identity card skeleton */}
+        <Card variant="outlined" sx={{ mb: 4 }}>
+          <CardContent sx={{ px: 3, py: 2.5 }}>
+            <Stack spacing={1.5}>
+              <Skeleton variant="text" width={180} height={28} />
+              <Skeleton variant="text" width={240} height={18} />
+              <Skeleton variant="text" width={140} height={18} />
+              <Skeleton variant="text" width={200} height={18} />
+            </Stack>
+          </CardContent>
+        </Card>
+
+        {/* Performance heading skeleton */}
+        <Box sx={{ mb: 1.5 }}>
+          <Skeleton variant="text" width={140} height={28} />
+          <Skeleton variant="text" width={320} height={18} />
+        </Box>
+
+        {/* Stat cards skeleton - 4 cards */}
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
+          {[0, 1, 2, 3].map((i) => (
+            <Card key={i} elevation={0} sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider", p: 2.5 }}>
+              <Skeleton variant="text" width={80} height={14} sx={{ mb: 1.5 }} />
+              <Skeleton variant="text" width={100} height={40} sx={{ mb: 1 }} />
+              <Skeleton variant="text" width="90%" height={14} />
+              <Skeleton variant="text" width={120} height={14} sx={{ mt: 1 }} />
+              <Skeleton variant="rectangular" width="100%" height={48} sx={{ mt: 2, borderRadius: 1 }} />
+            </Card>
+          ))}
+        </Box>
+
+        {/* Testimonials skeleton */}
+        <Box sx={{ mb: 3 }}>
+          <Skeleton variant="text" width={160} height={24} sx={{ mb: 1.5 }} />
+          <Stack direction="row" spacing={2}>
+            {[0, 1].map((i) => (
+              <Card key={i} variant="outlined" sx={{ flex: 1, p: 2 }}>
+                <Skeleton variant="text" width="100%" height={16} />
+                <Skeleton variant="text" width="80%" height={16} />
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5 }}>
+                  <Skeleton variant="circular" width={28} height={28} />
+                  <Box>
+                    <Skeleton variant="text" width={80} height={14} />
+                    <Skeleton variant="text" width={100} height={12} />
+                  </Box>
+                </Stack>
+              </Card>
+            ))}
+          </Stack>
+        </Box>
+
+        {/* Rating chart skeleton */}
+        <Card variant="outlined" sx={{ mb: 3 }}>
+          <CardContent sx={{ p: 2.5 }}>
+            <Skeleton variant="text" width={200} height={24} sx={{ mb: 2 }} />
+            <Skeleton variant="rectangular" width="100%" height={200} sx={{ borderRadius: 1 }} />
+          </CardContent>
+        </Card>
+
+        {/* Course performance skeleton */}
+        <Card variant="outlined" sx={{ mb: 3 }}>
+          <CardContent sx={{ p: 2.5 }}>
+            <Skeleton variant="text" width={180} height={24} sx={{ mb: 2 }} />
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Stack key={i} direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.25 }}>
+                <Skeleton variant="text" width={210} height={16} />
+                <Skeleton variant="rectangular" sx={{ flex: 1, height: 8, borderRadius: 1 }} />
+                <Skeleton variant="text" width={28} height={16} />
+              </Stack>
+            ))}
+          </CardContent>
+        </Card>
+      </>
+    );
+  }
 
   return (
     <>
