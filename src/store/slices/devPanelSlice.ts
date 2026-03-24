@@ -10,6 +10,14 @@ export type GuruRole =
   | "Project Mentor"
   | "Teacher";
 
+export type GuruStage = "experienced" | "new" | "early";
+
+export const GURU_STAGES: { value: GuruStage; label: string; description: string }[] = [
+  { value: "experienced", label: "Experienced", description: "Full data, all sections populated" },
+  { value: "early", label: "Early (2 weeks)", description: "Has availability & upcoming sessions, no completions" },
+  { value: "new", label: "New (Day 0)", description: "Just onboarded, zero data everywhere" },
+];
+
 export const GURU_ROLES: GuruRole[] = [
   "Career Mentor",
   "Course Mentor",
@@ -25,6 +33,7 @@ interface DevPanelState {
   isOpen: boolean;
   selectedRole: GuruRole;
   isRoleSwitching: boolean;
+  guruStage: GuruStage;
 }
 
 const savedRole =
@@ -36,6 +45,7 @@ const initialState: DevPanelState = {
   isOpen: false,
   selectedRole: savedRole && GURU_ROLES.includes(savedRole) ? savedRole : "Course Mentor",
   isRoleSwitching: false,
+  guruStage: "experienced",
 };
 
 const devPanelSlice = createSlice({
@@ -60,8 +70,11 @@ const devPanelSlice = createSlice({
     clearRoleSwitching(state) {
       state.isRoleSwitching = false;
     },
+    setGuruStage(state, action: PayloadAction<GuruStage>) {
+      state.guruStage = action.payload;
+    },
   },
 });
 
-export const { toggleDevPanel, setDevPanelOpen, setSelectedRole, clearRoleSwitching } = devPanelSlice.actions;
+export const { toggleDevPanel, setDevPanelOpen, setSelectedRole, clearRoleSwitching, setGuruStage } = devPanelSlice.actions;
 export default devPanelSlice.reducer;

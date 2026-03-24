@@ -19,6 +19,7 @@ import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import { keyframes } from "@mui/system";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
+import Paper from "@mui/material/Paper";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
@@ -117,6 +118,10 @@ export default function ProfilePage() {
   const timeZoneMode  = useAppSelector((s) => s.profile.timeZoneMode);
   const manualTimeZone= useAppSelector((s) => s.profile.manualTimeZone);
   const openProfileEdit = useAppSelector((s) => s.ui.openProfileEdit);
+  const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+  const isNewUser = guruStage === "new";
+  const isEarlyUser = guruStage === "early";
+  const isNewOrEarly = isNewUser || isEarlyUser;
   const draftName     = useAppSelector((s) => s.profile.draftName);
   const draftMode     = useAppSelector((s) => s.profile.draftMode);
   const draftPrograms = useAppSelector((s) => s.profile.draftPrograms);
@@ -244,7 +249,7 @@ export default function ProfilePage() {
   const statCards = [
     {
       label: "AVG RATING",
-      value: avgRating,
+      value: "4.65",
       description: "Consistent high ratings across all programs and cohorts.",
       delta: "+0.12",
       deltaLabel: "vs last month",
@@ -269,8 +274,8 @@ export default function ProfilePage() {
       ],
     },
     {
-      label: "SESSIONS / MONTH",
-      value: "7",
+      label: "AVG SESSIONS / MONTH",
+      value: "6",
       description: "Average sessions delivered per month across all programs.",
       delta: "+2",
       deltaLabel: "vs last month",
@@ -295,35 +300,35 @@ export default function ProfilePage() {
       ],
     },
     {
-      label: "SESSION QUALITY",
-      value: "98.8%",
-      description: "Sessions rated 4.4 or above.",
-      delta: "+0.3%",
+      label: "AVG SESSION QUALITY",
+      value: "96.8%",
+      description: "Sessions rated 4.0 or above.",
+      delta: "+0.5%",
       deltaLabel: "vs last month",
       deltaPositive: true,
-      bars: [96.5, 97.2, 97.9, 98.2, 98.5, 98.8],
+      bars: [95.2, 96.0, 96.8, 97.1, 97.5, 98.0],
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
       bg: "rgba(156, 39, 176, 0.06)",
       accent: "#9c27b0",
       reportTitle: "Session Quality Report",
       reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
       chartData: [
-        { month: "Sep 25", value: 96.5 }, { month: "Oct 25", value: 97.2 }, { month: "Nov 25", value: 97.9 },
-        { month: "Dec 25", value: 98.2 }, { month: "Jan 26", value: 98.5 }, { month: "Feb 26", value: 98.8 },
+        { month: "Sep 25", value: 95.2 }, { month: "Oct 25", value: 96.0 }, { month: "Nov 25", value: 96.8 },
+        { month: "Dec 25", value: 97.1 }, { month: "Jan 26", value: 97.5 }, { month: "Feb 26", value: 98.0 },
       ],
       chartKey: "value",
       breakdown: [
-        { name: "4.4+ threshold", value: "98.8% (Target: > 98%)" },
-        { name: "4.0+ threshold", value: "99.2% (Target: > 90%)" },
+        { name: "4.0+ threshold", value: "98% (Target: > 98%)" },
+        { name: "4.4+ threshold", value: "90% (Target: > 90%)" },
       ],
       primaryBenchmark: "Target: > 98%",
-      secondaryValue: "99.2%",
-      secondaryLabel: "Rated 4.0+",
+      secondaryValue: "90%",
+      secondaryLabel: "Rated 4.4+",
       secondaryBenchmark: "Target: > 90%",
     },
     {
       label: "AVG CONFIRM TIME",
-      value: "4.2h",
+      value: "7.2h",
       description: "How fast you confirm assigned sessions. Lower is better.",
       delta: "-1.3h",
       deltaLabel: "vs last quarter",
@@ -387,9 +392,12 @@ export default function ProfilePage() {
               },
             }}
           >
+            <MuiTooltip title={isNewOrEarly ? "Share unlocks after your first completed month" : ""} arrow>
+              <span>
             <Button
               variant="contained"
               size="small"
+              disabled={isNewOrEarly}
               startIcon={<IosShareOutlinedIcon sx={{ fontSize: 14 }} />}
               onClick={() => setShowShareModal(true)}
               sx={{
@@ -401,6 +409,8 @@ export default function ProfilePage() {
             >
               Share
             </Button>
+              </span>
+            </MuiTooltip>
           </Box>
         </Stack>
       </FlexBox>
@@ -441,7 +451,11 @@ export default function ProfilePage() {
         <Box>
           <Typography variant="h6" fontWeight={700}>Performance</Typography>
           <Typography variant="body2" color="text.secondary">
-            Understand trends quickly and drill into course-level patterns.
+            {isNewUser
+              ? "Your stats will build as you complete sessions. Here's what you'll track:"
+              : isEarlyUser
+                ? "You're just getting started. Stats will become richer as you complete more sessions."
+                : "Understand trends quickly and drill into course-level patterns."}
           </Typography>
         </Box>
       </FlexBox>
@@ -450,6 +464,24 @@ export default function ProfilePage() {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
         {statCards.map((card) => {
           const maxBar = Math.max(...card.bars);
+          const zeroMessages: Record<string, string> = {
+            "AVG RATING": "Complete your first session to see your rating",
+            "AVG SESSIONS / MONTH": "Sessions will appear here as you teach",
+            "AVG SESSION QUALITY": "Quality score unlocks after your first rating",
+            "AVG CONFIRM TIME": "Confirm your first session to start tracking",
+          };
+          const earlyValues: Record<string, string> = {
+            "AVG RATING": "4.7",
+            "AVG SESSIONS / MONTH": "2",
+            "AVG SESSION QUALITY": "100%",
+            "AVG CONFIRM TIME": "3.5h",
+          };
+          const earlyDescriptions: Record<string, string> = {
+            "AVG RATING": "Based on 2 sessions so far. Keep going!",
+            "AVG SESSIONS / MONTH": "You've completed 2 sessions in your first weeks.",
+            "AVG SESSION QUALITY": "All sessions rated 4.0+ so far. Great start!",
+            "AVG CONFIRM TIME": "Average time to confirm your assigned sessions.",
+          };
           return (
             <Card
               key={card.label}
@@ -475,17 +507,17 @@ export default function ProfilePage() {
                 </Typography>
 
                 {/* Hero number */}
-                <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", mb: 1 }}>
-                  {card.value}
+                <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", mb: 1, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
+                  {isNewUser ? "—" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
                 </Typography>
 
                 {/* Description */}
                 <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1 }}>
-                  {card.description}
+                  {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
                 </Typography>
 
                 {/* Delta + benchmark */}
-                {card.delta && (
+                {!isNewOrEarly && card.delta && (
                   <Box sx={{ mb: card.primaryBenchmark ? 0.5 : 1.5 }}>
                     <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600 }}>
                       {card.deltaPositive ? "↗" : "↘"} {card.delta}
@@ -495,14 +527,14 @@ export default function ProfilePage() {
                     </Typography>
                   </Box>
                 )}
-                {card.primaryBenchmark && (
+                {!isNewOrEarly && card.primaryBenchmark && (
                   <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem", mb: 0.5 }}>
                     {card.primaryBenchmark}
                   </Typography>
                 )}
 
                 {/* Secondary metric (e.g. < 4.0 threshold) */}
-                {card.secondaryValue && (
+                {!isNewOrEarly && card.secondaryValue && (
                   <Box sx={{ mb: 1.5, pt: 0.75, borderTop: "1px dashed", borderColor: "divider" }}>
                     <Stack direction="row" alignItems="baseline" spacing={0.5}>
                       <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontSize: "0.7rem" }}>
@@ -519,7 +551,13 @@ export default function ProfilePage() {
                 )}
 
                 {/* Mini line chart (SVG sparkline with tooltips) */}
-                {(() => {
+                {isNewOrEarly ? (
+                  <Box sx={{ mt: "auto", mb: 0.5 }}>
+                    <svg width="100%" height={48} viewBox="0 0 140 48" preserveAspectRatio="none" style={{ display: "block" }}>
+                      <line x1="0" y1="24" x2="140" y2="24" stroke={card.accent} strokeWidth={1} strokeDasharray="4 4" opacity={0.25} />
+                    </svg>
+                  </Box>
+                ) : (() => {
                   const h = 48;
                   const w = 140;
                   const minVal = Math.min(...card.bars);
@@ -578,35 +616,51 @@ export default function ProfilePage() {
                   );
                 })()}
                 {/* Line labels */}
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  {card.barLabels.map((lbl, i) => (
-                    <Typography key={i} variant="caption" color="text.disabled" sx={{ fontSize: "0.55rem" }}>
-                      {lbl}
-                    </Typography>
-                  ))}
-                </Box>
+                {!isNewOrEarly && (
+                  <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                    {card.barLabels.map((lbl, i) => (
+                      <Typography key={i} variant="caption" color="text.disabled" sx={{ fontSize: "0.55rem" }}>
+                        {lbl}
+                      </Typography>
+                    ))}
+                  </Box>
+                )}
 
               </CardContent>
 
               {/* CTA footer */}
-              <Divider />
-              <Box
-                sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { bgcolor: "action.hover" }, transition: "background-color 0.15s" }}
-                onClick={() => setReportModal(card.label)}
-              >
-                <FlexBox sx={{ justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>
-                    See detailed report
-                  </Typography>
-                  <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
-                </FlexBox>
-              </Box>
+              {!isNewOrEarly && (
+                <>
+                  <Divider />
+                  <Box
+                    sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { bgcolor: "action.hover" }, transition: "background-color 0.15s" }}
+                    onClick={() => setReportModal(card.label)}
+                  >
+                    <FlexBox sx={{ justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>
+                        See detailed report
+                      </Typography>
+                      <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+                    </FlexBox>
+                  </Box>
+                </>
+              )}
             </Card>
           );
         })}
       </Box>
 
       {/* ── Testimonials horizontal scroll ────────────────────────────── */}
+      {isNewOrEarly ? (
+        <Paper variant="outlined" sx={{ p: 3, mb: 3, textAlign: "center", borderStyle: "dashed", borderColor: "divider" }}>
+          <Typography variant="body2" color="text.secondary" fontWeight={500}>
+            Your learner testimonials will appear here after your first few sessions.
+          </Typography>
+          <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: "block" }}>
+            {isEarlyUser ? "You're almost there — feedback usually starts flowing after 3-4 sessions." : "Gurus typically receive their first feedback within 2 weeks."}
+          </Typography>
+        </Paper>
+      ) : (
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
           <Typography variant="subtitle1" fontWeight={600}>What learners say</Typography>
@@ -680,57 +734,70 @@ export default function ProfilePage() {
           ))}
         </Box>
       </Box>
+      )}
 
       {/* Rating trend chart */}
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent sx={{ p: 2.5 }}>
           <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>Rating trend (last 6 months)</Typography>
 
-          <Box sx={{ width: "100%", height: 200 }}>
-            <ResponsiveContainer>
-              <LineChart data={ratingChartData} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} axisLine={false} tickLine={false} />
-                <YAxis domain={[4.2, 5]} tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} tickCount={5} axisLine={false} tickLine={false} />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const d = payload[0].payload;
-                    return (
-                      <Card variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
-                        <Typography variant="caption" fontWeight={600}>{d.month}</Typography>
-                        <Typography variant="caption" display="block">Avg: {d.avg ?? "—"}</Typography>
-                      </Card>
-                    );
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="avg"
-                  stroke="var(--gl-stat-hours)"
-                  strokeWidth={2}
-                  dot={{ r: 4, fill: "hsl(var(--md-surface))", stroke: "var(--gl-stat-hours)", strokeWidth: 2 }}
-                  connectNulls
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </Box>
-
-          <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5 }}>
-            <FlexBox sx={{ gap: 1, alignItems: "center" }}>
-              <Chip label={`Avg ${avgRating}`} size="small" sx={{ fontWeight: 600, bgcolor: "action.selected" }} />
-              <Typography variant="caption" color="text.secondary">
-                Biggest gain: <strong style={{ color: "var(--gl-stat-sessions)" }}>+0.17</strong> from Nov 25 to Dec 25
+          {isNewOrEarly ? (
+            <Box sx={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Typography variant="body2" color="text.disabled" sx={{ textAlign: "center", maxWidth: 300 }}>
+                {isEarlyUser
+                  ? "Not enough data for a trend yet. Your rating chart needs at least 2 months of sessions."
+                  : "No ratings yet — your trend will appear after your first rated session."}
               </Typography>
-            </FlexBox>
-            <Button
-              size="small"
-              variant="text"
-              sx={{ fontSize: 12, textTransform: "none", p: 0, color: "text.secondary" }}
-            >
-              View rating history
-            </Button>
-          </FlexBox>
+            </Box>
+          ) : (
+            <>
+              <Box sx={{ width: "100%", height: 200 }}>
+                <ResponsiveContainer>
+                  <LineChart data={ratingChartData} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[4.2, 5]} tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} tickCount={5} axisLine={false} tickLine={false} />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null;
+                        const d = payload[0].payload;
+                        return (
+                          <Card variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
+                            <Typography variant="caption" fontWeight={600}>{d.month}</Typography>
+                            <Typography variant="caption" display="block">Avg: {d.avg ?? "—"}</Typography>
+                          </Card>
+                        );
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="avg"
+                      stroke="var(--gl-stat-hours)"
+                      strokeWidth={2}
+                      dot={{ r: 4, fill: "hsl(var(--md-surface))", stroke: "var(--gl-stat-hours)", strokeWidth: 2 }}
+                      connectNulls
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Box>
+
+              <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5 }}>
+                <FlexBox sx={{ gap: 1, alignItems: "center" }}>
+                  <Chip label={`Avg ${avgRating}`} size="small" sx={{ fontWeight: 600, bgcolor: "action.selected" }} />
+                  <Typography variant="caption" color="text.secondary">
+                    Biggest gain: <strong style={{ color: "var(--gl-stat-sessions)" }}>+0.17</strong> from Nov 25 to Dec 25
+                  </Typography>
+                </FlexBox>
+                <Button
+                  size="small"
+                  variant="text"
+                  sx={{ fontSize: 12, textTransform: "none", p: 0, color: "text.secondary" }}
+                >
+                  View rating history
+                </Button>
+              </FlexBox>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -739,11 +806,37 @@ export default function ProfilePage() {
         <CardContent sx={{ p: 2.5 }}>
           <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
             <Typography variant="subtitle1" fontWeight={600}>Course performance</Typography>
-            <Button size="small" variant="text" sx={{ fontSize: 12, textTransform: "none", p: 0, color: "text.secondary" }} onClick={() => setShowCourseReport(true)}>
-              View full
-            </Button>
+            {!isNewOrEarly && (
+              <Button size="small" variant="text" sx={{ fontSize: 12, textTransform: "none", p: 0, color: "text.secondary" }} onClick={() => setShowCourseReport(true)}>
+                View full
+              </Button>
+            )}
           </FlexBox>
 
+          {isNewUser ? (
+            <Typography variant="body2" color="text.disabled" sx={{ textAlign: "center", py: 3 }}>
+              Course ratings will populate as learners submit feedback.
+            </Typography>
+          ) : isEarlyUser ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+              {demoCoursePerf.slice(0, 2).map((c) => (
+                <FlexBox key={c.name} sx={{ alignItems: "center", gap: 1.5 }}>
+                  <Typography variant="caption" sx={{ minWidth: 210, flexShrink: 0, color: "text.secondary" }}>
+                    {c.name}
+                  </Typography>
+                  <Box sx={{ flex: 1, bgcolor: "action.hover", borderRadius: 1, height: 8, overflow: "hidden" }}>
+                    <Box sx={{ height: "100%", bgcolor: "text.primary", borderRadius: 1, width: `${((c.rating - 1) / 4) * 100}%` }} />
+                  </Box>
+                  <Typography variant="caption" fontWeight={600} sx={{ minWidth: 28, textAlign: "right" }}>
+                    {c.rating.toFixed(1)}
+                  </Typography>
+                </FlexBox>
+              ))}
+              <Typography variant="caption" color="text.disabled" sx={{ textAlign: "center", mt: 1 }}>
+                More courses will appear as you teach across programs.
+              </Typography>
+            </Box>
+          ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
             {demoCoursePerf.map((c) => (
               <FlexBox key={c.name} sx={{ alignItems: "center", gap: 1.5 }}>
@@ -767,6 +860,7 @@ export default function ProfilePage() {
               </FlexBox>
             ))}
           </Box>
+          )}
         </CardContent>
       </Card>
 
@@ -789,9 +883,14 @@ export default function ProfilePage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {demoMatrix.map((row) => (
+                {(isNewUser
+                  ? demoMatrix.map((r) => ({ ...r, scores: r.scores.map(() => null) }))
+                  : isEarlyUser
+                    ? demoMatrix.slice(0, 2).map((r) => ({ ...r, scores: r.scores.map((s, i) => i === 5 ? s : null) }))
+                    : demoMatrix
+                ).map((row) => (
                   <TableRow key={row.course} sx={{ "&:last-child td": { border: 0 } }}>
-                    <TableCell sx={{ fontSize: 11, color: "text.secondary", pl: 0, whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ fontSize: 11, color: isNewOrEarly ? "text.disabled" : "text.secondary", pl: 0, whiteSpace: "nowrap" }}>
                       {row.course}
                     </TableCell>
                     {row.scores.map((s, i) => (
@@ -816,6 +915,13 @@ export default function ProfilePage() {
         </Box>
       </FlexBox>
 
+      {isNewUser ? (
+        <Paper variant="outlined" sx={{ p: 3, mb: 4, textAlign: "center", borderStyle: "dashed", borderColor: "divider" }}>
+          <Typography variant="body2" color="text.disabled">
+            No active contracts. Your program contracts will appear here once assigned.
+          </Typography>
+        </Paper>
+      ) : (
       <Card variant="outlined" sx={{ mb: 4 }}>
         <TableContainer>
           <Table size="small">
@@ -830,7 +936,7 @@ export default function ProfilePage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {demoContracts.map((c, i) => (
+              {(isEarlyUser ? demoContracts.filter(c => c.active).slice(0, 1) : demoContracts).map((c, i) => (
                 <TableRow key={i} sx={{ "&:last-child td": { border: 0 } }}>
                   <TableCell sx={{ fontSize: 12, fontWeight: 600 }}>{c.program}</TableCell>
                   <TableCell sx={{ fontSize: 12, color: "text.secondary" }}>{c.role}</TableCell>
@@ -865,6 +971,7 @@ export default function ProfilePage() {
           </Table>
         </TableContainer>
       </Card>
+      )}
 
       {/* ── Edit profile dialog ───────────────────────────────────────────── */}
       <Dialog

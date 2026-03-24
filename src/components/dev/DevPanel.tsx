@@ -22,8 +22,11 @@ import {
   toggleDevPanel,
   setDevPanelOpen,
   setSelectedRole,
+  setGuruStage,
   GURU_ROLES,
+  GURU_STAGES,
   type GuruRole,
+  type GuruStage,
 } from "@/store/slices/devPanelSlice";
 
 const DRAWER_WIDTH = 320;
@@ -33,6 +36,7 @@ export function DevPanel() {
   const navigate = useNavigate();
   const isOpen = useAppSelector((s) => s.devPanel.isOpen);
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
+  const guruStage = useAppSelector((s) => s.devPanel.guruStage);
 
   // Cmd/Ctrl + K shortcut
   useEffect(() => {
@@ -178,6 +182,63 @@ export function DevPanel() {
             </Typography>
           </Stack>
         </Box>
+
+        <Box sx={{ px: 2.5, pb: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.5 }}>
+            <PersonOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+            <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              User Stage
+            </Typography>
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
+            Simulate different user lifecycle stages.
+          </Typography>
+        </Box>
+
+        <List dense sx={{ px: 1, py: 0, mb: 1.5 }}>
+          {GURU_STAGES.map((stage) => {
+            const isSelected = stage.value === guruStage;
+            return (
+              <ListItemButton
+                key={stage.value}
+                selected={isSelected}
+                onClick={() => dispatch(setGuruStage(stage.value))}
+                sx={{
+                  borderRadius: 1.5,
+                  mx: 0.5,
+                  mb: 0.5,
+                  py: 0.75,
+                  ...(isSelected && {
+                    bgcolor: "hsl(var(--md-primary-container) / 0.15)",
+                    "&.Mui-selected:hover": {
+                      bgcolor: "hsl(var(--md-primary-container) / 0.2)",
+                    },
+                  }),
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  {isSelected ? (
+                    <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: "primary.main" }} />
+                  ) : (
+                    <Box sx={{ width: 18, height: 18, borderRadius: "50%", border: 1.5, borderColor: "divider" }} />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={stage.label}
+                  secondary={stage.description}
+                  primaryTypographyProps={{
+                    variant: "body2",
+                    fontWeight: isSelected ? 600 : 400,
+                    color: isSelected ? "primary.main" : "text.primary",
+                  }}
+                  secondaryTypographyProps={{ variant: "caption" }}
+                />
+              </ListItemButton>
+            );
+          })}
+        </List>
+
+        <Divider sx={{ my: 1.5, mx: 2.5 }} />
 
         <List dense sx={{ px: 1, py: 0 }}>
           <ListItemButton
