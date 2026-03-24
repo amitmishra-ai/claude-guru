@@ -5,7 +5,7 @@ export const demoSessions: Session[] = [
   // ── Completed sessions (before demoNow = 2026-02-16) ──
   {
     id: "c1",
-    title: "Mentor Session: Python Fundamentals",
+    title: "Python Fundamentals",
     topic: "Python Basics & Data Structures",
     batch: "PGPDS Online January 26 A",
     program: "PGP-DS",
@@ -25,10 +25,16 @@ export const demoSessions: Session[] = [
     scheduledOnYmd: "2026-02-06",
     paymentModel: "fixed",
     totalEarningsInr: 12000,
+    linkedCourseId: "c1",
+    prepMaterials: [
+      { id: "pm-c1a", label: "Python Basics Slides", url: "#", type: "slides" },
+      { id: "pm-c1b", label: "Data Structures Reference", url: "#", type: "document" },
+      { id: "pm-c1c", label: "Intro to Python", url: "#", type: "video" },
+    ],
   },
   {
     id: "c2",
-    title: "Mentor Session: SQL Practice",
+    title: "SQL Practice",
     topic: "SQL Joins & Subqueries",
     batch: "PGPDS Online January 26 A",
     program: "PGP-DS",
@@ -48,10 +54,11 @@ export const demoSessions: Session[] = [
     scheduledOnYmd: "2026-02-04",
     paymentModel: "fixed",
     totalEarningsInr: 12000,
+    linkedCourseId: "c2",
   },
   {
     id: "c3",
-    title: "Mentor Session: Statistics Foundations",
+    title: "Statistics Foundations",
     topic: "Descriptive Stats & Distributions",
     batch: "AIML Online February 26 A",
     program: "PGP-AIML",
@@ -73,6 +80,7 @@ export const demoSessions: Session[] = [
     scheduledOnYmd: "2026-02-02",
     paymentModel: "fixed",
     totalEarningsInr: 12000,
+    linkedCourseId: "c3",
   },
   {
     id: "c4",
@@ -98,10 +106,11 @@ export const demoSessions: Session[] = [
     scheduledOnYmd: "2026-01-30",
     paymentModel: "fixed",
     totalEarningsInr: 18000,
+    linkedCourseId: "p8",
   },
   // ── Additional completed sessions (Oct 2025 – Feb 2026) ──
   {
-    id: "ch1", title: "Mentor Session: Intro to Machine Learning", topic: "Supervised vs Unsupervised Learning",
+    id: "ch1", title: "Intro to Machine Learning", topic: "Supervised vs Unsupervised Learning",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02 (Advanced)",
     dateYmd: "2025-10-04", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -109,7 +118,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-09-28", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch2", title: "Mentor Session: Linear Regression Deep Dive", topic: "OLS, Gradient Descent, Regularization",
+    id: "ch2", title: "Linear Regression Deep Dive", topic: "OLS, Gradient Descent, Regularization",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05 (Intermediate)",
     dateYmd: "2025-10-11", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -125,7 +134,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-10-12", paymentModel: "fixed", totalEarningsInr: 18000,
   },
   {
-    id: "ch4", title: "Mentor Session: Probability for ML", topic: "Bayes Theorem, Distributions",
+    id: "ch4", title: "Probability for ML", topic: "Bayes Theorem, Distributions",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01 (Beginner)",
     dateYmd: "2025-10-25", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -133,7 +142,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-10-19", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch5", title: "Mentor Session: EDA with Pandas", topic: "Data Cleaning, Feature Engineering",
+    id: "ch5", title: "EDA with Pandas", topic: "Data Cleaning, Feature Engineering",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06 (Beginner)",
     dateYmd: "2025-10-30", start: minutes(18), end: minutes(20), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -141,7 +150,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-10-24", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch6", title: "Mentor Session: Decision Trees & Ensembles", topic: "Random Forest, Boosting",
+    id: "ch6", title: "Decision Trees & Ensembles", topic: "Random Forest, Boosting",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04 (Advanced)",
     dateYmd: "2025-11-01", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -157,7 +166,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-02", paymentModel: "fixed", totalEarningsInr: 18000,
   },
   {
-    id: "ch8", title: "Mentor Session: Logistic Regression", topic: "Classification, ROC-AUC",
+    id: "ch8", title: "Logistic Regression", topic: "Classification, ROC-AUC",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05 (Intermediate)",
     dateYmd: "2025-11-12", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -165,7 +174,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-06", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch9", title: "Mentor Session: Clustering Techniques", topic: "K-Means, DBSCAN, Hierarchical",
+    id: "ch9", title: "Clustering Techniques", topic: "K-Means, DBSCAN, Hierarchical",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01 (Beginner)",
     dateYmd: "2025-11-15", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -173,7 +182,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-09", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch10", title: "Mentor Session: Time Series Basics", topic: "ARIMA, Seasonality, Stationarity",
+    id: "ch10", title: "Time Series Basics", topic: "ARIMA, Seasonality, Stationarity",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03 (Mixed)",
     dateYmd: "2025-11-22", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -181,7 +190,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-16", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch11", title: "Mentor Session: Dimensionality Reduction", topic: "PCA, t-SNE, UMAP",
+    id: "ch11", title: "Dimensionality Reduction", topic: "PCA, t-SNE, UMAP",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04 (Advanced)",
     dateYmd: "2025-11-29", start: minutes(18), end: minutes(20), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -197,7 +206,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-30", paymentModel: "fixed", totalEarningsInr: 18000,
   },
   {
-    id: "ch13", title: "Mentor Session: CNNs for Image Classification", topic: "Convolutions, Pooling, Transfer Learning",
+    id: "ch13", title: "CNNs for Image Classification", topic: "Convolutions, Pooling, Transfer Learning",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02 (Advanced)",
     dateYmd: "2025-12-10", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -205,7 +214,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-04", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch14", title: "Mentor Session: Recommendation Systems", topic: "Collaborative & Content-based Filtering",
+    id: "ch14", title: "Recommendation Systems", topic: "Collaborative & Content-based Filtering",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05 (Intermediate)",
     dateYmd: "2025-12-13", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -213,7 +222,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-07", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch15", title: "Mentor Session: RNNs & LSTMs", topic: "Sequence Models, Text Generation",
+    id: "ch15", title: "RNNs & LSTMs", topic: "Sequence Models, Text Generation",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01 (Beginner)",
     dateYmd: "2025-12-18", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -229,7 +238,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-16", paymentModel: "fixed", totalEarningsInr: 18000,
   },
   {
-    id: "ch17", title: "Mentor Session: SQL Window Functions", topic: "ROW_NUMBER, RANK, LEAD/LAG",
+    id: "ch17", title: "SQL Window Functions", topic: "ROW_NUMBER, RANK, LEAD/LAG",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03 (Mixed)",
     dateYmd: "2025-12-27", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -237,7 +246,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-21", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch18", title: "Mentor Session: A/B Testing & Experimentation", topic: "Hypothesis Testing, P-values, Power",
+    id: "ch18", title: "A/B Testing & Experimentation", topic: "Hypothesis Testing, P-values, Power",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06 (Beginner)",
     dateYmd: "2026-01-03", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -245,7 +254,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-28", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch19", title: "Mentor Session: Feature Selection", topic: "Mutual Info, RFE, Lasso",
+    id: "ch19", title: "Feature Selection", topic: "Mutual Info, RFE, Lasso",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02 (Advanced)",
     dateYmd: "2026-01-08", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -253,7 +262,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-02", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch20", title: "Mentor Session: XGBoost Masterclass", topic: "Hyperparameter Tuning, Feature Importance",
+    id: "ch20", title: "XGBoost Masterclass", topic: "Hyperparameter Tuning, Feature Importance",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04 (Advanced)",
     dateYmd: "2026-01-11", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -269,7 +278,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-09", paymentModel: "fixed", totalEarningsInr: 18000,
   },
   {
-    id: "ch22", title: "Mentor Session: Transformer Architecture", topic: "Attention, BERT, GPT",
+    id: "ch22", title: "Transformer Architecture", topic: "Attention, BERT, GPT",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01 (Beginner)",
     dateYmd: "2026-01-18", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -277,7 +286,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-12", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch23", title: "Mentor Session: Model Evaluation Strategies", topic: "Cross-validation, Bias-Variance",
+    id: "ch23", title: "Model Evaluation Strategies", topic: "Cross-validation, Bias-Variance",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03 (Mixed)",
     dateYmd: "2026-01-22", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -285,7 +294,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-16", paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch24", title: "Mentor Session: Reinforcement Learning Intro", topic: "Q-Learning, Policy Gradient",
+    id: "ch24", title: "Reinforcement Learning Intro", topic: "Q-Learning, Policy Gradient",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02 (Advanced)",
     dateYmd: "2026-01-25", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -301,7 +310,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-23", paymentModel: "fixed", totalEarningsInr: 18000,
   },
   {
-    id: "ch26", title: "Mentor Session: Data Ethics & Bias", topic: "Fairness, Accountability, Transparency",
+    id: "ch26", title: "Data Ethics & Bias", topic: "Fairness, Accountability, Transparency",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06 (Beginner)",
     dateYmd: "2026-02-01", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -310,7 +319,7 @@ export const demoSessions: Session[] = [
     paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch27", title: "Mentor Session: Graph Neural Networks", topic: "GCN, Node Embeddings, Knowledge Graphs",
+    id: "ch27", title: "Graph Neural Networks", topic: "GCN, Node Embeddings, Knowledge Graphs",
     batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02 (Advanced)",
     dateYmd: "2026-02-03", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -319,7 +328,7 @@ export const demoSessions: Session[] = [
     paymentModel: "fixed", totalEarningsInr: 12000,
   },
   {
-    id: "ch28", title: "Mentor Session: MLOps Best Practices", topic: "Monitoring, Drift Detection, Retraining",
+    id: "ch28", title: "MLOps Best Practices", topic: "Monitoring, Drift Detection, Retraining",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05 (Intermediate)",
     dateYmd: "2026-02-06", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
@@ -336,7 +345,7 @@ export const demoSessions: Session[] = [
     paymentModel: "fixed", totalEarningsInr: 18000,
   },
   {
-    id: "ch30", title: "Mentor Session: Capstone Project Review", topic: "End-to-end Project Feedback",
+    id: "ch30", title: "Capstone Project Review", topic: "End-to-end Project Feedback",
     batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03 (Mixed)",
     dateYmd: "2026-02-14", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "invoice_not_raised",
@@ -492,6 +501,7 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in",
     scheduledOnYmd: "2026-03-10",
     paymentModel: "fixed",
+    linkedCourseId: "p8",
   },
   // ── Evaluation sessions ──
   {
@@ -628,7 +638,7 @@ export const demoSessions: Session[] = [
   // ── Today's sessions (demoNow = 2026-02-16 09:00) ──
   {
     id: "today1",
-    title: "Mentor Session: EDA Walkthrough",
+    title: "EDA Walkthrough",
     topic: "Exploratory Data Analysis with Pandas",
     batch: "PGPDS Online January 26 A",
     program: "PGP-DS",
@@ -645,6 +655,13 @@ export const demoSessions: Session[] = [
     scheduledByEmail: "bhargavi.cs@greatlearning.in",
     scheduledOnYmd: "2026-02-10",
     paymentModel: "fixed",
+    linkedCourseId: "c1",
+    prepMaterials: [
+      { id: "pm-t1", label: "EDA Session Slides", url: "#", type: "slides" },
+      { id: "pm-t2", label: "Pandas Cheat Sheet", url: "#", type: "document" },
+      { id: "pm-t3", label: "Sample Dataset (CSV)", url: "#", type: "link" },
+      { id: "pm-t4", label: "EDA Walkthrough with Pandas", url: "#", type: "video" },
+    ],
   },
   // ── Upcoming / scheduled sessions ──
   {
@@ -677,6 +694,7 @@ export const demoSessions: Session[] = [
     prepMaterials: [
       { id: "pm1", label: "Orientation Slides", url: "#", type: "slides" },
       { id: "pm2", label: "Industry Landscape PDF", url: "#", type: "document" },
+      { id: "pm2b", label: "Welcome & Program Walkthrough", url: "#", type: "video" },
     ],
     paymentModel: "fixed",
     totalEarningsInr: 18000,
@@ -705,9 +723,11 @@ export const demoSessions: Session[] = [
     scheduledOnYmd: "2026-03-04",
     audienceType: "Group",
     timeZone: "Asia/Kolkata",
-    linkedCourseId: "c1",
+    linkedCourseId: "c2",
     prepMaterials: [
       { id: "pm16", label: "SQL Query Cheat Sheet", url: "#", type: "document" },
+      { id: "pm17", label: "SQL Joins Explained", url: "#", type: "video" },
+      { id: "pm18", label: "Practice Queries Notebook", url: "#", type: "link" },
     ],
     paymentModel: "fixed",
     totalEarningsInr: 14000,
@@ -738,6 +758,8 @@ export const demoSessions: Session[] = [
     prepMaterials: [
       { id: "pm13", label: "Python Fundamentals Notebook", url: "#", type: "document" },
       { id: "pm14", label: "Starter Code Repository", url: "#", type: "link" },
+      { id: "pm15", label: "Variables & Data Types Walkthrough", url: "#", type: "video" },
+      { id: "pm15b", label: "Session Slides — Control Flow", url: "#", type: "slides" },
     ],
     paymentModel: "fixed",
   },
@@ -793,6 +815,12 @@ export const demoSessions: Session[] = [
     audienceType: "Group",
     timeZone: "Asia/Kolkata",
     paymentModel: "fixed",
+    linkedCourseId: "c3",
+    prepMaterials: [
+      { id: "pm-cb1", label: "Hypothesis Testing Slides", url: "#", type: "slides" },
+      { id: "pm-cb2", label: "Worked Examples PDF", url: "#", type: "document" },
+      { id: "pm-cb3", label: "Confidence Intervals Demo", url: "#", type: "video" },
+    ],
     combinedBatches: [
       { batch: "PGPDS.O.MAR26.A", group: "Group 07" },
       { batch: "PGPDS.O.MAR26.B", group: "Group 03" },
@@ -824,6 +852,7 @@ export const demoSessions: Session[] = [
     timeZone: "Asia/Kolkata",
     paymentModel: "fixed",
     totalEarningsInr: 22000,
+    linkedCourseId: "c3",
     combinedBatches: [
       { batch: "PGPDS.O.MAR26.A", group: "Group 07" },
       { batch: "PGPDS.O.MAR26.B", group: "Group 03" },
@@ -855,6 +884,7 @@ export const demoSessions: Session[] = [
     timeZone: "Asia/Kolkata",
     paymentModel: "fixed",
     totalEarningsInr: 22000,
+    linkedCourseId: "c3",
     combinedBatches: [
       { batch: "PGPDS.O.MAR26.A", group: "Group 07" },
       { batch: "PGPDS.O.MAR26.B", group: "Group 03" },
@@ -1032,19 +1062,19 @@ export const demoRatingHistory: RatingHistoryEntry[] = [
   { id: "s0b", title: "Program Overview (All)", group: "Group 03 (Mixed)", dateYmd: "2026-03-11", score: 4.86, feedback: "Excellent AI case study discussion." },
   { id: "s0c2", title: "Data Visualization using Tableau", group: "Group 05 (Low work, high prog)", dateYmd: "2026-03-10", score: 4.84, feedback: "Interactive dashboards session was very helpful." },
   { id: "s0d", title: "Introduction to SQL", group: "Group 04 (High work, beginner prog)", dateYmd: "2026-03-08", score: 4.92, feedback: "Querying data with SQL explained brilliantly." },
-  { id: "rh1", title: "Mentor Session: Python Basics", group: "Group 06 (Beginner)", dateYmd: "2026-03-04", score: 4.8, feedback: "Good walkthrough with practical examples." },
-  { id: "rh2", title: "Mentor Session: SQL Practice", group: "Group 04 (High work, beginner prog)", dateYmd: "2026-02-25", score: 4.7, feedback: "Clear explanations, needed more time for doubts." },
-  { id: "rh3", title: "Mentor Session: Statistics Foundations", group: "Group 08 (Mixed)", dateYmd: "2026-02-18", score: 4.65, feedback: "Excellent session flow and engagement." },
-  { id: "rh4", title: "Mentor Session: Data Viz Deep Dive", group: "Group 09 (Mixed work, mixed prog)", dateYmd: "2026-02-11", score: 4.6, feedback: "Loved the real-world dashboard examples." },
-  { id: "rh5", title: "Mentor Session: Regression Essentials", group: "Group 10 (Advanced)", dateYmd: "2026-02-04", score: 4.5, feedback: "Good pacing and practical intuition." },
-  { id: "rh6", title: "Mentor Session: Probability Refresher", group: "Group 07 (High work, mixed prog)", dateYmd: "2026-01-28", score: 4.45, feedback: "Concepts were clear; wanted more solved examples." },
-  { id: "rh7", title: "Mentor Session: Exploratory Data Analysis", group: "Group 05 (Low work, high prog)", dateYmd: "2026-01-21", score: 4.4, feedback: "Very interactive and easy to follow." },
-  { id: "rh8", title: "Mentor Session: Feature Engineering", group: "Group 03 (Mixed)", dateYmd: "2026-01-14", score: 4.35, feedback: "Great tips for real projects." },
-  { id: "rh9", title: "Mentor Session: Model Evaluation", group: "Group 02 (Mixed work, beginner prog)", dateYmd: "2026-01-07", score: 4.3, feedback: "Excellent explanation of metrics and tradeoffs." },
-  { id: "rh10", title: "Mentor Session: Time Series Basics", group: "Group 11 (Mixed)", dateYmd: "2025-12-31", score: 4.2, feedback: "Good foundations and clear examples." },
-  { id: "rh11", title: "Mentor Session: Data Storytelling", group: "Group 01 (Mixed)", dateYmd: "2025-12-10", score: 4.28, feedback: "Strong narrative and practical examples." },
-  { id: "rh12", title: "Mentor Session: SQL Foundations", group: "Group 04 (Beginner)", dateYmd: "2025-11-12", score: 4.33, feedback: "Concepts explained clearly with good pacing." },
-  { id: "rh13", title: "Mentor Session: Python Refresher", group: "Group 06 (Mixed)", dateYmd: "2025-10-08", score: 4.25, feedback: "Useful recap and structured exercises." },
+  { id: "rh1", title: "Python Basics", group: "Group 06 (Beginner)", dateYmd: "2026-03-04", score: 4.8, feedback: "Good walkthrough with practical examples." },
+  { id: "rh2", title: "SQL Practice", group: "Group 04 (High work, beginner prog)", dateYmd: "2026-02-25", score: 4.7, feedback: "Clear explanations, needed more time for doubts." },
+  { id: "rh3", title: "Statistics Foundations", group: "Group 08 (Mixed)", dateYmd: "2026-02-18", score: 4.65, feedback: "Excellent session flow and engagement." },
+  { id: "rh4", title: "Data Viz Deep Dive", group: "Group 09 (Mixed work, mixed prog)", dateYmd: "2026-02-11", score: 4.6, feedback: "Loved the real-world dashboard examples." },
+  { id: "rh5", title: "Regression Essentials", group: "Group 10 (Advanced)", dateYmd: "2026-02-04", score: 4.5, feedback: "Good pacing and practical intuition." },
+  { id: "rh6", title: "Probability Refresher", group: "Group 07 (High work, mixed prog)", dateYmd: "2026-01-28", score: 4.45, feedback: "Concepts were clear; wanted more solved examples." },
+  { id: "rh7", title: "Exploratory Data Analysis", group: "Group 05 (Low work, high prog)", dateYmd: "2026-01-21", score: 4.4, feedback: "Very interactive and easy to follow." },
+  { id: "rh8", title: "Feature Engineering", group: "Group 03 (Mixed)", dateYmd: "2026-01-14", score: 4.35, feedback: "Great tips for real projects." },
+  { id: "rh9", title: "Model Evaluation", group: "Group 02 (Mixed work, beginner prog)", dateYmd: "2026-01-07", score: 4.3, feedback: "Excellent explanation of metrics and tradeoffs." },
+  { id: "rh10", title: "Time Series Basics", group: "Group 11 (Mixed)", dateYmd: "2025-12-31", score: 4.2, feedback: "Good foundations and clear examples." },
+  { id: "rh11", title: "Data Storytelling", group: "Group 01 (Mixed)", dateYmd: "2025-12-10", score: 4.28, feedback: "Strong narrative and practical examples." },
+  { id: "rh12", title: "SQL Foundations", group: "Group 04 (Beginner)", dateYmd: "2025-11-12", score: 4.33, feedback: "Concepts explained clearly with good pacing." },
+  { id: "rh13", title: "Python Refresher", group: "Group 06 (Mixed)", dateYmd: "2025-10-08", score: 4.25, feedback: "Useful recap and structured exercises." },
 ];
 
 export const demoMonthlyEarnings: MonthlyEarning[] = [

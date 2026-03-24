@@ -619,7 +619,7 @@ export default function CalendarPage() {
                             {fmtTime(s.start)}
                           </Typography>
                           <Typography sx={{ fontSize: '0.75rem', color: sColors.text, fontWeight: 700, lineHeight: '16px' }} noWrap>
-                            {s.title.replace("Mentor Session: ", "")}
+                            {s.title}
                           </Typography>
                         </Box>
                       );
@@ -1164,7 +1164,7 @@ export default function CalendarPage() {
                             <Typography
                               sx={{ fontSize: '0.7rem', fontWeight: 600, color: sColors.text, lineHeight: '1.3' }}
                             >
-                              {s.title.replace("Mentor Session: ", "")}
+                              {s.title}
                             </Typography>
                             {pxHeight > 56 && (
                               <Typography
@@ -1300,7 +1300,7 @@ export default function CalendarPage() {
                     const declined = !!sessionDeclined[s.id];
                     const confirmed = !!confirmations[s.id];
                     const sColors = sessionColors(confirmed, declined);
-                    const shortTitle = s.title.replace("Mentor Session: ", "");
+                    const shortTitle = s.title;
                     chips.push({
                       key: `sess-${s.id}`,
                       label: shortTitle,

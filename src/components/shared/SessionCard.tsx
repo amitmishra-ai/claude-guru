@@ -48,6 +48,8 @@ export type SessionCardProps = {
   actions?: ReactNode;
   /** Secondary action (right-aligned, e.g. "Group profile") */
   secondaryAction?: ReactNode;
+  /** When provided, makes the course name (title) a clickable link */
+  onCourseClick?: () => void;
   /** Container sx overrides (animation, opacity, etc.) */
   sx?: SxProps<Theme>;
 };
@@ -95,6 +97,7 @@ export function SessionCard({
   topRight,
   actions,
   secondaryAction,
+  onCourseClick,
   sx,
 }: SessionCardProps) {
   const statusChip = status && (
@@ -139,7 +142,30 @@ export function SessionCard({
     </Stack>
   );
 
-  const displayTitle = sessionType ? `${sessionType}: ${title}` : title;
+  const titleContent = sessionType ? (
+    <>
+      <span>{sessionType}: </span>
+      {onCourseClick ? (
+        <Box
+          component="span"
+          onClick={(e) => { e.stopPropagation(); onCourseClick(); }}
+          sx={{ color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+        >
+          {title}
+        </Box>
+      ) : (
+        <span>{title}</span>
+      )}
+    </>
+  ) : onCourseClick ? (
+    <Box
+      component="span"
+      onClick={(e) => { e.stopPropagation(); onCourseClick(); }}
+      sx={{ color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+    >
+      {title}
+    </Box>
+  ) : title;
 
   const titleRow = (
     <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
@@ -148,7 +174,7 @@ export function SessionCard({
         fontWeight={600}
         sx={{ fontSize: titleVariant === "h5" ? { xs: "1rem", md: "1.125rem" } : "0.875rem", minWidth: 0 }}
       >
-        {displayTitle}
+        {titleContent}
       </Typography>
       {statusChip}
     </Stack>
@@ -209,7 +235,7 @@ export function SessionCard({
               fontWeight={600}
               sx={{ fontSize: titleVariant === "h5" ? { xs: "0.9rem", sm: "1rem", md: "1.125rem" } : { xs: "0.8rem", sm: "0.875rem" }, minWidth: 0 }}
             >
-              {displayTitle}
+              {titleContent}
             </Typography>
             <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1 }} flexWrap="wrap" useFlexGap justifyContent="flex-end" sx={{ flexShrink: 0, maxWidth: { xs: "55%", sm: "auto" } }}>
               {statusChip}
@@ -217,12 +243,14 @@ export function SessionCard({
             </Stack>
           </Stack>
           {dateRow}
+
           {chipsRow}
         </>
       ) : (
         <>
           {titleRow}
           {dateRow}
+
           {chipsRow}
         </>
       )}

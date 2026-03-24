@@ -2,7 +2,6 @@ import { Fragment, useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
@@ -66,6 +65,7 @@ import {
   setOpenLearnerRatings,
   setLearnerRatingsSessionId,
   setOpenSessionDetails,
+  setOpenSessionMaterials,
 } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import {
@@ -269,6 +269,11 @@ export default function DashboardPage() {
   const needsWednesdayConfirm = scheduled.length > 0;
   const pendingRequestsCount = requests.filter((r) => r.response === "pending").length;
 
+  const getOnCourseClick = (s: Session) => {
+    if (!s.linkedCourseId) return undefined;
+    return () => navigate("/courses");
+  };
+
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
   const isNewUser = guruStage === "new";
   const isEarlyUser = guruStage === "early";
@@ -444,6 +449,7 @@ export default function DashboardPage() {
                               dateYmd={s.dateYmd}
                               start={s.start}
                               end={s.end}
+                              onCourseClick={getOnCourseClick(s)}
                               actions={
                                 <>
                                   <Button
@@ -458,10 +464,13 @@ export default function DashboardPage() {
                                   <Button
                                     variant="soft"
                                     size="small"
-                                    startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                                    onClick={() => dispatch(pushToast({ title: "Session Materials", description: "Opening event materials..." }))}
+                                    startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+                                    onClick={() => {
+                                      dispatch(setSessionFocus(s));
+                                      dispatch(setOpenSessionMaterials(true));
+                                    }}
                                   >
-                                    Session Materials
+                                    View Session Material
                                   </Button>
                                 </>
                               }
@@ -539,6 +548,7 @@ export default function DashboardPage() {
                                 dateYmd={s.dateYmd}
                                 start={s.start}
                                 end={s.end}
+                                onCourseClick={getOnCourseClick(s)}
                                 status={isConfirmed
                                   ? STATUS_CONFIRMED()
                                   : STATUS_SCHEDULED
@@ -549,10 +559,13 @@ export default function DashboardPage() {
                                     <Button
                                       variant="soft"
                                       size="small"
-                                      startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                                      onClick={() => dispatch(pushToast({ title: "Downloading event materials", description: "Preparing download..." }))}
+                                      startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+                                      onClick={() => {
+                                        dispatch(setSessionFocus(s));
+                                        dispatch(setOpenSessionMaterials(true));
+                                      }}
                                     >
-                                      Session Materials
+                                      View Session Material
                                     </Button>
                                     <Button
                                       variant="soft"
@@ -985,6 +998,7 @@ export default function DashboardPage() {
                                   dateYmd={s.dateYmd}
                                   start={s.start}
                                   end={s.end}
+                                  onCourseClick={getOnCourseClick(s)}
                                   topRight={topRightContent}
                                   chips={s.combinedBatches ? ["Combined session"] : undefined}
                                   actions={cardActions}
@@ -1019,6 +1033,7 @@ export default function DashboardPage() {
                                 dateYmd={s.dateYmd}
                                 start={s.start}
                                 end={s.end}
+                                onCourseClick={getOnCourseClick(s)}
                                 status={STATUS_DECLINED}
                               />
                               <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>

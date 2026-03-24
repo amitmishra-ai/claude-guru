@@ -17,7 +17,6 @@ import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
@@ -968,6 +967,11 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
                 {statusChip}
               </Stack>
               <Typography variant="h6" fontWeight={600}>{title}</Typography>
+              {isMentoring && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  M5 W2 | Hypothesis Testing &amp; Confidence Intervals
+                </Typography>
+              )}
             </Box>
 
             {/* Schedule section */}
@@ -1030,10 +1034,10 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
               </SectionBox>
             )}
 
-            {/* Event materials section (mentoring confirmed) */}
+            {/* Session materials section (mentoring confirmed) */}
             {isMentoring && isConfirmedState && (
               <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Event materials</Typography>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Session materials</Typography>
                 <Divider sx={{ mb: 0.5 }} />
                 <Stack spacing={0.75}>
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75, px: 1, borderRadius: "8px", "&:hover": { bgcolor: "action.hover" }, cursor: "pointer" }}>
@@ -1212,6 +1216,41 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
                     Watch recording <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
                   </Typography>
                 </InfoRow>
+              </SectionBox>
+            )}
+
+            {/* Feedback section (completed states) */}
+            {isCompletedState && (
+              <SectionBox>
+                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
+                  <StarOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-star-color)" }} />
+                  <Typography variant="subtitle2" fontWeight={600}>Feedback</Typography>
+                </Stack>
+                <Divider sx={{ mb: 0.5 }} />
+                {(subType === "completed" || subType === "combinedCompleted") ? (
+                  <>
+                    <InfoRow label="Avg. rating">
+                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                        <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
+                        <Typography variant="body2" fontWeight={700}>4.5</Typography>
+                        <Typography variant="caption" color="text.secondary">(24 responses)</Typography>
+                      </Stack>
+                    </InfoRow>
+                    <Box sx={{ mt: 1 }}>
+                      <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>
+                        Detailed Feedback
+                      </Button>
+                    </Box>
+                  </>
+                ) : subType === "gathering" ? (
+                  <InfoRow label="Status">
+                    <Chip label="Gathering feedback" size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem" }} />
+                  </InfoRow>
+                ) : (
+                  <InfoRow label="Status">
+                    <Chip label="No feedback collected" size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", opacity: 0.7 }} />
+                  </InfoRow>
+                )}
               </SectionBox>
             )}
           </Stack>
@@ -2031,11 +2070,12 @@ function OnlineSessionCards() {
       />
 
       {/* 1. Mentoring — Confirmed */}
-      <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Join event + Session Materials on card.">
+      <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Join event + View Session Material on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
+            onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
             dateYmd="2026-03-18"
             start={minutes(18)}
@@ -2044,7 +2084,7 @@ function OnlineSessionCards() {
             actions={
               <>
                 <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
-                <Button variant="soft" size="small" startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}>Session Materials</Button>
+                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
               </>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-confirmed")}>View details</Button>}
@@ -2058,6 +2098,7 @@ function OnlineSessionCards() {
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
+            onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
             dateYmd="2026-03-18"
             start={minutes(18)}
@@ -2066,7 +2107,7 @@ function OnlineSessionCards() {
             actions={
               <>
                 <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
-                <Button variant="soft" size="small" startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}>Session Materials</Button>
+                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
               </>
             }
             chips={["Combined session"]}
@@ -2087,6 +2128,7 @@ function OnlineSessionCards() {
           <SessionCard
             title="Python Fundamentals"
             sessionType="Online session"
+            onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
             dateYmd="2026-03-20"
             start={minutes(9, 30)}
@@ -2109,6 +2151,7 @@ function OnlineSessionCards() {
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
+            onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
             dateYmd="2026-03-20"
             start={minutes(18)}
@@ -2194,6 +2237,7 @@ function OnlineSessionCards() {
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
+            onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
             dateYmd="2026-03-12"
             start={minutes(18)}
@@ -2212,12 +2256,43 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
+      {/* 7b. Mentoring — Completed (Recording processing) */}
+      <ComponentSection title="Mentoring — Completed (Recording processing)" description="Session just ended, recording not yet processed. Watch recording button is disabled. Typically takes up to an hour.">
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="Statistics for Data Science"
+            sessionType="Online session"
+            onCourseClick={() => {}}
+            batch="PGPDS.O.MAR26.A"
+            dateYmd="2026-03-12"
+            start={minutes(18)}
+            end={minutes(20)}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PENDING}
+                {CHIP_GATHERING}
+              </Stack>
+            }
+            actions={
+              <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />} disabled>
+                Watch recording
+              </Button>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-gathering")}>View details</Button>}
+          />
+          <Typography variant="caption" color="text.disabled" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
+            Recording is being processed and will be available shortly.
+          </Typography>
+        </Card>
+      </ComponentSection>
+
       {/* 8. Mentoring — Completed (No feedback) */}
       <ComponentSection title="Mentoring — Completed (No feedback)" description="Event older than 30 days, no learner ratings. Payment processed + No feedback collected chips top-right.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Python Fundamentals"
             sessionType="Online session"
+            onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
             dateYmd="2026-01-15"
             start={minutes(9, 30)}
@@ -2242,6 +2317,7 @@ function OnlineSessionCards() {
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
+            onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
             dateYmd="2026-03-05"
             start={minutes(18)}
