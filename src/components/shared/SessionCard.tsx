@@ -76,19 +76,6 @@ export const STATUS_DECLINED: SessionCardStatus = {
   border: "var(--gl-status-declined-border)",
 };
 
-export const STATUS_SUMMARY_NEEDED: SessionCardStatus = {
-  label: "Summary needed",
-  bg: "var(--gl-status-pending-bg)",
-  color: "var(--gl-status-pending-text)",
-  border: "var(--gl-status-pending-border)",
-};
-
-export const STATUS_SUMMARY_SUBMITTED: SessionCardStatus = {
-  label: "Summary submitted",
-  bg: "var(--gl-status-confirmed-bg)",
-  color: "var(--gl-status-confirmed-text)",
-  border: "var(--gl-status-confirmed-border)",
-};
 
 /* ── Component ── */
 

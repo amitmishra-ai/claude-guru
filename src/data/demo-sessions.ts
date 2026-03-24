@@ -73,7 +73,6 @@ export const demoSessions: Session[] = [
     scheduledOnYmd: "2026-02-02",
     paymentModel: "fixed",
     totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Covered descriptive statistics and distributions with real-world datasets. High engagement — several learners stayed back for extra doubt-clearing.", submittedAtMs: 1738900000000 },
   },
   {
     id: "c4",
@@ -99,7 +98,6 @@ export const demoSessions: Session[] = [
     scheduledOnYmd: "2026-01-30",
     paymentModel: "fixed",
     totalEarningsInr: 18000,
-    summary: { learnerEngagementNotes: "Backpropagation walkthrough was clear. Students built a simple neural net from scratch in NumPy.", submittedAtMs: 1738700000000 },
   },
   // ── Additional completed sessions (Oct 2025 – Feb 2026) ──
   {
@@ -109,7 +107,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-A1B2C3", invoiceId: "INV-2025-1004-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-09-28", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Great participation. Students actively discussed real-world ML use cases.", submittedAtMs: 1728100000000 },
   },
   {
     id: "ch2", title: "Mentor Session: Linear Regression Deep Dive", topic: "OLS, Gradient Descent, Regularization",
@@ -118,7 +115,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-D4E5F6", invoiceId: "INV-2025-1011-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-10-05", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Covered gradient descent in depth. A few students needed extra help with calculus.", submittedAtMs: 1728700000000 },
   },
   {
     id: "ch3", title: "Workshop: Data Visualization with Python", topic: "Matplotlib, Seaborn, Plotly",
@@ -127,7 +123,6 @@ export const demoSessions: Session[] = [
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-G7H8I9", invoiceId: "INV-2025-1018-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-10-12", paymentModel: "fixed", totalEarningsInr: 18000,
-    summary: { learnerEngagementNotes: "Hands-on session. Students built 3 dashboards by end of class.", submittedAtMs: 1729300000000 },
   },
   {
     id: "ch4", title: "Mentor Session: Probability for ML", topic: "Bayes Theorem, Distributions",
@@ -136,7 +131,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-J1K2L3", invoiceId: "INV-2025-1025-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-10-19", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Students had a solid grasp of conditional probability. Bayes theorem examples resonated well.", submittedAtMs: 1729900000000 },
   },
   {
     id: "ch5", title: "Mentor Session: EDA with Pandas", topic: "Data Cleaning, Feature Engineering",
@@ -145,7 +139,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-M4N5O6", invoiceId: "INV-2025-1030-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-10-24", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Strong engagement. Students struggled with missing data imputation but grasped it by end.", submittedAtMs: 1730300000000 },
   },
   {
     id: "ch6", title: "Mentor Session: Decision Trees & Ensembles", topic: "Random Forest, Boosting",
@@ -154,7 +147,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-P7Q8R9", invoiceId: "INV-2025-1101-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-10-26", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Compared decision tree vs random forest performance. Learners appreciated the visual tree explanations.", submittedAtMs: 1730500000000 },
   },
   {
     id: "ch7", title: "Workshop: NLP Fundamentals", topic: "Tokenization, TF-IDF, Word2Vec",
@@ -163,7 +155,6 @@ export const demoSessions: Session[] = [
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-S1T2U3", invoiceId: "INV-2025-1108-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-02", paymentModel: "fixed", totalEarningsInr: 18000,
-    summary: { learnerEngagementNotes: "Excellent session. Built a sentiment classifier from scratch.", submittedAtMs: 1731100000000 },
   },
   {
     id: "ch8", title: "Mentor Session: Logistic Regression", topic: "Classification, ROC-AUC",
@@ -172,7 +163,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-V4W5X6", invoiceId: "INV-2025-1112-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-06", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Good session on classification metrics. ROC curve plotting was the highlight.", submittedAtMs: 1731500000000 },
   },
   {
     id: "ch9", title: "Mentor Session: Clustering Techniques", topic: "K-Means, DBSCAN, Hierarchical",
@@ -181,7 +171,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-Y7Z8A1", invoiceId: "INV-2025-1115-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-09", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Good Q&A. Students compared clustering results on different datasets.", submittedAtMs: 1731700000000 },
   },
   {
     id: "ch10", title: "Mentor Session: Time Series Basics", topic: "ARIMA, Seasonality, Stationarity",
@@ -190,7 +179,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-B2C3D4", invoiceId: "INV-2025-1122-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-16", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Covered stationarity tests and ARIMA modeling. Students applied it to stock price data.", submittedAtMs: 1732300000000 },
   },
   {
     id: "ch11", title: "Mentor Session: Dimensionality Reduction", topic: "PCA, t-SNE, UMAP",
@@ -199,7 +187,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-E5F6G7", invoiceId: "INV-2025-1129-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-23", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Visualized high-dimensional data in 2D. Very engaging.", submittedAtMs: 1732900000000 },
   },
   {
     id: "ch12", title: "Workshop: Model Deployment with Flask", topic: "REST APIs, Docker, Cloud Deploy",
@@ -208,7 +195,6 @@ export const demoSessions: Session[] = [
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-H8I9J1", invoiceId: "INV-2025-1206-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-11-30", paymentModel: "fixed", totalEarningsInr: 18000,
-    summary: { learnerEngagementNotes: "Deployed a Flask API end-to-end. Students dockerized and pushed to cloud.", submittedAtMs: 1733500000000 },
   },
   {
     id: "ch13", title: "Mentor Session: CNNs for Image Classification", topic: "Convolutions, Pooling, Transfer Learning",
@@ -217,7 +203,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-K2L3M4", invoiceId: "INV-2025-1210-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-04", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Trained a ResNet model on custom dataset. High energy session.", submittedAtMs: 1733800000000 },
   },
   {
     id: "ch14", title: "Mentor Session: Recommendation Systems", topic: "Collaborative & Content-based Filtering",
@@ -226,7 +211,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-N5O6P7", invoiceId: "INV-2025-1213-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-07", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Built a movie recommender using collaborative filtering. Students compared SVD vs KNN approaches.", submittedAtMs: 1734100000000 },
   },
   {
     id: "ch15", title: "Mentor Session: RNNs & LSTMs", topic: "Sequence Models, Text Generation",
@@ -235,7 +219,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-Q8R9S1", invoiceId: "INV-2025-1218-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-12", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Built a text generator. Students were excited about the results.", submittedAtMs: 1734500000000 },
   },
   {
     id: "ch16", title: "Workshop: GANs & Generative AI", topic: "Image Generation, Diffusion Models",
@@ -244,7 +227,6 @@ export const demoSessions: Session[] = [
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-T2U3V4", invoiceId: "INV-2025-1222-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-16", paymentModel: "fixed", totalEarningsInr: 18000,
-    summary: { learnerEngagementNotes: "Generated images with GANs and explored diffusion models. High excitement from students.", submittedAtMs: 1735100000000 },
   },
   {
     id: "ch17", title: "Mentor Session: SQL Window Functions", topic: "ROW_NUMBER, RANK, LEAD/LAG",
@@ -253,7 +235,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-W5X6Y7", invoiceId: "INV-2025-1227-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-21", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Complex queries practiced. Good participation in pair exercises.", submittedAtMs: 1735300000000 },
   },
   {
     id: "ch18", title: "Mentor Session: A/B Testing & Experimentation", topic: "Hypothesis Testing, P-values, Power",
@@ -262,7 +243,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-Z8A1B2", invoiceId: "INV-2026-0103-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2025-12-28", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Ran a live A/B test simulation. Students debated significance thresholds.", submittedAtMs: 1735900000000 },
   },
   {
     id: "ch19", title: "Mentor Session: Feature Selection", topic: "Mutual Info, RFE, Lasso",
@@ -271,7 +251,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-C3D4E5", invoiceId: "INV-2026-0108-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-02", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Compared feature selection methods on Kaggle datasets. Very interactive.", submittedAtMs: 1736300000000 },
   },
   {
     id: "ch20", title: "Mentor Session: XGBoost Masterclass", topic: "Hyperparameter Tuning, Feature Importance",
@@ -280,7 +259,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-F6G7H8", invoiceId: "INV-2026-0111-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-05", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Deep dive into XGBoost hyperparameters. Kaggle leaderboard competition in class was a hit.", submittedAtMs: 1736500000000 },
   },
   {
     id: "ch21", title: "Workshop: End-to-End ML Pipeline", topic: "MLflow, Feature Store, CI/CD",
@@ -289,7 +267,6 @@ export const demoSessions: Session[] = [
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-I9J1K2", invoiceId: "INV-2026-0115-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-09", paymentModel: "fixed", totalEarningsInr: 18000,
-    summary: { learnerEngagementNotes: "Set up a full pipeline with MLflow tracking. Students deployed models to staging.", submittedAtMs: 1736900000000 },
   },
   {
     id: "ch22", title: "Mentor Session: Transformer Architecture", topic: "Attention, BERT, GPT",
@@ -298,7 +275,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-L3M4N5", invoiceId: "INV-2026-0118-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-12", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Attention mechanism demo was well received. Students fine-tuned BERT for sentiment analysis.", submittedAtMs: 1737100000000 },
   },
   {
     id: "ch23", title: "Mentor Session: Model Evaluation Strategies", topic: "Cross-validation, Bias-Variance",
@@ -307,7 +283,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-O6P7Q8", invoiceId: "INV-2026-0122-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-16", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Walked through overfitting examples. Students ran their own cross-validation experiments.", submittedAtMs: 1737500000000 },
   },
   {
     id: "ch24", title: "Mentor Session: Reinforcement Learning Intro", topic: "Q-Learning, Policy Gradient",
@@ -316,7 +291,6 @@ export const demoSessions: Session[] = [
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-R9S1T2", invoiceId: "INV-2026-0125-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-19", paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "RL concepts clicked after the CartPole demo. Students trained agents in real-time.", submittedAtMs: 1737700000000 },
   },
   {
     id: "ch25", title: "Workshop: Computer Vision Applications", topic: "Object Detection, YOLO, Segmentation",
@@ -325,7 +299,6 @@ export const demoSessions: Session[] = [
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-U3V4W5", invoiceId: "INV-2026-0129-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-23", paymentModel: "fixed", totalEarningsInr: 18000,
-    summary: { learnerEngagementNotes: "Ran YOLO on custom images. Students loved the real-time detection demo.", submittedAtMs: 1738100000000 },
   },
   {
     id: "ch26", title: "Mentor Session: Data Ethics & Bias", topic: "Fairness, Accountability, Transparency",
@@ -335,7 +308,6 @@ export const demoSessions: Session[] = [
     transactionId: "TXN-GL-AA1BB2", invoiceId: "INV-2026-0201-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-26",
     paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Deep discussion on bias in ML models. Students analyzed case studies on algorithmic fairness.", submittedAtMs: 1738400000000 },
   },
   {
     id: "ch27", title: "Mentor Session: Graph Neural Networks", topic: "GCN, Node Embeddings, Knowledge Graphs",
@@ -345,7 +317,6 @@ export const demoSessions: Session[] = [
     transactionId: "TXN-GL-BB2CC3", invoiceId: "INV-2026-0203-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-28",
     paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Introduced graph-based learning. Linked it to social network analysis use cases.", submittedAtMs: 1738500000000 },
   },
   {
     id: "ch28", title: "Mentor Session: MLOps Best Practices", topic: "Monitoring, Drift Detection, Retraining",
@@ -355,7 +326,6 @@ export const demoSessions: Session[] = [
     transactionId: "TXN-GL-CC3DD4", invoiceId: "INV-2026-0206-001", scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-01-31",
     paymentModel: "fixed", totalEarningsInr: 12000,
-    summary: { learnerEngagementNotes: "Covered model monitoring and data drift. Set up alerting pipelines as a hands-on exercise.", submittedAtMs: 1738800000000 },
   },
   {
     id: "ch29", title: "Workshop: LLM Fine-tuning", topic: "LoRA, PEFT, Instruction Tuning",

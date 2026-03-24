@@ -10,14 +10,13 @@ interface SessionsState {
   sessionFocus: Session | null;
   homeSessionsView: "next" | "completed" | "declined";
   selectedSessionType: "All" | SessionType;
-  selectedTimePeriod: "All" | "Pending Summaries" | "Last 6 months" | "2025" | "2024" | "2023" | "2022";
+  selectedTimePeriod: "All" | "Last 6 months" | "2025" | "2024" | "2023" | "2022";
   confirmMoveSessionId: string | null;
   recentlyMovedConfirmedId: string | null;
   declineMoveSessionId: string | null;
   declineSessionFocus: Session | null;
   declineReason: string;
   recentlyConfirmedIds: Record<string, number>;
-  summaries: Record<string, { learnerEngagementNotes: string; submittedAtMs: number }>;
 }
 
 const initialState: SessionsState = {
@@ -35,10 +34,6 @@ const initialState: SessionsState = {
   declineSessionFocus: null,
   declineReason: "",
   recentlyConfirmedIds: {},
-  summaries: {
-    c3: { learnerEngagementNotes: "Covered descriptive statistics and distributions with real-world datasets. High engagement — several learners stayed back for extra doubt-clearing. Overall, learners were engaged and the session met its objectives.", submittedAtMs: 1739030400000 },
-    c4: { learnerEngagementNotes: "Excellent deep learning workshop. Learners were highly engaged during the backpropagation walkthrough. Several students stayed back for additional Q&A on neural network architectures.", submittedAtMs: 1738771200000 },
-  },
 };
 
 const sessionsSlice = createSlice({
@@ -95,12 +90,6 @@ const sessionsSlice = createSlice({
     setDeclineReason(state, action: PayloadAction<string>) {
       state.declineReason = action.payload;
     },
-    submitSummary(state, action: PayloadAction<{ sessionId: string; learnerEngagementNotes: string }>) {
-      state.summaries[action.payload.sessionId] = {
-        learnerEngagementNotes: action.payload.learnerEngagementNotes,
-        submittedAtMs: Date.now(),
-      };
-    },
   },
 });
 
@@ -120,7 +109,6 @@ export const {
   setDeclineMoveSessionId,
   setDeclineSessionFocus,
   setDeclineReason,
-  submitSummary,
 } = sessionsSlice.actions;
 
 export default sessionsSlice.reducer;

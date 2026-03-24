@@ -46,22 +46,19 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import IconButton from "@mui/material/IconButton";
-import Switch from "@mui/material/Switch";
 import { keyframes } from "@mui/system";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
   setSessionFocus,
   confirmSession,
   clearRecentlyConfirmed,
-  acceptSession,
   setHomeSessionsView,
   setDeclineSessionFocus,
   setDeclineReason,
   setSelectedSessionType,
   setSelectedTimePeriod,
-  submitSummary,
 } from "@/store/slices/sessionsSlice";
-import { removeUnavailableBySessionId, setPatterns } from "@/store/slices/availabilitySlice";
+import { setPatterns } from "@/store/slices/availabilitySlice";
 import {
   setOpenSession,
   setOpenAvailability,
@@ -83,9 +80,7 @@ import {
 } from "@/lib/helpers";
 import { demoNow, DOW_LONG, timeOptions12 } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions, demoPlannedEvents } from "@/data/demo-sessions";
-import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED, STATUS_SUMMARY_NEEDED, STATUS_SUMMARY_SUBMITTED } from "@/components/shared/SessionCard";
-import { InlineSummaryForm } from "@/components/shared/InlineSummaryForm";
-import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
+import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
@@ -176,7 +171,6 @@ export default function DashboardPage() {
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
   const sessions = useMemo(() => filterSessionsByRole(allSessions, selectedRole), [allSessions, selectedRole]);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
-  const summaries = useAppSelector((s) => s.sessions.summaries);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
   const homeSessionsView = useAppSelector((s) => s.sessions.homeSessionsView);
   const hasUserConfiguredAvailability = useAppSelector((s) => s.availability.hasUserConfiguredAvailability);
@@ -193,10 +187,6 @@ export default function DashboardPage() {
 
   /* ── local state for exit animation ─────────────────────────────── */
   const [exitingId, setExitingId] = useState<string | null>(null);
-
-  /* ── inline summary state ──────────────────────────────────────── */
-  const [summarizingSessionId, setSummarizingSessionId] = useState<string | null>(null);
-  const [editingSummaryId, setEditingSummaryId] = useState<string | null>(null);
 
   /* ── planned event detail dialog state ───────────────────────── */
   const [plannedEventDetailId, setPlannedEventDetailId] = useState<string | null>(null);
@@ -240,10 +230,7 @@ export default function DashboardPage() {
       ? completedSessions
       : completedSessions.filter((s) => s.sessionType === selectedSessionType);
 
-    if (selectedTimePeriod === "Pending Summaries") {
-      const onlineTypes = ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"];
-      filtered = filtered.filter((s) => onlineTypes.includes(s.sessionType) && !summaries[s.id]);
-    } else if (selectedTimePeriod === "Last 6 months") {
+    if (selectedTimePeriod === "Last 6 months") {
       const sixMonthsAgo = new Date(demoNow);
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       filtered = filtered.filter((s) => new Date(s.dateYmd) >= sixMonthsAgo);
@@ -252,7 +239,7 @@ export default function DashboardPage() {
     }
 
     return filtered;
-  }, [completedSessions, selectedSessionType, selectedTimePeriod, summaries]);
+  }, [completedSessions, selectedSessionType, selectedTimePeriod]);
   const declinedSessions = useMemo(
     () => sessions.filter((s) => sessionDeclined[s.id]),
     [sessions, sessionDeclined]
@@ -281,7 +268,6 @@ export default function DashboardPage() {
 
   const needsWednesdayConfirm = scheduled.length > 0;
   const pendingRequestsCount = requests.filter((r) => r.response === "pending").length;
-  const pendingSummaryCount = completedSessions.filter((s) => !summaries[s.id]).length;
 
   return (
     <Stack spacing={2}>
@@ -752,28 +738,21 @@ export default function DashboardPage() {
                 {/* ── Completed tab ── */}
                 {homeSessionsView === "completed" && (
                   <>
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="center" justifyContent="space-between" sx={{ width: "100%" }}>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography variant="body2" color={selectedTimePeriod === "Pending Summaries" ? "primary" : "text.secondary"} sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
-                          Pending summaries ({completedSessions.filter((s) => ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"].includes(s.sessionType) && !summaries[s.id]).length})
-                        </Typography>
-                        <Switch
-                          size="small"
-                          checked={selectedTimePeriod === "Pending Summaries"}
-                          onChange={(_e: unknown, checked: boolean) => {
-                            if (checked) dispatch(setSelectedTimePeriod("Pending Summaries"));
-                            else dispatch(setSelectedTimePeriod("Last 6 months"));
-                          }}
-                        />
-                      </Stack>
-
+                    <Stack direction="row" justifyContent="flex-end">
                       <Select
                         size="small"
-                        variant="standard"
-                        disableUnderline
-                        value={selectedTimePeriod === "Pending Summaries" ? "Last 6 months" : selectedTimePeriod}
+                        variant="outlined"
+                        value={selectedTimePeriod}
                         onChange={(e) => dispatch(setSelectedTimePeriod(e.target.value as typeof selectedTimePeriod))}
-                        sx={{ fontSize: "0.85rem", fontWeight: 600, color: "primary.main", "& .MuiSelect-select": { py: 0.5 }, "& .MuiSvgIcon-root": { color: "primary.main" } }}
+                        sx={{
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          minWidth: 140,
+                          "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+                          "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "text.secondary" },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderWidth: 1 },
+                          "& .MuiSelect-select": { py: 0.75, px: 1.5 },
+                        }}
                       >
                         <MenuItem value="Last 6 months">Last 6 months</MenuItem>
                         <MenuItem value="2025">2025</MenuItem>
@@ -799,22 +778,17 @@ export default function DashboardPage() {
                           const avgNum = hasRatings
                             ? ratings.reduce((a, r) => a + r.rating, 0) / ratings.length
                             : 0;
-                          const hasSummary = !!summaries[s.id];
-                          const isSummarizing = summarizingSessionId === s.id;
-                          const isEditing = editingSummaryId === s.id;
                           const daysSinceSession = (nowMs - new Date(s.dateYmd).getTime()) / (1000 * 60 * 60 * 24);
                           const feedbackLabel = daysSinceSession > 30 ? "No feedback collected" : "Gathering feedback";
                           const isMockInterview = s.title.toLowerCase().includes("mock");
                           const isPaid = s.paymentStatus === "paid";
                           const hasPaymentStatus = !!s.paymentStatus;
                           const st = s.sessionType;
-                          const isOnlineType = ["Online session", "Career mentoring session", "Mentored Learning session", "Online class", "Industry session", "Schedule a call"].includes(st);
                           const isResidency = st === "Residency";
                           const isEvaluation = st === "Evaluation";
                           const isModeration = st === "Moderation";
                           const isCapstone = st === "Capstone project mentoring session";
                           const isCVReview = st === "CV Review";
-                          const hasSummaryFlow = isOnlineType; // only online-type sessions have summary
 
                           // Payment chip helper
                           const paymentChip = isPaid
@@ -907,15 +881,9 @@ export default function DashboardPage() {
                               </Button>
                             ) : null;
                           } else {
-                            // Online session types — full summary flow
+                            // Online session types
                             cardActions = (
                               <>
-                                {!hasSummary && !isSummarizing && (
-                                  <Button startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />} variant="contained" size="small"
-                                    onClick={() => setSummarizingSessionId(s.id)}>
-                                    Write summary
-                                  </Button>
-                                )}
                                 {s.recordingUrl && (
                                   <Button startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
                                     onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}>
@@ -934,12 +902,10 @@ export default function DashboardPage() {
                                     Share Feedback
                                   </Button>
                                 )}
-                                {hasSummary && (
-                                  <Button startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
-                                    onClick={() => navigate(`/payments?highlight=${s.id}`)}>
-                                    View in payments
-                                  </Button>
-                                )}
+                                <Button startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
+                                  onClick={() => navigate(`/payments?highlight=${s.id}`)}>
+                                  View in payments
+                                </Button>
                               </>
                             );
                           }
@@ -1003,46 +969,6 @@ export default function DashboardPage() {
                                   secondaryAction={viewDetailsBtn}
                                 />
                               )}
-                              {/* Summary flow — only for online-type sessions */}
-                              {hasSummaryFlow && !hasSummary && !isSummarizing && (
-                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
-                                  Write summary to process invoice
-                                </Typography>
-                              )}
-                              {hasSummaryFlow && isSummarizing && (
-                                <InlineSummaryForm
-                                  sessionId={s.id}
-                                  sessionTitle={s.title}
-                                  onCancel={() => setSummarizingSessionId(null)}
-                                />
-                              )}
-                              {hasSummaryFlow && hasSummary && !isEditing && (
-                                <Paper variant="outlined" sx={{ p: 1.5, mt: 1.5, borderRadius: 1.5, bgcolor: "action.hover" }}>
-                                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-                                    <Typography variant="caption" fontWeight={600}>Session summary</Typography>
-                                    <Button
-                                      startIcon={<EditNoteOutlinedIcon sx={{ fontSize: 14 }} />}
-                                      variant="text"
-                                      size="small"
-                                      sx={{ fontSize: 11, minWidth: "auto", p: 0 }}
-                                      onClick={() => setEditingSummaryId(s.id)}
-                                    >
-                                      Edit
-                                    </Button>
-                                  </Stack>
-                                  <Typography variant="body2" color="text.secondary">
-                                    {summaries[s.id].learnerEngagementNotes}
-                                  </Typography>
-                                </Paper>
-                              )}
-                              {hasSummaryFlow && isEditing && hasSummary && (
-                                <InlineSummaryForm
-                                  sessionId={s.id}
-                                  sessionTitle={s.title}
-                                  initialNotes={summaries[s.id].learnerEngagementNotes}
-                                  onCancel={() => setEditingSummaryId(null)}
-                                />
-                              )}
                             </Card>
                             </Fragment>
                           );
@@ -1072,21 +998,10 @@ export default function DashboardPage() {
                                 start={s.start}
                                 end={s.end}
                                 status={STATUS_DECLINED}
-                                actions={
-                                  <Button
-                                    startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
-                                    variant="soft"
-                                    size="small"
-                                    onClick={() => {
-                                      dispatch(acceptSession(s.id));
-                                      dispatch(removeUnavailableBySessionId(s.id));
-                                      dispatch(pushToast({ title: "Event accepted", description: `${s.title} · ${fmtDateNice(s.dateYmd)}` }));
-                                    }}
-                                  >
-                                    Accept
-                                  </Button>
-                                }
                               />
+                              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                                To re-accept this session, contact {s.scheduledByName || "the scheduler"}{s.scheduledByEmail ? ` at ${s.scheduledByEmail}` : ""}.
+                              </Typography>
                             </Card>
                           ))}
                         </Stack>
@@ -1147,23 +1062,6 @@ export default function DashboardPage() {
                     action={
                       <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
                         Review Confirmations
-                      </Button>
-                    }
-                  />
-                )}
-
-                {/* Session summaries task */}
-                {pendingSummaryCount > 0 && (
-                  <TaskCard
-                    chipLabel={`${pendingSummaryCount} pending`}
-                    chipColor="var(--gl-status-pending-text)"
-                    chipBg="var(--gl-status-pending-bg)"
-                    chipBorder="var(--gl-status-pending-border)"
-                    title="Write session summaries"
-                    description="Capture learner impact to unlock invoice processing."
-                    action={
-                      <Button size="small" variant="soft" onClick={() => dispatch(setHomeSessionsView("completed"))}>
-                        Go to completed events
                       </Button>
                     }
                   />
