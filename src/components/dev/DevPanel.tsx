@@ -12,12 +12,19 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import CodeOutlinedIcon from "@mui/icons-material/CodeOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
+import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
+import Button from "@mui/material/Button";
 import { useAppSelector, useAppDispatch } from "@/store";
+import { resetAvailability } from "@/store/slices/availabilitySlice";
 import {
   toggleDevPanel,
   setDevPanelOpen,
@@ -119,59 +126,28 @@ export function DevPanel() {
 
         {/* Role Selector */}
         <Box sx={{ px: 2.5, pt: 2, pb: 1.5 }}>
-          <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.5 }}>
+          <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
             <PersonOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
             <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>
               Guru Role
             </Typography>
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
-            Switch the dashboard persona to preview data for different roles.
-          </Typography>
+          <FormControl size="small" fullWidth>
+            <InputLabel>Role</InputLabel>
+            <Select
+              label="Role"
+              value={selectedRole}
+              onChange={(e) => dispatch(setSelectedRole(e.target.value as GuruRole))}
+              sx={{ fontSize: "0.85rem" }}
+            >
+              {GURU_ROLES.map((role) => (
+                <MenuItem key={role} value={role} sx={{ fontSize: "0.85rem" }}>{role}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
 
-        <List dense sx={{ px: 1, py: 0 }}>
-          {GURU_ROLES.map((role: GuruRole) => {
-            const isSelected = role === selectedRole;
-            return (
-              <ListItemButton
-                key={role}
-                selected={isSelected}
-                onClick={() => dispatch(setSelectedRole(role))}
-                sx={{
-                  borderRadius: 1.5,
-                  mx: 0.5,
-                  mb: 0.5,
-                  py: 0.75,
-                  ...(isSelected && {
-                    bgcolor: "hsl(var(--md-primary-container) / 0.15)",
-                    "&.Mui-selected:hover": {
-                      bgcolor: "hsl(var(--md-primary-container) / 0.2)",
-                    },
-                  }),
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 32 }}>
-                  {isSelected ? (
-                    <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: "primary.main" }} />
-                  ) : (
-                    <Box sx={{ width: 18, height: 18, borderRadius: "50%", border: 1.5, borderColor: "divider" }} />
-                  )}
-                </ListItemIcon>
-                <ListItemText
-                  primary={role}
-                  primaryTypographyProps={{
-                    variant: "body2",
-                    fontWeight: isSelected ? 600 : 400,
-                    color: isSelected ? "primary.main" : "text.primary",
-                  }}
-                />
-              </ListItemButton>
-            );
-          })}
-        </List>
-
-        <Divider sx={{ my: 2, mx: 2.5 }} />
+        <Divider sx={{ my: 1.5, mx: 2.5 }} />
 
         {/* Dev Tools */}
         <Box sx={{ px: 2.5, pb: 1 }}>
@@ -259,6 +235,24 @@ export function DevPanel() {
             />
           </ListItemButton>
         </List>
+
+        <Divider sx={{ my: 1.5, mx: 2.5 }} />
+
+        <Box sx={{ px: 2.5, pb: 2 }}>
+          <Button
+            variant="soft"
+            size="small"
+            color="primary"
+            startIcon={<RestartAltOutlinedIcon sx={{ fontSize: 16 }} />}
+            fullWidth
+            onClick={() => {
+              dispatch(resetAvailability());
+            }}
+            sx={{ textTransform: "none", fontSize: "0.8rem" }}
+          >
+            Reset availability
+          </Button>
+        </Box>
       </Drawer>
     </>
   );

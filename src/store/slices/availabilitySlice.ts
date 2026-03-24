@@ -42,11 +42,19 @@ interface AvailabilityState {
 const today = new Date();
 const todayYmd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
+// Persist availability across reloads
+const savedAvailability = typeof window !== "undefined" ? (() => {
+  try {
+    const raw = window.localStorage.getItem("guru-availability");
+    return raw ? JSON.parse(raw) as { hasConfigured: boolean; patterns: Pattern[] } : null;
+  } catch { return null; }
+})() : null;
+
 const initialState: AvailabilityState = {
-  patterns: demoPatterns,
+  patterns: savedAvailability?.patterns ?? demoPatterns,
   oneOffAvail: [],
   unavailable: [],
-  hasUserConfiguredAvailability: false,
+  hasUserConfiguredAvailability: savedAvailability?.hasConfigured ?? false,
   userConfiguredPatterns: [],
   maxPerWeek: 6,
   rangeDays: 60,
@@ -81,6 +89,9 @@ const availabilitySlice = createSlice({
   reducers: {
     setPatterns(state, action: PayloadAction<Pattern[]>) {
       state.patterns = action.payload;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("guru-availability", JSON.stringify({ hasConfigured: state.hasUserConfiguredAvailability, patterns: action.payload }));
+      }
     },
     setOneOffAvail(state, action: PayloadAction<Block[]>) {
       state.oneOffAvail = action.payload;
@@ -96,6 +107,9 @@ const availabilitySlice = createSlice({
     },
     setHasUserConfiguredAvailability(state, action: PayloadAction<boolean>) {
       state.hasUserConfiguredAvailability = action.payload;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("guru-availability", JSON.stringify({ hasConfigured: action.payload, patterns: state.patterns }));
+      }
     },
     setUserConfiguredPatterns(state, action: PayloadAction<Array<{ label: string; days: string[]; start: number; end: number }>>) {
       state.userConfiguredPatterns = action.payload;
@@ -182,6 +196,17 @@ const availabilitySlice = createSlice({
     removeUnavailableByGroupId(state, action: PayloadAction<string>) {
       state.unavailable = state.unavailable.filter((n) => n.groupId !== action.payload);
     },
+    resetAvailability(state) {
+      state.hasUserConfiguredAvailability = false;
+      state.patterns = demoPatterns;
+      state.userConfiguredPatterns = [];
+      state.presetCards = [];
+      state.availabilityStep = 1;
+      state.availabilityDraftPatterns = [];
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("guru-availability");
+      }
+    },
   },
 });
 
@@ -220,6 +245,7 @@ export const {
   removeUnavailableBySessionId,
   setEditingLeaveGroupId,
   removeUnavailableByGroupId,
+  resetAvailability,
 } = availabilitySlice.actions;
 
 export default availabilitySlice.reducer;
