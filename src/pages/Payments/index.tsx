@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import TextField from "@mui/material/TextField";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MuiTooltip from "@mui/material/Tooltip";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import Box from "@mui/material/Box";
@@ -35,13 +46,26 @@ import { demoMonthlyEarnings } from "@/data/demo-sessions";
 
 // ── Demo payments (100 entries: 20 recent pending, 80 completed) ─────────────
 const EVENT_NAMES = [
-  "Deep Learning", "NLP Advanced", "RL Workshop", "MLOps Masterclass",
-  "Data Eng – Pipeline", "CV Intro Session", "Statistics Foundations",
-  "Python Warm-up", "SQL Practice", "Probability Refresher",
-  "Feature Engineering", "Model Evaluation", "Time Series Basics",
-  "Data Storytelling", "Exploratory Data Analysis", "Regression Essentials",
-  "Data Viz Deep Dive", "Clustering Workshop", "Neural Networks Intro",
-  "Transformer Architectures",
+  "Mentor Session: Intro to Machine Learning",
+  "Mentor Session: Linear Regression Deep Dive",
+  "Workshop: Data Visualization with Python",
+  "Mentor Session: Probability for ML",
+  "Mentor Session: EDA with Pandas",
+  "Mentor Session: Decision Trees & Ensembles",
+  "Workshop: NLP Fundamentals",
+  "Mentor Session: Logistic Regression",
+  "Mentor Session: Clustering Techniques",
+  "Mentor Session: Time Series Basics",
+  "Mentor Session: Dimensionality Reduction",
+  "Workshop: Model Deployment with Flask",
+  "Mentor Session: CNNs for Image Classification",
+  "Mentor Session: Recommendation Systems",
+  "Mentor Session: RNNs & LSTMs",
+  "Workshop: GANs & Generative AI",
+  "Mentor Session: SQL Window Functions",
+  "Mentor Session: A/B Testing & Experimentation",
+  "Mentor Session: XGBoost Masterclass",
+  "Workshop: End-to-End ML Pipeline",
 ];
 const SESSION_TYPES: { type: string; dur: string; amount: number }[] = [
   { type: "Live", dur: "2h", amount: 12000 },
@@ -53,19 +77,22 @@ const SESSION_TYPES: { type: string; dur: string; amount: number }[] = [
 
 // Payments linked to completed sessions (need summary)
 const completedSessionPayments = [
-  { event: "Mentor Session: Python Fundamentals", type: "Live", dur: "2h", amount: 12000, status: "Pending review", txn: "–", inv: "–", sessionId: "c1" },
-  { event: "Mentor Session: SQL Practice", type: "Live", dur: "2h", amount: 12000, status: "Pending review", txn: "–", inv: "–", sessionId: "c2" },
-  { event: "Deep Learning Workshop", type: "Workshop", dur: "3h", amount: 18000, status: "Pending review", txn: "–", inv: "–", sessionId: "c4" },
-  { event: "Mentor Session: Feature Engineering", type: "Live", dur: "2h", amount: 12000, status: "Pending review", txn: "–", inv: "–", sessionId: "c5" },
-  { event: "NLP Advanced – Batch 3", type: "Live", dur: "2h", amount: 15000, status: "Pending review", txn: "–", inv: "–", sessionId: "c6" },
-  { event: "Regression Essentials Workshop", type: "Workshop", dur: "3h", amount: 18000, status: "Pending review", txn: "–", inv: "–", sessionId: "c7" },
-  { event: "Mentor Session: Data Viz Deep Dive", type: "Live", dur: "1.5h", amount: 9000, status: "Pending review", txn: "–", inv: "–", sessionId: "c8" },
-  { event: "Mentor Session: Probability Refresher", type: "Live", dur: "2h", amount: 12000, status: "Pending review", txn: "–", inv: "–", sessionId: "c9" },
+  { event: "Mentor Session: Capstone Project Review", date: "14 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Pending", txn: "–", inv: "–", sessionId: "ch30", _date: new Date("2026-02-14") },
+  { event: "Mentor Session: Python Fundamentals", date: "12 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Pending", txn: "–", inv: "–", sessionId: "c1", _date: new Date("2026-02-12") },
+  { event: "Mentor Session: SQL Practice", date: "10 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Pending", txn: "–", inv: "–", sessionId: "c2", _date: new Date("2026-02-10") },
+  { event: "Workshop: LLM Fine-tuning", date: "9 Feb 2026", type: "Workshop", dur: "3h", amount: 18000, status: "Pending", txn: "–", inv: "–", sessionId: "ch29", _date: new Date("2026-02-09") },
+  { event: "Mentor Session: Statistics Foundations", date: "8 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-9X2M7P", inv: "INV-2026-0208-001", sessionId: "c3", _date: new Date("2026-02-08") },
+  { event: "Mentor Session: MLOps Best Practices", date: "6 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-CC3DD4", inv: "INV-2026-0206-001", sessionId: "ch28", _date: new Date("2026-02-06") },
+  { event: "Deep Learning Workshop", date: "5 Feb 2026", type: "Workshop", dur: "3h", amount: 18000, status: "Completed", txn: "TXN-GL-DL0205", inv: "INV-2026-0205-001", sessionId: "c4", _date: new Date("2026-02-05") },
+  { event: "Mentor Session: Graph Neural Networks", date: "3 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-BB2CC3", inv: "INV-2026-0203-001", sessionId: "ch27", _date: new Date("2026-02-03") },
+  { event: "Mentor Session: Data Ethics & Bias", date: "1 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-AA1BB2", inv: "INV-2026-0201-001", sessionId: "ch26", _date: new Date("2026-02-01") },
 ];
 
 const generatedPayments = Array.from({ length: 92 }, (_, i) => {
   const idx = i + 9;
   const eventName = EVENT_NAMES[i % EVENT_NAMES.length];
+  const cohorts = ["PGP-DS", "PGP-AIML", "PGP-SE", "PGP-BA", "AIML Online"];
+  const cohort = cohorts[i % cohorts.length];
   const batch = Math.ceil(idx / 5);
   const session = SESSION_TYPES[i % SESSION_TYPES.length];
   const isPending = i < 17 ? i % 2 === 0 : (i > 17 && i % 17 === 0);
@@ -73,8 +100,10 @@ const generatedPayments = Array.from({ length: 92 }, (_, i) => {
   const d = new Date(2026, 2, 15);
   d.setDate(d.getDate() - (i + 3) * 3);
   const dateStr = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+  const fmtDate = `${d.getDate()} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()]} ${d.getFullYear()}`;
   return {
-    event: `${eventName} – Batch ${batch}`,
+    event: `${eventName} – ${cohort} ${batch}`,
+    date: fmtDate,
     type: session.type,
     dur: session.dur,
     amount: session.amount,
@@ -82,6 +111,7 @@ const generatedPayments = Array.from({ length: 92 }, (_, i) => {
     txn: status === "Completed" ? `TXN-${dateStr}-${String(idx).padStart(3, "0")}` : "–",
     inv: status === "Completed" ? `INV-${String(idx).padStart(3, "0")}` : "–",
     sessionId: undefined as string | undefined,
+    _date: d,
   };
 });
 
@@ -113,7 +143,7 @@ function build12MonthChart(earnings: typeof demoMonthlyEarnings) {
   return result;
 }
 
-type PaymentFilter = "All" | "Completed" | "Pending";
+type PaymentFilter = "All" | "Completed" | "Pending" | "Disputed";
 
 const highlightFade = keyframes`
   0%   { background-color: hsl(var(--md-primary) / 0.18); }
@@ -129,6 +159,14 @@ export default function PaymentsPage() {
   const [chartLoading, setChartLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(true);
   const rowsPerPage = 30;
+
+  // Dispute state
+  const [disputes, setDisputes] = useState<Record<number, { reason: string; notes: string }>>({});
+  const [disputeModal, setDisputeModal] = useState<{ index: number; event: string; amount: number } | null>(null);
+  const [disputeReason, setDisputeReason] = useState("");
+  const [disputeNotes, setDisputeNotes] = useState("");
+  const [isRefiningDispute, setIsRefiningDispute] = useState(false);
+  const disputeCutoff = new Date("2025-12-18"); // 60 days before demoNow (2026-02-16)
 
   // Pick up highlight param from URL
   useEffect(() => {
@@ -154,7 +192,7 @@ export default function PaymentsPage() {
     return () => clearTimeout(t);
   }, [page, paymentFilter]);
 
-  type SortKey = "event" | "type" | "dur" | "amount" | "status" | "txn" | "inv";
+  type SortKey = "event" | "date" | "type" | "dur" | "amount" | "status" | "txn" | "inv";
   const [sortBy, setSortBy] = useState<SortKey>("event");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
@@ -295,6 +333,7 @@ export default function PaymentsPage() {
           <MenuItem value="All">All</MenuItem>
           <MenuItem value="Completed">Completed</MenuItem>
           <MenuItem value="Pending">Pending</MenuItem>
+          <MenuItem value="Disputed">Disputed</MenuItem>
         </Select>
       </FlexBox>
 
@@ -305,6 +344,7 @@ export default function PaymentsPage() {
               <TableRow sx={{ bgcolor: "action.hover" }}>
                 {([
                   { label: "Event", key: "event" },
+                  { label: "Date", key: "date" },
                   { label: "Type", key: "type" },
                   { label: "Duration", key: "dur" },
                   { label: "Amount", key: "amount" },
@@ -323,6 +363,7 @@ export default function PaymentsPage() {
                     </TableSortLabel>
                   </TableCell>
                 ))}
+                <TableCell sx={{ fontWeight: 600, fontSize: 11, color: "text.secondary", py: 1.25, width: 48 }} />
               </TableRow>
             </TableHead>
             <TableBody>
@@ -330,6 +371,7 @@ export default function PaymentsPage() {
                 Array.from({ length: 8 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton variant="text" width="80%" /></TableCell>
+                    <TableCell><Skeleton variant="text" width={70} /></TableCell>
                     <TableCell><Skeleton variant="rounded" width={48} height={20} /></TableCell>
                     <TableCell><Skeleton variant="text" width={30} /></TableCell>
                     <TableCell><Skeleton variant="text" width={60} /></TableCell>
@@ -339,9 +381,14 @@ export default function PaymentsPage() {
                   </TableRow>
                 ))
               ) : demoPayments
-                .map((p) => p.status === "Pending review" ? { ...p, status: "Pending" } : p)
+                .map((p, origIdx) => ({ ...(p.status === "Pending review" ? { ...p, status: "Pending" } : p), _idx: origIdx }))
+                .map((p) => disputes[p._idx] ? { ...p, status: "Disputed" } : p)
                 .filter((p) => paymentFilter === "All" || p.status === paymentFilter)
                 .sort((a, b) => {
+                  if (sortBy === "date") {
+                    const cmp = ((a as { _date?: Date })._date?.getTime() ?? 0) - ((b as { _date?: Date })._date?.getTime() ?? 0);
+                    return sortDir === "asc" ? cmp : -cmp;
+                  }
                   const av = a[sortBy];
                   const bv = b[sortBy];
                   const cmp = typeof av === "number" ? av - (bv as number) : String(av).localeCompare(String(bv));
@@ -353,12 +400,20 @@ export default function PaymentsPage() {
                   key={i}
                   sx={{
                     "&:last-child td": { border: 0 },
+                    "& .flag-action": { opacity: 1, transition: "color 0.15s ease" },
+                    "& .flag-action svg": { color: "text.disabled" },
+                    "&:hover .flag-action svg": { color: "warning.main" },
                     ...(highlightSessionId && p.sessionId === highlightSessionId
                       ? { animation: `${highlightFade} 1s ease-out forwards` }
                       : {}),
                   }}
                 >
-                  <TableCell sx={{ fontSize: 12 }}>{p.event}</TableCell>
+                  <TableCell sx={{ fontSize: 12, maxWidth: 280 }} title={p.event}>
+                    <Typography variant="body2" sx={{ fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {p.event}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ fontSize: 11, color: "text.secondary", whiteSpace: "nowrap" }}>{p.date}</TableCell>
                   <TableCell sx={{ fontSize: 12 }}>
                     <Chip
                       label={p.type}
@@ -379,12 +434,18 @@ export default function PaymentsPage() {
                         fontWeight: 500,
                         ...(p.status === "Completed"
                           ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" }
-                          : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)" }),
+                          : p.status === "Disputed"
+                            ? { bgcolor: "#fff3e0", color: "#e65100" }
+                            : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)" }),
                       }}
                     />
                   </TableCell>
-                  <TableCell sx={{ fontSize: 11, fontFamily: "monospace", color: "text.secondary" }}>
-                    {p.txn}
+                  <TableCell sx={{ fontSize: 11, fontFamily: "monospace", color: "text.secondary", maxWidth: 110 }}>
+                    <MuiTooltip title={p.txn !== "–" ? p.txn : ""} arrow enterDelay={400} slotProps={{ tooltip: { sx: { fontSize: "0.75rem", fontWeight: 500, py: 0.75, px: 1.5, borderRadius: 1.5 } } }}>
+                      <Typography variant="body2" sx={{ fontSize: 11, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {p.txn}
+                      </Typography>
+                    </MuiTooltip>
                   </TableCell>
                   <TableCell>
                     {p.inv !== "–" ? (
@@ -394,7 +455,7 @@ export default function PaymentsPage() {
                           startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 12 }} />}
                           sx={{ fontSize: 11, textTransform: "none", p: 0, color: "text.secondary" }}
                         >
-                          {p.inv}
+                          {p.inv.length > 7 ? `${p.inv.slice(0, 7)}…` : p.inv}
                         </Button>
                         <IconButton size="small" sx={{ p: 0.25 }}>
                           <FileDownloadOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
@@ -403,6 +464,39 @@ export default function PaymentsPage() {
                     ) : (
                       <Typography variant="caption" color="text.disabled">–</Typography>
                     )}
+                  </TableCell>
+                  <TableCell sx={{ px: 0.5 }}>
+                    {(() => {
+                      const paymentDate = (p as { _date?: Date })._date;
+                      const isRecent = paymentDate ? paymentDate >= disputeCutoff : false;
+                      const isDisputed = !!disputes[(p as { _idx: number })._idx];
+
+                      if (isDisputed) {
+                        return (
+                          <MuiTooltip title={`Reason: ${disputes[(p as { _idx: number })._idx].reason}`} arrow>
+                            <InfoOutlinedIcon sx={{ fontSize: 16, color: "#e65100", cursor: "pointer" }} />
+                          </MuiTooltip>
+                        );
+                      }
+                      if (isRecent) {
+                        return (
+                            <IconButton
+                              size="small"
+                              className="flag-action"
+                              title="Report incorrect value"
+                              sx={{ p: 0.25 }}
+                              onClick={() => {
+                                setDisputeModal({ index: (p as { _idx: number })._idx, event: p.event, amount: p.amount });
+                                setDisputeReason("");
+                                setDisputeNotes("");
+                              }}
+                            >
+                              <FlagOutlinedIcon sx={{ fontSize: 16, color: "warning.main" }} />
+                            </IconButton>
+                        );
+                      }
+                      return null;
+                    })()}
                   </TableCell>
                 </TableRow>
               ))}
@@ -423,6 +517,95 @@ export default function PaymentsPage() {
         </FlexBox>
       </Card>
 
+      {/* ── Dispute Modal ── */}
+      <Dialog
+        open={!!disputeModal}
+        onClose={() => setDisputeModal(null)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 2 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, fontSize: "1rem", pb: 0.5 }}>Report payment issue</DialogTitle>
+        <DialogContent sx={{ pt: 1.5 }}>
+          {disputeModal && (
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="caption" color="text.secondary">Session</Typography>
+                <Typography variant="body2" fontWeight={600}>{disputeModal.event}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary">Amount</Typography>
+                <Typography variant="body2" fontWeight={600}>{fmtInr(disputeModal.amount)}</Typography>
+              </Box>
+              <FormControl size="small" fullWidth>
+                <InputLabel>Reason</InputLabel>
+                <Select
+                  label="Reason"
+                  value={disputeReason}
+                  onChange={(e) => setDisputeReason(e.target.value)}
+                >
+                  <MenuItem value="Incorrect amount">Incorrect amount</MenuItem>
+                  <MenuItem value="Wrong session duration">Wrong session duration</MenuItem>
+                  <MenuItem value="Missing payment">Missing payment</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
+                </Select>
+              </FormControl>
+              <Box>
+                <TextField
+                  label="Additional notes"
+                  placeholder="Describe the issue..."
+                  multiline
+                  rows={3}
+                  size="small"
+                  fullWidth
+                  value={disputeNotes}
+                  onChange={(e) => setDisputeNotes(e.target.value)}
+                />
+                <Button
+                  size="small"
+                  variant="text"
+                  startIcon={isRefiningDispute
+                    ? <Box sx={{ width: 14, height: 14, border: "2px solid", borderColor: "primary.main", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite", "@keyframes spin": { to: { transform: "rotate(360deg)" } } }} />
+                    : <AutoAwesomeOutlinedIcon sx={{ fontSize: 14 }} />
+                  }
+                  disabled={!disputeNotes.trim() || isRefiningDispute}
+                  onClick={() => {
+                    setIsRefiningDispute(true);
+                    const refinedResponses: Record<string, string> = {
+                      "Incorrect amount": `The payment of ${disputeModal ? fmtInr(disputeModal.amount) : ""} for "${disputeModal?.event}" does not match the agreed rate. ${disputeNotes.trim() ? `Specifically: ${disputeNotes.trim()}.` : ""} Requesting a review and correction of the invoiced amount.`,
+                      "Wrong session duration": `The recorded duration for "${disputeModal?.event}" is inaccurate. ${disputeNotes.trim() ? `Details: ${disputeNotes.trim()}.` : ""} Please verify the session logs and update the duration accordingly.`,
+                      "Missing payment": `Payment for "${disputeModal?.event}" has not been received or reflected in the records. ${disputeNotes.trim() ? `Additional context: ${disputeNotes.trim()}.` : ""} Kindly investigate and process the outstanding payment.`,
+                      "Other": disputeNotes.trim() ? `Regarding "${disputeModal?.event}": ${disputeNotes.trim()}. Please review and take appropriate action.` : disputeNotes,
+                    };
+                    setTimeout(() => {
+                      setDisputeNotes(refinedResponses[disputeReason] ?? disputeNotes);
+                      setIsRefiningDispute(false);
+                    }, 1200);
+                  }}
+                  sx={{ mt: 0.5, textTransform: "none", fontSize: "0.75rem" }}
+                >
+                  {isRefiningDispute ? "Refining..." : "Refine with AI"}
+                </Button>
+              </Box>
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="text" color="inherit" onClick={() => setDisputeModal(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!disputeReason}
+            onClick={() => {
+              if (!disputeModal) return;
+              setDisputes((prev) => ({ ...prev, [disputeModal.index]: { reason: disputeReason, notes: disputeNotes } }));
+              dispatch(pushToast({ title: "Issue reported", description: `${disputeModal.event} has been flagged for review.` }));
+              setDisputeModal(null);
+            }}
+          >
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
