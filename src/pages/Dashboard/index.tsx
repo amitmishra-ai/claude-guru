@@ -2,7 +2,6 @@ import { Fragment, useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
@@ -66,6 +65,7 @@ import {
   setOpenLearnerRatings,
   setLearnerRatingsSessionId,
   setOpenSessionDetails,
+  setOpenSessionMaterials,
 } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import {
@@ -269,6 +269,11 @@ export default function DashboardPage() {
   const needsWednesdayConfirm = scheduled.length > 0;
   const pendingRequestsCount = requests.filter((r) => r.response === "pending").length;
 
+  const getOnCourseClick = (s: Session) => {
+    if (!s.linkedCourseId) return undefined;
+    return () => navigate("/courses");
+  };
+
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
   const isNewUser = guruStage === "new";
   const isEarlyUser = guruStage === "early";
@@ -444,6 +449,7 @@ export default function DashboardPage() {
                               dateYmd={s.dateYmd}
                               start={s.start}
                               end={s.end}
+                              onCourseClick={getOnCourseClick(s)}
                               actions={
                                 <>
                                   <Button
@@ -458,10 +464,13 @@ export default function DashboardPage() {
                                   <Button
                                     variant="soft"
                                     size="small"
-                                    startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                                    onClick={() => dispatch(pushToast({ title: "Session Materials", description: "Opening event materials..." }))}
+                                    startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+                                    onClick={() => {
+                                      dispatch(setSessionFocus(s));
+                                      dispatch(setOpenSessionMaterials(true));
+                                    }}
                                   >
-                                    Session Materials
+                                    View Session Material
                                   </Button>
                                 </>
                               }
@@ -539,6 +548,7 @@ export default function DashboardPage() {
                                 dateYmd={s.dateYmd}
                                 start={s.start}
                                 end={s.end}
+                                onCourseClick={getOnCourseClick(s)}
                                 status={isConfirmed
                                   ? STATUS_CONFIRMED()
                                   : STATUS_SCHEDULED
@@ -549,10 +559,13 @@ export default function DashboardPage() {
                                     <Button
                                       variant="soft"
                                       size="small"
-                                      startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                                      onClick={() => dispatch(pushToast({ title: "Downloading event materials", description: "Preparing download..." }))}
+                                      startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+                                      onClick={() => {
+                                        dispatch(setSessionFocus(s));
+                                        dispatch(setOpenSessionMaterials(true));
+                                      }}
                                     >
-                                      Session Materials
+                                      View Session Material
                                     </Button>
                                     <Button
                                       variant="soft"
@@ -985,6 +998,7 @@ export default function DashboardPage() {
                                   dateYmd={s.dateYmd}
                                   start={s.start}
                                   end={s.end}
+                                  onCourseClick={getOnCourseClick(s)}
                                   topRight={topRightContent}
                                   chips={s.combinedBatches ? ["Combined session"] : undefined}
                                   actions={cardActions}
@@ -1019,6 +1033,7 @@ export default function DashboardPage() {
                                 dateYmd={s.dateYmd}
                                 start={s.start}
                                 end={s.end}
+                                onCourseClick={getOnCourseClick(s)}
                                 status={STATUS_DECLINED}
                               />
                               <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
@@ -1069,78 +1084,7 @@ export default function DashboardPage() {
 
         {/* Right column: Tasks sidebar (desktop only) */}
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' }, alignSelf: 'flex-start', position: 'sticky', top: 24 }}>
-          {/* Performance stats 2×2 grid */}
-          <Card sx={{ p: 2, mb: 2 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-            <Typography variant="subtitle2" fontWeight={600}>Your Performance</Typography>
-            <Button variant="text" size="small" sx={{ textTransform: "none", fontSize: "0.75rem" }} onClick={() => navigate("/profile")}>
-              View profile
-            </Button>
-          </Stack>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
-            {homeStatCards.map((s) => {
-              const minV = Math.min(...s.bars);
-              const maxV = Math.max(...s.bars);
-              const range = maxV - minV || 1;
-              const w = 80;
-              const h = 20;
-              const pts = s.bars.map((v, i) => {
-                const x = (i / (s.bars.length - 1)) * w;
-                const y = h - ((v - minV) / range) * (h - 4) - 2;
-                return `${x},${y}`;
-              });
-              const polyPoints = pts.join(" ");
-              return (
-                <Card
-                  key={s.label}
-                  elevation={0}
-                  sx={{
-                    p: 1.25,
-                    bgcolor: s.bg,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: 2,
-                    cursor: "pointer",
-                    transition: "border-color 0.2s",
-                    "&:hover": { borderColor: s.accent },
-                  }}
-                  onClick={() => navigate("/profile")}
-                >
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
-                    <Box>
-                      <Typography variant="caption" sx={{ color: s.accent, fontWeight: 700, fontSize: "0.55rem", letterSpacing: "0.06em" }}>
-                        {s.label.toUpperCase()}
-                      </Typography>
-                      <Typography fontWeight={700} sx={{ fontSize: "1rem", lineHeight: 1.1, mt: 0.25, ...(s.value === "—" ? { opacity: 0.3 } : {}) }}>
-                        {s.value}
-                      </Typography>
-                      {s.delta && (
-                        <Typography variant="caption" sx={{ color: s.positive ? "success.main" : "error.main", fontWeight: 600, fontSize: "0.6rem" }}>
-                          {s.positive ? "↗" : "↘"} {s.delta}
-                        </Typography>
-                      )}
-                    </Box>
-                    <Box sx={{ width: 48, flexShrink: 0 }}>
-                      {s.bars.length > 1 ? (
-                        <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
-                          <polygon points={`0,${h} ${polyPoints} ${w},${h}`} fill={s.accent} opacity={0.1} />
-                          <polyline points={polyPoints} fill="none" stroke={s.accent} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" opacity={0.6} />
-                          <circle cx={pts[pts.length - 1].split(",")[0]} cy={pts[pts.length - 1].split(",")[1]} r={2} fill={s.accent} />
-                        </svg>
-                      ) : (
-                        <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
-                          <line x1="0" y1={h / 2} x2={w} y2={h / 2} stroke={s.accent} strokeWidth={1} strokeDasharray="3 3" opacity={0.25} />
-                        </svg>
-                      )}
-                    </Box>
-                  </Stack>
-                </Card>
-              );
-            })}
-          </Box>
-          </Card>
-
-            <Card sx={{ p: 2 }}>
+            <Card sx={{ p: 2, mb: 2 }}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Tasks</Typography>
               <Stack spacing={2}>
                 {/* Confirm events task */}
@@ -1315,6 +1259,77 @@ export default function DashboardPage() {
                 )}
               </Stack>
             </Card>
+
+          {/* Performance stats 2×2 grid */}
+          <Card sx={{ p: 2 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+            <Typography variant="subtitle2" fontWeight={600}>Your Performance</Typography>
+            <Button variant="text" size="small" sx={{ textTransform: "none", fontSize: "0.75rem" }} onClick={() => navigate("/profile")}>
+              View profile
+            </Button>
+          </Stack>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
+            {homeStatCards.map((s) => {
+              const minV = Math.min(...s.bars);
+              const maxV = Math.max(...s.bars);
+              const range = maxV - minV || 1;
+              const w = 80;
+              const h = 20;
+              const pts = s.bars.map((v, i) => {
+                const x = (i / (s.bars.length - 1)) * w;
+                const y = h - ((v - minV) / range) * (h - 4) - 2;
+                return `${x},${y}`;
+              });
+              const polyPoints = pts.join(" ");
+              return (
+                <Card
+                  key={s.label}
+                  elevation={0}
+                  sx={{
+                    p: 1.25,
+                    bgcolor: s.bg,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 2,
+                    cursor: "pointer",
+                    transition: "border-color 0.2s",
+                    "&:hover": { borderColor: s.accent },
+                  }}
+                  onClick={() => navigate("/profile")}
+                >
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
+                    <Box>
+                      <Typography variant="caption" sx={{ color: s.accent, fontWeight: 700, fontSize: "0.55rem", letterSpacing: "0.06em" }}>
+                        {s.label.toUpperCase()}
+                      </Typography>
+                      <Typography fontWeight={700} sx={{ fontSize: "1rem", lineHeight: 1.1, mt: 0.25, ...(s.value === "—" ? { opacity: 0.3 } : {}) }}>
+                        {s.value}
+                      </Typography>
+                      {s.delta && (
+                        <Typography variant="caption" sx={{ color: s.positive ? "success.main" : "error.main", fontWeight: 600, fontSize: "0.6rem" }}>
+                          {s.positive ? "↗" : "↘"} {s.delta}
+                        </Typography>
+                      )}
+                    </Box>
+                    <Box sx={{ width: 48, flexShrink: 0 }}>
+                      {s.bars.length > 1 ? (
+                        <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
+                          <polygon points={`0,${h} ${polyPoints} ${w},${h}`} fill={s.accent} opacity={0.1} />
+                          <polyline points={polyPoints} fill="none" stroke={s.accent} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" opacity={0.6} />
+                          <circle cx={pts[pts.length - 1].split(",")[0]} cy={pts[pts.length - 1].split(",")[1]} r={2} fill={s.accent} />
+                        </svg>
+                      ) : (
+                        <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
+                          <line x1="0" y1={h / 2} x2={w} y2={h / 2} stroke={s.accent} strokeWidth={1} strokeDasharray="3 3" opacity={0.25} />
+                        </svg>
+                      )}
+                    </Box>
+                  </Stack>
+                </Card>
+              );
+            })}
+          </Box>
+          </Card>
         </Grid>
       </Grid>}
 

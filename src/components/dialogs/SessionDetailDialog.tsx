@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -19,7 +19,7 @@ import {
   setDeclineSessionFocus,
   setDeclineReason,
 } from "@/store/slices/sessionsSlice";
-import { setOpenSession, setOpenDeclineReason, setOpenSessionDetails } from "@/store/slices/uiSlice";
+import { setOpenSession, setOpenDeclineReason, setOpenSessionDetails, setOpenSessionMaterials } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import { sortByDateTime, dateTimeMs, fmtDateNice } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
@@ -100,10 +100,13 @@ export function SessionDetailDialog() {
                           <Button
                             variant="soft"
                             size="small"
-                            startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
-                            onClick={() => dispatch(pushToast({ title: "Downloading event materials", description: "Preparing download..." }))}
+                            startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+                            onClick={() => {
+                              dispatch(setSessionFocus(s));
+                              dispatch(setOpenSessionMaterials(true));
+                            }}
                           >
-                            Session Materials
+                            View Session Material
                           </Button>
                           <Button
                             variant="soft"

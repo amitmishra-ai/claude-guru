@@ -11,6 +11,7 @@ import { PollBuilderDialog } from "./PollBuilderDialog";
 import { MarkUnavailableModal } from "./MarkUnavailableModal";
 import { AddAvailabilityModal } from "./AddAvailabilityModal";
 import { SessionDetailsModal } from "./SessionDetailsModal";
+import { SessionMaterialsDrawer } from "./SessionMaterialsDrawer";
 import { CourseDetailDialog } from "./CourseDetailDialog";
 
 /**
@@ -33,6 +34,7 @@ export function GlobalDialogs() {
       <MarkUnavailableModal />
       <AddAvailabilityModal />
       <SessionDetailsModal />
+      <SessionMaterialsDrawer />
       <CourseDetailDialog />
     </>
   );

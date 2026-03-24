@@ -22,6 +22,10 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
+import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
+import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -39,43 +43,56 @@ import {
   setDeclineSessionFocus,
   setDeclineReason,
 } from "@/store/slices/sessionsSlice";
-import { setOpenSessionDetails, setOpenDeclineReason } from "@/store/slices/uiSlice";
+import { setOpenSessionDetails, setOpenDeclineReason, setOpenLearnerRatings, setLearnerRatingsSessionId } from "@/store/slices/uiSlice";
 import { addPoll, updatePoll, removePoll } from "@/store/slices/pollsSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import { fmtDateNice, fmtTime12, fmtDuration, fmtInr, getTimeZoneOffsetMinutes, formatGMTOffsetFromMinutesAhead } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
-import { demoCourseCatalog } from "@/data/demo-sessions";
+import { demoCourseCatalog, demoLearnerRatingsBySessionId } from "@/data/demo-sessions";
 import { dateTimeMs, sortByDateTime } from "@/lib/helpers";
 import type { SessionPrepMaterial, Poll } from "@/lib/types";
 
 const MATERIAL_ICONS: Record<SessionPrepMaterial["type"], React.ReactNode> = {
-  slides: <SlideshowOutlinedIcon sx={{ fontSize: 14 }} />,
-  document: <DescriptionOutlinedIcon sx={{ fontSize: 14 }} />,
-  video: <VideocamOutlinedIcon sx={{ fontSize: 14 }} />,
-  link: <LinkOutlinedIcon sx={{ fontSize: 14 }} />,
+  slides: <SlideshowOutlinedIcon sx={{ fontSize: 15 }} />,
+  document: <DescriptionOutlinedIcon sx={{ fontSize: 15 }} />,
+  video: <VideocamOutlinedIcon sx={{ fontSize: 15 }} />,
+  link: <LinkOutlinedIcon sx={{ fontSize: 15 }} />,
 };
 
-function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
+/* ── Shared layout primitives ── */
+
+function DetailRow({ label, children, compact }: { label: string; children: React.ReactNode; compact?: boolean }) {
   return (
-    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
-      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>
+    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: compact ? 0.625 : 0.875 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>
         {label}
       </Typography>
       <Box sx={{ textAlign: "right" }}>
-        <Typography variant="body2" fontWeight={500}>{children}</Typography>
+        <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }} component="div">{children}</Typography>
       </Box>
     </Stack>
   );
 }
 
-function SectionBox({ children }: { children: React.ReactNode }) {
+function SectionHeading({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
+  return (
+    <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+      {icon && <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>{icon}</Box>}
+      <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
+        {children}
+      </Typography>
+    </Stack>
+  );
+}
+
+function SectionCard({ children }: { children: React.ReactNode }) {
   return (
     <Box
       sx={{
-        borderRadius: "16px",
+        borderRadius: "12px",
         border: 1,
         borderColor: "divider",
-        backgroundColor: "hsl(var(--md-surface))",
+        bgcolor: "hsl(var(--md-surface))",
         p: 2,
       }}
     >
@@ -372,15 +389,17 @@ function PollsSection({ sessionId }: { sessionId: string }) {
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
         <Stack direction="row" alignItems="center" spacing={0.75}>
           <PollOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
-          <Typography variant="subtitle2" fontWeight={700}>Polls</Typography>
+          <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
+            Polls
+          </Typography>
           {sessionPolls.length > 0 && (
             <Chip
               label={sessionPolls.length}
               size="small"
               sx={{
-                height: 20,
-                minWidth: 20,
-                fontSize: "0.65rem",
+                height: 18,
+                minWidth: 18,
+                fontSize: "0.6rem",
                 fontWeight: 700,
                 bgcolor: "primary.main",
                 color: "primary.contrastText",
@@ -465,7 +484,6 @@ export function SessionDetailsModal() {
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
   const nowMs = demoNow.getTime();
 
-  // The next upcoming session (first in sorted upcoming list) is always treated as confirmed
   const nextSessionId = sortByDateTime(allSessions).find(
     (s) => dateTimeMs(s.dateYmd, s.start) >= nowMs && !sessionDeclined[s.id]
   )?.id ?? null;
@@ -481,9 +499,13 @@ export function SessionDetailsModal() {
     ? demoCourseCatalog.find((c) => c.id === session.linkedCourseId)
     : null;
   const isMentoring = session?.sessionType === "Career mentoring session";
-
-  // Show polls for confirmed, non-completed sessions
   const showPolls = session && isConfirmed && !isCompleted;
+
+  /* Status chip config */
+  const statusLabel = isCompleted ? "Completed" : isConfirmed ? "Confirmed" : "Scheduled";
+  const statusSx = isCompleted || isConfirmed
+    ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" }
+    : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" };
 
   return (
     <Drawer
@@ -493,14 +515,17 @@ export function SessionDetailsModal() {
       SlideProps={{ onExited: () => dispatch(setSessionFocus(null)) }}
       sx={{
         "& .MuiDrawer-paper": {
-          width: { xs: "100vw", sm: 520 },
+          width: { xs: "100vw", sm: 480 },
           maxWidth: "100vw",
-          boxShadow: "-8px 0 32px rgba(0,0,0,0.08)",
+          boxShadow: "-4px 0 24px rgba(0,0,0,0.06)",
+          borderLeft: "1px solid",
+          borderColor: "divider",
         },
       }}
     >
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-        {/* ── Sticky header ── */}
+
+        {/* ── Sticky header with status ── */}
         <Box
           sx={{
             position: "sticky",
@@ -509,347 +534,475 @@ export function SessionDetailsModal() {
             borderBottom: 1,
             borderColor: "divider",
             bgcolor: "background.paper",
-            px: 3,
-            py: 2,
+            px: 2.5,
+            py: 1.5,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexShrink: 0,
           }}
         >
-          <Typography variant="subtitle1" fontWeight={700}>Event details</Typography>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
+            {session && (
+              <Chip
+                label={statusLabel}
+                size="small"
+                sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...statusSx }}
+              />
+            )}
+          </Stack>
           <IconButton size="small" onClick={handleClose} sx={{ color: "text.secondary" }}>
-            <CloseOutlinedIcon sx={{ fontSize: 18 }} />
+            <CloseOutlinedIcon sx={{ fontSize: 16 }} />
           </IconButton>
         </Box>
 
         {/* ── Scrollable content ── */}
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2.5 }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
           {session ? (
-            <Stack spacing={2.5}>
-              {/* Header: breadcrumb + status + title */}
-              <Box>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.75 }}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                    {[session.batch || session.program, session.sessionType].filter(Boolean).join(" · ")}
+            <>
+              {/* ═══ HERO: Title + Schedule at-a-glance ═══ */}
+              <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+                {/* Breadcrumb */}
+                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
+                  {[session.batch || session.program, session.sessionType].filter(Boolean).join(" · ")}
+                </Typography>
+                {/* Title */}
+                <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3, mb: 0.25 }}>
+                  {session.title}
+                </Typography>
+                {session.topic && (
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>
+                    {session.topic}
                   </Typography>
-                  {isConfirmed && (
-                    <Chip
-                      label="Confirmed"
-                      size="small"
-                      sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }}
-                    />
-                  )}
-                  {!isConfirmed && !isCompleted && (
-                    <Chip
-                      label="Scheduled"
-                      size="small"
-                      sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }}
-                    />
-                  )}
-                  {isCompleted && (
-                    <Chip
-                      label="Completed"
-                      size="small"
-                      sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }}
-                    />
-                  )}
-                </Stack>
-                <Typography variant="h6" fontWeight={600}>{session.title}</Typography>
+                )}
+
+                {/* Schedule at-a-glance */}
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 1.75,
+                    borderRadius: "10px",
+                    bgcolor: "hsl(var(--md-surface-container) / 0.5)",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Stack spacing={1}>
+                    {/* Date + Time — hero line */}
+                    <Stack direction="row" alignItems="center" spacing={1.5}>
+                      <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "hsl(var(--md-on-primary-container))" }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.875rem", lineHeight: 1.2 }}>
+                          {fmtDateNice(session.dateYmd)}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                          {fmtTime12(session.start)}&ndash;{fmtTime12(session.end)} &middot; {fmtDuration(session.start, session.end)}
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    {/* Location */}
+                    <Stack direction="row" alignItems="center" spacing={1.5}>
+                      <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <PlaceOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>
+                          {session.location}
+                        </Typography>
+                        {session.timeZone && (
+                          <Typography variant="caption" color="text.secondary">
+                            {session.timeZone} ({formatGMTOffsetFromMinutesAhead(getTimeZoneOffsetMinutes(session.timeZone))})
+                          </Typography>
+                        )}
+                      </Box>
+                    </Stack>
+                  </Stack>
+                </Box>
               </Box>
 
-              {/* Schedule info */}
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Date">
-                  <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                    <span>{fmtDateNice(session.dateYmd)}</span>
-                  </Stack>
-                </InfoRow>
-                <InfoRow label="Time">
-                  <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <AccessTimeOutlinedIcon sx={{ fontSize: 13 }} />
-                    <span>{fmtTime12(session.start)}&ndash;{fmtTime12(session.end)}</span>
-                  </Stack>
-                </InfoRow>
-                <InfoRow label="Duration">{fmtDuration(session.start, session.end)}</InfoRow>
-                {session.timeZone && (
-                  <InfoRow label="Time zone">
-                    <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                      <LanguageOutlinedIcon sx={{ fontSize: 13 }} />
-                      <span>{session.timeZone} ({formatGMTOffsetFromMinutesAhead(getTimeZoneOffsetMinutes(session.timeZone))})</span>
-                    </Stack>
-                  </InfoRow>
-                )}
-                <InfoRow label="Location">
-                  <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <PlaceOutlinedIcon sx={{ fontSize: 13 }} />
-                    <span>{session.location}</span>
-                  </Stack>
-                </InfoRow>
-              </SectionBox>
+              <Divider />
 
-              {/* Scheduling metadata */}
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                {session.scheduledByName && (
-                  <InfoRow label="Scheduled by">
-                    <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                      <AccountCircleOutlinedIcon sx={{ fontSize: 13 }} />
-                      <span>{session.scheduledByName}</span>
-                    </Stack>
-                    {session.scheduledByEmail && (
-                      <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                        <MailOutlinedIcon sx={{ fontSize: 12 }} />
-                        <Typography variant="caption" color="text.secondary">
-                          {session.scheduledByEmail}
-                        </Typography>
-                      </Stack>
-                    )}
-                    {session.scheduledOnYmd && (
-                      <Typography variant="caption" color="text.secondary">
-                        on {fmtDateNice(session.scheduledOnYmd)}
-                      </Typography>
-                    )}
-                  </InfoRow>
-                )}
-                {session.cohort && (
-                  <InfoRow label="Batch">{session.cohort}</InfoRow>
-                )}
-                {session.group && (
-                  <InfoRow label="Group">
-                    <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                      <GroupsOutlinedIcon sx={{ fontSize: 13 }} />
-                      <span>{session.group}</span>
-                    </Stack>
-                  </InfoRow>
-                )}
-                {session.audienceType && (
-                  <InfoRow label="Audience">{session.audienceType}</InfoRow>
-                )}
-              </SectionBox>
+              {/* ═══ DETAIL SECTIONS ═══ */}
+              <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
 
-              {/* Predicted groups */}
-              {session.predictedGroups && session.predictedGroups.length > 0 && (
-                <SectionBox>
-                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>Predicted groups</Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                    {session.predictedGroups.map((g) => (
-                      <Chip key={g} label={g} size="small" />
-                    ))}
-                  </Stack>
-                </SectionBox>
-              )}
-
-              {/* Linked course */}
-              {linkedCourse && (
-                <SectionBox>
-                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>Linked course</Typography>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-                    <Typography variant="body2">{linkedCourse.title}</Typography>
-                    <Button
-                      variant="text"
-                      size="small"
-                      startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}
-                      onClick={() => {
-                        handleClose();
-                        navigate("/courses");
-                        dispatch(pushToast({ title: "Course content", description: `Viewing ${linkedCourse.title}` }));
-                      }}
-                    >
-                      View course
-                    </Button>
-                  </Stack>
-                </SectionBox>
-              )}
-
-              {/* Preparation / Event materials */}
-              {!isMentoring && session.prepMaterials && session.prepMaterials.length > 0 && (
-                <SectionBox>
-                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>Event materials</Typography>
-                  <Stack spacing={0.75}>
-                    {session.prepMaterials.map((m) => (
-                      <Stack
-                        key={m.id}
-                        direction="row"
-                        alignItems="center"
-                        spacing={1}
-                        sx={{
-                          py: 0.75,
-                          px: 1,
-                          borderRadius: "8px",
-                          "&:hover": { bgcolor: "action.hover" },
-                          cursor: "pointer",
-                        }}
-                        onClick={() => dispatch(pushToast({ title: "Opening", description: m.label }))}
-                      >
-                        <Box sx={{ color: "text.secondary", display: "flex" }}>{MATERIAL_ICONS[m.type]}</Box>
-                        <Typography variant="body2">{m.label}</Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                </SectionBox>
-              )}
-
-              {/* Learner context (1:1 sessions) */}
-              {isMentoring && session.learnerContext && (
-                <SectionBox>
-                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>Learner context</Typography>
-                  <Divider sx={{ mb: 0.5 }} />
-                  {session.learnerContext.learnerName && (
-                    <InfoRow label="Learner">{session.learnerContext.learnerName}</InfoRow>
-                  )}
-                  <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap" useFlexGap>
-                    {session.learnerContext.resumeUrl && (
-                      <Button
-                        variant="soft"
-                        size="small"
-                        startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}
-                        onClick={() => dispatch(pushToast({ title: "Opening resume", description: "Downloading learner resume..." }))}
-                      >
-                        Resume
-                      </Button>
-                    )}
-                    {session.learnerContext.linkedInUrl && (
-                      <Button
-                        variant="soft"
-                        size="small"
-                        startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}
-                        onClick={() => dispatch(pushToast({ title: "Opening LinkedIn", description: "Launching LinkedIn profile..." }))}
-                      >
-                        LinkedIn
-                      </Button>
-                    )}
-                    {session.learnerContext.learnerProfileUrl && (
-                      <Button
-                        variant="soft"
-                        size="small"
-                        startIcon={<AccountCircleOutlinedIcon sx={{ fontSize: 14 }} />}
-                        onClick={() => dispatch(pushToast({ title: "Opening profile", description: "Launching learner profile..." }))}
-                      >
-                        Learner profile
-                      </Button>
-                    )}
-                  </Stack>
-                  {session.learnerContext.notes && (
-                    <Box
-                      sx={{
-                        mt: 1.5,
-                        p: 1.5,
-                        borderRadius: "12px",
-                        bgcolor: "hsl(var(--md-surface-container) / 0.3)",
-                        fontSize: "0.8125rem",
-                        color: "hsl(var(--md-on-surface-variant))",
-                      }}
-                    >
-                      {session.learnerContext.notes}
-                    </Box>
-                  )}
-                </SectionBox>
-              )}
-
-              {/* ═══ POLLS SECTION ═══ */}
-              {showPolls && <PollsSection sessionId={session.id} />}
-
-              {/* Remuneration (confirmed or completed sessions) */}
-              {(isConfirmed || isCompleted) && session.paymentAmountInr && (
-                <SectionBox>
-                  <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                    <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-confirmed-text)" }} />
-                    <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
-                  </Stack>
-                  <Divider sx={{ mb: 0.5 }} />
-                  {session.paymentModel && (
-                    <InfoRow label="Payment model">
-                      <Chip
-                        label={session.paymentModel === "hourly" ? "Hourly" : "Fixed Price"}
-                        size="small"
-                                             />
-                    </InfoRow>
-                  )}
-                  {session.paymentModel === "hourly" && session.hourlyRateInr && (
-                    <InfoRow label="Hourly rate">{fmtInr(session.hourlyRateInr)}/hr</InfoRow>
-                  )}
-                  <InfoRow label="Event fee">{fmtInr(session.paymentAmountInr)}</InfoRow>
-
-                  {isCompleted && (
-                    <>
-                      <Divider sx={{ my: 1 }} />
-                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: "block" }}>
-                        Post-completion earnings
-                      </Typography>
-                      <Box
-                        sx={{
-                          p: 1.5,
-                          borderRadius: "12px",
-                          bgcolor: "hsl(var(--md-surface-container) / 0.3)",
-                        }}
-                      >
-                        <Stack spacing={1}>
-                          <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <Typography variant="body2" color="text.secondary">Total earnings</Typography>
-                            <Typography variant="subtitle2" fontWeight={700}>
-                              {fmtInr(session.totalEarningsInr ?? session.paymentAmountInr)}
-                            </Typography>
-                          </Stack>
-                          {session.paymentModel === "hourly" && session.hourlyRateInr && (
-                            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                              <Typography variant="body2" color="text.secondary">Breakdown</Typography>
-                              <Typography variant="body2">
-                                {fmtInr(session.hourlyRateInr)}/hr &times; {fmtDuration(session.start, session.end)}
-                              </Typography>
-                            </Stack>
-                          )}
-                          {session.paymentStatus && (
-                            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                              <Typography variant="body2" color="text.secondary">Status</Typography>
-                              <Chip
-                                label={
-                                  session.paymentStatus === "paid" ? "Paid"
-                                    : session.paymentStatus === "invoice_pending" ? "Invoice Pending"
-                                    : "Invoice Not Raised"
-                                }
-                                size="small"
-                                sx={{
-                                  fontWeight: 600,
-                                  ...(session.paymentStatus === "paid"
-                                    ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" }
-                                    : session.paymentStatus === "invoice_pending"
-                                    ? { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }
-                                    : {}
-                                  ),
-                                }}
-                              />
-                            </Stack>
-                          )}
-                          {session.transactionId && (
-                            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                              <Typography variant="body2" color="text.secondary">Transaction ID</Typography>
-                              <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}>
-                                {session.transactionId}
-                              </Typography>
-                            </Stack>
-                          )}
-                          {session.invoiceId && (
-                            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                              <Typography variant="body2" color="text.secondary">Invoice ID</Typography>
-                              <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}>
-                                {session.invoiceId}
-                              </Typography>
-                            </Stack>
-                          )}
+                {/* ── Details ── */}
+                <Box sx={{ mb: 2.5 }}>
+                  <SectionHeading>Details</SectionHeading>
+                  <SectionCard>
+                    {session.scheduledByName && (
+                      <DetailRow label="Scheduled by">
+                        <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
+                          <AccountCircleOutlinedIcon sx={{ fontSize: 14 }} />
+                          <span>{session.scheduledByName}</span>
                         </Stack>
-                      </Box>
-                    </>
-                  )}
-                </SectionBox>
-              )}
-            </Stack>
+                        {session.scheduledOnYmd && (
+                          <Typography variant="caption" color="text.secondary">
+                            on {fmtDateNice(session.scheduledOnYmd)}
+                          </Typography>
+                        )}
+                      </DetailRow>
+                    )}
+                    {session.cohort && <DetailRow label="Batch">{session.cohort}</DetailRow>}
+                    {session.group && (
+                      <DetailRow label="Group">
+                        <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
+                          <GroupsOutlinedIcon sx={{ fontSize: 14 }} />
+                          <span>{session.group}</span>
+                        </Stack>
+                      </DetailRow>
+                    )}
+                    {session.scheduledByEmail && (
+                      <DetailRow label="Contact">
+                        <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
+                          <MailOutlinedIcon sx={{ fontSize: 13 }} />
+                          <span>{session.scheduledByEmail}</span>
+                        </Stack>
+                      </DetailRow>
+                    )}
+                  </SectionCard>
+                </Box>
+
+                {/* ── Predicted groups ── */}
+                {session.predictedGroups && session.predictedGroups.length > 0 && (
+                  <Box sx={{ mb: 2.5 }}>
+                    <SectionHeading>Predicted groups</SectionHeading>
+                    <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+                      {session.predictedGroups.map((g) => (
+                        <Chip key={g} label={g} size="small" sx={{ fontSize: "0.75rem" }} />
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
+
+                {/* ── Combined batches ── */}
+                {session.combinedBatches && session.combinedBatches.length > 0 && (
+                  <Box sx={{ mb: 2.5 }}>
+                    <SectionHeading icon={<CallMergeOutlinedIcon sx={{ fontSize: 14 }} />}>
+                      Combined session &middot; {session.combinedBatches.length} batches
+                    </SectionHeading>
+                    <SectionCard>
+                      {session.combinedBatches.map((cb) => (
+                        <DetailRow key={cb.batch} label={cb.batch}>
+                          {cb.group && (
+                            <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
+                              <GroupsOutlinedIcon sx={{ fontSize: 14 }} />
+                              <span>{cb.group}</span>
+                            </Stack>
+                          )}
+                        </DetailRow>
+                      ))}
+                    </SectionCard>
+                  </Box>
+                )}
+
+                {/* ── Linked course ── */}
+                {linkedCourse && (
+                  <Box sx={{ mb: 2.5 }}>
+                    <SectionHeading>Linked course</SectionHeading>
+                    <SectionCard>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{linkedCourse.title}</Typography>
+                        <Button
+                          variant="text"
+                          size="small"
+                          startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 13 }} />}
+                          onClick={() => {
+                            handleClose();
+                            navigate("/courses");
+                            dispatch(pushToast({ title: "Course content", description: `Viewing ${linkedCourse.title}` }));
+                          }}
+                          sx={{ fontSize: "0.75rem", flexShrink: 0 }}
+                        >
+                          View
+                        </Button>
+                      </Stack>
+                    </SectionCard>
+                  </Box>
+                )}
+
+                {/* ── Session materials ── */}
+                {session.prepMaterials && session.prepMaterials.length > 0 && (
+                  <Box sx={{ mb: 2.5 }}>
+                    <SectionHeading>Session materials</SectionHeading>
+                    <Stack spacing={0.5}>
+                      {session.prepMaterials.map((m) => {
+                        const isVideo = m.type === "video";
+                        return (
+                          <Stack
+                            key={m.id}
+                            direction="row"
+                            alignItems="center"
+                            sx={{
+                              py: 0.875,
+                              px: 1.25,
+                              borderRadius: "8px",
+                              border: "1px solid",
+                              borderColor: "divider",
+                              "&:hover": { bgcolor: "action.hover", borderColor: "text.disabled" },
+                              transition: "all 0.12s ease",
+                            }}
+                          >
+                            <Box sx={{ color: "text.secondary", display: "flex", mr: 1.25 }}>{MATERIAL_ICONS[m.type]}</Box>
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{m.label}</Typography>
+                              <Typography variant="caption" color="text.disabled" sx={{ textTransform: "uppercase", fontSize: "0.6rem", letterSpacing: "0.04em" }}>
+                                {m.type === "slides" ? "Slides" : m.type === "document" ? "Document" : m.type === "video" ? "Video" : "Link"}
+                              </Typography>
+                            </Box>
+                            {isVideo ? (
+                              <Button
+                                variant="text"
+                                size="small"
+                                startIcon={<PlayCircleOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => dispatch(pushToast({ title: "Playing video", description: m.label }))}
+                                sx={{ fontSize: "0.7rem", flexShrink: 0 }}
+                              >
+                                Watch
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="text"
+                                size="small"
+                                startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 14 }} />}
+                                onClick={() => dispatch(pushToast({ title: "Downloading", description: m.label }))}
+                                sx={{ fontSize: "0.7rem", flexShrink: 0 }}
+                              >
+                                Download
+                              </Button>
+                            )}
+                          </Stack>
+                        );
+                      })}
+                    </Stack>
+                  </Box>
+                )}
+
+                {/* ── Learner context (1:1 sessions) ── */}
+                {isMentoring && session.learnerContext && (
+                  <Box sx={{ mb: 2.5 }}>
+                    <SectionHeading>Learner context</SectionHeading>
+                    <SectionCard>
+                      {session.learnerContext.learnerName && (
+                        <DetailRow label="Learner">{session.learnerContext.learnerName}</DetailRow>
+                      )}
+                      <Stack direction="row" spacing={1} sx={{ mt: 0.5 }} flexWrap="wrap" useFlexGap>
+                        {session.learnerContext.resumeUrl && (
+                          <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}
+                            onClick={() => dispatch(pushToast({ title: "Opening resume" }))} sx={{ fontSize: "0.75rem" }}>
+                            Resume
+                          </Button>
+                        )}
+                        {session.learnerContext.linkedInUrl && (
+                          <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}
+                            onClick={() => dispatch(pushToast({ title: "Opening LinkedIn" }))} sx={{ fontSize: "0.75rem" }}>
+                            LinkedIn
+                          </Button>
+                        )}
+                        {session.learnerContext.learnerProfileUrl && (
+                          <Button variant="soft" size="small" startIcon={<AccountCircleOutlinedIcon sx={{ fontSize: 14 }} />}
+                            onClick={() => dispatch(pushToast({ title: "Opening profile" }))} sx={{ fontSize: "0.75rem" }}>
+                            Profile
+                          </Button>
+                        )}
+                      </Stack>
+                      {session.learnerContext.notes && (
+                        <Box
+                          sx={{
+                            mt: 1.5,
+                            p: 1.25,
+                            borderRadius: "8px",
+                            bgcolor: "hsl(var(--md-surface-container) / 0.3)",
+                            fontSize: "0.8rem",
+                            color: "hsl(var(--md-on-surface-variant))",
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {session.learnerContext.notes}
+                        </Box>
+                      )}
+                    </SectionCard>
+                  </Box>
+                )}
+
+                {/* ── Polls ── */}
+                {showPolls && (
+                  <Box sx={{ mb: 2.5 }}>
+                    <PollsSection sessionId={session.id} />
+                  </Box>
+                )}
+
+                {/* ── Recording ── */}
+                {isCompleted && session.recordingUrl && (
+                  <Box sx={{ mb: 2.5 }}>
+                    <SectionHeading icon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</SectionHeading>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={1.25}
+                      sx={{
+                        py: 0.875,
+                        px: 1.25,
+                        borderRadius: "8px",
+                        border: "1px solid",
+                        borderColor: "divider",
+                        "&:hover": { bgcolor: "action.hover", borderColor: "text.disabled" },
+                        cursor: "pointer",
+                        transition: "all 0.12s ease",
+                      }}
+                      onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${session.title}` }))}
+                    >
+                      <VideocamOutlinedIcon sx={{ fontSize: 15, color: "text.secondary" }} />
+                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>Watch session recording</Typography>
+                    </Stack>
+                  </Box>
+                )}
+
+                {/* ── Feedback ── */}
+                {isCompleted && (() => {
+                  const ratings = demoLearnerRatingsBySessionId[session.id];
+                  const hasRatings = ratings && ratings.length > 0;
+                  const avg = hasRatings
+                    ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(1)
+                    : null;
+                  const daysSince = (nowMs - new Date(session.dateYmd).getTime()) / (1000 * 60 * 60 * 24);
+                  return (
+                    <Box sx={{ mb: 2.5 }}>
+                      <SectionHeading icon={<StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />}>Feedback</SectionHeading>
+                      <SectionCard>
+                        {hasRatings ? (
+                          <>
+                            <Stack direction="row" alignItems="center" justifyContent="space-between">
+                              <Stack direction="row" alignItems="center" spacing={0.75}>
+                                <StarOutlinedIcon sx={{ fontSize: 18, color: "var(--gl-star-color)" }} />
+                                <Typography variant="body1" fontWeight={700} sx={{ fontSize: "1.1rem" }}>{avg}</Typography>
+                                <Typography variant="caption" color="text.secondary">({ratings.length})</Typography>
+                              </Stack>
+                              <Button
+                                variant="soft"
+                                size="small"
+                                onClick={() => {
+                                  dispatch(setLearnerRatingsSessionId(session.id));
+                                  dispatch(setOpenLearnerRatings(true));
+                                }}
+                                sx={{ fontSize: "0.75rem" }}
+                              >
+                                View details
+                              </Button>
+                            </Stack>
+                          </>
+                        ) : (
+                          <Stack direction="row" alignItems="center" justifyContent="space-between">
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>
+                              {daysSince > 30 ? "No feedback collected" : "Gathering feedback"}
+                            </Typography>
+                            <Chip
+                              label={daysSince > 30 ? "Expired" : "Pending"}
+                              size="small"
+                              sx={{
+                                fontWeight: 600,
+                                fontSize: "0.65rem",
+                                height: 20,
+                                ...(daysSince > 30
+                                  ? { bgcolor: "action.hover", color: "text.disabled" }
+                                  : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }),
+                              }}
+                            />
+                          </Stack>
+                        )}
+                      </SectionCard>
+                    </Box>
+                  );
+                })()}
+
+                {/* ── Remuneration ── */}
+                {(isConfirmed || isCompleted) && session.paymentAmountInr && (
+                  <Box sx={{ mb: 1 }}>
+                    <SectionHeading icon={<SavingsOutlinedIcon sx={{ fontSize: 14 }} />}>Remuneration</SectionHeading>
+                    <SectionCard>
+                      {session.paymentModel && (
+                        <DetailRow label="Model" compact>
+                          <Chip label={session.paymentModel === "hourly" ? "Hourly" : "Fixed"} size="small" sx={{ height: 20, fontSize: "0.65rem", fontWeight: 600 }} />
+                        </DetailRow>
+                      )}
+                      {session.paymentModel === "hourly" && session.hourlyRateInr && (
+                        <DetailRow label="Rate" compact>{fmtInr(session.hourlyRateInr)}/hr</DetailRow>
+                      )}
+                      <DetailRow label="Event fee" compact>
+                        <Typography variant="body2" fontWeight={700}>{fmtInr(session.paymentAmountInr)}</Typography>
+                      </DetailRow>
+
+                      {isCompleted && (
+                        <>
+                          <Divider sx={{ my: 1 }} />
+                          <Box
+                            sx={{
+                              p: 1.25,
+                              borderRadius: "8px",
+                              bgcolor: "hsl(var(--md-surface-container) / 0.3)",
+                            }}
+                          >
+                            <Stack spacing={0.75}>
+                              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                <Typography variant="caption" color="text.secondary" fontWeight={500}>Total earnings</Typography>
+                                <Typography variant="body2" fontWeight={700}>
+                                  {fmtInr(session.totalEarningsInr ?? session.paymentAmountInr)}
+                                </Typography>
+                              </Stack>
+                              {session.paymentModel === "hourly" && session.hourlyRateInr && (
+                                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                  <Typography variant="caption" color="text.secondary" fontWeight={500}>Breakdown</Typography>
+                                  <Typography variant="caption" fontWeight={500}>
+                                    {fmtInr(session.hourlyRateInr)}/hr &times; {fmtDuration(session.start, session.end)}
+                                  </Typography>
+                                </Stack>
+                              )}
+                              {session.paymentStatus && (
+                                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                  <Typography variant="caption" color="text.secondary" fontWeight={500}>Status</Typography>
+                                  <Chip
+                                    label={
+                                      session.paymentStatus === "paid" ? "Paid"
+                                        : session.paymentStatus === "invoice_pending" ? "Invoice Pending"
+                                        : "Invoice Not Raised"
+                                    }
+                                    size="small"
+                                    sx={{
+                                      fontWeight: 600,
+                                      fontSize: "0.65rem",
+                                      height: 20,
+                                      ...(session.paymentStatus === "paid"
+                                        ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" }
+                                        : session.paymentStatus === "invoice_pending"
+                                        ? { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }
+                                        : {}
+                                      ),
+                                    }}
+                                  />
+                                </Stack>
+                              )}
+                              {session.transactionId && (
+                                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                  <Typography variant="caption" color="text.secondary" fontWeight={500}>TXN ID</Typography>
+                                  <Typography variant="caption" sx={{ fontFamily: "monospace", fontWeight: 500 }}>{session.transactionId}</Typography>
+                                </Stack>
+                              )}
+                            </Stack>
+                          </Box>
+                        </>
+                      )}
+                    </SectionCard>
+                  </Box>
+                )}
+              </Stack>
+            </>
           ) : (
-            <Typography variant="body2" color="text.secondary">No event selected.</Typography>
+            <Box sx={{ px: 2.5, py: 4, textAlign: "center" }}>
+              <Typography variant="body2" color="text.secondary">No event selected.</Typography>
+            </Box>
           )}
         </Box>
 
@@ -862,15 +1015,15 @@ export function SessionDetailsModal() {
             borderTop: 1,
             borderColor: "divider",
             bgcolor: "background.paper",
-            px: 3,
-            py: 2,
+            px: 2.5,
+            py: 1.5,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexShrink: 0,
           }}
         >
-          <Button variant="text" color="inherit" onClick={handleClose}>
+          <Button variant="text" color="inherit" size="small" onClick={handleClose}>
             Close
           </Button>
           {session && !isCompleted && (
@@ -878,7 +1031,7 @@ export function SessionDetailsModal() {
               <Button
                 variant="soft"
                 size="small"
-                startIcon={<CancelOutlinedIcon sx={{ fontSize: 16 }} />}
+                startIcon={<CancelOutlinedIcon sx={{ fontSize: 15 }} />}
                 onClick={() => {
                   dispatch(setDeclineSessionFocus(session));
                   dispatch(setDeclineReason(""));
@@ -892,7 +1045,7 @@ export function SessionDetailsModal() {
                 <Button
                   variant="contained"
                   size="small"
-                  startIcon={<CheckCircleOutlinedIcon sx={{ fontSize: 16 }} />}
+                  startIcon={<CheckCircleOutlinedIcon sx={{ fontSize: 15 }} />}
                   onClick={() => {
                     dispatch(confirmSession(session.id));
                     dispatch(pushToast({ title: "Confirmed", description: `${session.title} \u2022 ${fmtDateNice(session.dateYmd)}` }));
@@ -901,6 +1054,27 @@ export function SessionDetailsModal() {
                   Confirm
                 </Button>
               )}
+            </Stack>
+          )}
+          {session && isCompleted && (
+            <Stack direction="row" spacing={1}>
+              {session.recordingUrl && (
+                <Button
+                  variant="soft"
+                  size="small"
+                  startIcon={<VideocamOutlinedIcon sx={{ fontSize: 15 }} />}
+                  onClick={() => dispatch(pushToast({ title: "Opening recording" }))}
+                >
+                  Recording
+                </Button>
+              )}
+              <Button
+                variant="soft"
+                size="small"
+                onClick={() => { handleClose(); navigate("/payments"); }}
+              >
+                View in payments
+              </Button>
             </Stack>
           )}
         </Box>

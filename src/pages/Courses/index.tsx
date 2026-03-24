@@ -1,30 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
-import Badge from "@mui/material/Badge";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
-import Drawer from "@mui/material/Drawer";
 import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
 import InputBase from "@mui/material/InputBase";
-import LinearProgress from "@mui/material/LinearProgress";
 import Skeleton from "@mui/material/Skeleton";
 import Popover from "@mui/material/Popover";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import TuneIcon from "@mui/icons-material/Tune";
-import { PageHeader } from "@/components/shared/PageHeader";
+import AutoStoriesOutlinedIcon from "@mui/icons-material/AutoStoriesOutlined";
 import { CoursePatternThumb } from "@/components/shared/CoursePatternThumb";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setSessionFocus } from "@/store/slices/sessionsSlice";
@@ -77,10 +72,10 @@ function MappedSessionsOverflow({
               }}
             >
               <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.3 }} noWrap>
-                {s.title.replace("Mentor Session: ", "")}
+                {SESSION_TYPE_SHORT[s.sessionType] ?? s.sessionType}
               </Typography>
               <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}
+                {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
               </Typography>
             </Box>
           ))}
@@ -90,6 +85,20 @@ function MappedSessionsOverflow({
   );
 }
 
+/* ─── Mapped-event chip label: session type + date (not the title) ─────────── */
+const SESSION_TYPE_SHORT: Record<string, string> = {
+  "Online session": "Online session",
+  "Mentored Learning session": "Mentored session",
+  "Online class": "Online class",
+  "Industry session": "Industry session",
+  Residency: "Residency",
+};
+
+function fmtSessionChipLabel(s: Session) {
+  const typeLabel = SESSION_TYPE_SHORT[s.sessionType] ?? s.sessionType;
+  return `${typeLabel} · ${fmtDateNice(s.dateYmd)}`;
+}
+
 /* ─── Course card skeleton ────────────────────────────────────────────────── */
 /* ─── Course card ─────────────────────────────────────────────────────────── */
 function CourseCard({
@@ -97,6 +106,7 @@ function CourseCard({
   mapped,
   onOpenSession,
   isPast = false,
+  isLearn = false,
   onCardClick,
   moduleData,
 }: {
@@ -104,6 +114,7 @@ function CourseCard({
   mapped: Session[];
   onOpenSession: (s: Session) => void;
   isPast?: boolean;
+  isLearn?: boolean;
   onCardClick?: () => void;
   moduleData?: import("@/lib/types").CourseModuleData;
 }) {
@@ -135,21 +146,18 @@ function CourseCard({
           {/* Thumbnail row: pattern left, chips right */}
           <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, mb: 1.5 }}>
             <CoursePatternThumb color={c.color ?? "#1976d2"} pattern={c.pattern ?? 0} size={72} />
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, justifyContent: "flex-end", pt: 0.25 }}>
-              <Chip label={c.role} size="small" variant="outlined" />
-              {c.isNew && !isPast && (
-                <Chip
-                  label="New"
-                  size="small"
-                  icon={<span style={{ fontSize: 11, marginLeft: 6 }}>✦</span>}
-                  sx={{
-                    bgcolor: "var(--gl-new-badge-bg)", color: "var(--gl-new-badge-text)",
-                    fontSize: "0.7rem", height: 22, fontWeight: 700,
-                    "& .MuiChip-icon": { color: "var(--gl-new-badge-text)", ml: "4px" },
-                  }}
-                />
-              )}
-            </Box>
+            {c.isNew && !isPast && !isLearn && (
+              <Chip
+                label="New"
+                size="small"
+                icon={<span style={{ fontSize: 11, marginLeft: 6 }}>✦</span>}
+                sx={{
+                  bgcolor: "var(--gl-new-badge-bg)", color: "var(--gl-new-badge-text)",
+                  fontSize: "0.7rem", height: 22, fontWeight: 700,
+                  "& .MuiChip-icon": { color: "var(--gl-new-badge-text)", ml: "4px" },
+                }}
+              />
+            )}
           </Box>
 
           {/* Title */}
@@ -170,39 +178,42 @@ function CourseCard({
             {c.program} &bull; {c.batch}
           </Typography>
 
-          <Divider sx={{ mb: 1.5 }} />
-
-          {/* Mapped sessions */}
-          <Box sx={{ mt: "auto" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.75 }}>
-              <CalendarMonthIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                {isPast ? "Events taught" : "Upcoming events"}
-              </Typography>
-            </Box>
-            {mapped.length === 0 ? (
-              <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic" }}>
-                {isPast ? "No events yet." : "No events scheduled yet."}
-              </Typography>
-            ) : (
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, alignItems: "center" }}>
-                <Chip
-                  label={firstSession.title.replace("Mentor Session: ", "")}
-                  size="small"
-                  onClick={(e) => { e.stopPropagation(); onOpenSession(firstSession); }}
-                  sx={{
-                    cursor: "pointer", fontSize: "0.7rem", height: 24,
-                    bgcolor: "var(--gl-mapped-session-bg)",
-                    color: "var(--gl-mapped-session-text)",
-                    "&:hover": { bgcolor: "var(--gl-mapped-session-hover)" },
-                    maxWidth: 220,
-                    "& .MuiChip-label": { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-                  }}
-                />
-                {rest.length > 0 && <MappedSessionsOverflow sessions={rest} onSelect={onOpenSession} />}
+          {/* Mapped sessions — only for teach courses */}
+          {!isLearn && (
+            <>
+              <Divider sx={{ mb: 1.5 }} />
+              <Box sx={{ mt: "auto" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.75 }}>
+                  <CalendarMonthIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+                  <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    {isPast ? "Events taught" : "Upcoming events"}
+                  </Typography>
+                </Box>
+                {mapped.length === 0 ? (
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic" }}>
+                    {isPast ? "No events yet." : "No events scheduled yet."}
+                  </Typography>
+                ) : (
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, alignItems: "center" }}>
+                    <Chip
+                      label={fmtSessionChipLabel(firstSession)}
+                      size="small"
+                      onClick={(e) => { e.stopPropagation(); onOpenSession(firstSession); }}
+                      sx={{
+                        cursor: "pointer", fontSize: "0.7rem", height: 24,
+                        bgcolor: "var(--gl-mapped-session-bg)",
+                        color: "var(--gl-mapped-session-text)",
+                        "&:hover": { bgcolor: "var(--gl-mapped-session-hover)" },
+                        maxWidth: 220,
+                        "& .MuiChip-label": { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                      }}
+                    />
+                    {rest.length > 0 && <MappedSessionsOverflow sessions={rest} onSelect={onOpenSession} />}
+                  </Box>
+                )}
               </Box>
-            )}
-          </Box>
+            </>
+          )}
         </CardContent>
       </Card>
     </Grid>
@@ -236,82 +247,6 @@ function CourseCardSkeleton() {
         </CardContent>
       </Card>
     </Grid>
-  );
-}
-
-/* ─── Search + filter bar ─────────────────────────────────────────────────── */
-function SearchFilterBar({
-  searchQuery,
-  onSearchChange,
-  activeFilterCount,
-  onOpenDrawer,
-  fullWidth = false,
-}: {
-  searchQuery: string;
-  onSearchChange: (v: string) => void;
-  activeFilterCount: number;
-  onOpenDrawer: () => void;
-  fullWidth?: boolean;
-}) {
-  return (
-    <Box
-      sx={{
-        display: "flex", alignItems: "center", height: 40,
-        border: 1, borderColor: "divider", borderRadius: 1.5,
-        overflow: "hidden", bgcolor: "background.paper",
-        width: fullWidth ? "100%" : undefined,
-        "&:focus-within": { borderColor: "text.secondary" },
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", px: 1.25, gap: 0.75, flex: 1, minWidth: 0 }}>
-        <SearchIcon sx={{ fontSize: 15, color: "text.disabled", flexShrink: 0 }} />
-        <InputBase
-          placeholder="Search courses…"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          sx={{ fontSize: "0.8125rem", flex: 1, minWidth: 0 }}
-        />
-      </Box>
-
-      <Divider orientation="vertical" flexItem />
-
-      <Box
-        component="button"
-        onClick={onOpenDrawer}
-        sx={{
-          display: "flex", alignItems: "center", gap: 0.75,
-          px: 1.5, height: "100%", flexShrink: 0,
-          border: "none", bgcolor: activeFilterCount > 0 ? "action.selected" : "transparent",
-          cursor: "pointer", fontFamily: "inherit",
-          color: activeFilterCount > 0 ? "text.primary" : "text.secondary",
-          "&:hover": { bgcolor: "action.hover" },
-        }}
-      >
-        <TuneIcon sx={{ fontSize: 15 }} />
-        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: "0.8125rem" }}>
-          Filters
-        </Typography>
-        {activeFilterCount > 0 && (
-          <Chip
-            label={activeFilterCount}
-            size="small"
-            sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, px: 0, "& .MuiChip-label": { px: "5px" } }}
-          />
-        )}
-      </Box>
-    </Box>
-  );
-}
-
-/* ─── Filter section label ────────────────────────────────────────────────── */
-function FilterSectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <Typography
-      variant="caption"
-      sx={{ fontWeight: 700, color: "text.disabled", letterSpacing: "0.08em", textTransform: "uppercase", display: "block", mb: 1.25 }}
-    >
-      {children}
-    </Typography>
   );
 }
 
@@ -350,11 +285,6 @@ export default function CoursesPage() {
     []
   );
 
-  /* ── Derive unique filter options from catalog ── */
-  const allPrograms = useMemo(() => [...new Set(sortedCatalog.map((c) => c.program))], [sortedCatalog]);
-  const allRoles = useMemo(() => [...new Set(sortedCatalog.map((c) => c.role))], [sortedCatalog]);
-  const allBatches = useMemo(() => [...new Set(sortedCatalog.map((c) => c.batch))], [sortedCatalog]);
-
   /* ── Loading skeleton ── */
   const [loading, setLoading] = useState(!_coursesInitialLoadDone);
   useEffect(() => {
@@ -369,64 +299,29 @@ export default function CoursesPage() {
   /* ── Search ── */
   const [searchQuery, setSearchQuery] = useState("");
 
-  /* ── Applied filters (committed on "Apply") ── */
-  const [appliedPrograms, setAppliedPrograms] = useState<string[]>([]);
-  const [appliedRoles, setAppliedRoles] = useState<string[]>([]);
-  const [appliedBatch, setAppliedBatch] = useState("");
-
-  /* ── Pending filters (draft inside drawer) ── */
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [pendingPrograms, setPendingPrograms] = useState<string[]>([]);
-  const [pendingRoles, setPendingRoles] = useState<string[]>([]);
-  const [pendingBatch, setPendingBatch] = useState("");
-
-  const openDrawer = () => {
-    setPendingPrograms(appliedPrograms);
-    setPendingRoles(appliedRoles);
-    setPendingBatch(appliedBatch);
-    setDrawerOpen(true);
-  };
-
-  const applyFilters = () => {
-    setAppliedPrograms(pendingPrograms);
-    setAppliedRoles(pendingRoles);
-    setAppliedBatch(pendingBatch);
-    setDrawerOpen(false);
-  };
-
-  const clearPending = () => {
-    setPendingPrograms([]);
-    setPendingRoles([]);
-    setPendingBatch("");
-  };
-
-  const togglePendingProgram = (p: string) =>
-    setPendingPrograms((prev) => prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]);
-
-  const togglePendingRole = (r: string) =>
-    setPendingRoles((prev) => prev.includes(r) ? prev.filter((x) => x !== r) : [...prev, r]);
-
-  const activeFilterCount = appliedPrograms.length + appliedRoles.length + (appliedBatch ? 1 : 0);
-
-  /* ── Filtered catalog (search + applied filters) ── */
   const filteredCatalog = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return sortedCatalog.filter((c) => {
-      if (appliedPrograms.length > 0 && !appliedPrograms.includes(c.program)) return false;
-      if (appliedRoles.length > 0 && !appliedRoles.includes(c.role)) return false;
-      if (appliedBatch && c.batch !== appliedBatch) return false;
-      if (q && !([c.title, c.program, c.role, c.batch].some((f) => f.toLowerCase().includes(q)))) return false;
-      return true;
-    });
-  }, [sortedCatalog, searchQuery, appliedPrograms, appliedRoles, appliedBatch]);
+    if (!q) return sortedCatalog;
+    return sortedCatalog.filter((c) =>
+      [c.title, c.program, c.batch].some((f) => f.toLowerCase().includes(q))
+    );
+  }, [sortedCatalog, searchQuery]);
 
-  const currentCourses = useMemo(() => filteredCatalog.filter((c) => c.status === "current"), [filteredCatalog]);
-  const pastCourses = useMemo(() => filteredCatalog.filter((c) => c.status === "past"), [filteredCatalog]);
+  // Split by enrollment type
+  const teachCatalog = useMemo(() => filteredCatalog.filter((c) => c.enrollment !== "learn"), [filteredCatalog]);
+  const learnCatalog = useMemo(() => filteredCatalog.filter((c) => c.enrollment === "learn"), [filteredCatalog]);
 
-  const [visiblePastCount, setVisiblePastCount] = useState(6);
-  useEffect(() => { setVisiblePastCount(6); }, [searchQuery, appliedPrograms, appliedRoles, appliedBatch]);
-  const visiblePastCourses = pastCourses.slice(0, visiblePastCount);
-  const hasMorePast = visiblePastCount < pastCourses.length;
+  const teachCurrent = useMemo(() => teachCatalog.filter((c) => c.status === "current"), [teachCatalog]);
+  const teachPast = useMemo(() => teachCatalog.filter((c) => c.status === "past"), [teachCatalog]);
+  const learnCurrent = useMemo(() => learnCatalog.filter((c) => c.status === "current"), [learnCatalog]);
+  const learnPast = useMemo(() => learnCatalog.filter((c) => c.status === "past"), [learnCatalog]);
+
+  const [visibleTeachPastCount, setVisibleTeachPastCount] = useState(6);
+  const [visibleLearnPastCount, setVisibleLearnPastCount] = useState(6);
+  const visibleTeachPast = teachPast.slice(0, visibleTeachPastCount);
+  const hasMoreTeachPast = visibleTeachPastCount < teachPast.length;
+  const visibleLearnPast = learnPast.slice(0, visibleLearnPastCount);
+  const hasMoreLearnPast = visibleLearnPastCount < learnPast.length;
 
   const openSession = (s: Session) => {
     dispatch(setSessionFocus(s));
@@ -444,236 +339,239 @@ export default function CoursesPage() {
   };
 
   const nothingFound = filteredCatalog.length === 0;
-  const hasActiveFilters = activeFilterCount > 0 || searchQuery.trim() !== "";
 
   return (
     <>
-      <PageHeader
-        icon={DescriptionOutlinedIcon}
-        title="Courses"
-        subtitle="Track your teaching assignments, events and learning content"
-        action={
-          <Box sx={{ display: { xs: "none", sm: "flex" } }}>
-            <SearchFilterBar
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              activeFilterCount={activeFilterCount}
-              onOpenDrawer={openDrawer}
-            />
+      {/* ── Page header ── */}
+      <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2} sx={{ mb: 0.5 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5}>
+          <Box sx={{ p: 1, borderRadius: 2, border: 1, borderColor: "divider", bgcolor: "background.paper", display: "flex" }}>
+            <AutoStoriesOutlinedIcon sx={{ fontSize: 18 }} />
           </Box>
-        }
-      />
+          <Box>
+            <Typography variant="h6" sx={{ lineHeight: 1.35, fontWeight: 700 }}>Courses</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+              Your teaching assignments and learning content
+            </Typography>
+          </Box>
+        </Stack>
+        <Box
+          sx={{
+            display: { xs: "none", sm: "flex" },
+            alignItems: "center",
+            gap: 1,
+            height: 42,
+            px: 2,
+            borderRadius: "24px",
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            transition: "all 0.2s ease",
+            "&:hover": { borderColor: "text.secondary", boxShadow: "0 1px 6px rgba(0,0,0,0.06)" },
+            "&:focus-within": {
+              borderColor: "primary.main",
+              boxShadow: "0 0 0 3px hsl(var(--md-primary) / 0.12)",
+            },
+          }}
+        >
+          <SearchIcon sx={{ fontSize: 18, color: "text.secondary", flexShrink: 0 }} />
+          <InputBase
+            placeholder="Search courses…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ fontSize: "0.875rem", minWidth: 180, "& .MuiInputBase-input::placeholder": { color: "text.secondary", opacity: 0.7 } }}
+          />
+        </Box>
+      </Stack>
 
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 2.5 }}>
 
         {/* Skeleton loading state */}
         {loading && (
-          <>
-            {/* Current Courses skeleton */}
-            <Box sx={{ mb: 4 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                <Skeleton variant="text" width={130} height={24} />
-                <Skeleton variant="rounded" width={24} height={20} sx={{ borderRadius: 10 }} />
-              </Box>
-              <Grid container spacing={2}>
-                {Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)}
-              </Grid>
-            </Box>
-
-            {/* Completed Courses skeleton */}
-            <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                <Skeleton variant="text" width={155} height={24} />
-                <Skeleton variant="rounded" width={28} height={20} sx={{ borderRadius: 10 }} />
-              </Box>
-              <Grid container spacing={2}>
-                {Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={`p${i}`} />)}
-              </Grid>
-            </Box>
-          </>
+          <Stack spacing={2.5}>
+            {[0, 1].map((section) => (
+              <Card key={section} variant="outlined" sx={{ borderRadius: 3, overflow: "hidden" }}>
+                <Box sx={{ px: 2.5, py: 2 }}>
+                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Skeleton variant="circular" width={20} height={20} />
+                    <Skeleton variant="text" width={280} height={24} />
+                    <Box sx={{ flex: 1 }} />
+                    <Skeleton variant="rounded" width={28} height={22} sx={{ borderRadius: 10 }} />
+                  </Stack>
+                </Box>
+                <Box sx={{ px: 2.5, pb: 2.5 }}>
+                  <Grid container spacing={2}>
+                    {Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)}
+                  </Grid>
+                </Box>
+              </Card>
+            ))}
+          </Stack>
         )}
 
         {/* Empty state */}
         {!loading && nothingFound && (
-          <Box sx={{ py: 8, textAlign: "center" }}>
-            <SearchIcon sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
-            <Typography variant="body1" color="text.secondary">
-              {hasActiveFilters ? "No courses match the current filters." : "No courses found."}
-            </Typography>
-            <Typography variant="caption" color="text.disabled">
-              Try adjusting your search or filters.
-            </Typography>
-          </Box>
-        )}
-
-        {/* Current Courses */}
-        {!loading && currentCourses.length > 0 && (
-          <Box sx={{ mb: 4 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Current Courses</Typography>
-              <Chip label={currentCourses.length} size="small" sx={{ fontWeight: 600 }} />
-            </Box>
-            <Grid container spacing={2}>
-              {currentCourses.map((c) => (
-                <CourseCard key={c.id} c={c} mapped={courseToMappedSessions[c.id] ?? []} onOpenSession={openSession} onCardClick={() => openCourseDetail(c.id)} moduleData={demoCourseModules[c.id]} />
-              ))}
-            </Grid>
-          </Box>
-        )}
-
-        {/* Completed Courses */}
-        {!loading && pastCourses.length > 0 && (
-          <Box sx={{ mb: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Completed Courses</Typography>
-              <Chip label={pastCourses.length} size="small" sx={{ fontWeight: 600 }} />
-            </Box>
-            <Grid container spacing={2}>
-              {visiblePastCourses.map((c) => (
-                <CourseCard key={c.id} c={c} mapped={courseToMappedSessions[c.id] ?? []} onOpenSession={openCompletedSessionDialog} isPast onCardClick={() => openCourseDetail(c.id)} />
-              ))}
-            </Grid>
-            {hasMorePast && (
-              <Box sx={{ mt: 2.5, display: "flex", justifyContent: "center" }}>
-                <Button variant="soft" size="small" endIcon={<ExpandMoreIcon />} onClick={() => setVisiblePastCount((n) => n + 9)}>
-                  Show more
-                </Button>
-              </Box>
-            )}
-          </Box>
-        )}
-
-        {/* Footer tip */}
-        {!loading && (
-          <Card variant="outlined" sx={{ mt: 2, bgcolor: "action.hover" }}>
-            <CardContent sx={{ p: 2 }}>
-              <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
-                <LightbulbOutlinedIcon sx={{ fontSize: 18, mt: "2px", opacity: 0.65, flexShrink: 0 }} />
-                <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.5 }}>
-                  <strong>Tip:</strong> Click any course to explore its modules, track your progress, and access learning resources. Completed courses are available for reference anytime.
+          <Card variant="outlined" sx={{ borderRadius: 3, py: 8, textAlign: "center" }}>
+            {searchQuery.trim() ? (
+              <>
+                <SearchIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1.5 }} />
+                <Typography variant="body1" color="text.secondary" fontWeight={500}>
+                  No courses match &ldquo;{searchQuery.trim()}&rdquo;
                 </Typography>
-              </Box>
-            </CardContent>
+                <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: "block" }}>
+                  Try a different search term.
+                </Typography>
+              </>
+            ) : (
+              <>
+                <AutoStoriesOutlinedIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1.5 }} />
+                <Typography variant="body1" color="text.secondary" fontWeight={500}>
+                  No courses found
+                </Typography>
+                <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: "block" }}>
+                  Courses will appear here once you are enrolled.
+                </Typography>
+              </>
+            )}
           </Card>
         )}
+
+        {/* ── Courses you teach (Teacher / TA) ── */}
+        {!loading && teachCatalog.length > 0 && (
+          <Accordion
+            defaultExpanded
+            disableGutters
+            elevation={0}
+            sx={{
+              border: 1, borderColor: "divider", borderRadius: "12px !important",
+              overflow: "hidden", mb: 2.5,
+              "&::before": { display: "none" },
+              "& .MuiAccordionSummary-root:hover": { bgcolor: "action.hover" },
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ fontSize: 20 }} />}
+              sx={{ px: { xs: 2, sm: 2.5 }, py: 1.25, "& .MuiAccordionSummary-content": { my: 1, alignItems: "center", gap: 1.25 } }}
+            >
+              <Box sx={{ p: 0.75, borderRadius: 1.5, bgcolor: "primary.main", display: "flex", flexShrink: 0 }}>
+                <SchoolOutlinedIcon sx={{ fontSize: 16, color: "primary.contrastText" }} />
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3, fontSize: { xs: "0.875rem", sm: "0.95rem" } }}>Courses in which you are enrolled as a teacher or a TA</Typography>
+              </Box>
+              <Chip label={teachCatalog.length} size="small" sx={{ fontWeight: 700, fontSize: "0.75rem", height: 24, mr: 0.5 }} />
+            </AccordionSummary>
+            <AccordionDetails sx={{ px: { xs: 2, sm: 2.5 }, pb: 3, pt: 0.5 }}>
+              {/* Current */}
+              {teachCurrent.length > 0 && (
+                <Box sx={{ mb: teachPast.length > 0 ? 3 : 0 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.secondary" }}>Current</Typography>
+                    <Box sx={{ flex: 1, height: "1px", bgcolor: "divider" }} />
+                    <Typography variant="caption" color="text.disabled" fontWeight={600}>{teachCurrent.length}</Typography>
+                  </Stack>
+                  <Grid container spacing={2}>
+                    {teachCurrent.map((c) => (
+                      <CourseCard key={c.id} c={c} mapped={courseToMappedSessions[c.id] ?? []} onOpenSession={openSession} onCardClick={() => openCourseDetail(c.id)} moduleData={demoCourseModules[c.id]} />
+                    ))}
+                  </Grid>
+                </Box>
+              )}
+              {/* Completed */}
+              {teachPast.length > 0 && (
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.secondary" }}>Completed</Typography>
+                    <Box sx={{ flex: 1, height: "1px", bgcolor: "divider" }} />
+                    <Typography variant="caption" color="text.disabled" fontWeight={600}>{teachPast.length}</Typography>
+                  </Stack>
+                  <Grid container spacing={2}>
+                    {visibleTeachPast.map((c) => (
+                      <CourseCard key={c.id} c={c} mapped={courseToMappedSessions[c.id] ?? []} onOpenSession={openCompletedSessionDialog} isPast onCardClick={() => openCourseDetail(c.id)} />
+                    ))}
+                  </Grid>
+                  {hasMoreTeachPast && (
+                    <Box sx={{ mt: 2.5, display: "flex", justifyContent: "center" }}>
+                      <Button variant="soft" size="small" endIcon={<ExpandMoreIcon />} onClick={() => setVisibleTeachPastCount((n) => n + 9)}>
+                        Show more
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        )}
+
+        {/* ── Standalone courses you're learning (Student) ── */}
+        {!loading && learnCatalog.length > 0 && (
+          <Accordion
+            defaultExpanded
+            disableGutters
+            elevation={0}
+            sx={{
+              border: 1, borderColor: "divider", borderRadius: "12px !important",
+              overflow: "hidden", mb: 2,
+              "&::before": { display: "none" },
+              "& .MuiAccordionSummary-root:hover": { bgcolor: "action.hover" },
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ fontSize: 20 }} />}
+              sx={{ px: { xs: 2, sm: 2.5 }, py: 1.25, "& .MuiAccordionSummary-content": { my: 1, alignItems: "center", gap: 1.25 } }}
+            >
+              <Box sx={{ p: 0.75, borderRadius: 1.5, bgcolor: "secondary.main", display: "flex", flexShrink: 0 }}>
+                <MenuBookOutlinedIcon sx={{ fontSize: 16, color: "secondary.contrastText" }} />
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3, fontSize: { xs: "0.875rem", sm: "0.95rem" } }}>Standalone courses in which you are enrolled as a student</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mt: 0.25, display: "block" }}>In case you're enrolled in a GL program or batch as a student, you can access its courses by switching to the Learner Dashboard from the menu.</Typography>
+              </Box>
+              <Chip label={learnCatalog.length} size="small" sx={{ fontWeight: 700, fontSize: "0.75rem", height: 24, mr: 0.5, alignSelf: "flex-start", mt: 0.5 }} />
+            </AccordionSummary>
+            <AccordionDetails sx={{ px: { xs: 2, sm: 2.5 }, pb: 3, pt: 0.5 }}>
+              {/* Current */}
+              {learnCurrent.length > 0 && (
+                <Box sx={{ mb: learnPast.length > 0 ? 3 : 0 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.secondary" }}>Current</Typography>
+                    <Box sx={{ flex: 1, height: "1px", bgcolor: "divider" }} />
+                    <Typography variant="caption" color="text.disabled" fontWeight={600}>{learnCurrent.length}</Typography>
+                  </Stack>
+                  <Grid container spacing={2}>
+                    {learnCurrent.map((c) => (
+                      <CourseCard key={c.id} c={c} mapped={[]} onOpenSession={openSession} isLearn onCardClick={() => openCourseDetail(c.id)} />
+                    ))}
+                  </Grid>
+                </Box>
+              )}
+              {/* Completed */}
+              {learnPast.length > 0 && (
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.secondary" }}>Completed</Typography>
+                    <Box sx={{ flex: 1, height: "1px", bgcolor: "divider" }} />
+                    <Typography variant="caption" color="text.disabled" fontWeight={600}>{learnPast.length}</Typography>
+                  </Stack>
+                  <Grid container spacing={2}>
+                    {visibleLearnPast.map((c) => (
+                      <CourseCard key={c.id} c={c} mapped={[]} onOpenSession={openCompletedSessionDialog} isPast isLearn onCardClick={() => openCourseDetail(c.id)} />
+                    ))}
+                  </Grid>
+                  {hasMoreLearnPast && (
+                    <Box sx={{ mt: 2.5, display: "flex", justifyContent: "center" }}>
+                      <Button variant="soft" size="small" endIcon={<ExpandMoreIcon />} onClick={() => setVisibleLearnPastCount((n) => n + 9)}>
+                        Show more
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        )}
+
       </Box>
-
-      {/* ── Filter drawer ──────────────────────────────────────────────────── */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        PaperProps={{
-          sx: { width: { xs: "100%", sm: 380 }, display: "flex", flexDirection: "column" },
-        }}
-      >
-        {/* Header */}
-        <Box sx={{ px: 3, pt: 3, pb: 2, display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3 }}>Course Filters</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-              Narrow down courses by program, role, or batch.
-            </Typography>
-          </Box>
-          <IconButton size="small" onClick={() => setDrawerOpen(false)} sx={{ mt: 0.25 }}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Box>
-
-        <Divider />
-
-        {/* Scrollable filter body */}
-        <Box sx={{ flex: 1, overflowY: "auto", px: 3, py: 2.5 }}>
-          <Stack spacing={3}>
-
-            {/* Program */}
-            <Box>
-              <FilterSectionLabel>Program</FilterSectionLabel>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {allPrograms.map((p) => {
-                  const active = pendingPrograms.includes(p);
-                  return (
-                    <Chip
-                      key={p}
-                      label={p}
-                      onClick={() => togglePendingProgram(p)}
-                      variant={active ? "filled" : "outlined"}
-                      color={active ? "primary" : "default"}
-                      sx={{ fontWeight: active ? 600 : 400, cursor: "pointer" }}
-                    />
-                  );
-                })}
-              </Box>
-            </Box>
-
-            <Divider />
-
-            {/* Role */}
-            <Box>
-              <FilterSectionLabel>Role</FilterSectionLabel>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {allRoles.map((r) => {
-                  const active = pendingRoles.includes(r);
-                  return (
-                    <Chip
-                      key={r}
-                      label={r}
-                      onClick={() => togglePendingRole(r)}
-                      variant={active ? "filled" : "outlined"}
-                      color={active ? "primary" : "default"}
-                      sx={{ fontWeight: active ? 600 : 400, cursor: "pointer" }}
-                    />
-                  );
-                })}
-              </Box>
-            </Box>
-
-            <Divider />
-
-            {/* Batch — single select */}
-            <Box>
-              <FilterSectionLabel>Batch</FilterSectionLabel>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {allBatches.map((b) => {
-                  const active = pendingBatch === b;
-                  return (
-                    <Chip
-                      key={b}
-                      label={b}
-                      onClick={() => setPendingBatch(active ? "" : b)}
-                      variant={active ? "filled" : "outlined"}
-                      color={active ? "primary" : "default"}
-                      sx={{ fontWeight: active ? 600 : 400, cursor: "pointer" }}
-                    />
-                  );
-                })}
-              </Box>
-            </Box>
-
-          </Stack>
-        </Box>
-
-        <Divider />
-
-        {/* Sticky footer */}
-        <Box sx={{ px: 3, py: 2, display: "flex", gap: 1.5, justifyContent: "flex-end" }}>
-          <Button
-            variant="soft"
-            onClick={clearPending}
-            disabled={pendingPrograms.length === 0 && pendingRoles.length === 0 && pendingBatch === ""}
-            sx={{ textTransform: "none", fontWeight: 500 }}
-          >
-            Clear all
-          </Button>
-          <Button
-            variant="contained"
-            onClick={applyFilters}
-            sx={{ textTransform: "none", fontWeight: 600 }}
-          >
-            Apply filters
-          </Button>
-        </Box>
-      </Drawer>
     </>
   );
 }
