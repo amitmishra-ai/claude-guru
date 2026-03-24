@@ -1,11 +1,20 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import SwapHorizOutlinedIcon from "@mui/icons-material/SwapHorizOutlined";
+import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
+import Avatar from "@mui/material/Avatar";
+import Divider from "@mui/material/Divider";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
@@ -13,6 +22,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setIsNavCollapsed } from "@/store/slices/uiSlice";
+import { pushToast } from "@/store/slices/toastsSlice";
 
 // ── Collapsed: pill is 56×32, icon centred. Label sits below.
 // ── Expanded: pill is full-width row, borderRadius 28px, icon + label.
@@ -159,9 +169,21 @@ function NavItemExpanded({ icon, label, isActive }: NavItemExpandedProps) {
 
 export function Sidebar() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const isNavCollapsed = useAppSelector((s) => s.ui.isNavCollapsed);
+  const guruName = useAppSelector((s) => s.profile.guruName);
   const [isHovered, setIsHovered] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const sidebarWidth = isNavCollapsed ? 80 : 256;
+
+  const initials = guruName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const handleMenuClose = () => setMenuAnchor(null);
 
   return (
     <Box
@@ -377,32 +399,101 @@ export function Sidebar() {
         {/* Spacer */}
         <Box sx={{ flex: 1 }} />
 
-        {/* Settings */}
-        <NavLink
-          to="/preferences"
-          style={{ textDecoration: "none", marginBottom: 24 }}
-        >
-          {({ isActive }) =>
-            isNavCollapsed ? (
-              <Tooltip title="Settings" placement="right" arrow>
-                <span>
-                  <NavItemCollapsed
-                    icon={<SettingsOutlinedIcon fontSize="small" />}
-                    label="Settings"
-                    isActive={isActive}
-                  />
-                </span>
-              </Tooltip>
-            ) : (
-              <NavItemExpanded
-                icon={<SettingsOutlinedIcon fontSize="small" />}
-                label="Settings"
-                isActive={isActive}
-              />
-            )
-          }
-        </NavLink>
+        {/* ── User profile button ── */}
+        <Box sx={{ mb: 3 }}>
+          {isNavCollapsed ? (
+            <Tooltip title={guruName} placement="right" arrow>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <ButtonBase
+                  onClick={(e) => setMenuAnchor(e.currentTarget)}
+                  sx={{ borderRadius: "50%", p: 0.5 }}
+                >
+                  <Avatar variant="circular" sx={{ width: 32, height: 32, fontSize: "0.75rem", fontWeight: 700, bgcolor: "primary.main", borderRadius: "50%" }}>
+                    {initials}
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            </Tooltip>
+          ) : (
+            <ButtonBase
+              onClick={(e) => setMenuAnchor(e.currentTarget)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                width: "100%",
+                px: 2,
+                py: 1,
+                borderRadius: "28px",
+                transition: "background-color 0.15s",
+                "&:hover": { backgroundColor: "hsl(var(--md-surface-container) / 0.3)" },
+              }}
+            >
+              <Avatar variant="circular" sx={{ width: 32, height: 32, fontSize: "0.75rem", fontWeight: 700, bgcolor: "primary.main", borderRadius: "50%" }}>
+                {initials}
+              </Avatar>
+              <Box sx={{ flex: 1, textAlign: "left", overflow: "hidden" }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "hsl(var(--md-on-surface))", lineHeight: 1.3 }} noWrap>
+                  {guruName}
+                </Typography>
+                <Typography variant="caption" sx={{ color: "hsl(var(--md-on-surface-variant))", fontSize: "0.65rem" }} noWrap>
+                  {guruName.toLowerCase().replace(/\s+/g, ".")}@greatlearning.in
+                </Typography>
+              </Box>
+            </ButtonBase>
+          )}
+        </Box>
       </Box>
+
+      {/* ── User menu popover ── */}
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={handleMenuClose}
+        anchorOrigin={{ vertical: "top", horizontal: isNavCollapsed ? "right" : "center" }}
+        transformOrigin={{ vertical: "bottom", horizontal: isNavCollapsed ? "left" : "center" }}
+        slotProps={{
+          paper: {
+            sx: {
+              minWidth: 240,
+              borderRadius: 2.5,
+              boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+              mt: -1,
+            },
+          },
+        }}
+      >
+        {/* User info header */}
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="body2" fontWeight={600}>{guruName}</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {guruName.toLowerCase().replace(/\s+/g, ".")}@greatlearning.in
+          </Typography>
+        </Box>
+        <Divider />
+
+        <MenuItem onClick={() => { handleMenuClose(); navigate("/preferences"); }}>
+          <ListItemIcon><SettingsOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Settings</ListItemText>
+        </MenuItem>
+
+        <MenuItem onClick={() => { handleMenuClose(); dispatch(pushToast({ title: "Switching dashboard", description: "Redirecting to Learner Dashboard..." })); }}>
+          <ListItemIcon><SwapHorizOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Switch to Learner Dashboard</ListItemText>
+        </MenuItem>
+
+        <MenuItem onClick={() => { handleMenuClose(); dispatch(pushToast({ title: "Refer participants", description: "Opening referral link..." })); }}>
+          <ListItemIcon><PersonAddAltOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Refer Participants</ListItemText>
+        </MenuItem>
+
+        <Divider />
+
+        <MenuItem onClick={() => { handleMenuClose(); dispatch(pushToast({ title: "Logged out", description: "You have been signed out." })); }}>
+          <ListItemIcon><LogoutOutlinedIcon fontSize="small" sx={{ color: "error.main" }} /></ListItemIcon>
+          <ListItemText sx={{ "& .MuiListItemText-primary": { color: "error.main" } }}>Logout</ListItemText>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }
