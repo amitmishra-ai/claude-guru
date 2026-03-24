@@ -161,6 +161,8 @@ export type CourseCatalogItem = {
   status: "current" | "past";
   color?: string;
   pattern?: number;
+  /** "teach" = enrolled as Teacher/TA, "learn" = enrolled as Student */
+  enrollment?: "teach" | "learn";
 };
 
 // ─── Poll Types ─────────────────────────────────────────────────────────────

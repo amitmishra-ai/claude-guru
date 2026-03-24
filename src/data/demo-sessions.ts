@@ -2110,6 +2110,13 @@ export const demoCourseCatalog: CourseCatalogItem[] = [
   { id: "p24", title: "Database design: Normalisation & ER modelling",              program: "PGP-SE",  batch: "Cohort May", role: "Course Mentor",    topics: ["database", "sql", "normalisation", "er model"],              isNew: false, status: "past", color: "#EF4444", pattern: 6  },
   { id: "p25", title: "Hypothesis testing in business decisions",                   program: "PGP-BA",  batch: "Cohort Apr", role: "Industry Expert",  topics: ["hypothesis testing", "statistics", "a/b testing"],           isNew: false, status: "past", color: "#0D9488", pattern: 9  },
   { id: "p26", title: "Computer vision: Object detection & image segmentation",     program: "AIML",    batch: "Cohort Apr", role: "Teacher",          topics: ["computer vision", "object detection", "deep learning"],      isNew: false, status: "past", color: "#1D4ED8", pattern: 4  },
+
+  // ── Student enrollment (standalone courses) ─────────────────────────────
+  { id: "s1", title: "Capstone Project AIML", program: "PGP-AIML", batch: "PGPAIML.C.AUG19", role: "Student", topics: [], isNew: false, status: "current", color: "#3B5998", pattern: 2, enrollment: "learn" },
+  { id: "s2", title: "Capstone Project", program: "PGP-AIML", batch: "PGPAIML.C.JUL19", role: "Student", topics: [], isNew: false, status: "current", color: "#6366F1", pattern: 5, enrollment: "learn" },
+  { id: "s3", title: "Capstone", program: "PGP-AIML", batch: "PGPAIML.M.MAR19", role: "Student", topics: [], isNew: false, status: "past", color: "#0D9488", pattern: 4, enrollment: "learn" },
+  { id: "s4", title: "Capstone", program: "PGP-AIML", batch: "PGPAIML.C.APR19", role: "Student", topics: [], isNew: false, status: "past", color: "#7C3AED", pattern: 9, enrollment: "learn" },
+  { id: "s5", title: "Capstone", program: "PGP-AIML", batch: "PGPAIML.G.FEB19", role: "Student", topics: [], isNew: false, status: "past", color: "#F59E0B", pattern: 7, enrollment: "learn" },
 ];
 
 export const demoPlannedEvents: PlannedEvent[] = [
