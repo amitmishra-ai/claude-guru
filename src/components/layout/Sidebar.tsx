@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
@@ -322,6 +323,29 @@ export function Sidebar() {
               <NavItemExpanded
                 icon={<HomeOutlinedIcon fontSize="small" />}
                 label="Home"
+                isActive={isActive}
+              />
+            )
+          }
+        </NavLink>
+
+        {/* Calendar */}
+        <NavLink to="/calendar" style={{ textDecoration: "none" }}>
+          {({ isActive }) =>
+            isNavCollapsed ? (
+              <Tooltip title="Calendar" placement="right" arrow>
+                <span>
+                  <NavItemCollapsed
+                    icon={<CalendarMonthOutlinedIcon fontSize="small" />}
+                    label="Calendar"
+                    isActive={isActive}
+                  />
+                </span>
+              </Tooltip>
+            ) : (
+              <NavItemExpanded
+                icon={<CalendarMonthOutlinedIcon fontSize="small" />}
+                label="Calendar"
                 isActive={isActive}
               />
             )

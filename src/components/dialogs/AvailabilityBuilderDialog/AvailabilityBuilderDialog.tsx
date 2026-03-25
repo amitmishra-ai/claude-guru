@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
@@ -20,6 +20,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
+import Paper from "@mui/material/Paper";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -104,6 +105,8 @@ const AvailabilityBuilderDialog = () => {
   const open = useAppSelector((s) => s.ui.openAvailability);
   const step = useAppSelector((s) => s.availability.availabilityStep);
   const presetCards = useAppSelector((s) => s.availability.presetCards);
+  const hasConfigured = useAppSelector((s) => s.availability.hasUserConfiguredAvailability);
+  const existingPatterns = useAppSelector((s) => s.availability.patterns);
   const draftPatterns = useAppSelector((s) => s.availability.availabilityDraftPatterns);
   const builderDays = useAppSelector((s) => s.availability.builderDays);
   const builderStart = useAppSelector((s) => s.availability.builderStart);
@@ -121,6 +124,27 @@ const AvailabilityBuilderDialog = () => {
     timeZoneMode === "manual"
       ? manualTimeZone
       : Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  // Pre-populate builder from existing patterns when editing
+  useEffect(() => {
+    if (open && hasConfigured && existingPatterns.length > 0 && !presetCards.length) {
+      const presetKeys = defaultPresets.map((p) => p.label);
+      const updatedPresets = defaultPresets.map((preset) => {
+        const match = existingPatterns.find((p) => p.label === preset.label);
+        if (match) {
+          return { ...preset, start: fmtTime(match.start), end: fmtTime(match.end), days: [...match.days], enabled: true };
+        }
+        return preset;
+      });
+      dispatch(setPresetCards(updatedPresets));
+      const custom = existingPatterns.filter((p) => !presetKeys.includes(p.label));
+      if (custom.length > 0) {
+        dispatch(setAvailabilityDraftPatterns(custom.map((c) => ({ id: c.id, label: c.label, days: [...c.days], start: c.start, end: c.end }))));
+      }
+      // Skip to step 2 since timezone is already set
+      dispatch(setAvailabilityStep(2));
+    }
+  }, [open, hasConfigured, existingPatterns, presetCards.length, dispatch]);
 
   const cards = presetCards.length ? presetCards : defaultPresets;
 
@@ -313,301 +337,142 @@ const AvailabilityBuilderDialog = () => {
 
         {step === 2 && (
           /* ── Step 2: Weekly availability ── */
-          <Stack spacing={2}>
-            {/* Info */}
-            <Stack direction="row" alignItems="center" spacing={1.5}>
-              <Box sx={{ width: 40, height: 40, borderRadius: "50%", bgcolor: "action.hover", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <AccessTimeOutlinedIcon sx={{ fontSize: 20, color: "text.secondary" }} />
-              </Box>
-              <Box>
-                <Typography variant="body2" fontWeight={600}>Set your weekly slots</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Choose from recommended times or add your own.
-                </Typography>
-              </Box>
-            </Stack>
+          <Stack spacing={1.5}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              Set recurring availability. Add exceptions later.
+            </Typography>
 
-            {/* Recommended slots */}
-            <Box>
-              <Typography variant="caption" fontWeight={600} color="primary.main" sx={{ mb: 1, display: "block", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                Recommended
-              </Typography>
-
+            {/* Active slots — enabled presets + custom drafts */}
+            {(cards.filter((c) => c.enabled).length > 0 || draftPatterns.length > 0) && (
               <Stack spacing={1}>
-                {cards.map((card) =>
+                {cards.filter((c) => c.enabled).map((card) =>
                   editingPresetKey === card.key ? (
-                    /* ── Editing preset ── */
-                    <Box
-                      key={card.key}
-                      sx={{ border: 2, borderColor: "primary.main", borderRadius: 2, p: { xs: 1.5, sm: 2 } }}
-                    >
-                      <Typography variant="body2" fontWeight={700} sx={{ mb: 1.5 }}>{card.label}</Typography>
-                      <Stack spacing={1.5}>
-                        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-                          <FormControl fullWidth size="small">
-                            <InputLabel>Start</InputLabel>
-                            <Select label="Start" value={editPresetStart} onChange={(e) => setEditPresetStart(e.target.value)}>
-                              {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
-                            </Select>
-                          </FormControl>
-                          <FormControl fullWidth size="small">
-                            <InputLabel>End</InputLabel>
-                            <Select label="End" value={editPresetEnd} onChange={(e) => setEditPresetEnd(e.target.value)}>
-                              {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
-                            </Select>
-                          </FormControl>
-                        </Stack>
-                        <Stack direction="row" spacing={1}>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            onClick={() => {
-                              const updated = cards.map((c) =>
-                                c.key === card.key ? { ...c, start: editPresetStart, end: editPresetEnd, enabled: true } : c
-                              );
-                              dispatch(setPresetCards(updated));
-                              setEditingPresetKey(null);
-                            }}
-                          >
-                            Save
-                          </Button>
-                          <Button size="small" variant="text" color="inherit" onClick={() => setEditingPresetKey(null)}>
-                            Cancel
-                          </Button>
-                        </Stack>
+                    <Paper key={card.key} variant="outlined" sx={{ p: 1.5, borderRadius: 1.5, borderColor: "primary.main" }}>
+                      <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 1 }}>{card.label}</Typography>
+                      <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Start</InputLabel>
+                          <Select label="Start" value={editPresetStart} onChange={(e) => setEditPresetStart(e.target.value)}>
+                            {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>End</InputLabel>
+                          <Select label="End" value={editPresetEnd} onChange={(e) => setEditPresetEnd(e.target.value)}>
+                            {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                          </Select>
+                        </FormControl>
                       </Stack>
-                    </Box>
+                      <Stack direction="row" spacing={1}>
+                        <Button size="small" variant="contained" sx={{ textTransform: "none" }} onClick={() => {
+                          dispatch(setPresetCards(cards.map((c) => c.key === card.key ? { ...c, start: editPresetStart, end: editPresetEnd } : c)));
+                          setEditingPresetKey(null);
+                        }}>Save</Button>
+                        <Button size="small" variant="text" color="inherit" sx={{ textTransform: "none" }} onClick={() => setEditingPresetKey(null)}>Cancel</Button>
+                      </Stack>
+                    </Paper>
                   ) : (
-                    /* ── Preset card ── */
-                    <Box
-                      key={card.key}
-                      sx={{
-                        border: 1,
-                        borderColor: card.enabled ? "var(--gl-status-confirmed-border)" : "divider",
-                        borderRadius: 2,
-                        p: { xs: 1.5, sm: 2 },
-                        bgcolor: card.enabled ? "var(--gl-status-confirmed-bg)" : "transparent",
-                        transition: "all 150ms",
-                      }}
-                    >
-                      {/* Desktop (sm+): single row — info left, actions right */}
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                        sx={{ display: { xs: "none", sm: "flex" }, gap: 2 }}
-                      >
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight={700}>{card.label}</Typography>
+                    <Paper key={card.key} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Box>
+                          <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>{card.label}</Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {formatDayGroupShort(card.days)} &bull; {fmtTime(parseHHMM(card.start))}–{fmtTime(parseHHMM(card.end))}
+                            {formatDayGroupShort(card.days)} · {fmtTime12(parseHHMM(card.start))} – {fmtTime12(parseHHMM(card.end))}
                           </Typography>
                         </Box>
-                        <Stack direction="row" alignItems="center" gap={1} sx={{ flexShrink: 0 }}>
-                          <Button
-                            variant={card.enabled ? "soft" : "contained"}
-                            size="small"
-                            onClick={() => togglePreset(card.key)}
-                            sx={card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" } : { px: 2 }}
-                          >
-                            {card.enabled ? "Added" : "Add"}
-                          </Button>
-                          <Button
-                            variant="text"
-                            size="small"
-                            onClick={() => {
-                              setEditingPresetKey(card.key);
-                              setEditPresetStart(card.start);
-                              setEditPresetEnd(card.end);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          <IconButton
-                            size="small"
-                            onClick={() => dispatch(setPresetCards(cards.filter((c) => c.key !== card.key)))}
-                            sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
-                          >
+                        <Stack direction="row" spacing={0.25}>
+                          <IconButton size="small" onClick={() => { setEditingPresetKey(card.key); setEditPresetStart(card.start); setEditPresetEnd(card.end); }}>
+                            <EditOutlinedIcon sx={{ fontSize: 14 }} />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => togglePreset(card.key)}>
                             <CloseOutlinedIcon sx={{ fontSize: 14 }} />
                           </IconButton>
                         </Stack>
                       </Stack>
-
-                      {/* Mobile (xs): stacked — info top, actions bottom */}
-                      <Box sx={{ display: { xs: "block", sm: "none" } }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1 }}>
-                          <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.8rem" }}>
-                              {card.label}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {formatDayGroupShort(card.days)} &bull; {fmtTime(parseHHMM(card.start))}–{fmtTime(parseHHMM(card.end))}
-                            </Typography>
-                          </Box>
-                          {card.enabled && (
-                            <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: "var(--gl-status-confirmed-text)", flexShrink: 0, mt: 0.25 }} />
-                          )}
-                        </Stack>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Button
-                            variant={card.enabled ? "soft" : "contained"}
-                            size="small"
-                            onClick={() => togglePreset(card.key)}
-                            sx={{
-                              minHeight: 32,
-                              fontSize: "0.75rem",
-                              ...(card.enabled ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" } : {}),
-                            }}
-                          >
-                            {card.enabled ? "Remove" : "Add"}
-                          </Button>
-                          <Button
-                            variant="text"
-                            size="small"
-                            sx={{ minHeight: 32, fontSize: "0.75rem" }}
-                            onClick={() => {
-                              setEditingPresetKey(card.key);
-                              setEditPresetStart(card.start);
-                              setEditPresetEnd(card.end);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          <IconButton
-                            size="small"
-                            onClick={() => dispatch(setPresetCards(cards.filter((c) => c.key !== card.key)))}
-                            sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5, ml: "auto !important" }}
-                          >
-                            <CloseOutlinedIcon sx={{ fontSize: 14 }} />
-                          </IconButton>
-                        </Stack>
-                      </Box>
-                    </Box>
+                    </Paper>
                   )
                 )}
+                {draftPatterns.map((p) => (
+                  <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>{p.label}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {formatDayGroupShort(p.days)} · {fmtTime12(p.start)} – {fmtTime12(p.end)}
+                        </Typography>
+                      </Box>
+                      <IconButton size="small" onClick={() => removeCustomSlot(p.id)}>
+                        <CloseOutlinedIcon sx={{ fontSize: 14 }} />
+                      </IconButton>
+                    </Stack>
+                  </Paper>
+                ))}
               </Stack>
-            </Box>
+            )}
 
-            {/* Custom slots */}
-            {draftPatterns.length > 0 && (
-              <Box>
-                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: "block", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                  Custom slots
+            {/* Quick add — unselected presets */}
+            {cards.filter((c) => !c.enabled).length > 0 && (
+              <>
+                <Divider sx={{ my: 0.5 }} />
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>Quick add</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5, lineHeight: 1.4 }}>
+                  Popular slots — adding these helps you get scheduled faster.
                 </Typography>
-                <Stack spacing={1}>
-                  {draftPatterns.map((p) => (
-                    <Box
-                      key={p.id}
-                      sx={{ border: 1, borderColor: "primary.main", borderRadius: 2, p: { xs: 1.5, sm: 2 } }}
-                    >
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight={700} sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>{p.label}</Typography>
-                          <Typography variant="caption" color="primary.main">Custom slot</Typography>
-                        </Box>
-                        <IconButton
-                          size="small"
-                          onClick={() => removeCustomSlot(p.id)}
-                          sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.5 }}
-                        >
-                          <CloseOutlinedIcon sx={{ fontSize: 14 }} />
-                        </IconButton>
-                      </Stack>
+                {cards.filter((c) => !c.enabled).map((card) => (
+                  <Stack key={card.key} direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.5 }}>
+                    <Box>
+                      <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>{card.label}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatDayGroupShort(card.days)} · {fmtTime12(parseHHMM(card.start))} – {fmtTime12(parseHHMM(card.end))}
+                      </Typography>
                     </Box>
-                  ))}
-                </Stack>
-              </Box>
+                    <Stack direction="row" spacing={0.5}>
+                      <Button size="small" variant="text" sx={{ textTransform: "none", minWidth: 0, px: 1 }} onClick={() => { setEditingPresetKey(card.key); setEditPresetStart(card.start); setEditPresetEnd(card.end); togglePreset(card.key); }}>Edit</Button>
+                      <Button size="small" variant="soft" sx={{ textTransform: "none" }} onClick={() => togglePreset(card.key)}>Add</Button>
+                    </Stack>
+                  </Stack>
+                ))}
+              </>
             )}
 
             {/* Add custom slot */}
             {showCustomForm ? (
-              <Box sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: { xs: 1.5, sm: 2 } }}>
-                <Typography variant="body2" fontWeight={600} sx={{ mb: 1.5, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
-                  Add custom slot
-                </Typography>
-
-                {/* Day chips — larger touch targets on mobile */}
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mb: 2 }}>
+              <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 1.5, borderColor: "primary.main" }}>
+                <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 1 }}>Add custom slot</Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1 }}>
                   {DOW_LONG.map((day) => {
                     const selected = builderDays.includes(day);
                     return (
-                      <Chip
-                        key={day}
-                        label={day.slice(0, 3)}
-                        size="small"
+                      <Chip key={day} label={day.slice(0, 3)} size="small"
                         variant={selected ? "filled" : "outlined"}
                         onClick={() => toggleDay(day)}
-                        sx={{
-                          height: { xs: 32, sm: 28 },
-                          fontSize: { xs: "0.75rem", sm: "0.7rem" },
-                          fontWeight: 500,
-                          "& .MuiChip-label": { px: { xs: 1.5, sm: 1 } },
-                          ...(selected
-                            ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }
-                            : {}),
-                        }}
+                        sx={{ height: 26, fontSize: "0.7rem", ...(selected ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { cursor: "pointer" }) }}
                       />
                     );
                   })}
                 </Box>
-
-                {/* Time selectors — stacked on mobile */}
-                <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mb: 2 }}>
+                <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Start time</InputLabel>
-                    <Select
-                      label="Start time"
-                      value={builderStart}
-                      onChange={(e) => dispatch(setBuilderStart(e.target.value))}
-                    >
-                      {timeOptions12.map((opt) => (
-                        <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                      ))}
+                    <InputLabel>Start</InputLabel>
+                    <Select label="Start" value={builderStart} onChange={(e) => dispatch(setBuilderStart(e.target.value))}>
+                      {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
                     </Select>
                   </FormControl>
                   <FormControl fullWidth size="small">
-                    <InputLabel>End time</InputLabel>
-                    <Select
-                      label="End time"
-                      value={builderEnd}
-                      onChange={(e) => dispatch(setBuilderEnd(e.target.value))}
-                    >
-                      {timeOptions12.map((opt) => (
-                        <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                      ))}
+                    <InputLabel>End</InputLabel>
+                    <Select label="End" value={builderEnd} onChange={(e) => dispatch(setBuilderEnd(e.target.value))}>
+                      {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Stack>
-
                 <Stack direction="row" spacing={1}>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    onClick={addCustomSlot}
-                    disabled={!builderDays.length}
-                    sx={{ minHeight: 36 }}
-                  >
-                    Add slot
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="text"
-                    color="inherit"
-                    onClick={() => setShowCustomForm(false)}
-                    sx={{ minHeight: 36 }}
-                  >
-                    Cancel
-                  </Button>
+                  <Button size="small" variant="contained" onClick={addCustomSlot} disabled={!builderDays.length} sx={{ textTransform: "none" }}>Add</Button>
+                  <Button size="small" variant="text" color="inherit" onClick={() => setShowCustomForm(false)} sx={{ textTransform: "none" }}>Cancel</Button>
                 </Stack>
-              </Box>
+              </Paper>
             ) : (
-              <Button
-                variant="soft"
-                startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
-                onClick={() => setShowCustomForm(true)}
-                sx={{ alignSelf: "flex-start", minHeight: 36 }}
-              >
-                Add custom time
+              <Button variant="soft" size="small" startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />} onClick={() => setShowCustomForm(true)} sx={{ alignSelf: "flex-start", textTransform: "none" }}>
+                Custom slot
               </Button>
             )}
           </Stack>

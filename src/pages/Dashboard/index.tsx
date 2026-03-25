@@ -260,7 +260,15 @@ export default function DashboardPage() {
   const nextSession = todaySessions[0] ?? null;
   const todaySessionIds = new Set(todaySessions.map((s) => s.id));
   const confirmedCount = upcomingSessions.filter((s) => confirmations[s.id] || todaySessionIds.has(s.id)).length;
-  const scheduled = upcomingSessions.filter((s) => !confirmations[s.id] && !todaySessionIds.has(s.id));
+  const scheduled = upcomingSessions
+    .filter((s) => !confirmations[s.id] && !todaySessionIds.has(s.id))
+    .sort((a, b) => {
+      // Combined sessions first, then by date
+      const aCombined = a.combinedBatches ? 1 : 0;
+      const bCombined = b.combinedBatches ? 1 : 0;
+      if (aCombined !== bCombined) return bCombined - aCombined;
+      return dateTimeMs(a.dateYmd, a.start) - dateTimeMs(b.dateYmd, b.start);
+    });
   const confirmedUpcoming = upcomingSessions.filter((s) => confirmations[s.id]);
 
   // Display lists that account for the exit animation window:
@@ -1326,6 +1334,9 @@ export default function DashboardPage() {
                             <>
                               <Divider sx={{ my: 0.5 }} />
                               <Typography variant="caption" color="text.secondary" fontWeight={600}>Quick add</Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5, lineHeight: 1.4 }}>
+                                Popular slots — adding these helps you get scheduled faster.
+                              </Typography>
                               {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).map((ps) => (
                                 <Stack key={ps.key} direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.5 }}>
                                   <Box>

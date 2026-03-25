@@ -17,6 +17,7 @@ import SpeedDialAction from "@mui/material/SpeedDialAction";
 import SpeedDialIcon from "@mui/material/SpeedDialIcon";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import { keyframes } from "@mui/system";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setCalendarViewMode, setAnchorDate } from "@/store/slices/calendarSlice";
@@ -24,6 +25,7 @@ import { setSessionFocus, clearRecentlyConfirmed } from "@/store/slices/sessions
 import { setRequestFocus } from "@/store/slices/requestsSlice";
 import {
   setOpenSession,
+  setOpenSessionDetails,
   setOpenRequest,
   setOpenAvailability,
   setOpenNotAvailable,
@@ -326,11 +328,11 @@ export default function CalendarPage() {
             variant="contained"
             size="small"
             startIcon={<EditCalendarIcon sx={{ fontSize: 16 }} />}
-            aria-label="Add availability"
+            aria-label={hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}
             sx={{ textTransform: 'none' }}
             onClick={() => dispatch(setOpenAvailability(true))}
           >
-            Add availability
+            {hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}
           </Button>
         </Box>
 
@@ -595,7 +597,7 @@ export default function CalendarPage() {
                         <Box
                           key={s.id}
                           component="button"
-                          onClick={() => { dispatch(setSessionFocus(s)); dispatch(setOpenSession(true)); }}
+                          onClick={() => { dispatch(setSessionFocus(s)); dispatch(setOpenSessionDetails(true)); }}
                           sx={{
                             position: 'absolute',
                             top: `${topPct}%`,
@@ -1124,7 +1126,7 @@ export default function CalendarPage() {
                             component="button"
                             onClick={() => {
                               dispatch(setSessionFocus(s));
-                              dispatch(setOpenSession(true));
+                              dispatch(setOpenSessionDetails(true));
                             }}
                             aria-label={`${statusLabel} session: ${s.title}, ${fmtTime12(s.start)} to ${fmtTime12(s.end)}`}
                             sx={{
@@ -1435,88 +1437,25 @@ export default function CalendarPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── SUMMARY CARDS ────────────────────────────────────────────── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <Box sx={{ mt: 3, display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-        {/* Your week at a glance */}
-        <Card variant="outlined" sx={{ p: 2 }}>
-          <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
-            Your week at a glance
-          </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: '0.5rem', bgcolor: 'var(--gl-cal-session-scheduled-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CalendarMonthIcon sx={{ fontSize: 16, color: 'var(--gl-cal-session-scheduled-border)' }} />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>{weekStats.total}</Typography>
-                <Typography variant="caption" color="text.secondary">Events</Typography>
-              </Box>
+      {/* ── Week at a glance ──────────────────────────────────────────── */}
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ letterSpacing: "0.04em", mb: 1.5, display: "block" }}>
+          THIS WEEK
+        </Typography>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(5, 1fr)" }, gap: 1.5 }}>
+          {[
+            { value: weekStats.total, label: "Events", color: "text.secondary" },
+            { value: weekStats.confirmedCount, label: "Confirmed", color: "success.main" },
+            { value: weekStats.unconfirmedCount, label: "Unconfirmed", color: weekStats.unconfirmedCount > 0 ? "warning.main" : "text.secondary" },
+            { value: weekStats.pendingReqs, label: "Pending", color: weekStats.pendingReqs > 0 ? "info.main" : "text.secondary" },
+            { value: weekStats.availSlots, label: "Available slots", color: "text.secondary" },
+          ].map((s) => (
+            <Box key={s.label} sx={{ py: 1.5, px: 2, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
+              <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1, color: s.color }}>{s.value}</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>{s.label}</Typography>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: '0.5rem', bgcolor: 'var(--gl-cal-session-confirmed-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <TaskAltIcon sx={{ fontSize: 16, color: 'var(--gl-cal-session-confirmed-border)' }} />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>{weekStats.confirmedCount}</Typography>
-                <Typography variant="caption" color="text.secondary">Confirmed</Typography>
-              </Box>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: '0.5rem', bgcolor: 'var(--gl-cal-request-pending-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <AccessTimeIcon sx={{ fontSize: 16, color: 'var(--gl-cal-request-pending-border)' }} />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>{weekStats.pendingReqs}</Typography>
-                <Typography variant="caption" color="text.secondary">Pending requests</Typography>
-              </Box>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: '0.5rem', bgcolor: 'var(--gl-cal-avail-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CalendarMonthIcon sx={{ fontSize: 16, color: 'var(--gl-cal-avail-border, rgb(34,197,94))' }} />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>{weekStats.availSlots}</Typography>
-                <Typography variant="caption" color="text.secondary">Available slots</Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Card>
-
-        {/* Needs your attention */}
-        <Card variant="outlined" sx={{ p: 2 }}>
-          <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
-            Needs your attention
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {weekStats.unconfirmedCount > 0 && (
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ErrorOutlineIcon sx={{ fontSize: 16, color: 'var(--gl-cal-session-scheduled-border)' }} />
-                  <Typography variant="body2">
-                    {weekStats.unconfirmedCount} unconfirmed event{weekStats.unconfirmedCount > 1 ? "s" : ""}
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-            {weekStats.pendingReqs > 0 && (
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ErrorOutlineIcon sx={{ fontSize: 16, color: 'var(--gl-warning-icon)' }} />
-                  <Typography variant="body2">
-                    {weekStats.pendingReqs} pending request{weekStats.pendingReqs > 1 ? "s" : ""}
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-            {weekStats.unconfirmedCount === 0 && weekStats.pendingReqs === 0 && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1 }}>
-                <TaskAltIcon sx={{ fontSize: 16, color: 'var(--gl-cal-avail-border, rgb(34,197,94))' }} />
-                <Typography variant="body2" color="text.secondary">
-                  All caught up! No actions needed.
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        </Card>
+          ))}
+        </Box>
       </Box>
 
       {/* ── Mobile FAB ────────────────────────────────────────────────────── */}
@@ -1540,7 +1479,7 @@ export default function CalendarPage() {
         />
         <SpeedDialAction
           icon={<EditCalendarIcon />}
-          tooltipTitle="Add availability"
+          tooltipTitle={hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}
           tooltipOpen
           onClick={() => dispatch(setOpenAvailability(true))}
           sx={{ "& .MuiSpeedDialAction-staticTooltipLabel": { whiteSpace: "nowrap" } }}

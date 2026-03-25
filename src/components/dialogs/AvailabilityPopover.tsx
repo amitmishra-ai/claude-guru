@@ -103,10 +103,10 @@ export function AvailabilityPopover({
         {!confirmRemove ? (
           <Button
             size="small"
-            variant="outlined"
-            color="error"
+            variant="soft"
             onClick={() => setConfirmRemove(true)}
             fullWidth
+            sx={{ textTransform: "none", fontSize: "0.8rem", bgcolor: "rgba(211,47,47,0.08)", color: "error.main", "&:hover": { bgcolor: "rgba(211,47,47,0.16)" } }}
           >
             Remove slot
           </Button>
@@ -119,10 +119,10 @@ export function AvailabilityPopover({
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button size="small" variant="outlined" color="inherit" onClick={() => setConfirmRemove(false)} sx={{ flex: 1 }}>
+              <Button size="small" variant="soft" onClick={handleClose} sx={{ flex: 1, textTransform: "none", fontSize: "0.8rem" }}>
                 Keep
               </Button>
-              <Button size="small" variant="contained" color="error" onClick={handleRemove} sx={{ flex: 1 }}>
+              <Button size="small" variant="soft" onClick={handleRemove} sx={{ flex: 1, textTransform: "none", fontSize: "0.8rem", bgcolor: "rgba(211,47,47,0.08)", color: "error.main", "&:hover": { bgcolor: "rgba(211,47,47,0.16)" } }}>
                 Remove
               </Button>
             </Box>
