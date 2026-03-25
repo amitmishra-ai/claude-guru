@@ -11,6 +11,7 @@ import preferencesReducer from "./slices/preferencesSlice";
 import toastsReducer from "./slices/toastsSlice";
 import pollsReducer from "./slices/pollsSlice";
 import devPanelReducer from "./slices/devPanelSlice";
+import supportReducer from "./slices/supportSlice";
 import { ninjaApi } from "@/api/ninja/ninjaApi";
 
 export const store = configureStore({
@@ -27,6 +28,7 @@ export const store = configureStore({
     toasts: toastsReducer,
     polls: pollsReducer,
     devPanel: devPanelReducer,
+    support: supportReducer,
     // RTK Query API cache
     [ninjaApi.reducerPath]: ninjaApi.reducer,
   },

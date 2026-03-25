@@ -11,6 +11,7 @@ const PaymentsPage = lazy(() => import("@/pages/Payments"));
 const ProfilePage = lazy(() => import("@/pages/Profile"));
 const PreferencesPage = lazy(() => import("@/pages/Preferences"));
 const ComponentsPage = lazy(() => import("@/pages/Components"));
+const SupportPage = lazy(() => import("@/pages/Support"));
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/availability" element={<Suspense><AvailabilityPage /></Suspense>} />
         <Route path="/notifications" element={<Suspense><NotificationsPage /></Suspense>} />
         <Route path="/payments" element={<Suspense><PaymentsPage /></Suspense>} />
+        <Route path="/support" element={<Suspense><SupportPage /></Suspense>} />
         <Route path="/profile" element={<Suspense><ProfilePage /></Suspense>} />
         <Route path="/preferences" element={<Suspense><PreferencesPage /></Suspense>} />
         <Route path="/components" element={<Suspense><ComponentsPage /></Suspense>} />

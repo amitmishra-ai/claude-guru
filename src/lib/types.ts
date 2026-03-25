@@ -305,3 +305,43 @@ export type CourseModuleData = {
   courseId: string;
   sections: CourseSection[];
 };
+
+// ─── Support Tickets ─────────────────────────────────────────────────────────
+
+export type TicketStatus = "open" | "awaiting_reply" | "closed" | "escalated";
+export type TicketCategory = "Learning Material" | "Projects" | "Assignments" | "Technical Issue" | "Other";
+
+export type TicketComment = {
+  id: string;
+  author: string;
+  authorRole: "student" | "guru" | "support";
+  content: string;
+  timestamp: string;
+};
+
+export type TicketActivity = {
+  id: string;
+  actor: string;
+  action: string;
+  timestamp: string;
+};
+
+export type SupportTicket = {
+  id: string;
+  subject: string;
+  description: string;
+  status: TicketStatus;
+  category: TicketCategory;
+  studentName: string;
+  studentEmail: string;
+  studentPhone?: string;
+  batchName: string;
+  assignedTo: string;
+  assignedToEmail: string;
+  createdAt: string;
+  lastActivityAt: string;
+  isBookmarked: boolean;
+  isUnread: boolean;
+  comments: TicketComment[];
+  activities: TicketActivity[];
+};
