@@ -120,7 +120,7 @@ export function SessionCard({
   const chipsRow = (chips && chips.length > 0) && (
     <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
       {chips.map((c) =>
-        c === "Combined session" ? (
+        ["Combined session", "Full batch", "1:1 Session"].includes(c) ? (
           <Chip
             key={c}
             icon={<CallMergeOutlinedIcon sx={{ fontSize: 13 }} />}

@@ -69,7 +69,18 @@ export type Session = {
   hourlyRateInr?: number;
   totalEarningsInr?: number;
   /** Combined session — lists the batches merged into this session */
-  combinedBatches?: { batch: string; group: string }[];
+  combinedBatches?: {
+    batch: string;
+    group: string;
+    audienceType?: "Group" | "Batch" | "Individual";
+    learnerCount?: number;
+    proficiency?: string;
+    progress?: string;
+    learnerName?: string;
+    learnerEmail?: string;
+    programManager?: { name: string; email: string; phone?: string };
+    members?: { name: string; email: string }[];
+  }[];
 };
 
 // ─── Planned Event Types ────────────────────────────────────────────────────

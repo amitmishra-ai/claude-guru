@@ -670,7 +670,7 @@ export default function DashboardPage() {
                                   ? STATUS_CONFIRMED()
                                   : STATUS_SCHEDULED
                                 }
-                                chips={s.combinedBatches ? ["Combined session"] : undefined}
+                                chips={undefined}
                                 actions={isConfirmed ? (
                                   <>
                                     <Button
@@ -735,22 +735,63 @@ export default function DashboardPage() {
                                 }
                               />
                               {s.combinedBatches && (
-                                <Box sx={{ mt: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider", overflow: "hidden" }}>
-                                  <Box sx={{ px: 1.5, py: 0.75, bgcolor: "hsl(var(--md-surface-container) / 0.5)", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", gap: 0.75 }}>
+                                <Accordion
+                                  disableGutters
+                                  elevation={0}
+                                  defaultExpanded={false}
+                                  sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+                                >
+                                  <AccordionSummary
+                                    expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
+                                    sx={{ px: 1.5, py: 0, minHeight: "unset", bgcolor: "hsl(var(--md-surface-container) / 0.5)", "& .MuiAccordionSummary-content": { my: 0.75, gap: 0.75, alignItems: "center" } }}
+                                  >
                                     <CallMergeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
-                                    <Typography variant="caption" fontWeight={600} color="text.secondary">Combined batches</Typography>
+                                    <Typography variant="caption" fontWeight={600} color="text.secondary">
+                                      Combined session
+                                    </Typography>
                                     <Chip label={s.combinedBatches.length} size="small" sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, bgcolor: "action.selected", "& .MuiChip-label": { px: 0.5 } }} />
-                                  </Box>
+                                    {s.audienceType === "Individual" && s.combinedBatches[0]?.learnerName && (
+                                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>· {s.combinedBatches[0].learnerName}</Typography>
+                                    )}
+                                  </AccordionSummary>
+                                  <AccordionDetails sx={{ p: 0 }}>
                                   <Stack divider={<Divider />}>
                                     {s.combinedBatches.map((cb) => (
-                                      <Stack key={cb.batch} direction="row" alignItems="center" spacing={1} sx={{ px: 1.5, py: 0.75 }}>
-                                        <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
-                                        <Typography variant="caption" fontWeight={500}>{cb.batch}</Typography>
-                                        {cb.group && <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>}
-                                      </Stack>
+                                      <Box key={cb.batch} sx={{ px: 1.5, py: 0.75 }}>
+                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                          <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
+                                          <Typography variant="caption" fontWeight={500}>
+                                            {cb.audienceType === "Individual" ? cb.learnerName ?? cb.batch : cb.batch}
+                                          </Typography>
+                                          {cb.group && cb.audienceType !== "Individual" && (
+                                            <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
+                                          )}
+                                        </Stack>
+                                        {/* Audience-specific details */}
+                                        <Stack direction="row" spacing={1} sx={{ ml: 2, mt: 0.25 }}>
+                                          {cb.audienceType === "Group" && (
+                                            <>
+                                              {cb.learnerCount && <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 18, fontSize: "0.6rem" }} />}
+                                              {cb.proficiency && <Chip label={cb.proficiency} size="small" variant="outlined" sx={{ height: 18, fontSize: "0.6rem" }} />}
+                                            </>
+                                          )}
+                                          {cb.audienceType === "Batch" && (
+                                            <>
+                                              {cb.learnerCount && <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 18, fontSize: "0.6rem" }} />}
+                                              {cb.progress && <Chip label={cb.progress} size="small" variant="outlined" sx={{ height: 18, fontSize: "0.6rem" }} />}
+                                            </>
+                                          )}
+                                          {cb.audienceType === "Individual" && (
+                                            <>
+                                              {cb.learnerEmail && <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{cb.learnerEmail}</Typography>}
+                                            </>
+                                          )}
+                                        </Stack>
+                                      </Box>
                                     ))}
                                   </Stack>
-                                </Box>
+                                  </AccordionDetails>
+                                </Accordion>
                               )}
                             </Card>
                           );
@@ -1117,7 +1158,7 @@ export default function DashboardPage() {
                                   end={s.end}
                                   onCourseClick={getOnCourseClick(s)}
                                   topRight={topRightContent}
-                                  chips={s.combinedBatches ? ["Combined session"] : undefined}
+                                  chips={undefined}
                                   actions={cardActions}
                                   secondaryAction={viewDetailsBtn}
                                 />

@@ -33,6 +33,14 @@ import Chip from "@mui/material/Chip";
 import Collapse from "@mui/material/Collapse";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Avatar from "@mui/material/Avatar";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -682,20 +690,126 @@ export function SessionDetailsModal() {
                 {session.combinedBatches && session.combinedBatches.length > 0 && (
                   <Box sx={{ mb: 2.5 }}>
                     <SectionHeading icon={<CallMergeOutlinedIcon sx={{ fontSize: 14 }} />}>
-                      Combined session &middot; {session.combinedBatches.length} batches
+                      Combined session &middot; {session.combinedBatches.length}
                     </SectionHeading>
-                    <SectionCard>
+                    <Stack spacing={1}>
                       {session.combinedBatches.map((cb) => (
-                        <DetailRow key={cb.batch} label={cb.batch}>
-                          {cb.group && (
-                            <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                              <GroupsOutlinedIcon sx={{ fontSize: 14 }} />
-                              <span>{cb.group}</span>
+                        <Accordion
+                          key={cb.batch}
+                          disableGutters
+                          elevation={0}
+                          sx={{ border: "1px solid", borderColor: "divider", borderRadius: "8px !important", overflow: "hidden", "&::before": { display: "none" } }}
+                        >
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
+                            sx={{ px: 1.5, minHeight: "unset", "& .MuiAccordionSummary-content": { my: 0.75 } }}
+                          >
+                            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%", mr: 1 }}>
+                              <Typography variant="caption" fontWeight={600}>
+                                {cb.audienceType === "Individual" ? cb.learnerName ?? cb.batch : cb.batch}
+                              </Typography>
+                              <Chip
+                                label={cb.audienceType === "Individual" ? "Individual" : cb.audienceType === "Batch" ? "Whole batch" : cb.group || "Group"}
+                                size="small"
+                                variant="outlined"
+                                sx={{ height: 18, fontSize: "0.55rem", fontWeight: 600, borderRadius: 1 }}
+                              />
                             </Stack>
-                          )}
-                        </DetailRow>
+                          </AccordionSummary>
+                          <AccordionDetails sx={{ px: 1.5, pt: 0, pb: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
+                            {/* Program Manager */}
+                            {cb.programManager && (
+                              <Box sx={{ mb: cb.members && cb.members.length > 0 ? 1.5 : 0 }}>
+                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
+                                  Program Manager
+                                </Typography>
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                  <Avatar sx={{ width: 28, height: 28, fontSize: "0.7rem", bgcolor: "primary.main" }}>
+                                    {cb.programManager.name.charAt(0)}
+                                  </Avatar>
+                                  <Box>
+                                    <Typography variant="caption" fontWeight={600}>{cb.programManager.name}</Typography>
+                                    <Stack direction="row" spacing={1.5} sx={{ mt: 0.15 }}>
+                                      <Stack direction="row" alignItems="center" spacing={0.25}>
+                                        <MailOutlineIcon sx={{ fontSize: 11, color: "text.secondary" }} />
+                                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>{cb.programManager.email}</Typography>
+                                      </Stack>
+                                      {cb.programManager.phone && (
+                                        <Stack direction="row" alignItems="center" spacing={0.25}>
+                                          <PhoneOutlinedIcon sx={{ fontSize: 11, color: "text.secondary" }} />
+                                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>{cb.programManager.phone}</Typography>
+                                        </Stack>
+                                      )}
+                                    </Stack>
+                                  </Box>
+                                </Stack>
+                              </Box>
+                            )}
+
+                            {/* Group Members (only for Group audienceType) */}
+                            {(cb.audienceType === "Group" || cb.audienceType === "Batch") && cb.members && cb.members.length > 0 && (
+                              <Box>
+                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
+                                  Members ({cb.members.length})
+                                </Typography>
+                                <Stack
+                                  spacing={0.5}
+                                  sx={{
+                                    maxHeight: 180,
+                                    overflowY: "auto",
+                                    pr: 0.5,
+                                    "&::-webkit-scrollbar": { width: 2 },
+                                    "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
+                                    "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: 2, "&:hover": { bgcolor: "text.disabled" } },
+                                    scrollbarWidth: "thin",
+                                    scrollbarColor: "var(--mui-palette-divider) transparent",
+                                  }}
+                                >
+                                  {cb.members.map((m) => (
+                                    <Stack key={m.email} direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+                                      <Avatar sx={{ width: 28, height: 28, fontSize: "0.65rem", bgcolor: "action.selected", color: "text.primary", flexShrink: 0 }}>
+                                        {m.name.charAt(0)}
+                                      </Avatar>
+                                      <Box sx={{ minWidth: 0 }}>
+                                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.2 }}>{m.name}</Typography>
+                                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{m.email}</Typography>
+                                      </Box>
+                                    </Stack>
+                                  ))}
+                                </Stack>
+                              </Box>
+                            )}
+
+                            {/* Batch info chips */}
+                            {cb.audienceType !== "Individual" && (cb.learnerCount || cb.proficiency || cb.progress) && (
+                              <Stack direction="row" spacing={0.75} sx={{ mt: cb.programManager || (cb.members && cb.members.length > 0) ? 1 : 0 }}>
+                                {cb.learnerCount && <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 20, fontSize: "0.6rem" }} />}
+                                {cb.proficiency && <Chip label={cb.proficiency} size="small" variant="outlined" sx={{ height: 20, fontSize: "0.6rem" }} />}
+                                {cb.progress && <Chip label={cb.progress} size="small" variant="outlined" sx={{ height: 20, fontSize: "0.6rem" }} />}
+                              </Stack>
+                            )}
+
+                            {/* Individual learner details */}
+                            {cb.audienceType === "Individual" && cb.learnerName && (
+                              <Box sx={{ mt: cb.programManager ? 1.5 : 0 }}>
+                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
+                                  Learner
+                                </Typography>
+                                <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+                                  <Avatar sx={{ width: 28, height: 28, fontSize: "0.65rem", bgcolor: "action.selected", color: "text.primary", flexShrink: 0 }}>
+                                    {cb.learnerName.charAt(0)}
+                                  </Avatar>
+                                  <Box sx={{ minWidth: 0 }}>
+                                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.2 }}>{cb.learnerName}</Typography>
+                                    {cb.learnerEmail && <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontSize: "0.7rem" }}>{cb.learnerEmail}</Typography>}
+                                  </Box>
+                                </Stack>
+                              </Box>
+                            )}
+                          </AccordionDetails>
+                        </Accordion>
                       ))}
-                    </SectionCard>
+                    </Stack>
                   </Box>
                 )}
 
