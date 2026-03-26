@@ -454,7 +454,7 @@ export default function ProfilePage() {
       {/* ── Page header ──────────────────────────────────────────────────── */}
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
         <Box>
-          <Typography variant="h5" fontWeight={700}>Profile</Typography>
+          <Typography variant="h6" fontWeight={700}>Profile</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Your identity, performance trends, and financial overview.
           </Typography>

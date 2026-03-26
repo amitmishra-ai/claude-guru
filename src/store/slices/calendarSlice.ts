@@ -1,9 +1,11 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { demoNow } from "@/lib/constants";
 
+export type CalendarViewMode = "day" | "week" | "month" | "weekdays" | "weekend";
+
 interface CalendarState {
   anchorDate: string; // ISO string for serialization
-  calendarViewMode: "week" | "month";
+  calendarViewMode: CalendarViewMode;
 }
 
 const initialState: CalendarState = {
@@ -18,7 +20,7 @@ const calendarSlice = createSlice({
     setAnchorDate(state, action: PayloadAction<string>) {
       state.anchorDate = action.payload;
     },
-    setCalendarViewMode(state, action: PayloadAction<"week" | "month">) {
+    setCalendarViewMode(state, action: PayloadAction<CalendarViewMode>) {
       state.calendarViewMode = action.payload;
     },
   },

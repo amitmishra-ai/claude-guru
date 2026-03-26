@@ -10,9 +10,10 @@ export type GuruRole =
   | "Project Mentor"
   | "Teacher";
 
-export type GuruStage = "experienced" | "new" | "early";
+export type GuruStage = "experienced" | "new" | "early" | "onboarding";
 
 export const GURU_STAGES: { value: GuruStage; label: string; description: string }[] = [
+  { value: "onboarding", label: "Onboarding", description: "Code of Conduct acceptance, first-time setup" },
   { value: "experienced", label: "Experienced", description: "Full data, all sections populated" },
   { value: "early", label: "Early (2 weeks)", description: "Has availability & upcoming sessions, no completions" },
   { value: "new", label: "New (Day 0)", description: "Just onboarded, zero data everywhere" },

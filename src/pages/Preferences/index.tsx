@@ -1,4 +1,4 @@
-import SettingsIcon from "@mui/icons-material/Settings";
+
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
@@ -31,7 +31,7 @@ export default function PreferencesPage() {
 
   return (
     <>
-      <PageHeader icon={SettingsIcon} title="Settings" subtitle="Manage your appearance, notifications, and communication preferences." />
+      <PageHeader title="Settings" subtitle="Manage your appearance, notifications, and communication preferences." />
 
       {/* ── Appearance ── */}
       <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 3, mb: 1.5 }}>Appearance</Typography>

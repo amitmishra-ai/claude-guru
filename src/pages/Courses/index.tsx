@@ -344,17 +344,12 @@ export default function CoursesPage() {
     <>
       {/* ── Page header ── */}
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2} sx={{ mb: 0.5 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Box sx={{ p: 1, borderRadius: 2, border: 1, borderColor: "divider", bgcolor: "background.paper", display: "flex" }}>
-            <AutoStoriesOutlinedIcon sx={{ fontSize: 18 }} />
-          </Box>
-          <Box>
-            <Typography variant="h6" sx={{ lineHeight: 1.35, fontWeight: 700 }}>Courses</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-              Your teaching assignments and learning content
-            </Typography>
-          </Box>
-        </Stack>
+        <Box>
+          <Typography variant="h6" sx={{ lineHeight: 1.35, fontWeight: 700 }}>Courses</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+            Your teaching assignments and learning content
+          </Typography>
+        </Box>
         <Box
           sx={{
             display: { xs: "none", sm: "flex" },

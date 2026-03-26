@@ -21,7 +21,7 @@ interface SessionsState {
 
 const initialState: SessionsState = {
   items: demoSessions,
-  confirmations: {},
+  confirmations: { s0: true },
   sessionDeclined: {},
   sessionDeclinedAtYmd: {},
   sessionFocus: null,

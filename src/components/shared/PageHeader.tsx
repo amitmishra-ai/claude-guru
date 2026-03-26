@@ -9,7 +9,7 @@ export function PageHeader({
   action,
   iconBoxSx,
 }: {
-  icon: React.ElementType;
+  icon?: React.ElementType;
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
@@ -23,25 +23,27 @@ export function PageHeader({
       spacing={1.5}
     >
       <Stack direction="row" spacing={1.5} alignItems="flex-start">
-        <Box
-          sx={{
-            mt: 0.25,
-            p: 1,
-            borderRadius: 2,
-            border: 1,
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            ...iconBoxSx,
-          }}
-        >
-          <Icon style={{ width: 16, height: 16 }} />
-        </Box>
+        {Icon && (
+          <Box
+            sx={{
+              mt: 0.25,
+              p: 1,
+              borderRadius: 2,
+              border: 1,
+              borderColor: "divider",
+              bgcolor: "background.paper",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              ...iconBoxSx,
+            }}
+          >
+            <Icon style={{ width: 16, height: 16 }} />
+          </Box>
+        )}
 
         <Box>
-          <Typography variant="h6" sx={{ lineHeight: 1.35 }}>
+          <Typography variant="h6" sx={{ lineHeight: 1.35, fontWeight: 700 }}>
             {title}
           </Typography>
           {subtitle && (
