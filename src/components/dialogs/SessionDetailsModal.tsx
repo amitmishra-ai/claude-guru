@@ -503,6 +503,8 @@ export function SessionDetailsModal() {
 
   const isConfirmed = session ? (!!confirmations[session.id] || session.id === nextSessionId) : false;
   const isCompleted = session ? dateTimeMs(session.dateYmd, session.end) < nowMs : false;
+  const isPast = session ? dateTimeMs(session.dateYmd, session.start) < nowMs : false;
+  const isMissed = isPast && !isConfirmed && !isCompleted;
   const linkedCourse = session?.linkedCourseId
     ? demoCourseCatalog.find((c) => c.id === session.linkedCourseId)
     : null;
@@ -510,10 +512,14 @@ export function SessionDetailsModal() {
   const showPolls = session && isConfirmed && !isCompleted;
 
   /* Status chip config */
-  const statusLabel = isCompleted ? "Completed" : isConfirmed ? "Confirmed" : "Scheduled";
-  const statusSx = isCompleted || isConfirmed
-    ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" }
-    : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" };
+  const statusLabel = isCompleted ? "Completed" : isMissed ? "Missed" : isConfirmed ? "Confirmed" : isPast ? "Past" : "Scheduled";
+  const statusSx = isCompleted
+    ? { bgcolor: "var(--gl-status-completed-bg)", color: "var(--gl-status-completed-text)", border: "1px solid var(--gl-status-completed-border)" }
+    : isConfirmed
+      ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" }
+      : isMissed || isPast
+        ? { bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)" }
+        : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" };
 
   return (
     <Drawer
@@ -673,18 +679,6 @@ export function SessionDetailsModal() {
                     )}
                   </SectionCard>
                 </Box>
-
-                {/* ── Predicted groups ── */}
-                {session.predictedGroups && session.predictedGroups.length > 0 && (
-                  <Box sx={{ mb: 2.5 }}>
-                    <SectionHeading>Predicted groups</SectionHeading>
-                    <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
-                      {session.predictedGroups.map((g) => (
-                        <Chip key={g} label={g} size="small" sx={{ fontSize: "0.75rem" }} />
-                      ))}
-                    </Stack>
-                  </Box>
-                )}
 
                 {/* ── Combined batches ── */}
                 {session.combinedBatches && session.combinedBatches.length > 0 && (
@@ -1140,7 +1134,7 @@ export function SessionDetailsModal() {
           <Button variant="text" color="inherit" size="small" onClick={handleClose}>
             Close
           </Button>
-          {session && !isCompleted && (
+          {session && !isCompleted && !isPast && (
             <Stack direction="row" spacing={1}>
               <Button
                 variant="soft"
@@ -1169,6 +1163,11 @@ export function SessionDetailsModal() {
                 </Button>
               )}
             </Stack>
+          )}
+          {session && isPast && !isCompleted && (
+            <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.75rem" }}>
+              This session has passed
+            </Typography>
           )}
           {session && isCompleted && (
             <Stack direction="row" spacing={1}>

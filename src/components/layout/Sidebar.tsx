@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
-import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
+import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -375,29 +375,6 @@ export function Sidebar() {
           }
         </NavLink>
 
-        {/* Profile */}
-        <NavLink to="/profile" style={{ textDecoration: "none" }}>
-          {({ isActive }) =>
-            isNavCollapsed ? (
-              <Tooltip title="Profile" placement="right" arrow>
-                <span>
-                  <NavItemCollapsed
-                    icon={<GroupOutlinedIcon fontSize="small" />}
-                    label="Profile"
-                    isActive={isActive}
-                  />
-                </span>
-              </Tooltip>
-            ) : (
-              <NavItemExpanded
-                icon={<GroupOutlinedIcon fontSize="small" />}
-                label="Profile"
-                isActive={isActive}
-              />
-            )
-          }
-        </NavLink>
-
         {/* Payments */}
         <NavLink to="/payments" style={{ textDecoration: "none" }}>
           {({ isActive }) =>
@@ -421,23 +398,23 @@ export function Sidebar() {
           }
         </NavLink>
 
-        {/* Support */}
-        <NavLink to="/support" style={{ textDecoration: "none" }}>
+        {/* Profile */}
+        <NavLink to="/profile" style={{ textDecoration: "none" }}>
           {({ isActive }) =>
             isNavCollapsed ? (
-              <Tooltip title="Support" placement="right" arrow>
+              <Tooltip title="Profile" placement="right" arrow>
                 <span>
                   <NavItemCollapsed
-                    icon={<SupportAgentOutlinedIcon fontSize="small" />}
-                    label="Support"
+                    icon={<GroupOutlinedIcon fontSize="small" />}
+                    label="Profile"
                     isActive={isActive}
                   />
                 </span>
               </Tooltip>
             ) : (
               <NavItemExpanded
-                icon={<SupportAgentOutlinedIcon fontSize="small" />}
-                label="Support"
+                icon={<GroupOutlinedIcon fontSize="small" />}
+                label="Profile"
                 isActive={isActive}
               />
             )
@@ -447,8 +424,31 @@ export function Sidebar() {
         {/* Spacer */}
         <Box sx={{ flex: 1 }} />
 
+        {/* Support */}
+        <NavLink to="/support" style={{ textDecoration: "none" }}>
+          {({ isActive }) =>
+            isNavCollapsed ? (
+              <Tooltip title="Support" placement="right" arrow>
+                <span>
+                  <NavItemCollapsed
+                    icon={<ConfirmationNumberOutlinedIcon fontSize="small" />}
+                    label="Support"
+                    isActive={isActive}
+                  />
+                </span>
+              </Tooltip>
+            ) : (
+              <NavItemExpanded
+                icon={<ConfirmationNumberOutlinedIcon fontSize="small" />}
+                label="Support"
+                isActive={isActive}
+              />
+            )
+          }
+        </NavLink>
+
         {/* ── User profile button ── */}
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mt: 1.5, mb: 3 }}>
           {isNavCollapsed ? (
             <Tooltip title={guruName} placement="right" arrow>
               <Box sx={{ display: "flex", justifyContent: "center" }}>

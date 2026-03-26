@@ -35,6 +35,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Dialog from "@mui/material/Dialog";
+import Drawer from "@mui/material/Drawer";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
@@ -395,7 +396,7 @@ export default function DashboardPage() {
   return (
     <Stack spacing={2}>
       {/* ── Welcome header ── */}
-      <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1.125rem', md: '1.25rem' }, mb: -0.5 }}>
+      <Typography variant="h6" fontWeight={700} sx={{ mb: -0.5 }}>
         Welcome {guruName}
       </Typography>
 
@@ -809,85 +810,159 @@ export default function DashboardPage() {
                     </Stack>
                     {rolePlannedEvents.length > 0 ? (
                       <>
-                        {/* Planned Event Detail Dialog */}
-                        <Dialog
+                        {/* Planned Event Detail Drawer (right-side, matching confirmed events) */}
+                        <Drawer
+                          anchor="right"
                           open={plannedEventDetail !== null}
                           onClose={() => setPlannedEventDetailId(null)}
-                          maxWidth="sm"
-                          fullWidth
-                          PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}
+                          sx={{
+                            "& .MuiDrawer-paper": {
+                              width: { xs: "100vw", sm: 480 },
+                              maxWidth: "100vw",
+                              boxShadow: "-4px 0 24px rgba(0,0,0,0.06)",
+                              borderLeft: "1px solid",
+                              borderColor: "divider",
+                            },
+                          }}
                         >
-                          {plannedEventDetail && (
-                            <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-                              <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                Event details
-                                <IconButton size="small" onClick={() => setPlannedEventDetailId(null)} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
-                              </DialogTitle>
-                              <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
-                                <Stack spacing={2.5}>
-                                  <Box>
-                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 1, mb: 1.5 }}>
-                                      <Chip
-                                        label={plannedEventDetail.status === "to_be_confirmed" ? "To be confirmed" : "Confirmed"}
-                                        size="small"
-                                        sx={{
-                                          bgcolor: plannedEventDetail.status === "to_be_confirmed" ? "var(--gl-status-pending-bg)" : "var(--gl-status-confirmed-bg)",
-                                          color: plannedEventDetail.status === "to_be_confirmed" ? "var(--gl-status-pending-text)" : "var(--gl-status-confirmed-text)",
-                                          border: `1px solid ${plannedEventDetail.status === "to_be_confirmed" ? "var(--gl-status-pending-border)" : "var(--gl-status-confirmed-border)"}`,
-                                          fontWeight: 600,
-                                        }}
-                                      />
-                                      <Chip label={plannedEventDetail.program} size="small" />
-                                      <Chip label={plannedEventDetail.sessionType} size="small" />
-                                    </Stack>
-                                    <Typography variant="h6" fontWeight={600}>{plannedEventDetail.title}</Typography>
+                          {plannedEventDetail && (() => {
+                            const peStatusLabel = plannedEventDetail.status === "to_be_confirmed" ? "To be confirmed" : "Confirmed";
+                            const peStatusSx = plannedEventDetail.status === "to_be_confirmed"
+                              ? { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }
+                              : { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" };
+                            return (
+                              <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+                                {/* Header — matches SessionDetailsModal */}
+                                <Box
+                                  sx={{
+                                    position: "sticky",
+                                    top: 0,
+                                    zIndex: 10,
+                                    borderBottom: 1,
+                                    borderColor: "divider",
+                                    bgcolor: "background.paper",
+                                    px: 2.5,
+                                    py: 1.5,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                                    <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
+                                    <Chip label={peStatusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...peStatusSx }} />
+                                  </Stack>
+                                  <IconButton size="small" onClick={() => setPlannedEventDetailId(null)} sx={{ color: "text.secondary" }}>
+                                    <CloseOutlinedIcon sx={{ fontSize: 16 }} />
+                                  </IconButton>
+                                </Box>
+
+                                {/* Scrollable content — matches SessionDetailsModal layout */}
+                                <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
+                                  {/* Hero: Title + Schedule */}
+                                  <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+                                    {/* Breadcrumb */}
+                                    <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
+                                      {[plannedEventDetail.batch, plannedEventDetail.sessionType].filter(Boolean).join(" · ")}
+                                    </Typography>
+                                    {/* Title */}
+                                    <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3, mb: 0.25 }}>
+                                      {plannedEventDetail.title}
+                                    </Typography>
+
+                                    {/* Schedule at-a-glance card */}
+                                    <Box
+                                      sx={{
+                                        mt: 2,
+                                        p: 1.75,
+                                        borderRadius: "10px",
+                                        bgcolor: "hsl(var(--md-surface-container) / 0.5)",
+                                        border: "1px solid",
+                                        borderColor: "divider",
+                                      }}
+                                    >
+                                      <Stack spacing={1}>
+                                        {/* Date */}
+                                        <Stack direction="row" alignItems="center" spacing={1.5}>
+                                          <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                            <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "hsl(var(--md-on-primary-container))" }} />
+                                          </Box>
+                                          <Box>
+                                            <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.875rem", lineHeight: 1.2 }}>
+                                              {fmtDateNice(plannedEventDetail.startDateYmd)} &ndash; {fmtDateNice(plannedEventDetail.endDateYmd)}
+                                            </Typography>
+                                            <Typography variant="caption" color="var(--gl-status-pending-text)" fontWeight={500}>
+                                              Time to be confirmed
+                                            </Typography>
+                                          </Box>
+                                        </Stack>
+
+                                        {/* Contact */}
+                                        <Stack direction="row" alignItems="center" spacing={1.5}>
+                                          <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                            <MailOutlineIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                                          </Box>
+                                          <Box>
+                                            <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>
+                                              {plannedEventDetail.contactEmail}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                              Program contact
+                                            </Typography>
+                                          </Box>
+                                        </Stack>
+                                      </Stack>
+                                    </Box>
                                   </Box>
 
-                                  {/* Schedule */}
-                                  <Paper variant="outlined" sx={{ borderRadius: "16px", p: 2 }}>
-                                    <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
-                                    <Divider sx={{ mb: 0.5 }} />
-                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
-                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Date range</Typography>
-                                      <Stack direction="row" alignItems="center" spacing={0.5}>
-                                        <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                                        <Typography variant="body2" fontWeight={500}>{fmtDateNice(plannedEventDetail.startDateYmd)} &ndash; {fmtDateNice(plannedEventDetail.endDateYmd)}</Typography>
-                                      </Stack>
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
-                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Time</Typography>
-                                      <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500}>To be confirmed</Typography>
-                                    </Stack>
-                                  </Paper>
+                                  <Divider />
 
-                                  {/* Details */}
-                                  <Paper variant="outlined" sx={{ borderRadius: "16px", p: 2 }}>
-                                    <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
-                                    <Divider sx={{ mb: 0.5 }} />
-                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
-                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Batch</Typography>
-                                      <Typography variant="body2" fontWeight={500}>{plannedEventDetail.batch}</Typography>
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
-                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Program</Typography>
-                                      <Typography variant="body2" fontWeight={500}>{plannedEventDetail.program}</Typography>
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
-                                      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>Contact</Typography>
-                                      <Stack direction="row" alignItems="center" spacing={0.5}>
-                                        <MailOutlineIcon sx={{ fontSize: 13 }} />
-                                        <Typography variant="body2" fontWeight={500}>{plannedEventDetail.contactEmail}</Typography>
+                                  {/* ═══ DETAIL SECTIONS — same pattern as SessionDetailsModal ═══ */}
+                                  <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+                                    <Box sx={{ mb: 2.5 }}>
+                                      {/* SectionHeading */}
+                                      <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                                        <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
+                                          Details
+                                        </Typography>
                                       </Stack>
-                                    </Stack>
-                                  </Paper>
-                                </Stack>
-                              </DialogContent>
-                              <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2 }}>
-                                <Button variant="text" color="inherit" onClick={() => setPlannedEventDetailId(null)}>Close</Button>
-                              </DialogActions>
-                            </Box>
-                          )}
-                        </Dialog>
+                                      {/* SectionCard */}
+                                      <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                                        {/* DetailRow: Batch */}
+                                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                                          <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Batch</Typography>
+                                          <Box sx={{ textAlign: "right" }}>
+                                            <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{plannedEventDetail.batch}</Typography>
+                                          </Box>
+                                        </Stack>
+                                        {/* DetailRow: Program */}
+                                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                                          <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Program</Typography>
+                                          <Box sx={{ textAlign: "right" }}>
+                                            <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{plannedEventDetail.program}</Typography>
+                                          </Box>
+                                        </Stack>
+                                        {/* DetailRow: Contact */}
+                                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                                          <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Contact</Typography>
+                                          <Box sx={{ textAlign: "right" }}>
+                                            <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }} component="div">
+                                              <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
+                                                <MailOutlineIcon sx={{ fontSize: 13 }} />
+                                                <span>{plannedEventDetail.contactEmail}</span>
+                                              </Stack>
+                                            </Typography>
+                                          </Box>
+                                        </Stack>
+                                      </Box>
+                                    </Box>
+                                  </Stack>
+                                </Box>
+                              </Box>
+                            );
+                          })()}
+                        </Drawer>
 
                         <Stack spacing={1.5}>
                           {rolePlannedEvents.map((pe) => {
@@ -1217,11 +1292,6 @@ export default function DashboardPage() {
                                 start={s.start}
                                 end={s.end}
                                 status={{ label: "Declined", bg: "action.hover", color: "text.secondary", border: "transparent" }}
-                                actions={
-                                  <Button variant="soft" size="small" disabled>
-                                    Confirm
-                                  </Button>
-                                }
                               />
                             </Card>
                           ))}

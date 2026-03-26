@@ -46,6 +46,9 @@
   --gl-status-declined-bg: #ffebeb;
   --gl-status-declined-text: #7a2828;
   --gl-status-declined-border: rgba(244, 63, 94, 0.12);
+  --gl-status-completed-bg: #e0f2f1;
+  --gl-status-completed-text: #00695c;
+  --gl-status-completed-border: rgba(0, 105, 92, 0.25);
 
   /* ── Score heatmap tokens (Profile matrix) ── */
   --gl-score-excellent-bg: #e9f8eb;
@@ -165,6 +168,9 @@
   --gl-status-declined-bg: rgba(244, 63, 94, 0.12);
   --gl-status-declined-text: #fca5a5;
   --gl-status-declined-border: rgba(244, 63, 94, 0.2);
+  --gl-status-completed-bg: rgba(0, 105, 92, 0.15);
+  --gl-status-completed-text: #80cbc4;
+  --gl-status-completed-border: rgba(0, 105, 92, 0.3);
 
   /* ── Score heatmap tokens (dark) ── */
   --gl-score-excellent-bg: rgba(34, 197, 94, 0.15);

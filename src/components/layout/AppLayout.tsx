@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import Box from "@mui/material/Box";
 import { Sidebar } from "./Sidebar";
@@ -11,11 +11,16 @@ import { RoleSwitchOverlay } from "@/components/shared/RoleSwitchOverlay";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setIsDarkMode } from "@/store/slices/uiSlice";
 
+const OnboardingPage = lazy(() => import("@/pages/Onboarding"));
+
 export function AppLayout() {
   const dispatch = useAppDispatch();
   const isNavCollapsed = useAppSelector((s) => s.ui.isNavCollapsed);
   const isDarkMode = useAppSelector((s) => s.ui.isDarkMode);
   const themeMode = useAppSelector((s) => s.ui.themeMode);
+  const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+
+  const isOnboarding = guruStage === "onboarding";
 
   // Resolve themeMode → isDarkMode and persist to localStorage
   useEffect(() => {
@@ -40,6 +45,14 @@ export function AppLayout() {
     if (typeof document === "undefined") return;
     document.documentElement.classList.toggle("dark", isDarkMode);
   }, [isDarkMode]);
+
+  if (isOnboarding) {
+    return (
+      <Suspense>
+        <OnboardingPage />
+      </Suspense>
+    );
+  }
 
   return (
     <Box

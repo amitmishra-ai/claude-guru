@@ -220,7 +220,7 @@ export default function PaymentsPage() {
       {/* ── Page header ── */}
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
         <Box>
-          <Typography variant="h5" fontWeight={700}>Payments</Typography>
+          <Typography variant="h6" fontWeight={700}>Payments</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
             Track your month-on-month payouts and event-wise details.
           </Typography>

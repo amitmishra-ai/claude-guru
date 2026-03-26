@@ -35,6 +35,7 @@ import {
   setHasUserConfiguredAvailability,
 } from "@/store/slices/availabilitySlice";
 import { setOpenAvailability } from "@/store/slices/uiSlice";
+import { setTimeZoneMode, setManualTimeZone } from "@/store/slices/profileSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import { useSaveAvailabilityMutation } from "@/api/ninja/availabilityApi";
 import { DOW_LONG, timeOptions12 } from "@/lib/constants";
@@ -45,6 +46,18 @@ const defaultPresets: PresetCard[] = [
   { key: "weekends", label: "Weekend morning", days: ["Saturday", "Sunday"], start: "10:00", end: "12:00", enabled: false },
   { key: "weekendAfternoons", label: "Weekend afternoon", days: ["Saturday", "Sunday"], start: "14:00", end: "16:00", enabled: false },
   { key: "weekdayEvenings", label: "Weekday evenings", days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], start: "18:00", end: "20:00", enabled: false },
+];
+
+const TIMEZONE_OPTIONS = [
+  { value: "__auto__", label: "System timezone" },
+  { value: "Asia/Kolkata", label: "Asia/Kolkata (India)" },
+  { value: "Asia/Dubai", label: "Asia/Dubai (UAE)" },
+  { value: "Asia/Singapore", label: "Asia/Singapore" },
+  { value: "Europe/London", label: "Europe/London" },
+  { value: "Europe/Berlin", label: "Europe/Berlin" },
+  { value: "America/New_York", label: "America/New_York" },
+  { value: "America/Los_Angeles", label: "America/Los_Angeles" },
+  { value: "Australia/Sydney", label: "Australia/Sydney" },
 ];
 
 function fmtTimezoneDisplay(tz: string): string {
@@ -284,52 +297,101 @@ const AvailabilityBuilderDialog = () => {
       >
         {step === 1 && (
           /* ── Step 1: Timezone ── */
-          <Stack spacing={3}>
-            <Stack direction="row" alignItems="center" spacing={1.5}>
-              <Box sx={{ width: 40, height: 40, borderRadius: "50%", bgcolor: "action.hover", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <PublicOutlinedIcon sx={{ fontSize: 20, color: "text.secondary" }} />
-              </Box>
-              <Box>
-                <Typography variant="body2" fontWeight={600}>Confirm your timezone</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  This ensures your availability shows the correct times to learners.
-                </Typography>
-              </Box>
-            </Stack>
+          <Stack spacing={2.5}>
+            <Box>
+              <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
+                Confirm your timezone
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+                This ensures your availability shows the correct times to learners.
+              </Typography>
+            </Box>
 
-            {/* Timezone card */}
+            {/* Timezone selector */}
             <Box
               sx={{
                 border: 1,
                 borderColor: "divider",
                 borderRadius: 2,
-                p: { xs: 2, sm: 2.5 },
+                p: 2,
                 bgcolor: "action.hover",
               }}
             >
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Stack spacing={0.25}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                    Current timezone
-                  </Typography>
-                  <Typography variant="body1" fontWeight={700} sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}>
-                    {effectiveTimezone}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {fmtTimezoneDisplay(effectiveTimezone).split("(")[1]?.replace(")", "") || ""}
-                  </Typography>
-                </Stack>
-                <Button
-                  variant="soft"
-                  size="small"
-                  startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
-                >
-                  Change
-                </Button>
+              <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
+                <PublicOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.03em", fontSize: "0.68rem" }}>
+                  Select timezone
+                </Typography>
               </Stack>
+              <FormControl fullWidth size="small">
+                <Select
+                  displayEmpty
+                  value={timeZoneMode === "auto" ? "__auto__" : manualTimeZone}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "__auto__") {
+                      dispatch(setTimeZoneMode("auto"));
+                    } else {
+                      dispatch(setTimeZoneMode("manual"));
+                      dispatch(setManualTimeZone(val));
+                    }
+                  }}
+                  renderValue={(selected) => {
+                    if (selected === "__auto__") {
+                      const sysTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                      return (
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: "100%", pr: 1 }}>
+                          <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.85rem" }}>
+                            {sysTz}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {fmtTimezoneDisplay(sysTz).split("(")[1]?.replace(")", "") || ""} · Auto
+                          </Typography>
+                        </Stack>
+                      );
+                    }
+                    return (
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: "100%", pr: 1 }}>
+                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.85rem" }}>
+                          {selected}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {fmtTimezoneDisplay(selected).split("(")[1]?.replace(")", "") || ""}
+                        </Typography>
+                      </Stack>
+                    );
+                  }}
+                  sx={{
+                    bgcolor: "background.paper",
+                    "& .MuiSelect-select": { py: 1.25 },
+                  }}
+                  MenuProps={{ PaperProps: { sx: { maxHeight: 280 } } }}
+                >
+                  {TIMEZONE_OPTIONS.map((tz) => {
+                    const isAuto = tz.value === "__auto__";
+                    const sysTz = isAuto ? Intl.DateTimeFormat().resolvedOptions().timeZone : "";
+                    return (
+                      <MenuItem key={tz.value} value={tz.value} sx={{ py: 1, fontSize: "0.85rem" }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%" }}>
+                          <Box>
+                            <Typography variant="body2" sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
+                              {isAuto ? `System — ${sysTz}` : tz.label}
+                            </Typography>
+                          </Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ ml: 2, flexShrink: 0 }}>
+                            {isAuto
+                              ? fmtTimezoneDisplay(sysTz).split("(")[1]?.replace(")", "") || ""
+                              : fmtTimezoneDisplay(tz.value).split("(")[1]?.replace(")", "") || ""}
+                          </Typography>
+                        </Stack>
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
             </Box>
 
-            <Typography variant="caption" color="text.secondary" sx={{ textAlign: "center" }}>
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
               You can update this later from your profile settings.
             </Typography>
           </Stack>
