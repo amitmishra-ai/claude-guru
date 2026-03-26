@@ -457,7 +457,7 @@ export default function CoursesPage() {
                 <SchoolOutlinedIcon sx={{ fontSize: 16, color: "primary.contrastText" }} />
               </Box>
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3, fontSize: { xs: "0.875rem", sm: "0.95rem" } }}>Courses in which you are enrolled as a teacher or a TA</Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3, fontSize: { xs: "0.875rem", sm: "0.95rem" } }}>Courses as teacher or TA</Typography>
               </Box>
               <Chip label={teachCatalog.length} size="small" sx={{ fontWeight: 700, fontSize: "0.75rem", height: 24, mr: 0.5 }} />
             </AccordionSummary>
@@ -524,12 +524,16 @@ export default function CoursesPage() {
                 <MenuBookOutlinedIcon sx={{ fontSize: 16, color: "secondary.contrastText" }} />
               </Box>
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3, fontSize: { xs: "0.875rem", sm: "0.95rem" } }}>Standalone courses in which you are enrolled as a student</Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mt: 0.25, display: "block" }}>In case you're enrolled in a GL program or batch as a student, you can access its courses by switching to the Learner Dashboard from the menu.</Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3, fontSize: { xs: "0.875rem", sm: "0.95rem" } }}>Courses as student</Typography>
               </Box>
               <Chip label={learnCatalog.length} size="small" sx={{ fontWeight: 700, fontSize: "0.75rem", height: 24, mr: 0.5, alignSelf: "flex-start", mt: 0.5 }} />
             </AccordionSummary>
             <AccordionDetails sx={{ px: { xs: 2, sm: 2.5 }, pb: 3, pt: 0.5 }}>
+              <Box sx={{ mb: 2, px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "rgba(25,118,210,0.08)" }}>
+                <Typography variant="caption" fontWeight={600} sx={{ color: "primary.main", lineHeight: 1.4 }}>
+                  Enrolled in a GL program as a student? Switch to the Learner Dashboard from the menu to access those courses.
+                </Typography>
+              </Box>
               {/* Current */}
               {learnCurrent.length > 0 && (
                 <Box sx={{ mb: learnPast.length > 0 ? 3 : 0 }}>
