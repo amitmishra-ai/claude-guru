@@ -6,10 +6,6 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
 import Drawer from "@mui/material/Drawer";
 import TextField from "@mui/material/TextField";
 import Collapse from "@mui/material/Collapse";
@@ -41,8 +37,13 @@ import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import Paper from "@mui/material/Paper";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
-import { minutes, fmtDateNice } from "@/lib/helpers";
+import { minutes, fmtDateNice, fmtTime12 } from "@/lib/helpers";
 import { useAppSelector } from "@/store";
 import type { GuruRole } from "@/store/slices/devPanelSlice";
 import type { Poll } from "@/lib/types";
@@ -171,85 +172,6 @@ function StarRatingIcons({ rating }: { rating: number }) {
   );
 }
 
-/* ── Combined Batches Panel (shared across card types) ── */
-
-function CombinedBatchesPanel({ batches, compact }: { batches: { batch: string; group?: string }[]; compact?: boolean }) {
-  return (
-    <Box
-      sx={{
-        mt: 1.5,
-        borderRadius: 2,
-        border: "1px solid",
-        borderColor: "divider",
-        overflow: "hidden",
-      }}
-    >
-      {/* Accent header */}
-      <Box
-        sx={{
-          px: 1.5,
-          py: 0.75,
-          bgcolor: "hsl(var(--md-surface-container) / 0.5)",
-          borderBottom: "1px solid",
-          borderColor: "divider",
-          display: "flex",
-          alignItems: "center",
-          gap: 0.75,
-        }}
-      >
-        <CallMergeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
-        <Typography variant="caption" fontWeight={600} color="text.secondary">
-          Combined batches
-        </Typography>
-        <Chip
-          label={batches.length}
-          size="small"
-          sx={{
-            height: 18,
-            minWidth: 18,
-            fontSize: "0.65rem",
-            fontWeight: 700,
-            bgcolor: "action.selected",
-            "& .MuiChip-label": { px: 0.5 },
-          }}
-        />
-      </Box>
-      {/* Batch rows */}
-      <Stack divider={<Divider />}>
-        {batches.map((b) => (
-          <Stack
-            key={b.batch}
-            direction="row"
-            alignItems="center"
-            spacing={1}
-            sx={{
-              px: 1.5,
-              py: compact ? 0.5 : 0.75,
-            }}
-          >
-            <Box
-              sx={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                bgcolor: "text.disabled",
-                flexShrink: 0,
-              }}
-            />
-            <Typography variant="caption" fontWeight={500}>
-              {b.batch}
-            </Typography>
-            {b.group && (
-              <Typography variant="caption" color="text.secondary">
-                &mdash; {b.group}
-              </Typography>
-            )}
-          </Stack>
-        ))}
-      </Stack>
-    </Box>
-  );
-}
 
 /* ── Completed Combined Group wrapper ── */
 
@@ -359,20 +281,20 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
   endDateYmd: string;
 }) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          Event details
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
           <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
-        </DialogTitle>
+        </Box>
 
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
           <Stack spacing={2.5}>
             {/* Header: breadcrumb + status + title */}
             <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.75 }}>
                 <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                  {program} · {sessionType}
+                  {sessionType}
                 </Typography>
                 <Chip label="To be confirmed" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
               </Stack>
@@ -386,7 +308,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
               <InfoRow label="Date range">
                 <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
                   <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>{fmtDateNice(startDateYmd)} &ndash; {fmtDateNice(endDateYmd)}</span>
+                  <span>{fmtDateNice(startDateYmd)} &rarr; {fmtDateNice(endDateYmd)}</span>
                 </Stack>
               </InfoRow>
               <InfoRow label="Time">
@@ -408,13 +330,9 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
               </InfoRow>
             </SectionBox>
           </Stack>
-        </DialogContent>
-
-        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, justifyContent: "space-between" }}>
-          <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
-        </DialogActions>
+        </Box>
       </Box>
-    </Dialog>
+    </Drawer>
   );
 }
 
@@ -439,20 +357,20 @@ function ResidencyDetailDialog({ open, onClose, variant }: { open: boolean; onCl
   );
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          Event details
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
           <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
-        </DialogTitle>
+        </Box>
 
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
           <Stack spacing={2.5}>
             {/* Header: breadcrumb + status + title */}
             <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.75 }}>
                 <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                  PGP-AIML · Residency
+                  Residency
                 </Typography>
                 {statusChip}
               </Stack>
@@ -566,19 +484,16 @@ function ResidencyDetailDialog({ open, onClose, variant }: { open: boolean; onCl
               </SectionBox>
             )}
           </Stack>
-        </DialogContent>
+        </Box>
 
-        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, justifyContent: "space-between" }}>
-          <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
-          {isScheduled && (
-            <Stack direction="row" spacing={1}>
-              <Button variant="soft" size="small" startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 16 }} />}>I&apos;m unavailable</Button>
-              <Button variant="contained" size="small" startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 16 }} />}>Confirm</Button>
-            </Stack>
-          )}
-        </DialogActions>
+        {isScheduled && (
+          <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1 }}>
+            <Button variant="soft" size="small" startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 16 }} />}>I&apos;m unavailable</Button>
+            <Button variant="contained" size="small" startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 16 }} />}>Confirm</Button>
+          </Box>
+        )}
       </Box>
-    </Dialog>
+    </Drawer>
   );
 }
 
@@ -1276,10 +1191,10 @@ function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; on
           <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
           <Stack direction="row" spacing={1}>
             {isMentoring && isConfirmedState && (
-              <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
+              <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
             )}
             {isCareer && isConfirmedState && (
-              <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
+              <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
             )}
             {isScheduledState && (
               <>
@@ -1313,14 +1228,14 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
   );
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          Event details
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
           <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
-        </DialogTitle>
+        </Box>
 
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
           <Stack spacing={2.5}>
             {/* Header: breadcrumb + status + title */}
             <Box>
@@ -1445,13 +1360,9 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
               </SectionBox>
             )}
           </Stack>
-        </DialogContent>
-
-        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, justifyContent: "space-between" }}>
-          <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
-        </DialogActions>
+        </Box>
       </Box>
-    </Dialog>
+    </Drawer>
   );
 }
 
@@ -1474,14 +1385,14 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
   );
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          Event details
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
           <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
-        </DialogTitle>
+        </Box>
 
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
           <Stack spacing={2.5}>
             {/* Header: breadcrumb + status + title */}
             <Box>
@@ -1620,13 +1531,9 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
               </SectionBox>
             )}
           </Stack>
-        </DialogContent>
-
-        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, justifyContent: "space-between" }}>
-          <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
-        </DialogActions>
+        </Box>
       </Box>
-    </Dialog>
+    </Drawer>
   );
 }
 
@@ -1646,14 +1553,14 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
   );
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          Event details
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
           <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
-        </DialogTitle>
+        </Box>
 
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
           <Stack spacing={2.5}>
             {/* Header: breadcrumb + status + title */}
             <Box>
@@ -1739,19 +1646,16 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
               </SectionBox>
             )}
           </Stack>
-        </DialogContent>
+        </Box>
 
-        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, justifyContent: "space-between" }}>
-          <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
-          <Stack direction="row" spacing={1}>
-            <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}>View Student Progress</Button>
-            {isConfirmed && (
-              <Button variant="outlined" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Group Details (LMS)</Button>
-            )}
-          </Stack>
-        </DialogActions>
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1 }}>
+          <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}>View Student Progress</Button>
+          {isConfirmed && (
+            <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Group Details (LMS)</Button>
+          )}
+        </Box>
       </Box>
-    </Dialog>
+    </Drawer>
   );
 }
 
@@ -1771,14 +1675,14 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
   );
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "85vh", overflow: "hidden" } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          Event details
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
           <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
-        </DialogTitle>
+        </Box>
 
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2 }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
           <Stack spacing={2.5}>
             {/* Header: breadcrumb + status + title */}
             <Box>
@@ -1878,13 +1782,9 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
               </SectionBox>
             )}
           </Stack>
-        </DialogContent>
-
-        <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2, justifyContent: "space-between" }}>
-          <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
-        </DialogActions>
+        </Box>
       </Box>
-    </Dialog>
+    </Drawer>
   );
 }
 
@@ -1893,6 +1793,63 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Residency Cards (custom layout, NOT SessionCard) ── */
+
+const RESIDENCY_SCHEDULE_ACCORDION = (
+  <Accordion
+    disableGutters elevation={0} defaultExpanded={false}
+    sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+  >
+    <AccordionSummary
+      expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
+      sx={{ px: 1.5, py: 0, minHeight: "unset", bgcolor: "hsl(var(--md-surface-container) / 0.5)", "& .MuiAccordionSummary-content": { my: 0.75, gap: 0.75, alignItems: "center" } }}
+    >
+      <AccessTimeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+      <Typography variant="caption" fontWeight={600} color="text.secondary">3-day schedule</Typography>
+    </AccordionSummary>
+    <AccordionDetails sx={{ px: 1.5, py: 1 }}>
+      <Stack spacing={1}>
+        {[
+          { dateYmd: "2026-03-20", start: minutes(9), end: minutes(17) },
+          { dateYmd: "2026-03-21", start: minutes(9), end: minutes(17) },
+          { dateYmd: "2026-03-22", start: minutes(9), end: minutes(17) },
+        ].map((day, idx) => (
+          <Stack key={idx} direction="row" alignItems="center" spacing={3}>
+            <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ minWidth: 70 }}>{fmtDateNice(day.dateYmd)}</Typography>
+            <Typography variant="body2">{fmtTime12(day.start)} – {fmtTime12(day.end)}</Typography>
+          </Stack>
+        ))}
+      </Stack>
+    </AccordionDetails>
+  </Accordion>
+);
+
+const RESIDENCY_COMBINED_ACCORDION = (
+  <Accordion
+    disableGutters elevation={0} defaultExpanded={false}
+    sx={{ mt: 1, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+  >
+    <AccordionSummary
+      expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
+      sx={{ px: 1.5, py: 0, minHeight: "unset", bgcolor: "hsl(var(--md-surface-container) / 0.5)", "& .MuiAccordionSummary-content": { my: 0.75, gap: 0.75, alignItems: "center" } }}
+    >
+      <CallMergeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+      <Typography variant="caption" fontWeight={600} color="text.secondary">Combined session</Typography>
+      <Chip label="2" size="small" sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, bgcolor: "action.selected", "& .MuiChip-label": { px: 0.5 } }} />
+    </AccordionSummary>
+    <AccordionDetails sx={{ p: 0 }}>
+      <Stack divider={<Divider />}>
+        {["AIML Online March 26 A", "PGP-DS Online Feb 26 A — Group 06"].map((label) => (
+          <Box key={label} sx={{ px: 1.5, py: 0.75 }}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
+              <Typography variant="caption" fontWeight={500}>{label}</Typography>
+            </Stack>
+          </Box>
+        ))}
+      </Stack>
+    </AccordionDetails>
+  </Accordion>
+);
 
 function ResidencyCards() {
   const [detailOpen, setDetailOpen] = useState<ResidencyDialogVariant | null>(null);
@@ -1904,93 +1861,136 @@ function ResidencyCards() {
       {/* ── Confirmed ── */}
       <ComponentSection
         title="Residency — Confirmed"
-        description="Primary: title, Confirmed chip, date range + batch, city. Secondary (View Details): group, course LMS link, topic, PM email, city + map, day-wise slots."
+        description="Confirmed residency with 3-day schedule. Date range with → arrow. View Session Material + View Course content actions."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          {/* Row 1: Title + Status */}
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Residency: Program Overview (All)</Typography>
-            {CHIP_CONFIRMED}
-          </Stack>
-          {/* Row 2: Date + batch */}
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">20 – 22 Mar, 2026 &bull; AIML Online March 26 A &bull; Bangalore</Typography>
-          </Stack>
-          {/* Row 3: Actions */}
-          <Stack direction="row" justifyContent="flex-end">
-            <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
-          </Stack>
+          <SessionCard
+            title="AI in Practice Workshop"
+            sessionType="Residency"
+            batch="AIML Online March 26 A"
+            dateYmd="2026-03-20"
+            endDateYmd="2026-03-22"
+            start={minutes(9)}
+            end={minutes(17)}
+            locationText="Bangalore"
+            status={STATUS_CONFIRMED()}
+            actions={
+              <>
+                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
+                <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>View Course content</Button>
+              </>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>}
+            onCourseClick={() => {}}
+          />
+          {RESIDENCY_SCHEDULE_ACCORDION}
         </Card>
       </ComponentSection>
 
       {/* ── Confirmed (Combined Session) ── */}
       <ComponentSection
         title="Residency — Confirmed (Combined session)"
-        description="Multi-batch combined residency. Combined session chip on card. Combined batch details shown upfront."
+        description="Multi-batch combined residency with 3-day schedule + combined session accordion."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Residency: Program Overview (All)</Typography>
-            <Stack direction="row" spacing={0.75}>
-              {CHIP_COMBINED}
-              {CHIP_CONFIRMED}
-            </Stack>
-          </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">20 – 22 Mar, 2026 &bull; AIML Online March 26 A &bull; Bangalore</Typography>
-          </Stack>
-          <Stack direction="row" justifyContent="flex-end">
-            <Button variant="text" size="small" onClick={() => setDetailOpen("combined")}>View details</Button>
-          </Stack>
-          <CombinedBatchesPanel
-            compact
-            batches={[
-              { batch: "AIML Online March 26 A" },
-              { batch: "AIML Online Feb 26 B" },
-            ]}
+          <SessionCard
+            title="Deep Learning Fundamentals"
+            sessionType="Residency"
+            batch="AIML Online March 26 A"
+            dateYmd="2026-04-02"
+            endDateYmd="2026-04-04"
+            start={minutes(9)}
+            end={minutes(17)}
+            locationText="Bangalore"
+            status={STATUS_CONFIRMED()}
+            actions={
+              <>
+                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
+                <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>View Course content</Button>
+              </>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("combined")}>View details</Button>}
+            onCourseClick={() => {}}
           />
+          {RESIDENCY_SCHEDULE_ACCORDION}
+          {RESIDENCY_COMBINED_ACCORDION}
         </Card>
       </ComponentSection>
 
       {/* ── Scheduled ── */}
       <ComponentSection
         title="Residency — Scheduled"
-        description="Awaiting guru confirmation. Confirm/Unavailable on card, secondary info in View Details."
+        description="Awaiting guru confirmation. Confirm/Unavailable actions with 3-day schedule accordion."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Residency: Program Overview (All)</Typography>
-            {CHIP_SCHEDULED}
-          </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">25 – 27 Mar, 2026 &bull; AIML Online March 26 A &bull; Bangalore</Typography>
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-            <Stack direction="row" spacing={1}>
-              <Button startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="contained">Confirm</Button>
-              <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
-            </Stack>
-            <Button variant="text" size="small" onClick={() => setDetailOpen("scheduled")}>View details</Button>
-          </Stack>
+          <SessionCard
+            title="Deep Learning Fundamentals"
+            sessionType="Residency"
+            batch="AIML Online March 26 A"
+            dateYmd="2026-04-02"
+            endDateYmd="2026-04-04"
+            start={minutes(9)}
+            end={minutes(17)}
+            locationText="Bangalore"
+            status={STATUS_SCHEDULED}
+            actions={
+              <>
+                <Button startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="contained">Confirm</Button>
+                <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
+              </>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("scheduled")}>View details</Button>}
+            onCourseClick={() => {}}
+          />
+          {RESIDENCY_SCHEDULE_ACCORDION}
+        </Card>
+      </ComponentSection>
+
+      {/* ── Scheduled (Combined) ── */}
+      <ComponentSection
+        title="Residency — Scheduled (Combined session)"
+        description="Unconfirmed combined residency. Confirm/Unavailable + schedule + combined session accordions."
+      >
+        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <SessionCard
+            title="AI in Practice Workshop"
+            sessionType="Residency"
+            batch="AIML Online March 26 A"
+            dateYmd="2026-03-27"
+            endDateYmd="2026-03-29"
+            start={minutes(9)}
+            end={minutes(17)}
+            locationText="Bangalore"
+            status={STATUS_SCHEDULED}
+            actions={
+              <>
+                <Button startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="contained">Confirm</Button>
+                <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
+              </>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("scheduled")}>View details</Button>}
+            onCourseClick={() => {}}
+          />
+          {RESIDENCY_SCHEDULE_ACCORDION}
+          {RESIDENCY_COMBINED_ACCORDION}
         </Card>
       </ComponentSection>
 
       {/* ── Tentative ── */}
       <ComponentSection
         title="Residency — Tentative"
-        description="Planned residency. 'To be confirmed' chip. Course plain text (no link). Planner email. All secondary in View Details."
+        description="Planned residency, not yet confirmed by ops. 'To be confirmed' chip. View details only."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Residency: Program Overview (All)</Typography>
+            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>
+              <span>Residency: </span>Program Overview (All)
+            </Typography>
             {CHIP_TO_BE_CONFIRMED}
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">10 – 14 Apr, 2026 &bull; AIML Online March 26 A &bull; Bangalore</Typography>
+            <Typography variant="caption" color="text.secondary">Fri, Apr 10 &rarr; Mon, Apr 14 &bull; 9:00 AM&ndash;5:00 PM &bull; AIML Online March 26 A &bull; Bangalore</Typography>
           </Stack>
           <Stack direction="row" justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("tentative")}>View details</Button>
@@ -2001,47 +2001,53 @@ function ResidencyCards() {
       {/* ── Completed — Gathering feedback ── */}
       <ComponentSection
         title="Residency — Completed (Gathering feedback)"
-        description="Residency done, no feedback yet. Payment pending + Gathering feedback chips top-right."
+        description="Residency done, no feedback yet. Payment pending + Gathering feedback chips."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Residency: Program Overview (All)</Typography>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-              {CHIP_PAYMENT_PENDING}
-              {CHIP_GATHERING}
-            </Stack>
-          </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">5 – 7 Mar, 2026 &bull; AIML Online March 26 A</Typography>
-          </Stack>
-          <Stack direction="row" justifyContent="flex-end">
-            <Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>
-          </Stack>
+          <SessionCard
+            title="Program Overview (All)"
+            sessionType="Residency"
+            batch="AIML Online March 26 A"
+            dateYmd="2026-03-05"
+            endDateYmd="2026-03-07"
+            start={minutes(9)}
+            end={minutes(17)}
+            topRight={
+              <Stack direction="row" spacing={0.75}>
+                {CHIP_PAYMENT_PENDING}
+                {CHIP_GATHERING}
+              </Stack>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>}
+            onCourseClick={() => {}}
+          />
         </Card>
       </ComponentSection>
 
       {/* ── Completed — with rating ── */}
       <ComponentSection
         title="Residency — Completed (with feedback)"
-        description="Past residency with rating. Payment processed chip + star rating top-right. Detailed Feedback on card."
+        description="Past residency with rating. Payment processed chip + star rating. Detailed Feedback button."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Residency: Program Overview (All)</Typography>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-              {CHIP_PAYMENT_PROCESSED}
-              <StarRatingNumeric rating={4.2} />
-            </Stack>
-          </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">5 – 7 Mar, 2026 &bull; AIML Online March 26 A</Typography>
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-            <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
-            <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
-          </Stack>
+          <SessionCard
+            title="Program Overview (All)"
+            sessionType="Residency"
+            batch="AIML Online March 26 A"
+            dateYmd="2026-03-05"
+            endDateYmd="2026-03-07"
+            start={minutes(9)}
+            end={minutes(17)}
+            topRight={
+              <Stack direction="row" spacing={0.75}>
+                {CHIP_PAYMENT_PROCESSED}
+                <StarRatingNumeric rating={4.2} />
+              </Stack>
+            }
+            actions={<Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>}
+            onCourseClick={() => {}}
+          />
         </Card>
       </ComponentSection>
     </>
@@ -2070,7 +2076,7 @@ function OnlineSessionCards() {
       />
 
       {/* 1. Mentoring — Confirmed */}
-      <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Join event + View Session Material on card.">
+      <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Disabled Join session + View Session Material on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -2083,7 +2089,7 @@ function OnlineSessionCards() {
             status={STATUS_CONFIRMED()}
             actions={
               <>
-                <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
+                <Button variant="soft" size="small" disabled startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
                 <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
               </>
             }
@@ -2093,7 +2099,7 @@ function OnlineSessionCards() {
       </ComponentSection>
 
       {/* 2. Mentoring — Combined (Confirmed) */}
-      <ComponentSection title="Mentoring — Combined (Confirmed)" description="Combined session across batches. Combined session chip alongside Confirmed. Combined batch details shown upfront.">
+      <ComponentSection title="Mentoring — Combined (Confirmed)" description="Combined session across batches. Combined session accordion with batch details.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -2106,19 +2112,44 @@ function OnlineSessionCards() {
             status={STATUS_CONFIRMED()}
             actions={
               <>
-                <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
+                <Button variant="soft" size="small" disabled startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
                 <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
               </>
             }
-            chips={["Combined session"]}
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combined")}>View details</Button>}
           />
-          <CombinedBatchesPanel
-            batches={[
-              { batch: "PGPDS.O.MAR26.A", group: "Group 07" },
-              { batch: "PGPDS.O.MAR26.B", group: "Group 03" },
-            ]}
-          />
+          <Accordion
+            disableGutters elevation={0} defaultExpanded
+            sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
+              sx={{ px: 1.5, py: 0, minHeight: "unset", bgcolor: "hsl(var(--md-surface-container) / 0.5)", "& .MuiAccordionSummary-content": { my: 0.75, gap: 0.75, alignItems: "center" } }}
+            >
+              <CallMergeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+              <Typography variant="caption" fontWeight={600} color="text.secondary">Combined session</Typography>
+              <Chip label="2" size="small" sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, bgcolor: "action.selected", "& .MuiChip-label": { px: 0.5 } }} />
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <Stack divider={<Divider />}>
+                {[
+                  { batch: "PGPDS.O.MAR26.A", group: "Group 07", learnerCount: 20 },
+                  { batch: "PGPDS.O.MAR26.B", group: "Group 03", learnerCount: 18 },
+                ].map((cb) => (
+                  <Box key={cb.batch} sx={{ px: 1.5, py: 0.75 }}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
+                      <Typography variant="caption" fontWeight={500}>{cb.batch}</Typography>
+                      <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1} sx={{ ml: 2, mt: 0.25 }}>
+                      <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 18, fontSize: "0.6rem" }} />
+                    </Stack>
+                  </Box>
+                ))}
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
         </Card>
       </ComponentSection>
 
@@ -2146,7 +2177,7 @@ function OnlineSessionCards() {
       </ComponentSection>
 
       {/* 3b. Mentoring — Combined (Scheduled) */}
-      <ComponentSection title="Mentoring — Combined (Scheduled)" description="Unconfirmed combined event awaiting guru action. Combined batch details shown upfront.">
+      <ComponentSection title="Mentoring — Combined (Scheduled)" description="Unconfirmed combined event awaiting guru action. Combined session accordion.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -2163,20 +2194,42 @@ function OnlineSessionCards() {
                 <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
               </>
             }
-            chips={["Combined session"]}
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combinedScheduled")}>View details</Button>}
           />
-          <CombinedBatchesPanel
-            batches={[
-              { batch: "PGPDS.O.MAR26.A", group: "Group 07" },
-              { batch: "PGPDS.O.MAR26.B", group: "Group 03" },
-            ]}
-          />
+          <Accordion
+            disableGutters elevation={0} defaultExpanded={false}
+            sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
+              sx={{ px: 1.5, py: 0, minHeight: "unset", bgcolor: "hsl(var(--md-surface-container) / 0.5)", "& .MuiAccordionSummary-content": { my: 0.75, gap: 0.75, alignItems: "center" } }}
+            >
+              <CallMergeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+              <Typography variant="caption" fontWeight={600} color="text.secondary">Combined session</Typography>
+              <Chip label="2" size="small" sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, bgcolor: "action.selected", "& .MuiChip-label": { px: 0.5 } }} />
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <Stack divider={<Divider />}>
+                {[
+                  { batch: "PGPDS.O.MAR26.A", group: "Group 07" },
+                  { batch: "PGPDS.O.MAR26.B", group: "Group 03" },
+                ].map((cb) => (
+                  <Box key={cb.batch} sx={{ px: 1.5, py: 0.75 }}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
+                      <Typography variant="caption" fontWeight={500}>{cb.batch}</Typography>
+                      <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
+                    </Stack>
+                  </Box>
+                ))}
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
         </Card>
       </ComponentSection>
 
       {/* 4. Career 1:1 — Confirmed */}
-      <ComponentSection title="Career 1:1 — Confirmed" description="1:1 career mentoring. Join online session on card. Student info in View Details.">
+      <ComponentSection title="Career 1:1 — Confirmed" description="1:1 career mentoring. Join session on card. Student info in View Details.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -2187,7 +2240,7 @@ function OnlineSessionCards() {
             end={minutes(15)}
             status={STATUS_CONFIRMED()}
             actions={
-              <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
+              <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-confirmed")}>View details</Button>}
           />
@@ -2195,7 +2248,7 @@ function OnlineSessionCards() {
       </ComponentSection>
 
       {/* 5. Mock Interview — Confirmed (secondary facilitator) */}
-      <ComponentSection title="Mock Interview — Confirmed (secondary)" description="Mock interview event. Join online session + Share Feedback on card. Secondary facilitator badge.">
+      <ComponentSection title="Mock Interview — Confirmed (secondary)" description="Mock interview event. Join session + Share Feedback on card. Secondary facilitator badge.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
@@ -2207,7 +2260,7 @@ function OnlineSessionCards() {
             status={STATUS_CONFIRMED()}
             actions={
               <>
-                <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
+                <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
                 <Button variant="soft" size="small" startIcon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 14 }} />}>Share Feedback</Button>
               </>
             }
@@ -2363,7 +2416,6 @@ function OnlineSessionCards() {
                   <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
                 </>
               }
-              chips={["Combined session"]}
               secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combinedCompleted")}>View details</Button>}
             />
           </Card>
@@ -2388,7 +2440,6 @@ function OnlineSessionCards() {
                   <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
                 </>
               }
-              chips={["Combined session"]}
               secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combinedCompleted")}>View details</Button>}
             />
           </Card>
@@ -2436,7 +2487,7 @@ function CareerMentorOnlineSessionCards() {
       <OnlineEventDetailDialog open={detailOpen !== null} onClose={() => setDetailOpen(null)} variant={detailOpen ?? "career-confirmed"} />
 
       {/* 1. Career 1:1 — Confirmed */}
-      <ComponentSection title="Career 1:1 — Confirmed" description="1:1 career mentoring. Join online session on card. Student info, LinkedIn, resume in View Details.">
+      <ComponentSection title="Career 1:1 — Confirmed" description="1:1 career mentoring. Join session on card. Student info, LinkedIn, resume in View Details.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -2447,7 +2498,7 @@ function CareerMentorOnlineSessionCards() {
             end={minutes(15)}
             status={STATUS_CONFIRMED()}
             actions={
-              <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
+              <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-confirmed")}>View details</Button>}
           />
@@ -2455,7 +2506,7 @@ function CareerMentorOnlineSessionCards() {
       </ComponentSection>
 
       {/* 2. Mock Interview — Confirmed */}
-      <ComponentSection title="Mock Interview — Confirmed" description="Mock interview event. Join online session + Share Feedback on card.">
+      <ComponentSection title="Mock Interview — Confirmed" description="Mock interview event. Join session + Share Feedback on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
@@ -2467,7 +2518,7 @@ function CareerMentorOnlineSessionCards() {
             status={STATUS_CONFIRMED()}
             actions={
               <>
-                <Button variant="contained" size="small" startIcon={<LinkOutlinedIcon sx={{ fontSize: 16 }} />}>Join online session</Button>
+                <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
                 <Button variant="soft" size="small" startIcon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 14 }} />}>Share Feedback</Button>
               </>
             }

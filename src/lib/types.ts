@@ -68,6 +68,10 @@ export type Session = {
   paymentModel?: PaymentModel;
   hourlyRateInr?: number;
   totalEarningsInr?: number;
+  /** Residency end date for multi-day residencies (YYYY-MM-DD) */
+  endDateYmd?: string;
+  /** Residency day-level schedule (date + time per day) */
+  residencySchedule?: { dateYmd: string; start: number; end: number }[];
   /** Combined session — lists the batches merged into this session */
   combinedBatches?: {
     batch: string;

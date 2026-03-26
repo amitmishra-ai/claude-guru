@@ -577,9 +577,9 @@ export function SessionDetailsModal() {
             <>
               {/* ═══ HERO: Title + Schedule at-a-glance ═══ */}
               <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
-                {/* Breadcrumb */}
+                {/* Session type */}
                 <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
-                  {[session.batch || session.program, session.sessionType].filter(Boolean).join(" · ")}
+                  {session.sessionType}
                 </Typography>
                 {/* Title */}
                 <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3, mb: 0.25 }}>
@@ -623,7 +623,7 @@ export function SessionDetailsModal() {
                       <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <PlaceOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
                       </Box>
-                      <Box>
+                      <Box sx={{ flex: 1 }}>
                         <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>
                           {session.location}
                         </Typography>
@@ -633,6 +633,35 @@ export function SessionDetailsModal() {
                           </Typography>
                         )}
                       </Box>
+                      {session.location.toLowerCase() !== "online" ? (
+                        <Button
+                          variant="soft"
+                          size="small"
+                          startIcon={<PlaceOutlinedIcon sx={{ fontSize: 14 }} />}
+                          onClick={() => {
+                            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(session.location)}`, "_blank");
+                          }}
+                          sx={{ flexShrink: 0 }}
+                        >
+                          View map
+                        </Button>
+                      ) : (() => {
+                        const sessionStartMs = dateTimeMs(session.dateYmd, session.start);
+                        const sessionEndMs = dateTimeMs(session.dateYmd, session.end);
+                        const nowMs = demoNow.getTime();
+                        const joinEnabled = nowMs >= sessionStartMs - 15 * 60 * 1000 && nowMs < sessionEndMs;
+                        return (
+                          <Button
+                            variant={joinEnabled ? "contained" : "soft"}
+                            size="small"
+                            disabled={!joinEnabled}
+                            startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}
+                            sx={{ flexShrink: 0 }}
+                          >
+                            Join session
+                          </Button>
+                        );
+                      })()}
                     </Stack>
                   </Stack>
                 </Box>

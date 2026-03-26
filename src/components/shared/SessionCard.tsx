@@ -30,6 +30,8 @@ export type SessionCardProps = {
   batch?: string;
   /** Date in YYYY-MM-DD */
   dateYmd: string;
+  /** End date for multi-day events (YYYY-MM-DD) */
+  endDateYmd?: string;
   /** Start time (minutes from midnight) */
   start: number;
   /** End time (minutes from midnight) */
@@ -88,6 +90,7 @@ export function SessionCard({
   topic,
   batch,
   dateYmd,
+  endDateYmd,
   start,
   end,
   group,
@@ -192,7 +195,7 @@ export function SessionCard({
       <Stack direction="row" alignItems="center" spacing={0.5}>
         <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
         <Typography variant="caption" color="text.secondary">
-          {fmtDateNice(dateYmd)} &bull; {fmtTime12(start)}&ndash;{fmtTime12(end)}
+          {fmtDateNice(dateYmd)}{endDateYmd ? <> &rarr; {fmtDateNice(endDateYmd)}</> : null} &bull; {fmtTime12(start)}&ndash;{fmtTime12(end)}
           {batch ? <> &bull; {batch}</> : null}
           {locationText ? <> &bull; {locationText}</> : null}
         </Typography>
