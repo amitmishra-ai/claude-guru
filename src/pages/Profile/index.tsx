@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import StarIcon from "@mui/icons-material/Star";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -135,14 +136,11 @@ export default function ProfilePage() {
   const [showCourseReport, setShowCourseReport] = useState(false);
   const testimonialRef = useRef<HTMLDivElement>(null);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [shareMonth, setShareMonth] = useState(() => {
-    const d = new Date("2026-02-16");
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  });
+  const [shareMonth, setShareMonth] = useState("2026-03");
 
   // Generate last 6 months for the share card dropdown
   const shareMonthOptions = useMemo(() => {
-    const base = new Date("2026-02-16");
+    const base = new Date("2026-03-24");
     const months: { value: string; label: string }[] = [];
     for (let i = 0; i < 6; i++) {
       const d = new Date(base.getFullYear(), base.getMonth() - i, 1);
@@ -165,60 +163,66 @@ export default function ProfilePage() {
     "2025-09": {
       bg: "#e0f2f1", circles: ["#4db6ac", "#b2dfdb", "#80cbc4"],
       chipBg: "#b2dfdb", chipColor: "#00695c",
-      stats: [{ bg: "#b2dfdb", color: "#004d40" }, { bg: "#4db6ac", color: "#fff" }, { bg: "#e0f2f1", color: "#00695c" }, { bg: "#80cbc4", color: "#004d40" }],
+      stats: [{ bg: "#b2dfdb", color: "#004d40" }, { bg: "#4db6ac", color: "#fff" }, { bg: "#e0f2f1", color: "#00695c" }, { bg: "#80cbc4", color: "#004d40" }, { bg: "#e0f2f1", color: "#00695c" }],
       headingColor: "#00695c", taglineColor: "#00897b", spotlightColor: "#00897b", nameColor: "#004d40", subtitleColor: "#4db6ac",
       pattern: "repeating-linear-gradient(135deg, transparent, transparent 8px, rgba(0,105,92,0.03) 8px, rgba(0,105,92,0.03) 9px)",
     },
     "2025-10": {
       bg: "#fff3e0", circles: ["#ffd54f", "#ff8a65", "#ffcc80"],
       chipBg: "#ffd54f", chipColor: "#bf360c",
-      stats: [{ bg: "#ffd54f", color: "#4e342e" }, { bg: "#ff8a65", color: "#fff" }, { bg: "#ffe0b2", color: "#bf360c" }, { bg: "#ffcc80", color: "#4e342e" }],
+      stats: [{ bg: "#ffd54f", color: "#4e342e" }, { bg: "#ff8a65", color: "#fff" }, { bg: "#ffe0b2", color: "#bf360c" }, { bg: "#ffcc80", color: "#4e342e" }, { bg: "#fff3e0", color: "#bf360c" }],
       headingColor: "#bf360c", taglineColor: "#e65100", spotlightColor: "#e65100", nameColor: "#3e2723", subtitleColor: "#ff8a65",
       pattern: "repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(191,54,12,0.025) 12px, rgba(191,54,12,0.025) 24px, transparent 24px, transparent 36px)",
     },
     "2025-11": {
       bg: "#fce4ec", circles: ["#f48fb1", "#ce93d8", "#f8bbd0"],
       chipBg: "#f48fb1", chipColor: "#880e4f",
-      stats: [{ bg: "#f48fb1", color: "#fff" }, { bg: "#ce93d8", color: "#fff" }, { bg: "#fce4ec", color: "#880e4f" }, { bg: "#e1bee7", color: "#4a148c" }],
+      stats: [{ bg: "#f48fb1", color: "#fff" }, { bg: "#ce93d8", color: "#fff" }, { bg: "#fce4ec", color: "#880e4f" }, { bg: "#e1bee7", color: "#4a148c" }, { bg: "#fce4ec", color: "#880e4f" }],
       headingColor: "#880e4f", taglineColor: "#ad1457", spotlightColor: "#ad1457", nameColor: "#4a148c", subtitleColor: "#ce93d8",
       pattern: "radial-gradient(circle 40px at 20% 30%, rgba(136,14,79,0.03) 0%, transparent 60%), radial-gradient(circle 30px at 70% 60%, rgba(74,20,140,0.03) 0%, transparent 60%)",
     },
     "2025-12": {
       bg: "#e8eaf6", circles: ["#81d4fa", "#b0bec5", "#c5cae9"],
       chipBg: "#81d4fa", chipColor: "#0d47a1",
-      stats: [{ bg: "#81d4fa", color: "#0d47a1" }, { bg: "#b0bec5", color: "#263238" }, { bg: "#e3f2fd", color: "#1565c0" }, { bg: "#cfd8dc", color: "#37474f" }],
+      stats: [{ bg: "#81d4fa", color: "#0d47a1" }, { bg: "#42a5f5", color: "#fff" }, { bg: "#e3f2fd", color: "#0d47a1" }, { bg: "#bbdefb", color: "#0d47a1" }, { bg: "#e3f2fd", color: "#0d47a1" }],
       headingColor: "#1a237e", taglineColor: "#283593", spotlightColor: "#1565c0", nameColor: "#0d47a1", subtitleColor: "#7986cb",
       pattern: "radial-gradient(circle 2px at 15% 20%, rgba(13,71,161,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 45% 70%, rgba(13,71,161,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 75% 35%, rgba(13,71,161,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 90% 80%, rgba(13,71,161,0.06) 0%, transparent 50%)",
     },
     "2026-01": {
       bg: "#eceff1", circles: ["#90a4ae", "#b0bec5", "#cfd8dc"],
       chipBg: "#b0bec5", chipColor: "#263238",
-      stats: [{ bg: "#90a4ae", color: "#fff" }, { bg: "#78909c", color: "#fff" }, { bg: "#eceff1", color: "#37474f" }, { bg: "#b0bec5", color: "#263238" }],
+      stats: [{ bg: "#cfd8dc", color: "#263238" }, { bg: "#90a4ae", color: "#fff" }, { bg: "#eceff1", color: "#263238" }, { bg: "#b0bec5", color: "#1a237e" }, { bg: "#eceff1", color: "#263238" }],
       headingColor: "#263238", taglineColor: "#37474f", spotlightColor: "#455a64", nameColor: "#263238", subtitleColor: "#78909c",
       pattern: "radial-gradient(circle 1.5px at 10% 15%, rgba(38,50,56,0.05) 0%, transparent 50%), radial-gradient(circle 1.5px at 35% 55%, rgba(38,50,56,0.05) 0%, transparent 50%), radial-gradient(circle 1.5px at 60% 25%, rgba(38,50,56,0.05) 0%, transparent 50%), radial-gradient(circle 1.5px at 85% 75%, rgba(38,50,56,0.05) 0%, transparent 50%)",
     },
     "2026-02": {
       bg: "#dbeafe", circles: ["#fde68a", "#bfdbfe", "#93c5fd"],
       chipBg: "#fde68a", chipColor: "#1e3a5f",
-      stats: [{ bg: "#fde68a", color: "#1e3a5f" }, { bg: "#60a5fa", color: "#fff" }, { bg: "#bfdbfe", color: "#1e3a5f" }, { bg: "#93c5fd", color: "#1e3a5f" }],
+      stats: [{ bg: "#fde68a", color: "#1e3a5f" }, { bg: "#60a5fa", color: "#fff" }, { bg: "#bfdbfe", color: "#1e3a5f" }, { bg: "#93c5fd", color: "#1e3a5f" }, { bg: "#e0f2fe", color: "#1e3a5f" }],
       headingColor: "#2563eb", taglineColor: "#2563eb", spotlightColor: "#2563eb", nameColor: "#0f172a", subtitleColor: "#64748b",
+    },
+    "2026-03": {
+      bg: "#ecfdf5", circles: ["#6ee7b7", "#a7f3d0", "#d1fae5"],
+      chipBg: "#6ee7b7", chipColor: "#064e3b",
+      stats: [{ bg: "#6ee7b7", color: "#064e3b" }, { bg: "#34d399", color: "#fff" }, { bg: "#a7f3d0", color: "#064e3b" }, { bg: "#d1fae5", color: "#065f46" }, { bg: "#ecfdf5", color: "#065f46" }],
+      headingColor: "#059669", taglineColor: "#059669", spotlightColor: "#059669", nameColor: "#064e3b", subtitleColor: "#6ee7b7",
     },
   };
 
   // Mock monthly data for the share card
   const shareMonthData = useMemo(() => {
-    const dataByMonth: Record<string, { learners: string; hours: string; completion: string; sessions: string; rating: string; monthLabel: string }> = {
-      "2026-02": { learners: "1,240", hours: "38", completion: "96", sessions: "42", rating: "4.54", monthLabel: "FEB 2026" },
-      "2026-01": { learners: "1,105", hours: "34", completion: "94", sessions: "38", rating: "4.48", monthLabel: "JAN 2026" },
-      "2025-12": { learners: "980", hours: "32", completion: "92", sessions: "35", rating: "4.45", monthLabel: "DEC 2025" },
-      "2025-11": { learners: "1,050", hours: "36", completion: "95", sessions: "40", rating: "4.51", monthLabel: "NOV 2025" },
-      "2025-10": { learners: "920", hours: "30", completion: "91", sessions: "33", rating: "4.42", monthLabel: "OCT 2025" },
-      "2025-09": { learners: "870", hours: "28", completion: "89", sessions: "30", rating: "4.38", monthLabel: "SEP 2025" },
+    const dataByMonth: Record<string, { sessions: string; hours: string; learners: string; rating: string; rated4Plus: string; monthLabel: string }> = {
+      "2026-03": { sessions: "7", hours: "14", learners: "168", rating: "4.7", rated4Plus: "6", monthLabel: "MAR 2026" },
+      "2026-02": { sessions: "6", hours: "12", learners: "142", rating: "4.5", rated4Plus: "5", monthLabel: "FEB 2026" },
+      "2026-01": { sessions: "8", hours: "16", learners: "195", rating: "4.6", rated4Plus: "7", monthLabel: "JAN 2026" },
+      "2025-12": { sessions: "5", hours: "10", learners: "120", rating: "4.4", rated4Plus: "4", monthLabel: "DEC 2025" },
+      "2025-11": { sessions: "6", hours: "12", learners: "155", rating: "4.5", rated4Plus: "5", monthLabel: "NOV 2025" },
+      "2025-10": { sessions: "4", hours: "8", learners: "98", rating: "4.3", rated4Plus: "3", monthLabel: "OCT 2025" },
     };
-    return dataByMonth[shareMonth] ?? dataByMonth["2026-02"];
+    return dataByMonth[shareMonth] ?? dataByMonth["2026-03"];
   }, [shareMonth]);
 
-  const shareTheme = MONTH_THEMES[shareMonth] ?? MONTH_THEMES["2026-02"];
+  const shareTheme = MONTH_THEMES[shareMonth] ?? MONTH_THEMES["2026-03"];
 
   const tzLabel = useMemo(() => {
     const tz = timeZoneMode === "auto"
@@ -1173,73 +1177,110 @@ export default function ProfilePage() {
               bgcolor: shareTheme.bg,
               position: "relative",
               overflow: "hidden",
-              color: shareTheme.nameColor,
-              aspectRatio: "4 / 3",
               transition: "background-color 0.4s ease",
-              ...(shareTheme.pattern ? { "&::after": { content: '""', position: "absolute", inset: 0, background: shareTheme.pattern, zIndex: 0 } } : {}),
             }}
           >
-            {/* Decorative circles */}
-            <Box sx={{ position: "absolute", top: -60, right: -40, width: 220, height: 220, borderRadius: "50%", bgcolor: shareTheme.circles[0], opacity: 0.6, transition: "background-color 0.4s ease" }} />
-            <Box sx={{ position: "absolute", bottom: -50, right: -30, width: 140, height: 140, borderRadius: "50%", bgcolor: shareTheme.circles[1], opacity: 0.7, transition: "background-color 0.4s ease" }} />
-            <Box sx={{ position: "absolute", bottom: -20, left: "40%", width: 80, height: 80, borderRadius: "50%", bgcolor: shareTheme.circles[2], opacity: 0.5, transition: "background-color 0.4s ease" }} />
+            {/* Subtle decorative accent */}
+            <Box sx={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: shareTheme.circles[0], opacity: 0.3 }} />
 
-            <Box sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column", position: "relative", zIndex: 1 }}>
-              {/* Header: Logo left + Month badge right */}
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Box component="img" src="/gl-logo-navy.svg" alt="Great Learning" sx={{ height: 24 }} />
-                <Chip
-                  label={shareMonthData.monthLabel}
-                  size="small"
-                  sx={{ bgcolor: shareTheme.chipBg, color: shareTheme.chipColor, fontWeight: 700, fontSize: "0.7rem", borderRadius: 9999, px: 1, transition: "all 0.4s ease" }}
-                />
+            <Box sx={{ p: 3, position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
+              {/* Row 1: Logo + Month */}
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+                <Box component="img" src="/gl-logo-navy.svg" alt="Great Learning" sx={{ height: 20 }} />
+                <Typography sx={{ color: shareTheme.headingColor, fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.05em" }}>
+                  {shareMonthData.monthLabel}
+                </Typography>
               </Stack>
 
-              {/* Guru Spotlight heading */}
-              <Typography sx={{ color: shareTheme.spotlightColor, letterSpacing: "0.15em", fontWeight: 700, fontSize: "0.55rem", mb: 0.5 }}>
+              {/* Row 2: Name + subtitle */}
+              <Typography sx={{ color: shareTheme.headingColor, letterSpacing: "0.1em", fontWeight: 700, fontSize: "0.45rem", mb: 0.15 }}>
                 GURU SPOTLIGHT
               </Typography>
-              <Typography sx={{ color: shareTheme.nameColor, fontWeight: 800, fontSize: "1.5rem", lineHeight: 1.1, mb: 0.25 }}>
+              <Typography sx={{ color: shareTheme.nameColor, fontWeight: 800, fontSize: "1.3rem", lineHeight: 1.1 }}>
                 {guruName}
               </Typography>
-              <Typography sx={{ color: shareTheme.subtitleColor, fontSize: "0.75rem", mb: 2 }}>
+              <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.65rem", mb: 1.5 }}>
                 Machine Learning · Data Science
               </Typography>
 
-              {/* Monthly Achievements heading */}
-              <Typography sx={{ color: shareTheme.headingColor, letterSpacing: "0.12em", fontWeight: 700, fontSize: "0.5rem", mb: 1 }}>
-                MONTHLY ACHIEVEMENTS
-              </Typography>
-
-              {/* 2x2 stat grid */}
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, flex: 1, minHeight: 0 }}>
-                {[
-                  { value: shareMonthData.learners, unit: "learners", sub: "Enrolled this month", ...shareTheme.stats[0] },
-                  { value: shareMonthData.hours, unit: "hrs", sub: "Live sessions delivered", ...shareTheme.stats[1] },
-                  { value: shareMonthData.completion, unit: "%", sub: "Completion rate", ...shareTheme.stats[2] },
-                  { value: shareMonthData.sessions, unit: "sessions", sub: "Sessions taken", ...shareTheme.stats[3] },
-                ].map((s) => (
-                  <Box key={s.sub} sx={{ bgcolor: s.bg, borderRadius: 2, px: 1.5, py: 1.25, display: "flex", flexDirection: "column", justifyContent: "flex-end", transition: "background-color 0.4s ease" }}>
-                    <Stack direction="row" alignItems="baseline" spacing={0.5}>
-                      <Typography sx={{ color: s.color, fontWeight: 800, fontSize: "1.4rem", lineHeight: 1 }}>{s.value}</Typography>
-                      <Typography sx={{ color: s.color, fontWeight: 600, fontSize: "0.65rem", opacity: 0.85 }}>{s.unit}</Typography>
-                    </Stack>
-                    <Typography sx={{ color: s.color, fontSize: "0.6rem", fontWeight: 500, opacity: 0.8, mt: 0.25 }}>{s.sub}</Typography>
+              {/* Row 3: Bento stats grid */}
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, flex: 1, minHeight: 0, mb: 1.5 }}>
+                {/* Left column — 2 tall cards with chips */}
+                <Stack spacing={1}>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <Box>
+                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
+                        {shareMonthData.sessions}
+                      </Typography>
+                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.7rem", fontWeight: 400, mt: 0.5, lineHeight: 1.43 }}>
+                        Sessions delivered this month
+                      </Typography>
+                    </Box>
+                    <Chip
+                      icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}
+                      label="Top 10% Gurus"
+                      size="small"
+                      variant="outlined"
+                      sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }}
+                    />
                   </Box>
-                ))}
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <Box>
+                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
+                        {shareMonthData.hours} Hrs
+                      </Typography>
+                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>
+                        Taught this month
+                      </Typography>
+                    </Box>
+                    <Chip
+                      icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}
+                      label="Top 10% Gurus"
+                      size="small"
+                      variant="outlined"
+                      sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }}
+                    />
+                  </Box>
+                </Stack>
+                {/* Right column — 3 shorter cards */}
+                <Stack spacing={1}>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5 }}>
+                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
+                      {shareMonthData.learners}
+                    </Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>
+                      Learners taught
+                    </Typography>
+                  </Box>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5 }}>
+                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
+                      {shareMonthData.rating}/5
+                    </Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>
+                      Avg ratings this month
+                    </Typography>
+                  </Box>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5 }}>
+                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
+                      {shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`}
+                    </Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>
+                      Sessions rated 4+
+                    </Typography>
+                  </Box>
+                </Stack>
               </Box>
 
-              {/* Footer */}
-              <Divider sx={{ borderColor: "rgba(0,0,0,0.1)", borderStyle: "dashed", mt: 1.5, mb: 1 }} />
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography sx={{ color: shareTheme.taglineColor, fontSize: "0.65rem", fontWeight: 600 }}>
+              {/* Row 4: Footer */}
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pt: 1, borderTop: "1px dashed", borderColor: "rgba(0,0,0,0.08)" }}>
+                <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.55rem", fontWeight: 600 }}>
                   Empowering careers, one lesson at a time.
                 </Typography>
-                <Stack direction="row" alignItems="center" spacing={0.3}>
+                <Stack direction="row" alignItems="center" spacing={0.15}>
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <Typography key={i} sx={{ color: "#f59e0b", fontSize: "0.75rem", lineHeight: 1 }}>★</Typography>
+                    <StarIcon key={i} sx={{ fontSize: 12, color: "#f59e0b" }} />
                   ))}
-                  <Typography sx={{ color: shareTheme.nameColor, fontWeight: 700, fontSize: "0.75rem", ml: 0.5 }}>{shareMonthData.rating}</Typography>
+                  <Typography sx={{ color: shareTheme.nameColor, fontWeight: 700, fontSize: "0.65rem", ml: 0.25 }}>{shareMonthData.rating}</Typography>
                 </Stack>
               </Stack>
             </Box>
