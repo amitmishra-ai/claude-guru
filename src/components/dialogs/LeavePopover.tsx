@@ -81,75 +81,77 @@ export function LeavePopover({
       open={open}
       anchorEl={anchorEl}
       onClose={handleClose}
-      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      transformOrigin={{ vertical: "top", horizontal: "left" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      transformOrigin={{ vertical: "top", horizontal: "center" }}
       slotProps={{
         paper: {
           sx: {
-            minWidth: 260,
-            maxWidth: 320,
+            minWidth: 280,
+            maxWidth: 340,
+            borderRadius: 3,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
+            border: "1px solid",
+            borderColor: "divider",
+            mt: 1,
           },
         },
       }}
     >
-      <Box sx={{ p: 2 }}>
-        <Typography variant="subtitle2" fontWeight={600}>
-          {na.reason || "Leave"}
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1.5 }}>
-          <CalendarTodayOutlinedIcon sx={{ fontSize: 14, opacity: 0.6 }} />
-          <Typography variant="body2" color="text.secondary">
-            {isMultiDay
-              ? `${fmtDateNice(groupBlocks[0].dateYmd)} – ${fmtDateNice(groupBlocks[groupBlocks.length - 1].dateYmd)}`
-              : fmtDateNice(na.dateYmd)}
+      <Box sx={{ p: 2.5 }}>
+        {/* Header */}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.9rem" }}>
+            {na.reason || "Leave"}
           </Typography>
+          {isMultiDay && (
+            <Typography variant="caption" sx={{ fontSize: "0.68rem", fontWeight: 600, color: "text.disabled", bgcolor: "action.hover", px: 1, py: 0.25, borderRadius: 1 }}>
+              {groupBlocks.length} days
+            </Typography>
+          )}
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.75 }}>
-          <AccessTimeOutlinedIcon sx={{ fontSize: 14, opacity: 0.6 }} />
-          <Typography variant="body2" color="text.secondary">
-            {fmtTime12(na.start)} – {fmtTime12(na.end)}
-          </Typography>
+        {/* Schedule card */}
+        <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "action.hover", mb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+            <Typography variant="body2" sx={{ fontSize: "0.82rem", fontWeight: 500 }}>
+              {isMultiDay
+                ? `${fmtDateNice(groupBlocks[0].dateYmd)} – ${fmtDateNice(groupBlocks[groupBlocks.length - 1].dateYmd)}`
+                : fmtDateNice(na.dateYmd)}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <AccessTimeOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+            <Typography variant="body2" sx={{ fontSize: "0.82rem", fontWeight: 500 }}>
+              {fmtTime12(na.start)} – {fmtTime12(na.end)}
+            </Typography>
+          </Box>
         </Box>
 
-        {isMultiDay && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>
-            {groupBlocks.length} days
-          </Typography>
-        )}
-
-        <Divider sx={{ my: 1.5 }} />
-
+        {/* Actions */}
         {!confirmCancel ? (
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button size="small" variant="outlined" color="inherit" onClick={handleEdit} sx={{ flex: 1 }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button size="small" variant="soft" onClick={handleEdit} sx={{ flex: 1, textTransform: "none", fontSize: "0.8rem" }}>
               Edit
             </Button>
-            <Button
-              size="small"
-              variant="outlined"
-              color="error"
-              onClick={() => setConfirmCancel(true)}
-              sx={{ flex: 1 }}
-            >
+            <Button size="small" variant="outlined" color="error" onClick={() => setConfirmCancel(true)} sx={{ flex: 1, textTransform: "none", fontSize: "0.8rem" }}>
               Cancel leave
             </Button>
           </Box>
         ) : (
           <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.5 }}>
-              <WarningAmberOutlinedIcon sx={{ fontSize: 14, color: 'var(--gl-warning-icon)' }} />
-              <Typography variant="body2" fontWeight={500}>
-                Cancel this leave?
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1.5, px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "var(--gl-status-declined-bg)" }}>
+              <WarningAmberOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-status-declined-text)" }} />
+              <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.82rem", color: "var(--gl-status-declined-text)" }}>
+                Remove this leave?
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button size="small" variant="outlined" color="inherit" onClick={() => setConfirmCancel(false)} sx={{ flex: 1 }}>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button size="small" variant="soft" onClick={() => setConfirmCancel(false)} sx={{ flex: 1, textTransform: "none", fontSize: "0.8rem" }}>
                 Keep
               </Button>
-              <Button size="small" variant="contained" color="error" onClick={handleCancelLeave} sx={{ flex: 1 }}>
-                Yes, cancel
+              <Button size="small" variant="contained" color="error" onClick={handleCancelLeave} sx={{ flex: 1, textTransform: "none", fontSize: "0.8rem" }}>
+                Yes, remove
               </Button>
             </Box>
           </Box>

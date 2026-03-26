@@ -1,6 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -109,7 +111,7 @@ export function MarkNotAvailableDialog() {
   const editingLeaveGroupId = useAppSelector((s) => s.availability.editingLeaveGroupId);
   const unavailable = useAppSelector((s) => s.availability.unavailable);
 
-  const [autoDecline, setAutoDecline] = useState(false);
+  const [autoDecline, setAutoDecline] = useState(true);
   const [step, setStep] = useState<1 | 2>(1);
 
   /* ── Pre-fill when editing existing leave ───────────────────────── */
@@ -134,7 +136,7 @@ export function MarkNotAvailableDialog() {
   useEffect(() => {
     if (!open) {
       setStep(1);
-      setAutoDecline(false);
+      setAutoDecline(true);
     }
   }, [open]);
 
@@ -256,7 +258,7 @@ export function MarkNotAvailableDialog() {
     dispatch(setOpenNotAvailable(false));
     dispatch(setNaReason(""));
     dispatch(setEditingLeaveGroupId(null));
-    setAutoDecline(false);
+    setAutoDecline(true);
     setStep(1);
   };
 
@@ -265,30 +267,45 @@ export function MarkNotAvailableDialog() {
     dispatch(setEditingLeaveGroupId(null));
     dispatch(setNaReason(""));
     setStep(1);
-    setAutoDecline(false);
+    setAutoDecline(true);
   };
 
   return (
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="sm"
+      maxWidth="xs"
       fullWidth
+      PaperProps={{ sx: { borderRadius: 3, overflow: "hidden" } }}
     >
-      <DialogTitle>
-        {editingLeaveGroupId ? "Edit leave" : "Mark not available"}
-      </DialogTitle>
+      {/* ── Header ── */}
+      <Box sx={{ px: 3, pt: 2.5, pb: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Typography variant="subtitle1" fontWeight={700}>
+          {editingLeaveGroupId ? "Edit leave" : step === 2 ? "Conflicts found" : "Mark leave"}
+        </Typography>
+        <Chip
+          label={step === 2 ? `${totalConflicts} conflict${totalConflicts > 1 ? "s" : ""}` : "Leave"}
+          size="small"
+          sx={{
+            height: 22,
+            fontSize: "0.7rem",
+            fontWeight: 600,
+            ...(step === 2
+              ? { bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)" }
+              : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }),
+          }}
+        />
+      </Box>
 
-      <DialogContent>
+      <DialogContent sx={{ px: 3, pt: 1, pb: 2 }}>
         {step === 1 && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
-            <Box sx={{ border: 1, borderColor: 'divider', bgcolor: 'action.hover', p: 1.5 }}>
-              <Typography variant="body2" color="text.secondary">
-                Block off a date or period when you are not available for events.
-              </Typography>
-            </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.82rem" }}>
+              Block off dates when you're not available for sessions.
+            </Typography>
 
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1.5 }}>
+            {/* Date range */}
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
               <TextField
                 label="Start date"
                 type="date"
@@ -309,15 +326,11 @@ export function MarkNotAvailableDialog() {
               />
             </Box>
 
-            {/* Time pickers */}
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1.5 }}>
+            {/* Time range */}
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
               <FormControl fullWidth size="small">
                 <InputLabel>Start time</InputLabel>
-                <Select
-                  label="Start time"
-                  value={naStart}
-                  onChange={(e) => dispatch(setNaStart(e.target.value))}
-                >
+                <Select label="Start time" value={naStart} onChange={(e) => dispatch(setNaStart(e.target.value))}>
                   {timeOptions12.map((opt) => (
                     <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
                   ))}
@@ -325,11 +338,7 @@ export function MarkNotAvailableDialog() {
               </FormControl>
               <FormControl fullWidth size="small">
                 <InputLabel>End time</InputLabel>
-                <Select
-                  label="End time"
-                  value={naEnd}
-                  onChange={(e) => dispatch(setNaEnd(e.target.value))}
-                >
+                <Select label="End time" value={naEnd} onChange={(e) => dispatch(setNaEnd(e.target.value))}>
                   {timeOptions12.map((opt) => (
                     <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
                   ))}
@@ -337,9 +346,8 @@ export function MarkNotAvailableDialog() {
               </FormControl>
             </Box>
 
-            {/* Validation error */}
             {naStartDate && naEndDate && !isValid && (
-              <Typography variant="caption" sx={{ color: 'error.main' }}>
+              <Typography variant="caption" sx={{ color: "error.main", fontSize: "0.75rem" }}>
                 End date/time must be after start date/time.
               </Typography>
             )}
@@ -348,7 +356,7 @@ export function MarkNotAvailableDialog() {
               label="Reason (optional)"
               value={naReason}
               onChange={(e) => dispatch(setNaReason(e.target.value))}
-              placeholder="E.g., vacation, personal leave"
+              placeholder="e.g. Vacation, Personal"
               size="small"
               fullWidth
             />
@@ -356,114 +364,103 @@ export function MarkNotAvailableDialog() {
         )}
 
         {step === 2 && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {/* Warning banner */}
             <Box
               sx={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 1.5,
-                p: 2,
-                bgcolor: 'warning.light',
-                border: 1,
-                borderColor: 'warning.main',
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 1.25,
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: "var(--gl-status-declined-bg)",
+                border: "1px solid var(--gl-status-declined-border)",
               }}
             >
-              <WarningAmberOutlinedIcon sx={{ fontSize: 18, flexShrink: 0, mt: "2px", color: 'var(--gl-warning-icon)' }} />
-              <Box>
-                <Typography variant="subtitle2" sx={{ color: 'warning.dark', fontWeight: 600 }}>
-                  {totalConflicts} conflicting item{totalConflicts > 1 ? "s" : ""} found
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'warning.dark', mt: 0.5 }}>
-                  The following events/requests overlap with your leave period:
-                </Typography>
-              </Box>
+              <WarningAmberOutlinedIcon sx={{ fontSize: 16, flexShrink: 0, mt: "1px", color: "var(--gl-status-declined-text)" }} />
+              <Typography variant="body2" sx={{ fontSize: "0.82rem", color: "var(--gl-status-declined-text)", fontWeight: 500 }}>
+                These events overlap with your leave and will need attention.
+              </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {/* Conflict list */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
               {conflictingSessions.map((s) => (
-                <Box
-                  key={s.id}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    p: 1.5,
-                    border: 1,
-                    borderColor: 'divider',
-                    bgcolor: 'background.paper',
-                  }}
-                >
-                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'error.main', flexShrink: 0 }} />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" fontWeight={500}>{s.title}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {s.dateYmd} &bull; {fmtTime12(s.start)}–{fmtTime12(s.end)}
+                <Box key={s.id} sx={{ display: "flex", alignItems: "center", gap: 1.25, px: 1.5, py: 1, borderRadius: 1.5, border: 1, borderColor: "divider" }}>
+                  <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "error.main", flexShrink: 0 }} />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.82rem" }} noWrap>{s.title}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem" }}>
+                      {s.dateYmd} · {fmtTime12(s.start)}–{fmtTime12(s.end)}
                     </Typography>
                   </Box>
                 </Box>
               ))}
               {conflictingRequests.map((r) => (
-                <Box
-                  key={r.id}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    p: 1.5,
-                    border: 1,
-                    borderColor: 'divider',
-                    bgcolor: 'background.paper',
-                  }}
-                >
-                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'warning.main', flexShrink: 0 }} />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" fontWeight={500}>{r.title}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {r.dateYmd} &bull; {fmtTime12(r.start)}–{fmtTime12(r.end)}
+                <Box key={r.id} sx={{ display: "flex", alignItems: "center", gap: 1.25, px: 1.5, py: 1, borderRadius: 1.5, border: 1, borderColor: "divider" }}>
+                  <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "warning.main", flexShrink: 0 }} />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.82rem" }} noWrap>{r.title}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem" }}>
+                      {r.dateYmd} · {fmtTime12(r.start)}–{fmtTime12(r.end)}
                     </Typography>
                   </Box>
                 </Box>
               ))}
             </Box>
 
-            <Chip
-              label="Auto-decline events & mark requests unavailable"
-              size="small"
-              variant={autoDecline ? "filled" : "outlined"}
-              onClick={() => setAutoDecline(!autoDecline)}
+            {/* Auto-decline checkbox — highlighted */}
+            <Box
               sx={{
-                cursor: 'pointer',
-                ...(autoDecline
-                  ? { bgcolor: 'warning.main', color: 'warning.contrastText', '&:hover': { bgcolor: 'warning.dark' } }
-                  : { borderColor: 'warning.light', color: 'warning.dark', '&:hover': { bgcolor: 'warning.light' } }),
+                px: 1.5,
+                py: 1,
+                borderRadius: 2,
+                bgcolor: autoDecline ? "var(--gl-status-pending-bg)" : "action.hover",
+                border: "1px solid",
+                borderColor: autoDecline ? "var(--gl-status-pending-border)" : "divider",
+                transition: "all 0.2s ease",
               }}
-            />
+            >
+              <FormControlLabel
+                sx={{ m: 0 }}
+                control={
+                  <Checkbox
+                    checked={autoDecline}
+                    onChange={(_, c) => setAutoDecline(c)}
+                    size="small"
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontSize: "0.82rem", fontWeight: 600 }}>
+                      Auto-decline overlapping events
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem" }}>
+                      Conflicting sessions will be automatically declined
+                    </Typography>
+                  </Box>
+                }
+              />
+            </Box>
           </Box>
         )}
       </DialogContent>
 
-      <DialogActions>
-        {step === 1 && (
-          <>
-            <Button variant="text" color="inherit" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button variant="contained" onClick={handleMarkLeave} disabled={!isValid}>
-              {editingLeaveGroupId ? "Update leave" : "Mark leave"}
-            </Button>
-          </>
-        )}
-        {step === 2 && (
-          <>
-            <Button variant="text" color="inherit" onClick={() => setStep(1)}>
-              Go back
-            </Button>
-            <Button variant="contained" onClick={handleConfirm}>
-              Continue anyway
-            </Button>
-          </>
-        )}
-      </DialogActions>
+      {/* ── Footer ── */}
+      <Box sx={{ px: 3, pb: 2.5, pt: 0.5, display: "flex", justifyContent: "flex-end", gap: 1 }}>
+        <Button variant="text" color="inherit" size="small" onClick={step === 2 ? () => setStep(1) : handleClose}>
+          {step === 2 ? "Back" : "Cancel"}
+        </Button>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={step === 2 ? handleConfirm : handleMarkLeave}
+          disabled={step === 1 && !isValid}
+          sx={{ px: 3 }}
+        >
+          {step === 2 ? "Confirm leave" : editingLeaveGroupId ? "Update" : "Mark leave"}
+        </Button>
+      </Box>
     </Dialog>
   );
 }

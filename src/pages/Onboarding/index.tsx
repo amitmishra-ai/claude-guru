@@ -58,6 +58,13 @@ const STEPS: StepMeta[] = [
   },
 ];
 
+const STEP_GRADIENTS = [
+  // Step 1: Blue
+  `linear-gradient(160deg, hsl(215, 82%, 44%) 0%, hsl(215, 82%, 38%) 35%, hsl(210, 70%, 28%) 100%)`,
+  // Step 2: Teal/Green
+  `linear-gradient(160deg, hsl(170, 60%, 35%) 0%, hsl(175, 55%, 28%) 35%, hsl(180, 50%, 20%) 100%)`,
+];
+
 /* ════════════════════════════════════════════════════════
    CONTENT DATA — Code of Conduct
    ════════════════════════════════════════════════════════ */
@@ -333,10 +340,8 @@ function SidebarPanel({
         justifyContent: "space-between",
         p: { md: 4, lg: 5 },
         overflow: "hidden",
-        background: `linear-gradient(160deg,
-          hsl(215, 82%, 44%) 0%,
-          hsl(215, 82%, 38%) 35%,
-          hsl(210, 70%, 28%) 100%)`,
+        background: STEP_GRADIENTS[currentStep] || STEP_GRADIENTS[0],
+        transition: "background 0.6s ease",
         color: "#fff",
       }}
     >
@@ -806,6 +811,7 @@ export default function OnboardingPage() {
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [cocAccepted, setCocAccepted] = useState(false);
   const [nameInput, setNameInput] = useState("");
+  const [bannerPulse, setBannerPulse] = useState(false);
 
   const currentMeta = STEPS[step];
   const nameMatches = nameInput.trim().toLowerCase() === guruName.trim().toLowerCase();
@@ -885,16 +891,12 @@ export default function OnboardingPage() {
     }
   };
 
-  const scrollToBottom = () => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  };
-
   const canProceed =
     hasReachedBottom &&
     (currentMeta.acceptType === "checkbox" ? cocAccepted : nameMatches);
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1300, display: "flex", background: "var(--mui-palette-background-default, #fafafa)" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 1300, display: "flex", background: theme.palette.background.default }}>
       {/* ── Left panel — desktop only, full height ── */}
       {!isMobile && (
         <Box
@@ -915,7 +917,7 @@ export default function OnboardingPage() {
       )}
 
       {/* ── Right panel — content + footer ── */}
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, position: "relative" }}>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {/* Mobile top bar */}
         {isMobile && (
           <Box
@@ -968,7 +970,7 @@ export default function OnboardingPage() {
               bgcolor: "background.paper",
             }}
           >
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2, maxWidth: 820, mx: "auto" }}>
               <StepIndicator currentStep={step} totalSteps={STEPS.length} />
               <Typography
                 variant="caption"
@@ -987,10 +989,10 @@ export default function OnboardingPage() {
                 )}
               </Typography>
             </Stack>
-            <Typography variant="h6" sx={{ fontWeight: 800, fontSize: "1.2rem" }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, fontSize: "1.2rem", maxWidth: 820, mx: "auto" }}>
               {currentMeta.title}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.82rem" }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.82rem", maxWidth: 820, mx: "auto" }}>
               {currentMeta.subtitle}
             </Typography>
           </Box>
@@ -1009,7 +1011,7 @@ export default function OnboardingPage() {
             py: { xs: 2.5, md: 3 },
           }}
         >
-          <Box sx={{ maxWidth: 720 }}>
+          <Box sx={{ maxWidth: 820, mx: "auto", width: "100%" }}>
             {step === 0 && <CoCContent theme={theme} />}
             {step === 1 && <IPContent theme={theme} guruName={guruName} />}
 
@@ -1026,14 +1028,13 @@ export default function OnboardingPage() {
         {/* ── Scroll hint pill ── */}
         {showScrollHint && !hasReachedBottom && (
           <Box
-            onClick={scrollToBottom}
             sx={{
-              position: "absolute",
-              bottom: { xs: 120, md: 100 },
-              left: "50%",
+              position: "fixed",
+              bottom: { xs: 130, md: 110 },
+              left: { xs: "50%", md: "calc(50% + 160px)" },
               transform: "translateX(-50%)",
-              zIndex: 10,
-              cursor: "pointer",
+              zIndex: 1301,
+              pointerEvents: "none",
               display: "flex",
               alignItems: "center",
               gap: 0.5,
@@ -1045,8 +1046,6 @@ export default function OnboardingPage() {
               border: 1,
               borderColor: "divider",
               boxShadow: 4,
-              transition: "box-shadow 0.2s",
-              "&:hover": { boxShadow: 8 },
               "@keyframes bounceDown": {
                 "0%, 100%": { transform: "translateY(0)" },
                 "50%": { transform: "translateY(3px)" },
@@ -1080,59 +1079,71 @@ export default function OnboardingPage() {
             justifyContent="space-between"
             alignItems={{ xs: "stretch", sm: "center" }}
             spacing={1.5}
+            sx={{ maxWidth: 820, mx: "auto" }}
           >
             {/* Acceptance control */}
             <Box sx={{ flex: 1 }}>
-              {currentMeta.acceptType === "checkbox" ? (
-                <>
-                  <FormControlLabel
-                    disabled={!hasReachedBottom}
-                    control={
-                      <Checkbox
-                        checked={cocAccepted}
-                        onChange={(_, c) => setCocAccepted(c)}
-                        size="small"
-                        sx={{ "&.Mui-disabled": { color: alpha(theme.palette.text.disabled, 0.3) } }}
-                      />
-                    }
-                    label={
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontSize: "0.82rem",
-                          fontWeight: 500,
-                          color: hasReachedBottom ? "text.primary" : "text.disabled",
-                          transition: "color 0.3s ease",
-                          userSelect: "none",
-                        }}
-                      >
-                        I have read and accept the Guru's Code of Conduct
-                      </Typography>
-                    }
-                  />
-                  {!hasReachedBottom && (
-                    <Typography variant="caption" color="text.disabled" sx={{ display: "block", fontSize: "0.7rem", pl: 4, mt: -0.25 }}>
-                      Scroll through the entire document to enable acceptance
+              {!hasReachedBottom ? (
+                /* ── Scroll requirement banner — visible & prominent ── */
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    px: 2,
+                    py: 1,
+                    borderRadius: 2,
+                    bgcolor: bannerPulse ? "var(--gl-status-declined-bg)" : "var(--gl-status-pending-bg)",
+                    border: bannerPulse ? "1.5px solid var(--gl-status-declined-border)" : "1px solid var(--gl-status-pending-border)",
+                    transition: "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
+                    boxShadow: bannerPulse ? "0 0 0 3px rgba(244, 63, 94, 0.15)" : "none",
+                    "@keyframes shake": {
+                      "0%, 100%": { transform: "translateX(0)" },
+                      "15%": { transform: "translateX(-4px)" },
+                      "30%": { transform: "translateX(4px)" },
+                      "45%": { transform: "translateX(-3px)" },
+                      "60%": { transform: "translateX(3px)" },
+                      "75%": { transform: "translateX(-1px)" },
+                      "90%": { transform: "translateX(1px)" },
+                    },
+                    animation: bannerPulse ? "shake 0.5s ease" : "none",
+                  }}
+                >
+                  <KeyboardArrowDownIcon sx={{ fontSize: 18, color: bannerPulse ? "var(--gl-status-declined-text)" : "var(--gl-status-pending-text)" }} />
+                  <Typography variant="body2" sx={{ fontSize: "0.82rem", fontWeight: 600, color: bannerPulse ? "var(--gl-status-declined-text)" : "var(--gl-status-pending-text)" }}>
+                    Please scroll through the entire document to enable acceptance
+                  </Typography>
+                </Box>
+              ) : currentMeta.acceptType === "checkbox" ? (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={cocAccepted}
+                      onChange={(_, c) => setCocAccepted(c)}
+                      size="small"
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="body2"
+                      sx={{ fontSize: "0.82rem", fontWeight: 500, userSelect: "none" }}
+                    >
+                      I have read and accept the Guru's Code of Conduct
                     </Typography>
-                  )}
-                </>
+                  }
+                />
               ) : (
                 <Stack spacing={0.75}>
                   <Typography
                     variant="body2"
                     component="div"
-                    sx={{
-                      fontSize: "0.78rem",
-                      fontWeight: 500,
-                      color: hasReachedBottom ? "text.primary" : "text.disabled",
-                    }}
+                    sx={{ fontSize: "0.78rem", fontWeight: 500 }}
                   >
-                    <strong>{guruName}</strong> submission — type your name to accept
+                    <strong>{guruName}</strong> — type your name to accept
                   </Typography>
                   <TextField
                     size="small"
                     placeholder="Type your name as above"
-                    disabled={!hasReachedBottom}
                     value={nameInput}
                     autoComplete="off"
                     onChange={(e) => setNameInput(e.target.value)}
@@ -1142,41 +1153,47 @@ export default function OnboardingPage() {
                       "& .MuiOutlinedInput-root": { fontSize: "0.85rem" },
                     }}
                   />
-                  {!hasReachedBottom && (
-                    <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.7rem" }}>
-                      Scroll through the entire document to enable acceptance
-                    </Typography>
-                  )}
                 </Stack>
               )}
             </Box>
 
-            {/* Action button */}
-            <Button
-              variant="contained"
-              disabled={!canProceed}
-              onClick={handleNext}
-              endIcon={
-                step < STEPS.length - 1 ? (
-                  <ArrowForwardIcon sx={{ fontSize: 16 }} />
-                ) : (
-                  <CheckCircleOutlineIcon sx={{ fontSize: 16 }} />
-                )
-              }
-              sx={{
-                minHeight: { xs: 44, sm: 42 },
-                px: 4,
-                fontWeight: 600,
-                alignSelf: { xs: "stretch", sm: "flex-end" },
-                whiteSpace: "nowrap",
-                "&.Mui-disabled": {
-                  bgcolor: alpha(theme.palette.primary.main, 0.12),
-                  color: alpha(theme.palette.primary.main, 0.4),
-                },
+            {/* Action button — wrapper catches clicks when disabled to pulse the banner */}
+            <Box
+              onClick={() => {
+                if (!canProceed) {
+                  setBannerPulse(true);
+                  setTimeout(() => setBannerPulse(false), 1200);
+                }
               }}
+              sx={{ alignSelf: { xs: "stretch", sm: "flex-end" } }}
             >
-              {step < STEPS.length - 1 ? "Accept & Continue" : "Accept & Go to Dashboard"}
-            </Button>
+              <Button
+                variant="contained"
+                disabled={!canProceed}
+                onClick={handleNext}
+                endIcon={
+                  step < STEPS.length - 1 ? (
+                    <ArrowForwardIcon sx={{ fontSize: 16 }} />
+                  ) : (
+                    <CheckCircleOutlineIcon sx={{ fontSize: 16 }} />
+                  )
+                }
+                sx={{
+                  minHeight: { xs: 44, sm: 42 },
+                  px: 4,
+                  width: "100%",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  "&.Mui-disabled": {
+                    bgcolor: alpha(theme.palette.primary.main, 0.12),
+                    color: alpha(theme.palette.primary.main, 0.4),
+                    pointerEvents: "none",
+                  },
+                }}
+              >
+                Accept & Continue
+              </Button>
+            </Box>
           </Stack>
         </Box>
       </Box>

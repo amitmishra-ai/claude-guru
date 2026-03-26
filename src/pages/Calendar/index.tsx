@@ -272,11 +272,10 @@ export default function CalendarPage() {
   /* ── View mode menu ──────────────────────────────────────────────── */
   const [viewMenuAnchor, setViewMenuAnchor] = useState<HTMLElement | null>(null);
   const VIEW_OPTIONS: { value: CalendarViewMode; label: string }[] = [
+    { value: "weekend", label: "Weekend" },
     { value: "day", label: "Day" },
     { value: "week", label: "Week" },
     { value: "month", label: "Month" },
-    { value: "weekdays", label: "Weekdays" },
-    { value: "weekend", label: "Weekend" },
   ];
   const viewLabel = VIEW_OPTIONS.find((v) => v.value === calendarViewMode)?.label ?? "Week";
 
@@ -350,14 +349,14 @@ export default function CalendarPage() {
     <>
       {/* ── Single-line toolbar ── */}
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ flexWrap: "wrap", gap: 1 }}>
-        {/* Left: title + nav + date */}
+        {/* Left: title + nav + date + view dropdown */}
         <Stack direction="row" alignItems="center" sx={{ gap: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, mr: 2 }}>Calendar</Typography>
           <Button
             variant="outlined"
             size="small"
             sx={{ textTransform: "none", fontSize: "0.78rem", fontWeight: 500, height: 32, px: 1.5, borderColor: "divider", color: "text.primary" }}
-            onClick={() => dispatch(setAnchorDate(realNow.toISOString()))}
+            onClick={() => { dispatch(setAnchorDate(realNow.toISOString())); if (calendarViewMode === "weekend") dispatch(setCalendarViewMode("week")); }}
           >
             Today
           </Button>
@@ -374,11 +373,7 @@ export default function CalendarPage() {
                 ? anchorDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
                 : weekLabel(anchorDate)}
           </Typography>
-        </Stack>
-
-        {/* Right: view dropdown + actions */}
-        <Stack direction="row" alignItems="center" spacing={0.75}>
-          {/* View mode dropdown */}
+          {/* View mode dropdown — next to date */}
           <Button
             variant="outlined"
             size="small"
@@ -402,13 +397,13 @@ export default function CalendarPage() {
             anchorEl={viewMenuAnchor}
             open={Boolean(viewMenuAnchor)}
             onClose={() => setViewMenuAnchor(null)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+            transformOrigin={{ vertical: "top", horizontal: "left" }}
             slotProps={{ paper: { sx: { minWidth: 160, mt: 0.5 } } }}
           >
-            {VIEW_OPTIONS.map((opt, i) => (
+            {VIEW_OPTIONS.map((opt) => (
               <Box key={opt.value}>
-                {(opt.value === "weekdays") && <Divider sx={{ my: 0.5 }} />}
+                {opt.value === "day" && <Divider sx={{ my: 0.5 }} />}
                 <MenuItem
                   selected={calendarViewMode === opt.value}
                   onClick={() => {
@@ -427,29 +422,29 @@ export default function CalendarPage() {
               </Box>
             ))}
           </Menu>
+        </Stack>
 
-          {/* Action buttons — desktop */}
-          <Stack direction="row" spacing={0.5} sx={{ display: { xs: "none", sm: "flex" } }}>
-            <Button
-              variant="soft"
-              size="small"
-              startIcon={<EventBusyIcon sx={{ fontSize: 14 }} />}
-              sx={{ textTransform: "none", fontSize: "0.78rem", height: 32 }}
-              onClick={() => dispatch(setOpenNotAvailable(true))}
-            >
-              Leave
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<EditCalendarIcon sx={{ fontSize: 14 }} />}
-              sx={{ textTransform: "none", fontSize: "0.78rem", height: 32 }}
-              onClick={() => dispatch(setOpenAvailability(true))}
+        {/* Right: action buttons */}
+        <Stack direction="row" spacing={0.5} sx={{ display: { xs: "none", sm: "flex" } }}>
+          <Button
+            variant="soft"
+            size="small"
+            startIcon={<EventBusyIcon sx={{ fontSize: 14 }} />}
+            sx={{ textTransform: "none", fontSize: "0.78rem", height: 32 }}
+            onClick={() => dispatch(setOpenNotAvailable(true))}
+          >
+            Leave
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<EditCalendarIcon sx={{ fontSize: 14 }} />}
+            sx={{ textTransform: "none", fontSize: "0.78rem", height: 32 }}
+            onClick={() => dispatch(setOpenAvailability(true))}
             >
               {hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}
             </Button>
           </Stack>
-        </Stack>
       </Stack>
 
       {/* ── Availability gate ─────────────────────────────────────────── */}
