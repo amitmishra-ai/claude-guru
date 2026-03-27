@@ -37,12 +37,9 @@ export function CompletedSessionDetailDialog() {
   const session = useAppSelector((s) => s.sessions.sessionFocus);
   const close = () => {
     dispatch(setOpenCompletedSession(false));
-    dispatch(setSessionFocus(null));
   };
 
-  if (!session) return null;
-
-  const ratings = demoLearnerRatingsBySessionId[session.id];
+  const ratings = session ? demoLearnerRatingsBySessionId[session.id] : undefined;
   const hasRatings = ratings && ratings.length > 0;
   const avg = hasRatings
     ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(1)
@@ -53,6 +50,7 @@ export function CompletedSessionDetailDialog() {
       anchor="right"
       open={open}
       onClose={close}
+      slotProps={{ transition: { onExited: () => dispatch(setSessionFocus(null)) } }}
       sx={{
         "& .MuiDrawer-paper": {
           width: { xs: "100vw", sm: 480 },
@@ -63,6 +61,7 @@ export function CompletedSessionDetailDialog() {
         },
       }}
     >
+      {session ? (
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
 
         {/* ── Header ── */}
@@ -296,6 +295,7 @@ export function CompletedSessionDetailDialog() {
           </Button>
         </Box>
       </Box>
+      ) : null}
     </Drawer>
   );
 }

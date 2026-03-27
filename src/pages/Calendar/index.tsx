@@ -64,7 +64,7 @@ import {
   fmtTime12,
   toYmd,
 } from "@/lib/helpers";
-import { DOW, DOW_LONG, TIME_START, TIME_END, demoNow } from "@/lib/constants";
+import { DOW, DOW_LONG, demoNow } from "@/lib/constants";
 import type { NA, RequestSlot, Session } from "@/lib/types";
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
@@ -107,21 +107,26 @@ function computeEventLayout(
   return result;
 }
 
+/** Full-day time range for the calendar grid (midnight to midnight). */
+const CAL_START = 0;       // 00:00
+const CAL_END = 23 * 60;   // 23:00 (last label)
+
 /** Convert minutes-since-midnight to a percentage within the visible grid. */
 function timeToPercent(mins: number) {
-  return ((mins - TIME_START) / (TIME_END - TIME_START)) * 100;
+  return ((mins - CAL_START) / (CAL_END - CAL_START)) * 100;
 }
 
-/** Hours to render on the time axis (8 AM … 8 PM). */
+/** Hours to render on the time axis (12 AM … 11 PM — full day). */
 const HOUR_LABELS: number[] = (() => {
   const arr: number[] = [];
-  for (let m = TIME_START; m <= TIME_END; m += 60) arr.push(m);
+  for (let m = CAL_START; m <= CAL_END; m += 60) arr.push(m);
   return arr;
 })();
 
-/** Shared sizing constants for week/month card consistency */
+/** Shared sizing constants */
 const GRID_ROW_PX = 42;
-const CALENDAR_CARD_HEIGHT = HOUR_LABELS.length * GRID_ROW_PX + 84; // grid + header + bottom label room
+/** Default scroll target: 8 AM row */
+const DEFAULT_SCROLL_HOUR = 8;
 
 /** Format a Date as "Feb 16" */
 function fmtShortDate(d: Date) {
@@ -283,6 +288,18 @@ export default function CalendarPage() {
   const [leaveAnchorEl, setLeaveAnchorEl] = useState<HTMLElement | null>(null);
   const [availAnchorEl, setAvailAnchorEl] = useState<HTMLElement | null>(null);
 
+  /* ── Auto-scroll to 8 AM on mount / view change ─────────────────── */
+  const desktopGridRef = useRef<HTMLDivElement>(null);
+  const mobileGridRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const scrollTo8AM = (el: HTMLDivElement | null) => {
+      if (!el) return;
+      el.scrollTop = DEFAULT_SCROLL_HOUR * GRID_ROW_PX;
+    };
+    scrollTo8AM(desktopGridRef.current);
+    scrollTo8AM(mobileGridRef.current);
+  }, [calendarViewMode]);
+
   /* ── Confirmed pulse cleanup ──────────────────────────────────────── */
   useEffect(() => {
     const ids = Object.keys(recentlyConfirmedIds);
@@ -346,9 +363,9 @@ export default function CalendarPage() {
 
   /* ═══════════════════════════════════════════════════════════════════════ */
   return (
-    <>
+    <Box sx={{ display: "flex", flexDirection: "column", height: { md: "calc(100vh - 48px)" }, overflow: "hidden", gap: 2 }}>
       {/* ── Single-line toolbar ── */}
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ flexWrap: "wrap", gap: 1 }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ flexWrap: "wrap", gap: 1, flexShrink: 0 }}>
         {/* Left: title + nav + date + view dropdown */}
         <Stack direction="row" alignItems="center" sx={{ gap: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, mr: 2 }}>Calendar</Typography>
@@ -503,7 +520,7 @@ export default function CalendarPage() {
       {/* ── WEEK VIEW ─────────────────────────────────────────────────── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       {hasUserConfiguredAvailability && isWeekLike && (
-        <>
+        <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           {/* ── Mobile time-grid view (below md) ────────────────────────── */}
           <Box sx={{ mt: 2, display: { md: "none" } }}>
 
@@ -565,8 +582,8 @@ export default function CalendarPage() {
             </Box>
 
             {/* Single-day time grid */}
-            <Card variant="outlined" sx={{ overflow: 'hidden' }}>
-              <Box sx={{ overflowY: 'auto', maxHeight: 480, position: 'relative' }}>
+            <Card variant="outlined" sx={{ overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Box ref={mobileGridRef} sx={{ overflowY: 'auto', flex: 1, minHeight: 0, position: 'relative' }}>
                 {/* Hour rows */}
                 <Box sx={{ position: 'relative', height: HOUR_LABELS.length * GRID_ROW_PX }}>
                   {HOUR_LABELS.map((mins, idx) => (
@@ -683,7 +700,6 @@ export default function CalendarPage() {
           {/* ── Desktop time-grid view (md and above) ───────────────────── */}
           <Box
             sx={{
-              mt: 1.5,
               display: { xs: 'none', md: 'flex' },
               flexDirection: 'column',
               border: 1,
@@ -692,6 +708,8 @@ export default function CalendarPage() {
               bgcolor: 'background.paper',
               overflow: 'hidden',
               boxShadow: 'none',
+              flex: 1,
+              minHeight: 0,
             }}
           >
 
@@ -701,6 +719,7 @@ export default function CalendarPage() {
                 display: 'grid',
                 gridTemplateColumns: `56px repeat(${gridCols}, 1fr)`,
                 borderBottom: 1,
+                flexShrink: 0,
                 borderColor: 'divider',
               }}
             >
@@ -761,8 +780,8 @@ export default function CalendarPage() {
               })}
             </Box>
 
-            {/* Time grid body — full height, no internal scroll */}
-            <Box>
+            {/* Time grid body — scrollable, auto-scrolled to 8 AM */}
+            <Box ref={desktopGridRef} sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
               <Box
                 sx={{
                   display: 'grid',
@@ -919,7 +938,7 @@ export default function CalendarPage() {
                       {/* Current time indicator — today column only */}
                       {colIsToday && (() => {
                         const nowMins = realNow.getHours() * 60 + realNow.getMinutes();
-                        if (nowMins < TIME_START || nowMins > TIME_END) return null;
+                        if (nowMins < CAL_START || nowMins > CAL_END) return null;
                         const topPct = timeToPercent(nowMins);
                         return (
                           <Box
@@ -1162,7 +1181,7 @@ export default function CalendarPage() {
                         const isCompletedSession = isPastSession && confirmed;
                         const isMissedSession = isPastSession && !confirmed && !declined;
                         const sColors = isMissedSession
-                          ? { bg: "action.disabledBackground", border: "var(--gl-cal-busy-border)", text: "text.disabled", sub: "text.disabled" }
+                          ? { bg: "var(--gl-status-missed-bg)", border: "var(--gl-status-missed-border)", text: "var(--gl-status-missed-text)", sub: "var(--gl-status-missed-sub)" }
                           : isCompletedSession
                             ? { bg: "var(--gl-status-completed-bg)", border: "var(--gl-status-completed-border)", text: "var(--gl-status-completed-text)", sub: "var(--gl-status-completed-text)" }
                             : sessionColors(confirmed, declined);
@@ -1209,9 +1228,9 @@ export default function CalendarPage() {
                               pt: 0.5,
                               pb: 0.5,
                               textAlign: 'left',
-                              cursor: isPastSession && !confirmed ? 'default' : 'pointer',
+                              cursor: 'pointer',
                               textDecoration: declined ? 'line-through' : 'none',
-                              opacity: isPastSession && !confirmed && !declined ? 0.55 : 1,
+                              opacity: 1,
                               overflow: 'hidden',
                               fontFamily: 'inherit',
                               transition: 'box-shadow 0.2s ease, transform 0.15s ease',
@@ -1268,6 +1287,7 @@ export default function CalendarPage() {
                 borderColor: 'divider',
                 py: 0.75,
                 px: 2,
+                flexShrink: 0,
               }}
             >
               {/* Left: legend dots */}
@@ -1276,7 +1296,7 @@ export default function CalendarPage() {
                   { color: 'var(--gl-cal-session-scheduled-border)', label: 'Scheduled', dot: true },
                   { color: 'var(--gl-cal-session-confirmed-border)', label: 'Confirmed', dot: true },
                   { color: 'var(--gl-status-completed-text)', label: 'Completed', dot: true },
-                  { color: 'var(--gl-cal-busy-border)', label: 'Missed', dot: true },
+                  { color: 'var(--gl-status-missed-text)', label: 'Missed', dot: true },
                   { color: 'var(--gl-cal-session-declined-border)', label: 'Declined', dot: true },
                   { color: 'var(--gl-cal-avail-border, rgb(34,197,94))', label: 'Available', dashed: true },
                   { color: 'var(--gl-cal-leave-border, rgb(244,63,94))', label: 'Leave', dashed: true },
@@ -1322,15 +1342,15 @@ export default function CalendarPage() {
           {/* ── Popovers ─────────────────────────────────────────────── */}
           <LeavePopover anchorEl={leaveAnchorEl} />
           <AvailabilityPopover anchorEl={availAnchorEl} blocks={allAvailBlocks} />
-        </>
+        </Box>
       )}
 
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── MONTH VIEW ────────────────────────────────────────────────── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       {hasUserConfiguredAvailability && calendarViewMode === "month" && (
-        <>
-          <Card variant="outlined" sx={{ mt: 1.5, p: { xs: 1, md: 2 }, overflow: 'hidden', height: CALENDAR_CARD_HEIGHT, display: 'flex', flexDirection: 'column', borderRadius: 1, bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
+        <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+          <Card variant="outlined" sx={{ p: { xs: 1, md: 2 }, overflow: 'hidden', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', borderRadius: 1, bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
             {/* §9.1 Sunday-first visual month grid — but we use Monday-first to match week view DOW header */}
             <Box
               sx={{
@@ -1523,14 +1543,14 @@ export default function CalendarPage() {
               })()}
             </Box>
           </Card>
-        </>
+        </Box>
       )}
 
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── SUMMARY CARDS ────────────────────────────────────────────── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── Week at a glance ──────────────────────────────────────────── */}
-      <Box sx={{ mt: -0.5 }}>
+      <Box sx={{ flexShrink: 0 }}>
         <Typography variant="caption" fontWeight={600} color="text.disabled" sx={{ letterSpacing: "0.06em", textTransform: "uppercase", fontSize: "0.65rem", mb: 1, display: "block" }}>
           This week
         </Typography>
@@ -1590,6 +1610,6 @@ export default function CalendarPage() {
           sx={{ "& .MuiSpeedDialAction-staticTooltipLabel": { whiteSpace: "nowrap" } }}
         />
       </SpeedDial>
-    </>
+    </Box>
   );
 }

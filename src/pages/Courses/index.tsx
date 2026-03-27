@@ -23,7 +23,7 @@ import AutoStoriesOutlinedIcon from "@mui/icons-material/AutoStoriesOutlined";
 import { CoursePatternThumb } from "@/components/shared/CoursePatternThumb";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setSessionFocus } from "@/store/slices/sessionsSlice";
-import { setOpenSession, setOpenCompletedSession, setOpenCourseDetail, setCourseDetailId } from "@/store/slices/uiSlice";
+import { setOpenSession, setOpenSessionDetails, setOpenCompletedSession, setOpenCourseDetail, setCourseDetailId } from "@/store/slices/uiSlice";
 import { demoCourseCatalog, demoCourseModules } from "@/data/demo-sessions";
 import { sortByDateTime, dateTimeMs, fmtDateNice, fmtTime12 } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
@@ -325,7 +325,7 @@ export default function CoursesPage() {
 
   const openSession = (s: Session) => {
     dispatch(setSessionFocus(s));
-    dispatch(setOpenSession(true));
+    dispatch(setOpenSessionDetails(true));
   };
 
   const openCompletedSessionDialog = (s: Session) => {

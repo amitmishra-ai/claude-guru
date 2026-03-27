@@ -108,6 +108,12 @@
   --gl-cal-busy-bg: rgba(156, 163, 175, 0.25);
   --gl-cal-busy-border: rgb(156, 163, 175);
 
+  /* ── Missed session tokens (grey-blue, WCAG AA) ── */
+  --gl-status-missed-bg: #e8edf2;
+  --gl-status-missed-text: #455a74;
+  --gl-status-missed-border: rgba(69, 90, 116, 0.3);
+  --gl-status-missed-sub: #607080;
+
   /* ── UI accent tokens ── */
   --gl-badge-bg: #f44336;
   /* red-500 (MUI) */
@@ -229,6 +235,12 @@
   --gl-cal-leave-text: #fca5a5;
   --gl-cal-busy-bg: rgba(156, 163, 175, 0.15);
   --gl-cal-busy-border: rgba(156, 163, 175, 0.5);
+
+  /* ── Missed session tokens (grey-blue, WCAG AA) ── */
+  --gl-status-missed-bg: rgba(69, 90, 116, 0.2);
+  --gl-status-missed-text: #a0b4c8;
+  --gl-status-missed-border: rgba(160, 180, 200, 0.3);
+  --gl-status-missed-sub: #8899aa;
 
   /* ── UI accent tokens (dark) ── */
   --gl-badge-bg: #ef5350;

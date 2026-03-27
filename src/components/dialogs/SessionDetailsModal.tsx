@@ -526,7 +526,7 @@ export function SessionDetailsModal() {
       anchor="right"
       open={open}
       onClose={handleClose}
-      SlideProps={{ onExited: () => dispatch(setSessionFocus(null)) }}
+      slotProps={{ transition: { onExited: () => dispatch(setSessionFocus(null)) } }}
       sx={{
         "& .MuiDrawer-paper": {
           width: { xs: "100vw", sm: 480 },

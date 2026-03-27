@@ -60,6 +60,7 @@ export function AppLayout() {
         display: "grid",
         gridTemplateColumns: { xs: "minmax(0, 1fr)", md: isNavCollapsed ? "80px minmax(0, 1fr)" : "256px minmax(0, 1fr)" },
         transition: "grid-template-columns 0.2s",
+        height: "100vh",
       }}
     >
       <Sidebar />
@@ -67,6 +68,7 @@ export function AppLayout() {
         component="main"
         sx={{
           minWidth: 0,
+          overflowY: "auto",
           overflowX: "clip",
           p: { xs: 1.5, sm: 2, md: 3 },
           pt: { xs: "calc(56px + 12px + env(safe-area-inset-top))", md: 3 },

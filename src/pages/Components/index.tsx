@@ -44,9 +44,32 @@ import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import { minutes, fmtDateNice, fmtTime12 } from "@/lib/helpers";
-import { useAppSelector } from "@/store";
+import { useAppSelector, useAppDispatch } from "@/store";
+import { setSessionFocus } from "@/store/slices/sessionsSlice";
+import { setOpenSessionDetails, setOpenCompletedSession } from "@/store/slices/uiSlice";
 import type { GuruRole } from "@/store/slices/devPanelSlice";
 import type { Poll } from "@/lib/types";
+import {
+  demoMentoringConfirmed,
+  demoMentoringCombinedConfirmed,
+  demoMentoringScheduled,
+  demoMentoringCombinedScheduled,
+  demoMentoringCompletedGathering,
+  demoMentoringCompletedNoFeedback,
+  demoMentoringCompletedWithRating,
+  demoMentoringCombinedCompleted,
+  demoCareerConfirmed,
+  demoCareerScheduled,
+  demoCareerCompletedGathering,
+  demoCareerCompletedWithRating,
+  demoMockConfirmed,
+  demoMockCompleted,
+  demoResidencyConfirmed,
+  demoResidencyCombined,
+  demoResidencyScheduled,
+  demoResidencyCompletedGathering,
+  demoResidencyCompletedWithRating,
+} from "./demo-component-sessions";
 
 /* ══════════════════════════════════════════════════════════════════════════
    CHIP PRESETS
@@ -336,176 +359,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
   );
 }
 
-/* ── Residency View Details Dialog ── */
-
-type ResidencyDialogVariant = "confirmed" | "combined" | "scheduled" | "tentative" | "gathering" | "completed";
-
-function ResidencyDetailDialog({ open, onClose, variant }: { open: boolean; onClose: () => void; variant: ResidencyDialogVariant }) {
-  const isTentative = variant === "tentative";
-  const isScheduled = variant === "scheduled";
-  const isCompleted = variant === "completed";
-  const isGathering = variant === "gathering";
-
-  const statusChip = isCompleted ? (
-    <Chip label="Completed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  ) : isGathering ? (
-    <Chip label="Completed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  ) : isScheduled || isTentative ? (
-    <Chip label="Scheduled" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-  ) : (
-    <Chip label="Confirmed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  );
-
-  return (
-    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
-          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
-        </Box>
-
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
-          <Stack spacing={2.5}>
-            {/* Header: breadcrumb + status + title */}
-            <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.75 }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                  Residency
-                </Typography>
-                {statusChip}
-              </Stack>
-              <Typography variant="h6" fontWeight={600}>Program Overview (All)</Typography>
-            </Box>
-
-            {/* Schedule section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Date">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>20 &ndash; 22 Mar, 2026</span>
-                </Stack>
-              </InfoRow>
-              <InfoRow label="Location">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <LocationOnOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>Bangalore</span>
-                </Stack>
-                <Typography variant="caption" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" } }}>
-                  View on map <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
-                </Typography>
-              </InfoRow>
-            </SectionBox>
-
-            {/* Details section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label={isTentative ? "Planner" : "PM contact"}>
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <MailOutlineIcon sx={{ fontSize: 13 }} />
-                  <span>{isTentative ? "planner@greatlearning.in" : "pm.contact@greatlearning.in"}</span>
-                </Stack>
-              </InfoRow>
-              <InfoRow label="Batch">AIML Online March 26 A</InfoRow>
-            </SectionBox>
-
-            {/* Day-wise slots section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Day-wise slots</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              {isTentative ? (
-                <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500} sx={{ py: 1 }}>To be confirmed</Typography>
-              ) : (
-                <>
-                  {[
-                    { day: "Day 1 — Fri, Mar 20", time: "09:00 AM – 05:00 PM" },
-                    { day: "Day 2 — Sat, Mar 21", time: "09:00 AM – 01:00 PM" },
-                    { day: "Day 3 — Sun, Mar 22", time: "10:00 AM – 02:00 PM" },
-                  ].map((slot) => (
-                    <InfoRow key={slot.day} label={slot.day}>{slot.time}</InfoRow>
-                  ))}
-                </>
-              )}
-            </SectionBox>
-
-            {/* Combined session section */}
-            {variant === "combined" && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <Chip label="Combined session" size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.7rem" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Deep Learning Fundamentals</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Batch">AIML Online Feb 26 B</InfoRow>
-                <InfoRow label="Contact">
-                  <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <MailOutlineIcon sx={{ fontSize: 13 }} />
-                    <span>ravi.kumar@greatlearning.in</span>
-                  </Stack>
-                </InfoRow>
-                {[
-                  { day: "Day 1 — Fri, Mar 20", time: "09:00 AM – 05:00 PM" },
-                  { day: "Day 2 — Sat, Mar 21", time: "09:00 AM – 01:00 PM" },
-                ].map((slot) => (
-                  <InfoRow key={slot.day} label={slot.day}>{slot.time}</InfoRow>
-                ))}
-              </SectionBox>
-            )}
-
-            {/* Remuneration section */}
-            {isCompleted && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-confirmed-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-                </InfoRow>
-                <InfoRow label="Transaction ID">
-                  <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}>TXN-GL-8F3K2Q</Typography>
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {isGathering && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-pending-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-                </InfoRow>
-              </SectionBox>
-            )}
-          </Stack>
-        </Box>
-
-        {isScheduled && (
-          <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1 }}>
-            <Button variant="soft" size="small" startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 16 }} />}>I&apos;m unavailable</Button>
-            <Button variant="contained" size="small" startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 16 }} />}>Confirm</Button>
-          </Box>
-        )}
-      </Box>
-    </Drawer>
-  );
-}
-
-/* ── Online Event View Details Dialog (unified) ── */
-
-type OnlineEventDialogVariant =
-  | "mentoring-confirmed" | "mentoring-combined" | "mentoring-scheduled" | "mentoring-tentative"
-  | "mentoring-gathering" | "mentoring-noFeedback" | "mentoring-completed"
-  | "mentoring-combinedScheduled"
-  | "mentoring-combinedCompleted"
-  | "career-confirmed" | "career-scheduled" | "career-gathering" | "career-completed"
-  | "mock-confirmed" | "mock-gathering" | "mock-completed";
+/* ── ResidencyDetailDialog & OnlineEventDialogVariant — REMOVED, now uses shared SessionDetailsModal ── */
 
 /* ── Inline Poll Card ── */
 
@@ -761,7 +615,9 @@ function PollCreationForm({ onSave, onCancel, editingPoll }: {
   );
 }
 
-/* ── Online Event Detail Drawer (right-side panel) ── */
+/* ── OnlineEventDetailDialog REMOVED — now uses shared SessionDetailsModal via Redux dispatch ── */
+/* ── DELETE_START marker ── */
+type OnlineEventDialogVariant = string;
 
 function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; onClose: () => void; variant: OnlineEventDialogVariant }) {
   const category = variant.split("-")[0] as "mentoring" | "career" | "mock";
@@ -1823,11 +1679,12 @@ const RESIDENCY_COMBINED_ACCORDION = (
 );
 
 function ResidencyCards() {
-  const [detailOpen, setDetailOpen] = useState<ResidencyDialogVariant | null>(null);
+  const dispatch = useAppDispatch();
+  const openDetails = (s: import("@/lib/types").Session) => { dispatch(setSessionFocus(s)); dispatch(setOpenSessionDetails(true)); };
+  const openCompleted = (s: import("@/lib/types").Session) => { dispatch(setSessionFocus(s)); dispatch(setOpenCompletedSession(true)); };
 
   return (
     <>
-      <ResidencyDetailDialog open={detailOpen !== null} onClose={() => setDetailOpen(null)} variant={detailOpen ?? "confirmed"} />
 
       {/* ── Confirmed ── */}
       <ComponentSection
@@ -1851,7 +1708,7 @@ function ResidencyCards() {
                 <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>View Course content</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyConfirmed)}>View details</Button>}
             onCourseClick={() => {}}
           />
         </Card>
@@ -1879,7 +1736,7 @@ function ResidencyCards() {
                 <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>View Course content</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("combined")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyCombined)}>View details</Button>}
             onCourseClick={() => {}}
           />
           {RESIDENCY_COMBINED_ACCORDION}
@@ -1908,7 +1765,7 @@ function ResidencyCards() {
                 <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("scheduled")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyScheduled)}>View details</Button>}
             onCourseClick={() => {}}
           />
         </Card>
@@ -1936,32 +1793,10 @@ function ResidencyCards() {
                 <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("scheduled")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyScheduled)}>View details</Button>}
             onCourseClick={() => {}}
           />
           {RESIDENCY_COMBINED_ACCORDION}
-        </Card>
-      </ComponentSection>
-
-      {/* ── Tentative ── */}
-      <ComponentSection
-        title="Residency — Tentative"
-        description="Planned residency, not yet confirmed by ops. 'To be confirmed' chip. View details only."
-      >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>
-              <span>Residency: </span>Program Overview (All)
-            </Typography>
-            {CHIP_TO_BE_CONFIRMED}
-          </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">Fri, Apr 10 &rarr; Mon, Apr 14 &bull; 9:00 AM&ndash;5:00 PM &bull; AIML Online March 26 A &bull; Bangalore</Typography>
-          </Stack>
-          <Stack direction="row" justifyContent="flex-end">
-            <Button variant="text" size="small" onClick={() => setDetailOpen("tentative")}>View details</Button>
-          </Stack>
         </Card>
       </ComponentSection>
 
@@ -1985,7 +1820,7 @@ function ResidencyCards() {
                 {CHIP_GATHERING}
               </Stack>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoResidencyCompletedGathering)}>View details</Button>}
             onCourseClick={() => {}}
           />
         </Card>
@@ -2012,7 +1847,7 @@ function ResidencyCards() {
               </Stack>
             }
             actions={<Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>}
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoResidencyCompletedWithRating)}>View details</Button>}
             onCourseClick={() => {}}
           />
         </Card>
@@ -2024,12 +1859,13 @@ function ResidencyCards() {
 /* ── Online Session Cards (use SessionCard) ── */
 
 function OnlineSessionCards() {
-  const [detailOpen, setDetailOpen] = useState<OnlineEventDialogVariant | null>(null);
+  const dispatch = useAppDispatch();
   const [plannedDetailOpen, setPlannedDetailOpen] = useState(false);
+  const openDetails = (s: import("@/lib/types").Session) => { dispatch(setSessionFocus(s)); dispatch(setOpenSessionDetails(true)); };
+  const openCompleted = (s: import("@/lib/types").Session) => { dispatch(setSessionFocus(s)); dispatch(setOpenCompletedSession(true)); };
 
   return (
     <>
-      <OnlineEventDetailDialog open={detailOpen !== null} onClose={() => setDetailOpen(null)} variant={detailOpen ?? "mentoring-confirmed"} />
       <PlannedEventDetailDialog
         open={plannedDetailOpen}
         onClose={() => setPlannedDetailOpen(false)}
@@ -2060,7 +1896,7 @@ function OnlineSessionCards() {
                 <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-confirmed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoMentoringConfirmed)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2083,7 +1919,7 @@ function OnlineSessionCards() {
                 <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combined")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoMentoringCombinedConfirmed)}>View details</Button>}
           />
           <Accordion
             disableGutters elevation={0} defaultExpanded
@@ -2138,7 +1974,7 @@ function OnlineSessionCards() {
                 <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-scheduled")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoMentoringScheduled)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2161,7 +1997,7 @@ function OnlineSessionCards() {
                 <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combinedScheduled")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoMentoringCombinedScheduled)}>View details</Button>}
           />
           <Accordion
             disableGutters elevation={0} defaultExpanded={false}
@@ -2209,7 +2045,7 @@ function OnlineSessionCards() {
             actions={
               <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-confirmed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoCareerConfirmed)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2232,7 +2068,7 @@ function OnlineSessionCards() {
               </>
             }
             chips={["secondary"]}
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mock-confirmed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoMockConfirmed)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2271,7 +2107,7 @@ function OnlineSessionCards() {
             actions={
               <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-gathering")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCompletedGathering)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2298,7 +2134,7 @@ function OnlineSessionCards() {
                 Watch recording
               </Button>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-gathering")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCompletedGathering)}>View details</Button>}
           />
           <Typography variant="caption" color="text.disabled" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
             Recording is being processed and will be available shortly.
@@ -2326,7 +2162,7 @@ function OnlineSessionCards() {
             actions={
               <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-noFeedback")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCompletedNoFeedback)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2354,7 +2190,7 @@ function OnlineSessionCards() {
                 <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-completed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCompletedWithRating)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2383,7 +2219,7 @@ function OnlineSessionCards() {
                   <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
                 </>
               }
-              secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combinedCompleted")}>View details</Button>}
+              secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCombinedCompleted)}>View details</Button>}
             />
           </Card>
           {/* Batch B card */}
@@ -2407,7 +2243,7 @@ function OnlineSessionCards() {
                   <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
                 </>
               }
-              secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mentoring-combinedCompleted")}>View details</Button>}
+              secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCombinedCompleted)}>View details</Button>}
             />
           </Card>
         </CombinedCompletedGroup>
@@ -2436,7 +2272,7 @@ function OnlineSessionCards() {
                 <Button variant="soft" size="small" startIcon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 14 }} />}>Share Feedback</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mock-completed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMockCompleted)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2447,11 +2283,12 @@ function OnlineSessionCards() {
 /* ── Career Mentor Cards (use SessionCard) ── */
 
 function CareerMentorOnlineSessionCards() {
-  const [detailOpen, setDetailOpen] = useState<OnlineEventDialogVariant | null>(null);
+  const dispatch = useAppDispatch();
+  const openDetails = (s: import("@/lib/types").Session) => { dispatch(setSessionFocus(s)); dispatch(setOpenSessionDetails(true)); };
+  const openCompleted = (s: import("@/lib/types").Session) => { dispatch(setSessionFocus(s)); dispatch(setOpenCompletedSession(true)); };
 
   return (
     <>
-      <OnlineEventDetailDialog open={detailOpen !== null} onClose={() => setDetailOpen(null)} variant={detailOpen ?? "career-confirmed"} />
 
       {/* 1. Career 1:1 — Confirmed */}
       <ComponentSection title="Career 1:1 — Confirmed" description="1:1 career mentoring. Join session on card. Student info, LinkedIn, resume in View Details.">
@@ -2467,7 +2304,7 @@ function CareerMentorOnlineSessionCards() {
             actions={
               <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-confirmed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoCareerConfirmed)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2489,7 +2326,7 @@ function CareerMentorOnlineSessionCards() {
                 <Button variant="soft" size="small" startIcon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 14 }} />}>Share Feedback</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mock-confirmed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoMockConfirmed)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2511,7 +2348,7 @@ function CareerMentorOnlineSessionCards() {
                 <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-scheduled")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoCareerScheduled)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2535,7 +2372,7 @@ function CareerMentorOnlineSessionCards() {
             actions={
               <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-gathering")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoCareerCompletedGathering)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2559,7 +2396,7 @@ function CareerMentorOnlineSessionCards() {
             actions={
               <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("career-completed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoCareerCompletedWithRating)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
@@ -2587,7 +2424,7 @@ function CareerMentorOnlineSessionCards() {
                 <Button variant="soft" size="small" startIcon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 14 }} />}>Share Feedback</Button>
               </>
             }
-            secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("mock-completed")}>View details</Button>}
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMockCompleted)}>View details</Button>}
           />
         </Card>
       </ComponentSection>
