@@ -63,6 +63,8 @@ import {
   fmtTime,
   fmtTime12,
   toYmd,
+  getTimeZoneOffsetMinutes,
+  formatGMTOffsetFromMinutesAhead,
 } from "@/lib/helpers";
 import { DOW, DOW_LONG, demoNow } from "@/lib/constants";
 import type { NA, RequestSlot, Session } from "@/lib/types";
@@ -442,12 +444,12 @@ export default function CalendarPage() {
         </Stack>
 
         {/* Right: action buttons */}
-        <Stack direction="row" spacing={0.5} sx={{ display: { xs: "none", sm: "flex" } }}>
+        <Stack direction="row" spacing={1.5} sx={{ display: { xs: "none", sm: "flex" } }}>
           <Button
             variant="soft"
             size="small"
             startIcon={<EventBusyIcon sx={{ fontSize: 14 }} />}
-            sx={{ textTransform: "none", fontSize: "0.78rem", height: 32 }}
+            sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }}
             onClick={() => dispatch(setOpenNotAvailable(true))}
           >
             Leave
@@ -456,11 +458,11 @@ export default function CalendarPage() {
             variant="contained"
             size="small"
             startIcon={<EditCalendarIcon sx={{ fontSize: 14 }} />}
-            sx={{ textTransform: "none", fontSize: "0.78rem", height: 32 }}
+            sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }}
             onClick={() => dispatch(setOpenAvailability(true))}
-            >
-              {hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}
-            </Button>
+          >
+            {hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}
+          </Button>
           </Stack>
       </Stack>
 
@@ -1317,7 +1319,7 @@ export default function CalendarPage() {
               {/* Right: timezone */}
               <Chip
                 icon={<LanguageIcon sx={{ fontSize: 13 }} />}
-                label={effectiveTz}
+                label={`${effectiveTz} (${formatGMTOffsetFromMinutesAhead(getTimeZoneOffsetMinutes(effectiveTz, demoNow))})`}
                 size="small"
                 variant="outlined"
                 onClick={() => dispatch(setOpenTimezone(true))}

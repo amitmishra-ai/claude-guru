@@ -11,7 +11,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import { useAppSelector, useAppDispatch } from "@/store";
-import { setTimeZoneMode, setManualTimeZone } from "@/store/slices/profileSlice";
+import { setTimeZoneMode, setManualTimeZone, setTzOffsetMinutes } from "@/store/slices/profileSlice";
 import { setOpenTimezone } from "@/store/slices/uiSlice";
 import { getTimeZoneOffsetMinutes, formatGMTOffsetFromMinutesAhead } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
@@ -58,7 +58,7 @@ export function TimezoneDialog() {
   }, [effectiveTimeZone]);
 
   return (
-    <Dialog open={open} onClose={() => dispatch(setOpenTimezone(false))}>
+    <Dialog open={open} onClose={() => dispatch(setOpenTimezone(false))} maxWidth={false} PaperProps={{ sx: { width: 420, borderRadius: 3 } }}>
       <DialogTitle>Timezone</DialogTitle>
 
       <DialogContent>
@@ -138,24 +138,16 @@ export function TimezoneDialog() {
             </Box>
           ) : null}
 
-          <Box
-            sx={{
-              borderRadius: "12px",
-              border: 1,
-              borderColor: "var(--gl-status-pending-border)",
-              backgroundColor: "var(--gl-status-pending-bg)",
-              p: 1.5,
-              fontSize: "0.875rem",
-              color: "var(--gl-status-pending-text)",
-            }}
-          >
-            Prototype note: changing timezone updates the indicator. This demo does not convert session times across timezones.
-          </Box>
         </Box>
       </DialogContent>
 
       <DialogActions>
-        <Button variant="contained" onClick={() => dispatch(setOpenTimezone(false))}>
+        <Button variant="contained" onClick={() => {
+          const baseTzOffset = getTimeZoneOffsetMinutes("Asia/Kolkata", demoNow);
+          const targetTzOffset = getTimeZoneOffsetMinutes(effectiveTimeZone, demoNow);
+          dispatch(setTzOffsetMinutes(targetTzOffset - baseTzOffset));
+          dispatch(setOpenTimezone(false));
+        }}>
           Save
         </Button>
       </DialogActions>

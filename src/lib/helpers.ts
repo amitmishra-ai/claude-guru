@@ -17,6 +17,15 @@ export function fmtTime(mins: number) {
   return `${pad2(h)}:${pad2(m)}`;
 }
 
+/** Apply timezone offset to minutes-from-midnight value */
+export function applyTzOffset(mins: number, offsetMinutes: number) {
+  if (!offsetMinutes) return mins;
+  let adjusted = mins + offsetMinutes;
+  if (adjusted < 0) adjusted += 24 * 60;
+  if (adjusted >= 24 * 60) adjusted -= 24 * 60;
+  return adjusted;
+}
+
 export function fmtTime12(mins: number) {
   if (mins == null || isNaN(mins)) return "--:-- --";
   const h24 = Math.floor(mins / 60);

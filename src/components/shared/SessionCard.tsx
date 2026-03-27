@@ -7,7 +7,8 @@ import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { fmtDateNice, fmtTime12 } from "@/lib/helpers";
+import { fmtDateNice, fmtTime12, applyTzOffset } from "@/lib/helpers";
+import { useAppSelector } from "@/store";
 
 export type SessionCardStatus = {
   label: string;
@@ -103,6 +104,10 @@ export function SessionCard({
   onCourseClick,
   sx,
 }: SessionCardProps) {
+  const tzOffset = useAppSelector((s) => s.profile.tzOffsetMinutes);
+  const tzStart = applyTzOffset(start, tzOffset);
+  const tzEnd = applyTzOffset(end, tzOffset);
+
   const statusChip = status && (
     <Chip
       icon={status.icon ? <>{status.icon}</> : undefined}
@@ -195,7 +200,7 @@ export function SessionCard({
       <Stack direction="row" alignItems="center" spacing={0.5}>
         <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
         <Typography variant="caption" color="text.secondary">
-          {fmtDateNice(dateYmd)}{endDateYmd ? <> &rarr; {fmtDateNice(endDateYmd)}</> : null} &bull; {fmtTime12(start)}&ndash;{fmtTime12(end)}
+          {fmtDateNice(dateYmd)}{endDateYmd ? <> &rarr; {fmtDateNice(endDateYmd)}</> : null} &bull; {fmtTime12(tzStart)}&ndash;{fmtTime12(tzEnd)}
           {batch ? <> &bull; {batch}</> : null}
           {locationText ? <> &bull; {locationText}</> : null}
         </Typography>
