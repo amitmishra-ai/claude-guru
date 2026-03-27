@@ -85,7 +85,6 @@ import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import type { Session, SessionType } from "@/lib/types";
 import { filterSessionsByRole } from "@/lib/role-config";
 
@@ -747,38 +746,6 @@ export default function DashboardPage() {
                                   </Button>
                                 }
                               />
-                              {s.residencySchedule && s.residencySchedule.length > 0 && (
-                                <Accordion
-                                  disableGutters
-                                  elevation={0}
-                                  defaultExpanded={false}
-                                  sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
-                                >
-                                  <AccordionSummary
-                                    expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
-                                    sx={{ px: 1.5, py: 0, minHeight: "unset", bgcolor: "hsl(var(--md-surface-container) / 0.5)", "& .MuiAccordionSummary-content": { my: 0.75, gap: 0.75, alignItems: "center" } }}
-                                  >
-                                    <AccessTimeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
-                                    <Typography variant="caption" fontWeight={600} color="text.secondary">
-                                      {s.residencySchedule.length}-day schedule
-                                    </Typography>
-                                  </AccordionSummary>
-                                  <AccordionDetails sx={{ px: 1.5, py: 1 }}>
-                                    <Stack spacing={1}>
-                                      {s.residencySchedule.map((day, idx) => (
-                                        <Stack key={idx} direction="row" alignItems="center" spacing={3}>
-                                          <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ minWidth: 70 }}>
-                                            {fmtDateNice(day.dateYmd)}
-                                          </Typography>
-                                          <Typography variant="body2">
-                                            {fmtTime12(day.start)} – {fmtTime12(day.end)}
-                                          </Typography>
-                                        </Stack>
-                                      ))}
-                                    </Stack>
-                                  </AccordionDetails>
-                                </Accordion>
-                              )}
                               {s.combinedBatches && (
                                 <Accordion
                                   disableGutters
@@ -810,26 +777,6 @@ export default function DashboardPage() {
                                           </Typography>
                                           {cb.group && cb.audienceType !== "Individual" && (
                                             <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
-                                          )}
-                                        </Stack>
-                                        {/* Audience-specific details */}
-                                        <Stack direction="row" spacing={1} sx={{ ml: 2, mt: 0.25 }}>
-                                          {cb.audienceType === "Group" && (
-                                            <>
-                                              {cb.learnerCount && <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 18, fontSize: "0.6rem" }} />}
-                                              {cb.proficiency && <Chip label={cb.proficiency} size="small" variant="outlined" sx={{ height: 18, fontSize: "0.6rem" }} />}
-                                            </>
-                                          )}
-                                          {cb.audienceType === "Batch" && (
-                                            <>
-                                              {cb.learnerCount && <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 18, fontSize: "0.6rem" }} />}
-                                              {cb.progress && <Chip label={cb.progress} size="small" variant="outlined" sx={{ height: 18, fontSize: "0.6rem" }} />}
-                                            </>
-                                          )}
-                                          {cb.audienceType === "Individual" && (
-                                            <>
-                                              {cb.learnerEmail && <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{cb.learnerEmail}</Typography>}
-                                            </>
                                           )}
                                         </Stack>
                                       </Box>

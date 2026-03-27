@@ -663,6 +663,30 @@ export function SessionDetailsModal() {
                         );
                       })()}
                     </Stack>
+
+                    {/* Residency day-by-day schedule */}
+                    {session.residencySchedule && session.residencySchedule.length > 0 && (
+                      <>
+                        <Divider />
+                        <Box>
+                          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: "block" }}>
+                            {session.residencySchedule.length}-day schedule
+                          </Typography>
+                          <Stack spacing={0.75}>
+                            {session.residencySchedule.map((day, idx) => (
+                              <Stack key={idx} direction="row" alignItems="center" spacing={2}>
+                                <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ minWidth: 80 }}>
+                                  {fmtDateNice(day.dateYmd)}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={500}>
+                                  {fmtTime12(day.start)} – {fmtTime12(day.end)}
+                                </Typography>
+                              </Stack>
+                            ))}
+                          </Stack>
+                        </Box>
+                      </>
+                    )}
                   </Stack>
                 </Box>
               </Box>
@@ -740,35 +764,6 @@ export function SessionDetailsModal() {
                             </Stack>
                           </AccordionSummary>
                           <AccordionDetails sx={{ px: 1.5, pt: 0, pb: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
-                            {/* Program Manager */}
-                            {cb.programManager && (
-                              <Box sx={{ mb: cb.members && cb.members.length > 0 ? 1.5 : 0 }}>
-                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
-                                  Program Manager
-                                </Typography>
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                  <Avatar sx={{ width: 28, height: 28, fontSize: "0.7rem", bgcolor: "primary.main" }}>
-                                    {cb.programManager.name.charAt(0)}
-                                  </Avatar>
-                                  <Box>
-                                    <Typography variant="caption" fontWeight={600}>{cb.programManager.name}</Typography>
-                                    <Stack direction="row" spacing={1.5} sx={{ mt: 0.15 }}>
-                                      <Stack direction="row" alignItems="center" spacing={0.25}>
-                                        <MailOutlineIcon sx={{ fontSize: 11, color: "text.secondary" }} />
-                                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>{cb.programManager.email}</Typography>
-                                      </Stack>
-                                      {cb.programManager.phone && (
-                                        <Stack direction="row" alignItems="center" spacing={0.25}>
-                                          <PhoneOutlinedIcon sx={{ fontSize: 11, color: "text.secondary" }} />
-                                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>{cb.programManager.phone}</Typography>
-                                        </Stack>
-                                      )}
-                                    </Stack>
-                                  </Box>
-                                </Stack>
-                              </Box>
-                            )}
-
                             {/* Group Members (only for Group audienceType) */}
                             {(cb.audienceType === "Group" || cb.audienceType === "Batch") && cb.members && cb.members.length > 0 && (
                               <Box>
@@ -803,18 +798,10 @@ export function SessionDetailsModal() {
                               </Box>
                             )}
 
-                            {/* Batch info chips */}
-                            {cb.audienceType !== "Individual" && (cb.learnerCount || cb.proficiency || cb.progress) && (
-                              <Stack direction="row" spacing={0.75} sx={{ mt: cb.programManager || (cb.members && cb.members.length > 0) ? 1 : 0 }}>
-                                {cb.learnerCount && <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 20, fontSize: "0.6rem" }} />}
-                                {cb.proficiency && <Chip label={cb.proficiency} size="small" variant="outlined" sx={{ height: 20, fontSize: "0.6rem" }} />}
-                                {cb.progress && <Chip label={cb.progress} size="small" variant="outlined" sx={{ height: 20, fontSize: "0.6rem" }} />}
-                              </Stack>
-                            )}
 
                             {/* Individual learner details */}
                             {cb.audienceType === "Individual" && cb.learnerName && (
-                              <Box sx={{ mt: cb.programManager ? 1.5 : 0 }}>
+                              <Box>
                                 <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
                                   Learner
                                 </Typography>

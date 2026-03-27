@@ -1794,35 +1794,6 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
 
 /* ── Residency Cards (custom layout, NOT SessionCard) ── */
 
-const RESIDENCY_SCHEDULE_ACCORDION = (
-  <Accordion
-    disableGutters elevation={0} defaultExpanded={false}
-    sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
-  >
-    <AccordionSummary
-      expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
-      sx={{ px: 1.5, py: 0, minHeight: "unset", bgcolor: "hsl(var(--md-surface-container) / 0.5)", "& .MuiAccordionSummary-content": { my: 0.75, gap: 0.75, alignItems: "center" } }}
-    >
-      <AccessTimeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
-      <Typography variant="caption" fontWeight={600} color="text.secondary">3-day schedule</Typography>
-    </AccordionSummary>
-    <AccordionDetails sx={{ px: 1.5, py: 1 }}>
-      <Stack spacing={1}>
-        {[
-          { dateYmd: "2026-03-20", start: minutes(9), end: minutes(17) },
-          { dateYmd: "2026-03-21", start: minutes(9), end: minutes(17) },
-          { dateYmd: "2026-03-22", start: minutes(9), end: minutes(17) },
-        ].map((day, idx) => (
-          <Stack key={idx} direction="row" alignItems="center" spacing={3}>
-            <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ minWidth: 70 }}>{fmtDateNice(day.dateYmd)}</Typography>
-            <Typography variant="body2">{fmtTime12(day.start)} – {fmtTime12(day.end)}</Typography>
-          </Stack>
-        ))}
-      </Stack>
-    </AccordionDetails>
-  </Accordion>
-);
-
 const RESIDENCY_COMBINED_ACCORDION = (
   <Accordion
     disableGutters elevation={0} defaultExpanded={false}
@@ -1883,7 +1854,6 @@ function ResidencyCards() {
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>}
             onCourseClick={() => {}}
           />
-          {RESIDENCY_SCHEDULE_ACCORDION}
         </Card>
       </ComponentSection>
 
@@ -1912,7 +1882,6 @@ function ResidencyCards() {
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("combined")}>View details</Button>}
             onCourseClick={() => {}}
           />
-          {RESIDENCY_SCHEDULE_ACCORDION}
           {RESIDENCY_COMBINED_ACCORDION}
         </Card>
       </ComponentSection>
@@ -1942,7 +1911,6 @@ function ResidencyCards() {
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("scheduled")}>View details</Button>}
             onCourseClick={() => {}}
           />
-          {RESIDENCY_SCHEDULE_ACCORDION}
         </Card>
       </ComponentSection>
 
@@ -1971,7 +1939,6 @@ function ResidencyCards() {
             secondaryAction={<Button variant="text" size="small" onClick={() => setDetailOpen("scheduled")}>View details</Button>}
             onCourseClick={() => {}}
           />
-          {RESIDENCY_SCHEDULE_ACCORDION}
           {RESIDENCY_COMBINED_ACCORDION}
         </Card>
       </ComponentSection>
