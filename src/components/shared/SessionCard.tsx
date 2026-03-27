@@ -220,8 +220,8 @@ export function SessionCard({
   const actionsRow = (actions || secondaryAction) && (
     <Stack
       direction={{ xs: "column", sm: "row" }}
-      justifyContent="space-between"
-      alignItems={{ xs: "flex-start", sm: "center" }}
+      justifyContent={actions ? "space-between" : "flex-end"}
+      alignItems={{ xs: actions ? "flex-start" : "flex-end", sm: "center" }}
       spacing={1}
     >
       {actions && (

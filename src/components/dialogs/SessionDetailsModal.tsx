@@ -800,8 +800,8 @@ export function SessionDetailsModal() {
                                 </Stack>
                               </Box>
                             )}
-                            {/* Group Members (only for Group, not whole batch) */}
-                            {cb.audienceType === "Group" && cb.members && cb.members.length > 0 && (
+                            {/* Members list (Batch or Group) */}
+                            {(cb.audienceType === "Batch" || cb.audienceType === "Group") && cb.members && cb.members.length > 0 && (
                               <Box>
                                 <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
                                   Members ({cb.members.length})

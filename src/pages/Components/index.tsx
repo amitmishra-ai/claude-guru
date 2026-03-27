@@ -8,11 +8,9 @@ import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import TextField from "@mui/material/TextField";
-import Collapse from "@mui/material/Collapse";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
@@ -25,7 +23,6 @@ import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutline
 import PollOutlinedIcon from "@mui/icons-material/PollOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
@@ -41,7 +38,6 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
-import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import { minutes, fmtDateNice, fmtTime12 } from "@/lib/helpers";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -265,27 +261,6 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd,
   );
 }
 
-/* ── Shared building blocks for View Details dialogs ── */
-
-function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 1.25 }}>
-      <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 120 }}>{label}</Typography>
-      <Box sx={{ textAlign: "right" }}>
-        <Typography variant="body2" fontWeight={500} component="div">{children}</Typography>
-      </Box>
-    </Stack>
-  );
-}
-
-function SectionBox({ children }: { children: React.ReactNode }) {
-  return (
-    <Box sx={{ borderRadius: "16px", border: 1, borderColor: "divider", backgroundColor: "hsl(var(--md-surface))", p: 2 }}>
-      {children}
-    </Box>
-  );
-}
-
 /* ══════════════════════════════════════════════════════════════════════════
    VIEW DETAILS DIALOGS
    ══════════════════════════════════════════════════════════════════════════ */
@@ -304,62 +279,88 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
   endDateYmd: string;
 }) {
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw", boxShadow: "-4px 0 24px rgba(0,0,0,0.06)", borderLeft: "1px solid", borderColor: "divider" } }}>
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
-          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
+        {/* ── Sticky header ── */}
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
+            <Chip label="To be confirmed" size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }} />
+          </Stack>
+          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 16 }} /></IconButton>
         </Box>
 
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
-          <Stack spacing={2.5}>
-            {/* Header: breadcrumb + status + title */}
-            <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.75 }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                  {sessionType}
-                </Typography>
-                <Chip label="To be confirmed" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
+        {/* ── Scrollable content ── */}
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
+          {/* ═══ HERO ═══ */}
+          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
+              {sessionType}
+            </Typography>
+            <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3 }}>{title}</Typography>
+
+            {/* Schedule at-a-glance card */}
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+              <Stack spacing={1}>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "hsl(var(--md-on-primary-container))" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.875rem", lineHeight: 1.2 }}>
+                      {fmtDateNice(startDateYmd)} &ndash; {fmtDateNice(endDateYmd)}
+                    </Typography>
+                    <Typography variant="caption" color="var(--gl-status-pending-text)" fontWeight={500}>Time to be confirmed</Typography>
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <MailOutlineIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>{contactEmail}</Typography>
+                    <Typography variant="caption" color="text.secondary">Program contact</Typography>
+                  </Box>
+                </Stack>
               </Stack>
-              <Typography variant="h6" fontWeight={600}>{title}</Typography>
             </Box>
+          </Box>
 
-            {/* Schedule section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Date range">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>{fmtDateNice(startDateYmd)} &rarr; {fmtDateNice(endDateYmd)}</span>
-                </Stack>
-              </InfoRow>
-              <InfoRow label="Time">
-                <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500}>To be confirmed</Typography>
-              </InfoRow>
-            </SectionBox>
+          <Divider />
 
-            {/* Details section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Batch">{batch}</InfoRow>
-              <InfoRow label="Program">{program}</InfoRow>
-              <InfoRow label="Contact">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <MailOutlineIcon sx={{ fontSize: 13 }} />
-                  <span>{contactEmail}</span>
+          {/* ═══ DETAIL SECTIONS ═══ */}
+          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
+              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Batch</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{batch}</Typography>
                 </Stack>
-              </InfoRow>
-            </SectionBox>
+                <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Program</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{program}</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Contact</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }} component="div">
+                    <Stack direction="row" alignItems="center" spacing={0.5}><MailOutlineIcon sx={{ fontSize: 13 }} /><span>{contactEmail}</span></Stack>
+                  </Typography>
+                </Stack>
+              </Box>
+            </Box>
           </Stack>
+        </Box>
+
+        {/* ── Sticky footer ── */}
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
+          <Button variant="text" color="inherit" size="small" onClick={onClose}>Close</Button>
         </Box>
       </Box>
     </Drawer>
   );
 }
 
-/* ── ResidencyDetailDialog & OnlineEventDialogVariant — REMOVED, now uses shared SessionDetailsModal ── */
 
 /* ── Inline Poll Card ── */
 
@@ -615,456 +616,6 @@ function PollCreationForm({ onSave, onCancel, editingPoll }: {
   );
 }
 
-/* ── OnlineEventDetailDialog REMOVED — now uses shared SessionDetailsModal via Redux dispatch ── */
-/* ── DELETE_START marker ── */
-type OnlineEventDialogVariant = string;
-
-function OnlineEventDetailDialog({ open, onClose, variant }: { open: boolean; onClose: () => void; variant: OnlineEventDialogVariant }) {
-  const category = variant.split("-")[0] as "mentoring" | "career" | "mock";
-  const subType = variant.split("-").slice(1).join("-");
-
-  const isMentoring = category === "mentoring";
-  const isCareer = category === "career";
-  const isMock = category === "mock";
-
-  const sessionTypeLabel = isMentoring ? "Online session" : isCareer ? "Career mentoring session" : "Mock Interview";
-  const batchLabel = isMentoring ? "PGPDS.O.MAR26.A" : "PGP-AIML-BA-UTA-Nov25-C";
-  const title = isMentoring
-    ? "M5 W2 | Hypothesis Testing"
-    : isCareer
-      ? "Resume Review & Interview Prep"
-      : "Technical Round — Data Structures";
-
-  const isCombinedVariant = subType === "combined" || subType === "combinedScheduled" || subType === "combinedCompleted";
-  const isCompletedState = subType === "completed" || subType === "gathering" || subType === "noFeedback" || subType === "combinedCompleted";
-  const isScheduledState = subType === "scheduled" || subType === "combinedScheduled";
-  const isConfirmedState = subType === "confirmed" || subType === "combined";
-
-  // Show polls section for mentoring confirmed (the state where guru would create polls)
-  const showPolls = isMentoring && isConfirmedState;
-
-  // ── Local poll state for the Components showcase ──
-  const [polls, setPolls] = useState<Poll[]>([
-    {
-      id: "poll-demo-1",
-      sessionId: "demo-session",
-      question: "Which topic should we deep-dive into next week?",
-      options: ["Neural Networks", "Decision Trees", "Ensemble Methods"],
-      status: "queued",
-    },
-  ]);
-  const [showPollForm, setShowPollForm] = useState(false);
-  const [editingPollId, setEditingPollId] = useState<string | null>(null);
-
-  const handleSavePoll = (data: { question: string; options: string[]; status: "draft" | "queued" }) => {
-    if (editingPollId) {
-      setPolls((prev) => prev.map((p) => p.id === editingPollId ? { ...p, ...data } : p));
-    } else {
-      setPolls((prev) => [...prev, { id: `poll-${Date.now()}`, sessionId: "demo-session", ...data }]);
-    }
-    setShowPollForm(false);
-    setEditingPollId(null);
-  };
-
-  const handleDeletePoll = (id: string) => {
-    setPolls((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  const handleToggleStatus = (id: string) => {
-    setPolls((prev) => prev.map((p) => p.id === id ? { ...p, status: p.status === "draft" ? "queued" as const : "draft" as const } : p));
-  };
-
-  const handleEditPoll = (id: string) => {
-    setEditingPollId(id);
-    setShowPollForm(true);
-  };
-
-  const statusChip = isCompletedState ? (
-    <Chip label="Completed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  ) : isScheduledState || subType === "tentative" ? (
-    <Chip label="Scheduled" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-  ) : (
-    <Chip label="Confirmed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  );
-
-  const drawerWidth = { xs: "100vw", sm: 520 };
-
-  return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      sx={{
-        "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          maxWidth: "100vw",
-          boxShadow: "-8px 0 32px rgba(0,0,0,0.08)",
-        },
-      }}
-    >
-      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-        {/* ── Sticky header ── */}
-        <Box
-          sx={{
-            position: "sticky",
-            top: 0,
-            zIndex: 10,
-            borderBottom: 1,
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            px: 3,
-            py: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexShrink: 0,
-          }}
-        >
-          <Typography variant="subtitle1" fontWeight={700}>Event details</Typography>
-          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}>
-            <CloseOutlinedIcon sx={{ fontSize: 18 }} />
-          </IconButton>
-        </Box>
-
-        {/* ── Scrollable content ── */}
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2.5 }}>
-          <Stack spacing={2.5}>
-            {/* Header: breadcrumb + status + title */}
-            <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.75 }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                  {batchLabel} · {sessionTypeLabel}
-                </Typography>
-                {statusChip}
-              </Stack>
-              <Typography variant="h6" fontWeight={600}>{title}</Typography>
-              {isMentoring && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  M5 W2 | Hypothesis Testing &amp; Confidence Intervals
-                </Typography>
-              )}
-            </Box>
-
-            {/* Schedule section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Date">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>18 Mar, 2026</span>
-                </Stack>
-              </InfoRow>
-              <InfoRow label="Time">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <AccessTimeOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>06:00 PM &ndash; 08:00 PM</span>
-                </Stack>
-              </InfoRow>
-              <InfoRow label="Duration">2 hours</InfoRow>
-            </SectionBox>
-
-            {/* Details section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Contact">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <MailOutlineIcon sx={{ fontSize: 13 }} />
-                  <span>gurus_support@greatlearning.in</span>
-                </Stack>
-              </InfoRow>
-              {isMentoring && (
-                <>
-                  <InfoRow label="Group">
-                    <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                      <GroupOutlinedIcon sx={{ fontSize: 13 }} />
-                      <span>Group 07 (High work, mixed prog)</span>
-                    </Stack>
-                  </InfoRow>
-                  <InfoRow label="Course LMS">
-                    <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" }, fontWeight: 500 }}>
-                      Open in LMS <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
-                    </Typography>
-                  </InfoRow>
-                </>
-              )}
-              {!isMentoring && (
-                <InfoRow label="Batch">{isMentoring ? "PGPDS.O.MAR26.A" : "PGP-AIML-BA-UTA-Nov25-C"}</InfoRow>
-              )}
-            </SectionBox>
-
-            {/* Combined batches section (mentoring combined) */}
-            {isMentoring && isCombinedVariant && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Combined session</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Participants">48 students (combined)</InfoRow>
-                <InfoRow label="Batch A">PGPDS.O.MAR26.A &mdash; Group 07</InfoRow>
-                <InfoRow label="Batch B">PGPDS.O.MAR26.B &mdash; Group 03</InfoRow>
-              </SectionBox>
-            )}
-
-            {/* Session materials section (mentoring confirmed) */}
-            {isMentoring && isConfirmedState && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Session materials</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <Stack spacing={0.75}>
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75, px: 1, borderRadius: "8px", "&:hover": { bgcolor: "action.hover" }, cursor: "pointer" }}>
-                    <Box sx={{ color: "text.secondary", display: "flex" }}><DescriptionOutlinedIcon sx={{ fontSize: 14 }} /></Box>
-                    <Typography variant="body2">Session slides — Hypothesis Testing</Typography>
-                  </Stack>
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75, px: 1, borderRadius: "8px", "&:hover": { bgcolor: "action.hover" }, cursor: "pointer" }}>
-                    <Box sx={{ color: "text.secondary", display: "flex" }}><LinkOutlinedIcon sx={{ fontSize: 14 }} /></Box>
-                    <Typography variant="body2">Pre-session reading</Typography>
-                  </Stack>
-                </Stack>
-              </SectionBox>
-            )}
-
-            {/* ═══ POLLS SECTION (mentoring confirmed) ═══ */}
-            {showPolls && (
-              <Box>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                  <Stack direction="row" alignItems="center" spacing={0.75}>
-                    <PollOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
-                    <Typography variant="subtitle2" fontWeight={700}>Polls</Typography>
-                    {polls.length > 0 && (
-                      <Chip
-                        label={polls.length}
-                        size="small"
-                        sx={{
-                          height: 20,
-                          minWidth: 20,
-                          fontSize: "0.65rem",
-                          fontWeight: 700,
-                          bgcolor: "primary.main",
-                          color: "primary.contrastText",
-                          "& .MuiChip-label": { px: 0.5 },
-                        }}
-                      />
-                    )}
-                  </Stack>
-                  {!showPollForm && (
-                    <Button
-                      size="small"
-                      variant="soft"
-                      startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
-                      onClick={() => { setEditingPollId(null); setShowPollForm(true); }}
-                      sx={{ fontSize: "0.75rem" }}
-                    >
-                      Add poll
-                    </Button>
-                  )}
-                </Stack>
-
-                <Stack spacing={1.5}>
-                  {/* Existing polls */}
-                  {polls.map((poll) => (
-                    <PollCard
-                      key={poll.id}
-                      poll={poll}
-                      onEdit={() => handleEditPoll(poll.id)}
-                      onDelete={() => handleDeletePoll(poll.id)}
-                      onToggleStatus={() => handleToggleStatus(poll.id)}
-                    />
-                  ))}
-
-                  {/* Inline creation / edit form */}
-                  <Collapse in={showPollForm} unmountOnExit>
-                    <PollCreationForm
-                      editingPoll={editingPollId ? polls.find((p) => p.id === editingPollId) : null}
-                      onSave={handleSavePoll}
-                      onCancel={() => { setShowPollForm(false); setEditingPollId(null); }}
-                    />
-                  </Collapse>
-
-                  {/* Empty state */}
-                  {polls.length === 0 && !showPollForm && (
-                    <Box
-                      sx={{
-                        py: 3,
-                        px: 2,
-                        borderRadius: 2,
-                        border: "1px dashed",
-                        borderColor: "divider",
-                        textAlign: "center",
-                      }}
-                    >
-                      <PollOutlinedIcon sx={{ fontSize: 28, color: "text.disabled", mb: 0.5 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        No polls created yet
-                      </Typography>
-                      <Button
-                        size="small"
-                        variant="soft"
-                        startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
-                        onClick={() => setShowPollForm(true)}
-                      >
-                        Create your first poll
-                      </Button>
-                    </Box>
-                  )}
-                </Stack>
-              </Box>
-            )}
-
-            {/* Learner context section (career 1:1) */}
-            {isCareer && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Learner context</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Name">
-                  <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <AccountCircleOutlinedIcon sx={{ fontSize: 13 }} />
-                    <span>Priya Sharma</span>
-                  </Stack>
-                </InfoRow>
-                <InfoRow label="Background">Data Analyst at TCS &bull; 3 years exp</InfoRow>
-                <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap" useFlexGap>
-                  <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}>Resume</Button>
-                  <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}>LinkedIn</Button>
-                </Stack>
-                <Box sx={{ mt: 1.5, p: 1.5, borderRadius: "12px", bgcolor: "hsl(var(--md-surface-container) / 0.3)", fontSize: "0.8125rem", color: "hsl(var(--md-on-surface-variant))" }}>
-                  Review updated resume, discuss interview strategies for product companies
-                </Box>
-              </SectionBox>
-            )}
-
-            {/* Mock interview student info */}
-            {isMock && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Learner context</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Name">
-                  <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <AccountCircleOutlinedIcon sx={{ fontSize: 13 }} />
-                    <span>Priya Sharma</span>
-                  </Stack>
-                </InfoRow>
-                <InfoRow label="Background">Data Analyst at TCS &bull; 3 years exp</InfoRow>
-              </SectionBox>
-            )}
-
-            {/* Remuneration section */}
-            {subType === "gathering" && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-pending-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {(subType === "noFeedback" || subType === "completed" || subType === "combinedCompleted") && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-confirmed-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-                </InfoRow>
-                <InfoRow label="Transaction ID">
-                  <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}>TXN-GL-7A2P9R</Typography>
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {/* Recording link */}
-            {isCompletedState && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Recording</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Session recording">
-                  <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" }, fontWeight: 500 }}>
-                    Watch recording <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
-                  </Typography>
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {/* Feedback section (completed states) */}
-            {isCompletedState && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <StarOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-star-color)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Feedback</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                {(subType === "completed" || subType === "combinedCompleted") ? (
-                  <>
-                    <InfoRow label="Avg. rating">
-                      <Stack direction="row" alignItems="center" spacing={0.5}>
-                        <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
-                        <Typography variant="body2" fontWeight={700}>4.5</Typography>
-                        <Typography variant="caption" color="text.secondary">(24 responses)</Typography>
-                      </Stack>
-                    </InfoRow>
-                    <Box sx={{ mt: 1 }}>
-                      <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>
-                        Detailed Feedback
-                      </Button>
-                    </Box>
-                  </>
-                ) : subType === "gathering" ? (
-                  <InfoRow label="Status">
-                    <Chip label="Gathering feedback" size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem" }} />
-                  </InfoRow>
-                ) : (
-                  <InfoRow label="Status">
-                    <Chip label="No feedback collected" size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", opacity: 0.7 }} />
-                  </InfoRow>
-                )}
-              </SectionBox>
-            )}
-          </Stack>
-        </Box>
-
-        {/* ── Sticky footer ── */}
-        <Box
-          sx={{
-            position: "sticky",
-            bottom: 0,
-            zIndex: 10,
-            borderTop: 1,
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            px: 3,
-            py: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexShrink: 0,
-          }}
-        >
-          <Button variant="text" color="inherit" onClick={onClose}>Close</Button>
-          <Stack direction="row" spacing={1}>
-            {isMentoring && isConfirmedState && (
-              <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
-            )}
-            {isCareer && isConfirmedState && (
-              <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
-            )}
-            {isScheduledState && (
-              <>
-                <Button variant="soft" size="small" startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 16 }} />}>I&apos;m unavailable</Button>
-                <Button variant="contained" size="small" startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 16 }} />}>Confirm</Button>
-              </>
-            )}
-          </Stack>
-        </Box>
-      </Box>
-    </Drawer>
-  );
-}
-
 /* ── Evaluation View Details Dialog ── */
 
 type EvalDialogVariant = "confirmed" | "tentative" | "gathering" | "completed";
@@ -1075,147 +626,176 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
   const isCompleted = variant === "completed";
   const isGathering = variant === "gathering";
 
-  const statusChip = isConfirmed ? (
-    <Chip label="Confirmed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  ) : isTentative ? (
-    <Chip label="To be confirmed" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-  ) : (
-    <Chip label="Completed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  );
+  const statusLabel = isConfirmed ? "Confirmed" : isTentative ? "To be confirmed" : "Completed";
+  const statusSx = isTentative
+    ? { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }
+    : { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" };
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw", boxShadow: "-4px 0 24px rgba(0,0,0,0.06)", borderLeft: "1px solid", borderColor: "divider" } }}>
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
-          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
+        {/* ── Sticky header ── */}
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
+            <Chip label={statusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...statusSx }} />
+          </Stack>
+          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 16 }} /></IconButton>
         </Box>
 
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
-          <Stack spacing={2.5}>
-            {/* Header: breadcrumb + status + title */}
-            <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                  PGP-AIML · Evaluation
-                </Typography>
-                {statusChip}
+        {/* ── Scrollable content ── */}
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
+          {/* ═══ HERO ═══ */}
+          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
+              PGP-AIML · Evaluation
+            </Typography>
+            <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3 }}>
+              Linear Regression Assignment
+            </Typography>
+
+            {/* Schedule at-a-glance card */}
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+              <Stack spacing={1}>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "hsl(var(--md-on-primary-container))" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.875rem", lineHeight: 1.2 }}>
+                      {isTentative ? "1 Apr, 2026" : "15 Mar, 2026"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500}>Assessment due</Typography>
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>
+                      {isTentative ? "10 Apr, 2026" : "22 Mar, 2026"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">Grading due</Typography>
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <GroupOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>PGP-AIML-BA-UTA-Nov25-C</Typography>
+                    <Typography variant="caption" color="text.secondary">Batch</Typography>
+                  </Box>
+                </Stack>
               </Stack>
-              <Typography variant="h6" fontWeight={600}>Linear Regression Assignment</Typography>
+            </Box>
+          </Box>
+
+          <Divider />
+
+          {/* ═══ DETAIL SECTIONS ═══ */}
+          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+            {/* ── Details ── */}
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
+              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Assignment</Typography>
+                  <Box sx={{ textAlign: "right" }}>
+                    {isConfirmed || isCompleted || isGathering ? (
+                      <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 500, fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}>
+                        Open in SpeedGrader <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
+                      </Typography>
+                    ) : (
+                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>Linear Regression Assignment</Typography>
+                    )}
+                  </Box>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Course template</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>Applied Statistics</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Contact</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }} component="div">
+                    <Stack direction="row" alignItems="center" spacing={0.5}><MailOutlineIcon sx={{ fontSize: 13 }} /><span>gurus_support@greatlearning.in</span></Stack>
+                  </Typography>
+                </Stack>
+              </Box>
             </Box>
 
-            {/* Schedule section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Assessment due">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>{isTentative ? "1 Apr, 2026" : "15 Mar, 2026"}</span>
-                </Stack>
-              </InfoRow>
-              <InfoRow label="Grading due">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>{isTentative ? "10 Apr, 2026" : "22 Mar, 2026"}</span>
-                </Stack>
-              </InfoRow>
-            </SectionBox>
-
-            {/* Details section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Assignment">
-                {isConfirmed || isCompleted || isGathering ? (
-                  <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" }, fontWeight: 500 }}>
-                    Linear Regression Assignment <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
-                  </Typography>
-                ) : (
-                  <Typography variant="body2" fontWeight={500}>Linear Regression Assignment</Typography>
-                )}
-              </InfoRow>
-              <InfoRow label="Course template">Applied Statistics</InfoRow>
-              <InfoRow label="Batch">PGP-AIML-BA-UTA-Nov25-C</InfoRow>
-              <InfoRow label="Contact">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <MailOutlineIcon sx={{ fontSize: 13 }} />
-                  <span>gurus_support@greatlearning.in</span>
-                </Stack>
-              </InfoRow>
-            </SectionBox>
-
-            {/* Student progress (Confirmed only) */}
-            {isConfirmed && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Student progress</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Submissions">42 / 63</InfoRow>
-                <InfoRow label="Graded">18 / 42</InfoRow>
-                <Typography variant="caption" color="primary.main" sx={{ cursor: "pointer", mt: 0.5, display: "inline-block", "&:hover": { textDecoration: "underline" } }}>
-                  Reload
-                </Typography>
-              </SectionBox>
+            {/* ── Student Progress (confirmed / tentative) ── */}
+            {(isConfirmed || isTentative) && (
+              <Box sx={{ mb: 2.5 }}>
+                <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Student Progress</Typography>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  {isTentative ? (
+                    <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500} sx={{ py: 0.5 }}>To be confirmed</Typography>
+                  ) : (
+                    <>
+                      <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Submissions</Typography>
+                        <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>42 / 63</Typography>
+                      </Stack>
+                      <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Graded</Typography>
+                        <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>18 / 42</Typography>
+                      </Stack>
+                      <Typography variant="caption" color="primary.main" sx={{ cursor: "pointer", mt: 0.5, display: "inline-block", "&:hover": { textDecoration: "underline" } }}>Reload</Typography>
+                    </>
+                  )}
+                </Box>
+              </Box>
             )}
 
-            {/* Tentative: "To be confirmed" in place of progress */}
-            {isTentative && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Student progress</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500} sx={{ py: 1 }}>To be confirmed</Typography>
-              </SectionBox>
+            {/* ── Feedback (gathering / completed) ── */}
+            {(isGathering || isCompleted) && (
+              <Box sx={{ mb: 2.5 }}>
+                <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Feedback</Typography>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  {isGathering ? (
+                    <Typography variant="body2" fontWeight={500} sx={{ py: 0.5 }}>Gathering feedback</Typography>
+                  ) : (
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.875 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Rating</Typography>
+                      <StarRatingIcons rating={4} />
+                    </Stack>
+                  )}
+                </Box>
+              </Box>
             )}
 
-            {/* Feedback (completed variants) */}
-            {isGathering && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Feedback</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <Typography variant="body2" sx={{ py: 1 }}>Gathering feedback!</Typography>
-              </SectionBox>
-            )}
-
-            {isCompleted && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Feedback</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Rating">
-                  <StarRatingIcons rating={4} />
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {/* Remuneration section */}
-            {isGathering && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-pending-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
+            {/* ── Remuneration (gathering / completed) ── */}
+            {(isGathering || isCompleted) && (
+              <Box sx={{ mb: 2.5 }}>
+                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                  <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+                  <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>Remuneration</Typography>
                 </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {isCompleted && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-confirmed-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-                </InfoRow>
-                <InfoRow label="Transaction ID">
-                  <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}>TXN-GL-5E1M3N</Typography>
-                </InfoRow>
-              </SectionBox>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
+                    {isGathering
+                      ? <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
+                      : <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
+                    }
+                  </Stack>
+                  {isCompleted && (
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Transaction ID</Typography>
+                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem", fontFamily: "monospace" }}>TXN-GL-5E1M3N</Typography>
+                    </Stack>
+                  )}
+                </Box>
+              </Box>
             )}
           </Stack>
+        </Box>
+
+        {/* ── Sticky footer ── */}
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
+          <Button variant="text" color="inherit" size="small" onClick={onClose}>Close</Button>
         </Box>
       </Box>
     </Drawer>
@@ -1232,161 +812,176 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
   const isCompleted = variant === "completed";
   const isGathering = variant === "gathering";
 
-  const statusChip = isConfirmed ? (
-    <Chip label="Confirmed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  ) : isTentative ? (
-    <Chip label="To be confirmed" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-  ) : (
-    <Chip label="Completed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  );
+  const statusLabel = isConfirmed ? "Confirmed" : isTentative ? "To be confirmed" : "Completed";
+  const statusSx = isTentative
+    ? { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }
+    : { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" };
+  const dqTitle = isTentative ? "Ethics in Machine Learning" : "Impact of AI on Healthcare";
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw", boxShadow: "-4px 0 24px rgba(0,0,0,0.06)", borderLeft: "1px solid", borderColor: "divider" } }}>
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
-          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
+        {/* ── Sticky header ── */}
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
+            <Chip label={statusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...statusSx }} />
+          </Stack>
+          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 16 }} /></IconButton>
         </Box>
 
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
-          <Stack spacing={2.5}>
-            {/* Header: breadcrumb + status + title */}
-            <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                  PGP-AIML · Moderation
-                </Typography>
-                {statusChip}
+        {/* ── Scrollable content ── */}
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
+          {/* ═══ HERO ═══ */}
+          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
+              PGP-AIML · Moderation
+            </Typography>
+            <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3 }}>{dqTitle}</Typography>
+
+            {/* Schedule at-a-glance card */}
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+              <Stack spacing={1}>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "hsl(var(--md-on-primary-container))" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.875rem", lineHeight: 1.2 }}>{isTentative ? "5 Apr, 2026" : "15 Mar, 2026"}</Typography>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500}>Moderation start</Typography>
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>{isTentative ? "12 Apr, 2026" : "20 Mar, 2026"}</Typography>
+                    <Typography variant="caption" color="text.secondary">Concluding remark due</Typography>
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>{isTentative ? "15 Apr, 2026" : "22 Mar, 2026"}</Typography>
+                    <Typography variant="caption" color="text.secondary">Grading due</Typography>
+                  </Box>
+                </Stack>
               </Stack>
-              <Typography variant="h6" fontWeight={600}>{isTentative ? "Ethics in Machine Learning" : "Impact of AI on Healthcare"}</Typography>
+            </Box>
+          </Box>
+
+          <Divider />
+
+          {/* ═══ DETAIL SECTIONS ═══ */}
+          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+            {/* ── Details ── */}
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
+              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Discussion Question</Typography>
+                  <Box sx={{ textAlign: "right" }}>
+                    {isConfirmed || isCompleted || isGathering ? (
+                      <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 500, fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}>
+                        Open in SpeedGrader <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
+                      </Typography>
+                    ) : (
+                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{dqTitle}</Typography>
+                    )}
+                  </Box>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Course template</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>Applied Ethics in AI</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Contact</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }} component="div">
+                    <Stack direction="row" alignItems="center" spacing={0.5}><MailOutlineIcon sx={{ fontSize: 13 }} /><span>gurus_support@greatlearning.in</span></Stack>
+                  </Typography>
+                </Stack>
+              </Box>
             </Box>
 
-            {/* Schedule section — 3 dates (moderation start, concluding remark, grading due) */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Moderation start">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>{isTentative ? "5 Apr, 2026" : "15 Mar, 2026"}</span>
-                </Stack>
-              </InfoRow>
-              <InfoRow label="Concluding remark">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>{isTentative ? "12 Apr, 2026" : "20 Mar, 2026"}</span>
-                </Stack>
-              </InfoRow>
-              <InfoRow label="Grading due">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>{isTentative ? "15 Apr, 2026" : "22 Mar, 2026"}</span>
-                </Stack>
-              </InfoRow>
-            </SectionBox>
-
-            {/* Details section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Discussion Question">
-                {isConfirmed || isCompleted || isGathering ? (
-                  <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" }, fontWeight: 500 }}>
-                    {isGathering || isCompleted ? "Impact of AI on Healthcare" : "Open in SpeedGrader"} <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
-                  </Typography>
-                ) : (
-                  <Typography variant="body2" fontWeight={500}>{isTentative ? "Ethics in Machine Learning" : "Impact of AI on Healthcare"}</Typography>
-                )}
-              </InfoRow>
-              <InfoRow label="Course template">Applied Ethics in AI</InfoRow>
-              <InfoRow label="Batch">PGP-AIML-BA-UTA-Nov25-C</InfoRow>
-              <InfoRow label="Contact">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <MailOutlineIcon sx={{ fontSize: 13 }} />
-                  <span>gurus_support@greatlearning.in</span>
-                </Stack>
-              </InfoRow>
-            </SectionBox>
-
-            {/* Student response progress (Confirmed only) — discussion-specific stats */}
-            {isConfirmed && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Student response progress</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Posts">
-                  <Typography variant="body2" fontWeight={500} sx={{ color: "success.main" }}>87</Typography>
-                </InfoRow>
-                <InfoRow label="Posts unread">
-                  <Typography variant="body2" fontWeight={500} sx={{ color: "success.main" }}>12</Typography>
-                </InfoRow>
-                <InfoRow label="Graded">
-                  <Typography variant="body2" fontWeight={500} sx={{ color: "success.main" }}>54 / 63</Typography>
-                </InfoRow>
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Stats shown in green (guru replied within 30 hrs). Turns red if inactive.</Typography>
-                <Typography variant="caption" color="primary.main" sx={{ cursor: "pointer", mt: 0.5, display: "inline-block", "&:hover": { textDecoration: "underline" } }}>
-                  Reload
-                </Typography>
-              </SectionBox>
+            {/* ── Student Response Progress (confirmed / tentative) ── */}
+            {(isConfirmed || isTentative) && (
+              <Box sx={{ mb: 2.5 }}>
+                <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Student Response Progress</Typography>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  {isTentative ? (
+                    <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500} sx={{ py: 0.5 }}>To be confirmed</Typography>
+                  ) : (
+                    <>
+                      <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Posts</Typography>
+                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", color: "success.main" }}>87</Typography>
+                      </Stack>
+                      <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Posts unread</Typography>
+                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", color: "success.main" }}>12</Typography>
+                      </Stack>
+                      <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Graded</Typography>
+                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", color: "success.main" }}>54 / 63</Typography>
+                      </Stack>
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>Green = guru replied within 30 hrs. Turns red if inactive.</Typography>
+                      <Typography variant="caption" color="primary.main" sx={{ cursor: "pointer", mt: 0.5, display: "inline-block", "&:hover": { textDecoration: "underline" } }}>Reload</Typography>
+                    </>
+                  )}
+                </Box>
+              </Box>
             )}
 
-            {/* Tentative: "To be confirmed" */}
-            {isTentative && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Student response progress</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500} sx={{ py: 1 }}>To be confirmed</Typography>
-              </SectionBox>
+            {/* ── Feedback (gathering / completed) ── */}
+            {(isGathering || isCompleted) && (
+              <Box sx={{ mb: 2.5 }}>
+                <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Feedback</Typography>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  {isGathering ? (
+                    <Typography variant="body2" fontWeight={500} sx={{ py: 0.5 }}>Gathering feedback</Typography>
+                  ) : (
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.875 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Rating</Typography>
+                      <StarRatingIcons rating={5} />
+                    </Stack>
+                  )}
+                </Box>
+              </Box>
             )}
 
-            {/* Feedback (completed variants) */}
-            {isGathering && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Feedback</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <Typography variant="body2" sx={{ py: 1 }}>Gathering feedback!</Typography>
-              </SectionBox>
-            )}
-
-            {isCompleted && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Feedback</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Rating">
-                  <StarRatingIcons rating={5} />
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {/* Remuneration section */}
-            {isGathering && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-pending-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
+            {/* ── Remuneration (gathering / completed) ── */}
+            {(isGathering || isCompleted) && (
+              <Box sx={{ mb: 2.5 }}>
+                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                  <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+                  <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>Remuneration</Typography>
                 </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {isCompleted && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-confirmed-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-                </InfoRow>
-                <InfoRow label="Transaction ID">
-                  <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}>TXN-GL-9K4R2L</Typography>
-                </InfoRow>
-              </SectionBox>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
+                    {isGathering
+                      ? <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
+                      : <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
+                    }
+                  </Stack>
+                  {isCompleted && (
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Transaction ID</Typography>
+                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem", fontFamily: "monospace" }}>TXN-GL-9K4R2L</Typography>
+                    </Stack>
+                  )}
+                </Box>
+              </Box>
             )}
           </Stack>
+        </Box>
+
+        {/* ── Sticky footer ── */}
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
+          <Button variant="text" color="inherit" size="small" onClick={onClose}>Close</Button>
         </Box>
       </Box>
     </Drawer>
@@ -1401,114 +996,155 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
   const isConfirmed = variant === "confirmed";
   const isCompleted = variant === "completed";
   const isPaymentPending = variant === "paymentPending";
+  const isPast = isCompleted || isPaymentPending;
 
-  const statusChip = (isCompleted || isPaymentPending) ? (
-    <Chip label="Completed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  ) : (
-    <Chip label="Confirmed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  );
+  const statusLabel = isPast ? "Completed" : "Confirmed";
+  const statusSx = { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" };
+  const batchName = isPast ? "PGPDS.O.JUL25.A" : "PGPDS.O.MAR26.A";
+  const groupName = isPast ? "Team Beta" : "Team Alpha";
+  const domain = isPast ? "Computer Vision" : "NLP";
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw", boxShadow: "-4px 0 24px rgba(0,0,0,0.06)", borderLeft: "1px solid", borderColor: "divider" } }}>
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
-          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
+        {/* ── Sticky header ── */}
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
+            <Chip label={statusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...statusSx }} />
+          </Stack>
+          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 16 }} /></IconButton>
         </Box>
 
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
-          <Stack spacing={2.5}>
-            {/* Header: breadcrumb + status + title */}
-            <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                  PGP-DS · Capstone
-                </Typography>
-                {statusChip}
+        {/* ── Scrollable content ── */}
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
+          {/* ═══ HERO ═══ */}
+          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
+              PGP-DS · Capstone
+            </Typography>
+            <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3 }}>
+              Capstone &mdash; {batchName}
+            </Typography>
+
+            {/* Schedule at-a-glance card */}
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+              <Stack spacing={1}>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "hsl(var(--md-on-primary-container))" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.875rem", lineHeight: 1.2 }}>15 Jan &ndash; 20 Apr, 2026</Typography>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500}>Start &rarr; Presentation</Typography>
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <GroupOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>{groupName} &bull; {domain}</Typography>
+                    <Typography variant="caption" color="text.secondary">Group &bull; Domain</Typography>
+                  </Box>
+                </Stack>
+                {isConfirmed && (
+                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <AccessTimeOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>20 Mar, 2026</Typography>
+                      <Typography variant="caption" color="text.secondary">Next session</Typography>
+                    </Box>
+                  </Stack>
+                )}
               </Stack>
-              <Typography variant="h6" fontWeight={600}>Capstone &mdash; {(isPaymentPending || isCompleted) ? "PGPDS.O.JUL25.A" : "PGPDS.O.MAR26.A"}</Typography>
+            </Box>
+          </Box>
+
+          <Divider />
+
+          {/* ═══ DETAIL SECTIONS ═══ */}
+          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+            {/* ── Milestones ── */}
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Milestones</Typography>
+              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                {[
+                  { label: "Start", date: "15 Jan, 2026" },
+                  { label: "Synopsis", date: "5 Feb, 2026" },
+                  { label: "Interim", date: "1 Mar, 2026" },
+                  { label: "Final", date: "10 Apr, 2026" },
+                  { label: "Presentation", date: "20 Apr, 2026" },
+                ].map((m) => (
+                  <Stack key={m.label} direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>{m.label}</Typography>
+                    <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{m.date}</Typography>
+                  </Stack>
+                ))}
+              </Box>
             </Box>
 
-            {/* Schedule section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Start">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>15 Jan, 2026</span>
+            {/* ── Details ── */}
+            <Box sx={{ mb: 2.5 }}>
+              <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
+              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Batch</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{batchName}</Typography>
                 </Stack>
-              </InfoRow>
-              <InfoRow label="Synopsis">5 Feb, 2026</InfoRow>
-              <InfoRow label="Interim">1 Mar, 2026</InfoRow>
-              <InfoRow label="Final">10 Apr, 2026</InfoRow>
-              <InfoRow label="Presentation">20 Apr, 2026</InfoRow>
-            </SectionBox>
+                <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Group</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{groupName}</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Domain</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{domain}</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Contact</Typography>
+                  <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }} component="div">
+                    <Stack direction="row" alignItems="center" spacing={0.5}><MailOutlineIcon sx={{ fontSize: 13 }} /><span>gurus_support@greatlearning.in</span></Stack>
+                  </Typography>
+                </Stack>
+              </Box>
+            </Box>
 
-            {/* Details section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Group">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <GroupOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>{(isPaymentPending || isCompleted) ? "Team Beta" : "Team Alpha"}</span>
+            {/* ── Remuneration (completed variants) ── */}
+            {(isPaymentPending || isCompleted) && (
+              <Box sx={{ mb: 2.5 }}>
+                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                  <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+                  <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>Remuneration</Typography>
                 </Stack>
-              </InfoRow>
-              <InfoRow label="Domain">{(isPaymentPending || isCompleted) ? "Computer Vision" : "NLP"}</InfoRow>
-              {isConfirmed && (
-                <InfoRow label="Next session">
-                  <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                    <span>20 Mar, 2026</span>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
+                    {isPaymentPending
+                      ? <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
+                      : <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
+                    }
                   </Stack>
-                </InfoRow>
-              )}
-              <InfoRow label="Contact">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <MailOutlineIcon sx={{ fontSize: 13 }} />
-                  <span>gurus_support@greatlearning.in</span>
-                </Stack>
-              </InfoRow>
-            </SectionBox>
-
-            {/* Remuneration section */}
-            {isPaymentPending && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-pending-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600 }} />
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {isCompleted && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-confirmed-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
-                </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-                </InfoRow>
-                <InfoRow label="Transaction ID">
-                  <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}>TXN-GL-3C7W1P</Typography>
-                </InfoRow>
-              </SectionBox>
+                  {isCompleted && (
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Transaction ID</Typography>
+                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem", fontFamily: "monospace" }}>TXN-GL-3C7W1P</Typography>
+                    </Stack>
+                  )}
+                </Box>
+              </Box>
             )}
           </Stack>
         </Box>
 
-        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1 }}>
+        {/* ── Sticky footer ── */}
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
           <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}>View Student Progress</Button>
           {isConfirmed && (
             <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Group Details (LMS)</Button>
           )}
+          <Button variant="text" color="inherit" size="small" onClick={onClose}>Close</Button>
         </Box>
       </Box>
     </Drawer>
@@ -1524,120 +1160,180 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
   const isSubmitted = variant === "confirmed-submitted";
   const isCompleted = variant === "completed";
 
-  const statusChip = isCompleted ? (
-    <Chip label="Completed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  ) : (
-    <Chip label="Confirmed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-  );
+  const statusLabel = isCompleted ? "Completed" : "Confirmed";
+  const statusSx = { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" };
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw" } }}>
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw", boxShadow: "-4px 0 24px rgba(0,0,0,0.06)", borderLeft: "1px solid", borderColor: "divider" } }}
+    >
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
-          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 18 }} /></IconButton>
+        {/* ── Sticky header ── */}
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
+            <Chip label={statusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...statusSx }} />
+          </Stack>
+          <IconButton size="small" onClick={onClose} sx={{ color: "text.secondary" }}><CloseOutlinedIcon sx={{ fontSize: 16 }} /></IconButton>
         </Box>
 
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2 }}>
-          <Stack spacing={2.5}>
-            {/* Header: breadcrumb + status + title */}
-            <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1, mb: 0.75 }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em" }}>
-                  PGP-AIML · CV Review
-                </Typography>
-                {statusChip}
+        {/* ── Scrollable content ── */}
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
+          {/* ═══ HERO: Breadcrumb + Title ═══ */}
+          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
+              CV Review
+            </Typography>
+            <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3 }}>
+              CV Review
+            </Typography>
+
+            {/* Schedule at-a-glance card */}
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+              <Stack spacing={1}>
+                {/* Due date */}
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "hsl(var(--md-on-primary-container))" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.875rem", lineHeight: 1.2 }}>
+                      {isCompleted ? "5 Mar, 2026" : "22 Mar, 2026"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                      Due date
+                    </Typography>
+                  </Box>
+                </Stack>
+                {/* Batch */}
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <GroupOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>
+                      PGP-AIML-BA-UTA-Nov25-C
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">Batch</Typography>
+                  </Box>
+                </Stack>
+                {/* Contact */}
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <MailOutlineIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>
+                      gurus_support@greatlearning.in
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">Contact</Typography>
+                  </Box>
+                </Stack>
               </Stack>
-              <Typography variant="h6" fontWeight={600}>CV Review</Typography>
             </Box>
+          </Box>
 
-            {/* Schedule section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Schedule</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Due date">
-                <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                  <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-                  <span>{isCompleted ? "5 Mar, 2026" : "22 Mar, 2026"}</span>
-                </Stack>
-              </InfoRow>
-              {isConfirmed && !isSubmitted && (
-                <InfoRow label="Due on">22 March 2026</InfoRow>
-              )}
-            </SectionBox>
+          <Divider />
 
-            {/* Details section */}
-            <SectionBox>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Details</Typography>
-              <Divider sx={{ mb: 0.5 }} />
-              <InfoRow label="Batch">PGP-AIML-BA-UTA-Nov25-C</InfoRow>
-              {isCompleted && (
-                <InfoRow label="Contact">
-                  <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                    <MailOutlineIcon sx={{ fontSize: 13 }} />
-                    <span>gurus_support@greatlearning.in</span>
-                  </Stack>
-                </InfoRow>
-              )}
-            </SectionBox>
+          {/* ═══ DETAIL SECTIONS ═══ */}
+          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
 
-            {/* Links & Actions (Confirmed) */}
+            {/* ── Student Info (confirmed only) ── */}
             {isConfirmed && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Links &amp; Actions</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="LinkedIn">
-                  <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" }, fontWeight: 500 }}>
-                    View LinkedIn Profile <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
+              <Box sx={{ mb: 2.5 }}>
+                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                  <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
+                    Student Info
                   </Typography>
-                </InfoRow>
-                <InfoRow label="CV">
-                  <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" }, fontWeight: 500 }}>
-                    View CV <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
-                  </Typography>
-                </InfoRow>
-                <InfoRow label="Comments">
-                  <Button variant="text" size="small">View User Comments</Button>
-                </InfoRow>
-                <Divider sx={{ my: 1 }} />
-                {isSubmitted ? (
-                  <Typography variant="body2" color="var(--gl-status-confirmed-text)" fontWeight={500} sx={{ py: 0.5 }}>Already Submitted</Typography>
-                ) : (
-                  <Button variant="contained" size="small" sx={{ mt: 0.5 }}>Submit CV Review</Button>
-                )}
-              </SectionBox>
-            )}
-
-            {/* Completed: View Reviewed CV */}
-            {isCompleted && (
-              <SectionBox>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>Links</Typography>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Reviewed CV">
-                  <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" }, fontWeight: 500 }}>
-                    View Reviewed CV <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
-                  </Typography>
-                </InfoRow>
-              </SectionBox>
-            )}
-
-            {/* Remuneration (completed only) */}
-            {isCompleted && (
-              <SectionBox>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.5 }}>
-                  <SavingsOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-confirmed-text)" }} />
-                  <Typography variant="subtitle2" fontWeight={600}>Remuneration</Typography>
                 </Stack>
-                <Divider sx={{ mb: 0.5 }} />
-                <InfoRow label="Status">
-                  <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
-                </InfoRow>
-                <InfoRow label="Transaction ID">
-                  <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.75rem" }}>TXN-GL-4F2R8K</Typography>
-                </InfoRow>
-              </SectionBox>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  {/* Student avatar + name */}
+                  <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+                    <Avatar sx={{ width: 36, height: 36, bgcolor: "primary.main", fontSize: "0.8rem", fontWeight: 700 }}>AM</Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem" }}>Aarav Mehta</Typography>
+                      <Typography variant="caption" color="text.secondary">PGP-AIML-BA-UTA-Nov25-C</Typography>
+                    </Box>
+                  </Stack>
+                  <Divider sx={{ mb: 1 }} />
+                  {/* LinkedIn */}
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>LinkedIn</Typography>
+                    <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 500, fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}>
+                      View Profile <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
+                    </Typography>
+                  </Stack>
+                  {/* Resume / CV */}
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Resume / CV</Typography>
+                    <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 500, fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}>
+                      View CV <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
+                    </Typography>
+                  </Stack>
+                  {/* Comments */}
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Comments</Typography>
+                    <Button variant="text" size="small" sx={{ fontSize: "0.8125rem", textTransform: "none", fontWeight: 500, p: 0, minWidth: 0 }}>View User Comments</Button>
+                  </Stack>
+                </Box>
+              </Box>
+            )}
+
+            {/* ── Completed: Reviewed CV link ── */}
+            {isCompleted && (
+              <Box sx={{ mb: 2.5 }}>
+                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                  <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
+                    Links
+                  </Typography>
+                </Stack>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Reviewed CV</Typography>
+                    <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 500, fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}>
+                      View Reviewed CV <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
+                    </Typography>
+                  </Stack>
+                </Box>
+              </Box>
+            )}
+
+            {/* ── Remuneration (completed) ── */}
+            {isCompleted && (
+              <Box sx={{ mb: 2.5 }}>
+                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                  <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+                  <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
+                    Remuneration
+                  </Typography>
+                </Stack>
+                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
+                    <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Transaction ID</Typography>
+                    <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem", fontFamily: "monospace" }}>TXN-GL-4F2R8K</Typography>
+                  </Stack>
+                </Box>
+              </Box>
             )}
           </Stack>
+        </Box>
+
+        {/* ── Sticky footer ── */}
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: isConfirmed && !isSubmitted ? "space-between" : "flex-end", gap: 1, flexShrink: 0 }}>
+          {isConfirmed && !isSubmitted && (
+            <Button variant="contained" size="small">Submit CV Review</Button>
+          )}
+          {isSubmitted && (
+            <Chip label="Already Submitted" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
+          )}
+          <Button variant="text" color="inherit" size="small" onClick={onClose}>Close</Button>
         </Box>
       </Box>
     </Drawer>
@@ -1653,7 +1349,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
 const RESIDENCY_COMBINED_ACCORDION = (
   <Accordion
     disableGutters elevation={0} defaultExpanded={false}
-    sx={{ mt: 1, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+    sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
   >
     <AccordionSummary
       expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
@@ -1665,11 +1361,18 @@ const RESIDENCY_COMBINED_ACCORDION = (
     </AccordionSummary>
     <AccordionDetails sx={{ p: 0 }}>
       <Stack divider={<Divider />}>
-        {["AIML Online March 26 A", "PGP-DS Online Feb 26 A — Group 06"].map((label) => (
-          <Box key={label} sx={{ px: 1.5, py: 0.75 }}>
+        {[
+          { batch: "AIML Online March 26 A", group: "All Groups", learnerCount: 120 },
+          { batch: "AIML Online Feb 26 B", group: "All Groups", learnerCount: 95 },
+        ].map((cb) => (
+          <Box key={cb.batch} sx={{ px: 1.5, py: 0.75 }}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
-              <Typography variant="caption" fontWeight={500}>{label}</Typography>
+              <Typography variant="caption" fontWeight={500}>{cb.batch}</Typography>
+              <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
+            </Stack>
+            <Stack direction="row" spacing={1} sx={{ ml: 2, mt: 0.25 }}>
+              <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 18, fontSize: "0.6rem" }} />
             </Stack>
           </Box>
         ))}
@@ -2031,26 +1734,7 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 4. Career 1:1 — Confirmed */}
-      <ComponentSection title="Career 1:1 — Confirmed" description="1:1 career mentoring. Join session on card. Student info in View Details.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <SessionCard
-            title="Career Mentoring"
-            sessionType="Career mentoring session"
-            batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-03-18"
-            start={minutes(14)}
-            end={minutes(15)}
-            status={STATUS_CONFIRMED()}
-            actions={
-              <Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
-            }
-            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoCareerConfirmed)}>View details</Button>}
-          />
-        </Card>
-      </ComponentSection>
-
-      {/* 5. Mock Interview — Confirmed (secondary facilitator) */}
+      {/* 4. Mock Interview — Confirmed (secondary facilitator) */}
       <ComponentSection title="Mock Interview — Confirmed (secondary)" description="Mock interview event. Join session + Share Feedback on card. Secondary facilitator badge.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
@@ -2249,33 +1933,6 @@ function OnlineSessionCards() {
         </CombinedCompletedGroup>
       </ComponentSection>
 
-      {/* 12. Mock Interview — Completed */}
-      <ComponentSection title="Mock Interview — Completed" description="Past mock interview. Payment processed chip + star rating top-right. Watch recording + Detailed Feedback + Share Feedback.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <SessionCard
-            title="Mock Interview"
-            sessionType="Career mentoring session"
-            batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-02-25"
-            start={minutes(16)}
-            end={minutes(17)}
-            topRight={
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-                {CHIP_PAYMENT_PROCESSED}
-                <StarRatingNumeric rating={4.2} />
-              </Stack>
-            }
-            actions={
-              <>
-                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
-                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
-                <Button variant="soft" size="small" startIcon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 14 }} />}>Share Feedback</Button>
-              </>
-            }
-            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMockCompleted)}>View details</Button>}
-          />
-        </Card>
-      </ComponentSection>
     </>
   );
 }
@@ -2378,7 +2035,7 @@ function CareerMentorOnlineSessionCards() {
       </ComponentSection>
 
       {/* 5. Career — Completed (with rating) */}
-      <ComponentSection title="Career — Completed (with rating)" description="Past career event. Payment processed chip + star rating top-right. Detailed Feedback on card.">
+      <ComponentSection title="Career — Completed (with rating)" description="Past career event. Payment processed chip + star rating top-right. Watch recording + Detailed Feedback on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -2394,7 +2051,10 @@ function CareerMentorOnlineSessionCards() {
               </Stack>
             }
             actions={
-              <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+              <>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+              </>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoCareerCompletedWithRating)}>View details</Button>}
           />
@@ -2799,7 +2459,6 @@ const ROLE_SECTIONS: Record<GuruRole, { label: string; render: () => React.React
   ],
   "Career Mentor": [
     { label: "Career / Mock Interview", render: () => <CareerMentorOnlineSessionCards /> },
-    { label: "CV Review", render: () => <CVReviewCards /> },
   ],
   "CV Review Mentor": [
     { label: "CV Review", render: () => <CVReviewCards /> },
