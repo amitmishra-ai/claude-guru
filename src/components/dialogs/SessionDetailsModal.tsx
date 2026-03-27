@@ -26,6 +26,7 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
 import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -764,6 +765,18 @@ export function SessionDetailsModal() {
                             </Stack>
                           </AccordionSummary>
                           <AccordionDetails sx={{ px: 1.5, pt: 0, pb: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
+                            {/* Course name */}
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5, p: 1, borderRadius: "6px", bgcolor: "hsl(var(--md-surface-container) / 0.5)" }}>
+                              <MenuBookOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
+                              <Box>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem", display: "block", lineHeight: 1.2 }}>
+                                  {session.sessionType}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.3 }}>
+                                  {session.title}
+                                </Typography>
+                              </Box>
+                            </Stack>
                             {/* Group Members (only for Group audienceType) */}
                             {(cb.audienceType === "Group" || cb.audienceType === "Batch") && cb.members && cb.members.length > 0 && (
                               <Box>
