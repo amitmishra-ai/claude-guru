@@ -35,7 +35,9 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useSearchParams } from "react-router-dom";
 import { keyframes } from "@mui/system";
+import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
 import { useAppSelector, useAppDispatch } from "@/store";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { pushToast } from "@/store/slices/toastsSlice";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -196,6 +198,9 @@ export default function PaymentsPage() {
   const [sortBy, setSortBy] = useState<SortKey>("event");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
+  const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+  const isEmpty = guruStage === "empty";
+
   const handleSort = (key: SortKey) => {
     if (sortBy === key) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -205,11 +210,12 @@ export default function PaymentsPage() {
     }
     setPage(0);
   };
-  const chartData = useMemo(() => build12MonthChart(demoMonthlyEarnings), []);
+  const _chartData = useMemo(() => build12MonthChart(demoMonthlyEarnings), []);
+  const chartData = isEmpty ? _chartData.map((d) => ({ ...d, amount: 0 })) : _chartData;
   const earningsOnly = useMemo(() => chartData.filter((d) => d.amount > 0), [chartData]);
   const totalEarnings = useMemo(() => earningsOnly.reduce((a, m) => a + m.amount, 0), [earningsOnly]);
   const avgMonthly    = useMemo(() => earningsOnly.length ? Math.round(totalEarnings / earningsOnly.length) : 0, [totalEarnings, earningsOnly]);
-  const bestMonth     = useMemo(() => earningsOnly.reduce((a, b) => b.amount > a.amount ? b : a, earningsOnly[0]), [earningsOnly]);
+  const bestMonth     = useMemo(() => earningsOnly.length ? earningsOnly.reduce((a, b) => b.amount > a.amount ? b : a, earningsOnly[0]) : { label: "—", amount: 0 }, [earningsOnly]);
   const momTrend      = useMemo(() => {
     const lastTwo = earningsOnly.slice(-2);
     return lastTwo.length === 2 ? lastTwo[1].amount - lastTwo[0].amount : 0;
@@ -322,8 +328,19 @@ export default function PaymentsPage() {
       </Card>
 
       {/* ── Payment details table ── */}
+      <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Payment details</Typography>
+      {isEmpty ? (
+        <Box sx={{ mb: 4 }}>
+          <EmptyState
+            icon={<SavingsOutlinedIcon />}
+            title="No payments recorded yet"
+            subtitle="Session-wise payment details, transaction IDs, and invoices will appear here after your first completed session"
+          />
+        </Box>
+      ) : (
+      <>
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-        <Typography variant="subtitle1" fontWeight={700}>Payment details</Typography>
+        <Box />
         <Select
           value={paymentFilter}
           onChange={(e) => { setPaymentFilter(e.target.value as PaymentFilter); setPage(0); }}
@@ -516,6 +533,8 @@ export default function PaymentsPage() {
           />
         </FlexBox>
       </Card>
+      </>
+      )}
 
       {/* ── Dispute Modal ── */}
       <Dialog

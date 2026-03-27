@@ -20,6 +20,7 @@ import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import AutoStoriesOutlinedIcon from "@mui/icons-material/AutoStoriesOutlined";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { CoursePatternThumb } from "@/components/shared/CoursePatternThumb";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setSessionFocus } from "@/store/slices/sessionsSlice";
@@ -257,6 +258,8 @@ let _coursesInitialLoadDone = false;
 
 export default function CoursesPage() {
   const dispatch = useAppDispatch();
+  const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+  const isEmpty = guruStage === "empty";
   const sessions = useAppSelector((s) => s.sessions.items);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
 
@@ -281,8 +284,8 @@ export default function CoursesPage() {
   }, [upcomingSessionsSorted]);
 
   const sortedCatalog = useMemo(
-    () => [...demoCourseCatalog].sort((a, b) => Number(b.isNew) - Number(a.isNew)),
-    []
+    () => isEmpty ? [] : [...demoCourseCatalog].sort((a, b) => Number(b.isNew) - Number(a.isNew)),
+    [isEmpty]
   );
 
   /* ── Loading skeleton ── */
@@ -406,29 +409,19 @@ export default function CoursesPage() {
 
         {/* Empty state */}
         {!loading && nothingFound && (
-          <Card variant="outlined" sx={{ borderRadius: 3, py: 8, textAlign: "center" }}>
-            {searchQuery.trim() ? (
-              <>
-                <SearchIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1.5 }} />
-                <Typography variant="body1" color="text.secondary" fontWeight={500}>
-                  No courses match &ldquo;{searchQuery.trim()}&rdquo;
-                </Typography>
-                <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: "block" }}>
-                  Try a different search term.
-                </Typography>
-              </>
-            ) : (
-              <>
-                <AutoStoriesOutlinedIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1.5 }} />
-                <Typography variant="body1" color="text.secondary" fontWeight={500}>
-                  No courses found
-                </Typography>
-                <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: "block" }}>
-                  Courses will appear here once you are enrolled.
-                </Typography>
-              </>
-            )}
-          </Card>
+          searchQuery.trim() ? (
+            <EmptyState
+              icon={<SearchIcon />}
+              title={`No results for \u201c${searchQuery.trim()}\u201d`}
+              subtitle="Try adjusting your search term or check the spelling"
+            />
+          ) : (
+            <EmptyState
+              icon={<AutoStoriesOutlinedIcon />}
+              title="No courses yet"
+              subtitle="Courses you're enrolled in or teaching will appear here"
+            />
+          )
         )}
 
         {/* ── Courses you teach (Teacher / TA) ── */}

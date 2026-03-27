@@ -67,6 +67,9 @@ import {
 import { demoNow } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions, demoPlannedEvents } from "@/data/demo-sessions";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
+import { EmptyState } from "@/components/shared/EmptyState";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
@@ -147,9 +150,11 @@ function TaskCard({
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+  const isEmpty = guruStage === "empty";
   const allSessions = useAppSelector((s) => s.sessions.items);
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
-  const sessions = useMemo(() => filterSessionsByRole(allSessions, selectedRole), [allSessions, selectedRole]);
+  const sessions = useMemo(() => isEmpty ? [] : filterSessionsByRole(allSessions, selectedRole), [allSessions, selectedRole, isEmpty]);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
   const homeSessionsView = useAppSelector((s) => s.sessions.homeSessionsView);
@@ -161,7 +166,8 @@ export default function DashboardPage() {
   const requests = useAppSelector((s) => s.requests.items);
   const guruName = useAppSelector((s) => s.profile.guruName);
   const polls = useAppSelector((s) => s.polls.items);
-  const supportTickets = useAppSelector((s) => s.support.tickets);
+  const _supportTickets = useAppSelector((s) => s.support.tickets);
+  const supportTickets = isEmpty ? [] : _supportTickets;
   const openTicketCount = supportTickets.filter((t) => t.status === "open" || t.status === "awaiting_reply").length;
   const escalatedTicketCount = supportTickets.filter((t) => t.status === "escalated").length;
   const selectedSessionType = useAppSelector((s) => s.sessions.selectedSessionType);
@@ -224,8 +230,8 @@ export default function DashboardPage() {
     [sessions, sessionDeclined]
   );
 
-  const rolePlannedEvents = useMemo(() => filterSessionsByRole(demoPlannedEvents, selectedRole), [selectedRole]);
-  const rolePreviouslyDeclined = useMemo(() => filterSessionsByRole(demoPreviouslyDeclinedSessions, selectedRole), [selectedRole]);
+  const rolePlannedEvents = useMemo(() => isEmpty ? [] : filterSessionsByRole(demoPlannedEvents, selectedRole), [selectedRole, isEmpty]);
+  const rolePreviouslyDeclined = useMemo(() => isEmpty ? [] : filterSessionsByRole(demoPreviouslyDeclinedSessions, selectedRole), [selectedRole, isEmpty]);
 
   const todayYmd = demoNow.toISOString().slice(0, 10);
   const todaySessions = upcomingSessions.filter((s) => s.dateYmd === todayYmd);
@@ -261,8 +267,7 @@ export default function DashboardPage() {
     return () => navigate("/courses");
   };
 
-  const guruStage = useAppSelector((s) => s.devPanel.guruStage);
-  const isNewUser = guruStage === "new";
+  const isNewUser = guruStage === "new" || isEmpty;
   const isEarlyUser = guruStage === "early";
   const isNewOrEarly = isNewUser || isEarlyUser;
 
@@ -807,7 +812,12 @@ export default function DashboardPage() {
                           );
                         })
                       ) : (
-                        <Typography variant="body2" color="text.secondary">No upcoming activities.</Typography>
+                        <EmptyState
+                          icon={<EventNoteOutlinedIcon />}
+                          title="Nothing on the horizon"
+                          subtitle="Scheduled sessions will appear here once they're assigned to you by the program team"
+                          compact
+                        />
                       )}
                     </Stack>
 
@@ -1005,9 +1015,12 @@ export default function DashboardPage() {
                         </Stack>
                       </>
                     ) : (
-                      <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
-                        No planned events at this moment!
-                      </Typography>
+                      <EmptyState
+                        icon={<DateRangeOutlinedIcon />}
+                        title="No activities planned yet"
+                        subtitle="Tentative events from the program team will show up here as they're scheduled"
+                        compact
+                      />
                     )}
                   </Box>
                 )}
@@ -1253,7 +1266,12 @@ export default function DashboardPage() {
                         })}
                       </Stack>
                     ) : (
-                      <Typography variant="body2" color="text.secondary">No completed events yet.</Typography>
+                      <EmptyState
+                        icon={<CheckCircleOutlinedIcon />}
+                        title="No sessions completed yet"
+                        subtitle="Once you deliver your first session, it'll appear here with ratings and payment info"
+                        compact
+                      />
                     )}
                   </>
                 )}
@@ -1309,7 +1327,12 @@ export default function DashboardPage() {
                     )}
 
                     {declinedSessions.length === 0 && rolePreviouslyDeclined.length === 0 && (
-                      <Typography variant="body2" color="text.secondary">No declined events.</Typography>
+                      <EmptyState
+                        icon={<DoNotDisturbOnOutlinedIcon />}
+                        title="No declined events"
+                        subtitle="Any events you choose to decline will be kept here for your reference"
+                        compact
+                      />
                     )}
                   </>
                 )}

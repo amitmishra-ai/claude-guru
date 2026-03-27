@@ -13,7 +13,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Paper from "@mui/material/Paper";
+
 import Skeleton from "@mui/material/Skeleton";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
@@ -22,6 +22,10 @@ import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setSelectedTicket, setActiveTab, setSearchQuery, setCategoryFilter, toggleBookmark } from "@/store/slices/supportSlice";
 import { TicketDetailDrawer } from "@/components/dialogs/TicketDetailDrawer";
+import { EmptyState } from "@/components/shared/EmptyState";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
+import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
 import type { SupportTicket, TicketStatus } from "@/lib/types";
 
 const STATUS_COLORS: Record<TicketStatus, { bg: string; color: string }> = {
@@ -122,7 +126,9 @@ function TicketCard({ ticket, onSelect, onToggleBookmark }: { ticket: SupportTic
 
 export default function SupportPage() {
   const dispatch = useAppDispatch();
-  const tickets = useAppSelector((s) => s.support.tickets);
+  const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+  const _tickets = useAppSelector((s) => s.support.tickets);
+  const tickets = guruStage === "empty" ? [] : _tickets;
   const activeTab = useAppSelector((s) => s.support.activeTab);
   const searchQuery = useAppSelector((s) => s.support.searchQuery);
   const categoryFilter = useAppSelector((s) => s.support.categoryFilter);
@@ -291,20 +297,30 @@ export default function SupportPage() {
           ))}
         </Stack>
       ) : (
-        <Paper variant="outlined" sx={{ p: 4, textAlign: "center", borderStyle: "dashed", borderColor: "divider", mt: 2 }}>
-          <Typography variant="body1" fontWeight={600} sx={{ mb: 0.5 }}>
-            {activeTab === "needs_action" ? "All caught up!" : activeTab === "bookmarked" ? "No bookmarked tickets" : "No tickets found"}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {activeTab === "needs_action"
-              ? "No tickets need your attention right now."
-              : activeTab === "bookmarked"
-                ? "Star a ticket to save it here for quick access."
-                : activeTab === "closed"
-                  ? "Closed tickets will appear here."
-                  : "Try adjusting your search or filters."}
-          </Typography>
-        </Paper>
+        <Box sx={{ mt: 2 }}>
+          <EmptyState
+            icon={
+              activeTab === "needs_action" ? <CheckCircleOutlinedIcon /> :
+              activeTab === "bookmarked" ? <BookmarkBorderOutlinedIcon /> :
+              <InboxOutlinedIcon />
+            }
+            title={
+              activeTab === "needs_action" ? "All caught up!" :
+              activeTab === "bookmarked" ? "No bookmarked tickets" :
+              "No tickets found"
+            }
+            subtitle={
+              activeTab === "needs_action"
+                ? "No tickets need your attention right now. Nice work!"
+                : activeTab === "bookmarked"
+                  ? "Star any ticket to pin it here for quick access later"
+                  : activeTab === "closed"
+                    ? "Resolved tickets will appear here for your records"
+                    : "Try adjusting your search or filters to find what you need"
+            }
+            compact
+          />
+        </Box>
       )}
       </Card>
 

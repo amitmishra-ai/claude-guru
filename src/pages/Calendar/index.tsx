@@ -222,6 +222,8 @@ export default function CalendarPage() {
   const unavailable = useAppSelector((s) => s.availability.unavailable);
   const removedAvailabilityIds = useAppSelector((s) => s.availability.removedAvailabilityIds);
   const hasUserConfiguredAvailability = useAppSelector((s) => s.availability.hasUserConfiguredAvailability);
+  const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+  const isEmpty = guruStage === "empty";
   const requests = useAppSelector((s) => s.requests.items);
   /* ── memoized selectors (§7) ──────────────────────────────────────────── */
   const anchorDate = useAppSelector(selectAnchorDate);
@@ -230,9 +232,12 @@ export default function CalendarPage() {
   const weekDays = useAppSelector(selectWeekDays);
   const availabilityEndDate = useAppSelector(selectAvailabilityEndDate);
   const rangeEndYmd = availabilityEndDate;
-  const sessionsThisWeek = useAppSelector(selectSessionsThisWeek);
-  const requestsThisWeek = useAppSelector(selectRequestsThisWeek);
-  const busyThisWeek = useAppSelector(selectBusyThisWeek);
+  const _sessionsThisWeek = useAppSelector(selectSessionsThisWeek);
+  const _requestsThisWeek = useAppSelector(selectRequestsThisWeek);
+  const _busyThisWeek = useAppSelector(selectBusyThisWeek);
+  const sessionsThisWeek = isEmpty ? [] : _sessionsThisWeek;
+  const requestsThisWeek = isEmpty ? [] : _requestsThisWeek;
+  const busyThisWeek = isEmpty ? [] : _busyThisWeek;
   const isCurrentPeriod = useAppSelector(selectIsCurrentPeriod);
 
   /* ── navigation ───────────────────────────────────────────────────────── */

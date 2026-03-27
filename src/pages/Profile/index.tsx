@@ -50,6 +50,8 @@ import MentorImpactCard from "@/components/shared/MentorImpactCard";
 import FlexBox from "@/components/Utils/FlexBox";
 import { ScoreCell } from "@/components/shared/ScoreCell";
 import { useAppSelector, useAppDispatch } from "@/store";
+import { EmptyState } from "@/components/shared/EmptyState";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import { setOpenProfileEdit, setOpenTimezone } from "@/store/slices/uiSlice";
 import {
   setDraftName, setDraftMode, setDraftPrograms,
@@ -124,7 +126,8 @@ export default function ProfilePage() {
   const manualTimeZone= useAppSelector((s) => s.profile.manualTimeZone);
   const openProfileEdit = useAppSelector((s) => s.ui.openProfileEdit);
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
-  const isNewUser = guruStage === "new";
+  const isEmpty = guruStage === "empty";
+  const isNewUser = guruStage === "new" || isEmpty;
   const isEarlyUser = guruStage === "early";
   const isNewOrEarly = isNewUser || isEarlyUser;
   const draftName     = useAppSelector((s) => s.profile.draftName);
@@ -479,16 +482,18 @@ export default function ProfilePage() {
               borderRadius: "8px",
               padding: "2px",
               overflow: "hidden",
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: "-50%",
-                left: "-50%",
-                width: "200%",
-                height: "200%",
-                background: "conic-gradient(from 0deg, transparent 0deg, rgba(25,106,229,0.8) 60deg, transparent 120deg)",
-                animation: `${borderRotate} 2.5s linear infinite`,
-              },
+              ...(!isNewOrEarly && {
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: "-50%",
+                  left: "-50%",
+                  width: "200%",
+                  height: "200%",
+                  background: "conic-gradient(from 0deg, transparent 0deg, rgba(25,106,229,0.8) 60deg, transparent 120deg)",
+                  animation: `${borderRotate} 2.5s linear infinite`,
+                },
+              }),
             }}
           >
             <MuiTooltip title={isNewOrEarly ? "Share unlocks after your first completed month" : ""} arrow>
@@ -841,13 +846,16 @@ export default function ProfilePage() {
           <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>Rating trend (last 6 months)</Typography>
 
           {isNewOrEarly ? (
-            <Box sx={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Typography variant="body2" color="text.disabled" sx={{ textAlign: "center", maxWidth: 300 }}>
-                {isEarlyUser
-                  ? "Not enough data for a trend yet. Your rating chart needs at least 2 months of sessions."
-                  : "No ratings yet — your trend will appear after your first rated session."}
-              </Typography>
-            </Box>
+            <EmptyState
+              icon={<StarOutlinedIcon />}
+              title={isEarlyUser ? "Building your trend" : "No ratings yet"}
+              subtitle={
+                isEarlyUser
+                  ? "Your rating chart needs at least 2 months of session data to display a trend"
+                  : "Your rating trend will appear here after your first rated session"
+              }
+              compact
+            />
           ) : (
             <>
               <Box sx={{ width: "100%", height: 200 }}>

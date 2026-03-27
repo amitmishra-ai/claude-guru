@@ -6,7 +6,9 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { markRead, markAllRead } from "@/store/slices/notificationsSlice";
 import { setOpenSession, setOpenAvailability } from "@/store/slices/uiSlice";
@@ -143,21 +145,12 @@ export default function NotificationsPage() {
       )}
 
       {!notifications.length && (
-        <Box
-          sx={{
-            mt: 2,
-            borderRadius: "16px",
-            border: 1,
-            borderColor: "divider",
-            backgroundColor: "hsl(var(--md-surface-container) / 0.2)",
-            px: 2,
-            py: 4,
-            textAlign: "center",
-            fontSize: "0.875rem",
-            color: "hsl(var(--md-on-surface-variant))",
-          }}
-        >
-          No notifications yet.
+        <Box sx={{ mt: 2 }}>
+          <EmptyState
+            icon={<NotificationsNoneOutlinedIcon />}
+            title="You're all caught up"
+            subtitle="New notifications about sessions, payments, and updates will appear here"
+          />
         </Box>
       )}
     </>
