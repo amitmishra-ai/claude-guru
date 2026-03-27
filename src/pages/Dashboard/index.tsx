@@ -11,9 +11,6 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
@@ -23,21 +20,14 @@ import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Dialog from "@mui/material/Dialog";
 import Drawer from "@mui/material/Drawer";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
@@ -58,7 +48,6 @@ import {
   setSelectedSessionType,
   setSelectedTimePeriod,
 } from "@/store/slices/sessionsSlice";
-import { setPatterns } from "@/store/slices/availabilitySlice";
 import {
   setOpenSession,
   setOpenAvailability,
@@ -72,14 +61,10 @@ import { pushToast } from "@/store/slices/toastsSlice";
 import {
   sortByDateTime,
   dateTimeMs,
-  fmtTime12,
   fmtDateNice,
   isSessionCompleted,
-  formatDayGroupShort,
-  parseHHMM,
-  fmtTime,
 } from "@/lib/helpers";
-import { demoNow, DOW_LONG, timeOptions12 } from "@/lib/constants";
+import { demoNow } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions, demoPlannedEvents } from "@/data/demo-sessions";
 import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
@@ -112,12 +97,6 @@ const SESSION_TYPES: Array<"All" | SessionType> = [
   "Moderation",
   "CV Review",
   "Others",
-];
-
-const PRESET_SLOTS = [
-  { key: "weekendMorning", label: "Weekend morning", days: ["Saturday", "Sunday"], start: "10:00", end: "12:00" },
-  { key: "weekendAfternoon", label: "Weekend afternoon", days: ["Saturday", "Sunday"], start: "14:00", end: "16:00" },
-  { key: "weekdayEvenings", label: "Weekday evenings", days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], start: "18:00", end: "20:00" },
 ];
 
 /* ── Task card used in sidebar ── */
@@ -199,16 +178,6 @@ export default function DashboardPage() {
   const [plannedEventDetailId, setPlannedEventDetailId] = useState<string | null>(null);
   const plannedEventDetail = demoPlannedEvents.find((pe) => pe.id === plannedEventDetailId) ?? null;
 
-  /* ── inline availability editing state ───────────────────────────── */
-  const [editingPatternId, setEditingPatternId] = useState<string | null>(null);
-  const [editDays, setEditDays] = useState<string[]>([]);
-  const [editStart, setEditStart] = useState("10:00");
-  const [editEnd, setEditEnd] = useState("12:00");
-  const [showAddSlotModal, setShowAddSlotModal] = useState(false);
-  const [addDays, setAddDays] = useState<string[]>(["Saturday", "Sunday"]);
-  const [addStart, setAddStart] = useState("10:00");
-  const [addEnd, setAddEnd] = useState("12:00");
-  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
 
   /* ── clean up recentlyConfirmedIds (same pattern as Calendar) ───── */
   useEffect(() => {
@@ -1342,132 +1311,16 @@ export default function DashboardPage() {
 
                 {/* Availability task */}
                 {hasUserConfiguredAvailability ? (
-                  <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
-                    <Accordion
-                      defaultExpanded={false}
-                      disableGutters
-                      elevation={0}
-                      sx={{ bgcolor: "transparent", "&::before": { display: "none" } }}
-                    >
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 18 }} />}
-                        sx={{ px: 2.5, py: 0.5, minHeight: "unset", "& .MuiAccordionSummary-content": { my: 1.5 } }}
-                      >
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%", mr: 1 }}>
-                          <Box>
-                            <Typography variant="subtitle2" fontWeight={600}>Availability summary</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {patterns.length} slot{patterns.length !== 1 ? "s" : ""} configured
-                            </Typography>
-                          </Box>
-                          <Chip label="Configured" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 500, fontSize: "0.75rem" }} />
-                        </Stack>
-                      </AccordionSummary>
-                      <AccordionDetails sx={{ px: 2.5, pt: 0, pb: 2 }}>
-                        <Stack spacing={1}>
-                          {patterns.map((p) =>
-                            editingPatternId === p.id ? (
-                              <Paper key={p.id} variant="outlined" sx={{ p: 1.5, borderRadius: 1.5, borderColor: "primary.main" }}>
-                                <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 1 }}>Edit slot</Typography>
-                                <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mb: 1 }}>
-                                  {DOW_LONG.map((day) => (
-                                    <Chip
-                                      key={day}
-                                      label={day.slice(0, 3)}
-                                      size="small"
-                                      variant={editDays.includes(day) ? "filled" : "outlined"}
-                                      sx={editDays.includes(day) ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { cursor: "pointer" }}
-                                      onClick={() => setEditDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day])}
-                                    />
-                                  ))}
-                                </Stack>
-                                <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                                  <FormControl size="small" fullWidth>
-                                    <InputLabel>Start</InputLabel>
-                                    <Select label="Start" value={editStart} onChange={(e) => setEditStart(e.target.value)}>
-                                      {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                                    </Select>
-                                  </FormControl>
-                                  <FormControl size="small" fullWidth>
-                                    <InputLabel>End</InputLabel>
-                                    <Select label="End" value={editEnd} onChange={(e) => setEditEnd(e.target.value)}>
-                                      {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                                    </Select>
-                                  </FormControl>
-                                </Stack>
-                                <Stack direction="row" spacing={1}>
-                                  <Button size="small" variant="contained" disabled={!editDays.length} onClick={() => {
-                                    const label = `${formatDayGroupShort(editDays)} ${fmtTime12(parseHHMM(editStart))}–${fmtTime12(parseHHMM(editEnd))}`;
-                                    const updated = patterns.map((pat) => pat.id === p.id ? { ...pat, label, days: editDays, start: parseHHMM(editStart), end: parseHHMM(editEnd) } : pat);
-                                    dispatch(setPatterns(updated));
-                                    dispatch(pushToast({ title: "Slot updated", description: label }));
-                                    setEditingPatternId(null);
-                                  }}>Save</Button>
-                                  <Button size="small" variant="text" color="inherit" onClick={() => setEditingPatternId(null)}>Cancel</Button>
-                                </Stack>
-                              </Paper>
-                            ) : (
-                              <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                  <Box>
-                                    <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>{p.label}</Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      {formatDayGroupShort(p.days)} · {fmtTime12(p.start)} – {fmtTime12(p.end)}
-                                    </Typography>
-                                  </Box>
-                                  <Stack direction="row" spacing={0.25}>
-                                    <IconButton size="small" onClick={() => {
-                                      setEditingPatternId(p.id);
-                                      setEditDays([...p.days]);
-                                      setEditStart(fmtTime(p.start));
-                                      setEditEnd(fmtTime(p.end));
-                                    }}>
-                                      <EditOutlinedIcon sx={{ fontSize: 14 }} />
-                                    </IconButton>
-                                    <IconButton size="small" onClick={() => setConfirmRemoveId(p.id)}>
-                                      <DeleteOutlinedIcon sx={{ fontSize: 14 }} />
-                                    </IconButton>
-                                  </Stack>
-                                </Stack>
-                              </Paper>
-                            )
-                          )}
-                          {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).length > 0 && (
-                            <>
-                              <Divider sx={{ my: 0.5 }} />
-                              <Typography variant="caption" color="text.secondary" fontWeight={600}>Quick add</Typography>
-                              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5, lineHeight: 1.4 }}>
-                                Popular slots — adding these helps you get scheduled faster.
-                              </Typography>
-                              {PRESET_SLOTS.filter((ps) => !patterns.some((p) => p.label === ps.label)).map((ps) => (
-                                <Stack key={ps.key} direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.5 }}>
-                                  <Box>
-                                    <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>{ps.label}</Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                      {formatDayGroupShort(ps.days)} · {fmtTime12(parseHHMM(ps.start))} – {fmtTime12(parseHHMM(ps.end))}
-                                    </Typography>
-                                  </Box>
-                                  <Button size="small" variant="soft" onClick={() => {
-                                    const newPattern = { id: `preset-${ps.key}-${Date.now()}`, label: ps.label, days: [...ps.days], start: parseHHMM(ps.start), end: parseHHMM(ps.end) };
-                                    dispatch(setPatterns([...patterns, newPattern]));
-                                    dispatch(pushToast({ title: "Slot added", description: ps.label }));
-                                  }}>Add</Button>
-                                </Stack>
-                              ))}
-                            </>
-                          )}
-                          <Button
-                            size="small"
-                            variant="soft"
-                            startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
-                            onClick={() => setShowAddSlotModal(true)}
-                            fullWidth
-                          >
-                            Custom slot
-                          </Button>
-                        </Stack>
-                      </AccordionDetails>
-                    </Accordion>
+                  <Card variant="outlined" sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => dispatch(setOpenAvailability(true))}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="subtitle2" fontWeight={600}>Availability summary</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {patterns.length} slot{patterns.length !== 1 ? "s" : ""} configured
+                        </Typography>
+                      </Box>
+                      <Chip label="Configured" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                    </Stack>
                   </Card>
                 ) : (
                   <TaskCard
@@ -1555,80 +1408,6 @@ export default function DashboardPage() {
         </Grid>
       </Grid>}
 
-      {/* ── Add custom slot modal ── */}
-      <Dialog open={showAddSlotModal} onClose={() => setShowAddSlotModal(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, fontSize: "1.1rem", pb: 0 }}>
-          Add custom slot
-          <IconButton size="small" onClick={() => setShowAddSlotModal(false)} sx={{ position: "absolute", right: 12, top: 12 }}>
-            <CloseOutlinedIcon sx={{ fontSize: 16 }} />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 1 }}>Select days</Typography>
-          <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mb: 2 }}>
-            {DOW_LONG.map((day) => (
-              <Chip
-                key={day}
-                label={day.slice(0, 3)}
-                size="small"
-                variant={addDays.includes(day) ? "filled" : "outlined"}
-                sx={addDays.includes(day) ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { cursor: "pointer" }}
-                onClick={() => setAddDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day])}
-              />
-            ))}
-          </Stack>
-          <Stack direction="row" spacing={2}>
-            <FormControl size="small" fullWidth>
-              <InputLabel>Start time</InputLabel>
-              <Select label="Start time" value={addStart} onChange={(e) => setAddStart(e.target.value)}>
-                {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-              </Select>
-            </FormControl>
-            <FormControl size="small" fullWidth>
-              <InputLabel>End time</InputLabel>
-              <Select label="End time" value={addEnd} onChange={(e) => setAddEnd(e.target.value)}>
-                {timeOptions12.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button variant="text" color="inherit" onClick={() => setShowAddSlotModal(false)}>Cancel</Button>
-          <Button variant="contained" disabled={!addDays.length} onClick={() => {
-            const label = `${formatDayGroupShort(addDays)} ${fmtTime12(parseHHMM(addStart))}–${fmtTime12(parseHHMM(addEnd))}`;
-            const newPattern = { id: `custom-${Date.now()}`, label, days: [...addDays], start: parseHHMM(addStart), end: parseHHMM(addEnd) };
-            dispatch(setPatterns([...patterns, newPattern]));
-            dispatch(pushToast({ title: "Slot added", description: label }));
-            setAddDays(["Saturday", "Sunday"]);
-            setAddStart("10:00");
-            setAddEnd("12:00");
-            setShowAddSlotModal(false);
-          }}>Add slot</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* ── Confirm remove slot dialog ── */}
-      <Dialog open={!!confirmRemoveId} onClose={() => setConfirmRemoveId(null)} maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: 700, fontSize: "1.1rem" }}>Remove availability slot?</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary">
-            {confirmRemoveId && patterns.find((p) => p.id === confirmRemoveId)
-              ? `This will remove "${patterns.find((p) => p.id === confirmRemoveId)!.label}" from your availability. You can add it back anytime.`
-              : "This slot will be removed from your availability."}
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button variant="text" color="inherit" onClick={() => setConfirmRemoveId(null)}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={() => {
-            if (!confirmRemoveId) return;
-            const removed = patterns.find((p) => p.id === confirmRemoveId);
-            const updated = patterns.filter((p) => p.id !== confirmRemoveId);
-            dispatch(setPatterns(updated));
-            dispatch(pushToast({ title: "Slot removed", description: removed?.label ?? "" }));
-            setConfirmRemoveId(null);
-          }}>Remove</Button>
-        </DialogActions>
-      </Dialog>
     </Stack>
   );
 }
