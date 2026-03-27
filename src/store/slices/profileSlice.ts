@@ -6,6 +6,8 @@ interface ProfileState {
   guruPrograms: string;
   timeZoneMode: "auto" | "manual";
   manualTimeZone: string;
+  /** Offset in minutes from base timezone (Asia/Kolkata) to effective timezone */
+  tzOffsetMinutes: number;
   // Draft state for edit dialog
   draftName: string;
   draftMode: "Online" | "Hybrid" | "In-person";
@@ -18,6 +20,7 @@ const initialState: ProfileState = {
   guruPrograms: "PGP-DS",
   timeZoneMode: "auto",
   manualTimeZone: "Asia/Kolkata",
+  tzOffsetMinutes: 0,
   draftName: "Snehanjan Shome",
   draftMode: "Online",
   draftPrograms: "PGP-DS",
@@ -41,6 +44,9 @@ const profileSlice = createSlice({
     },
     setManualTimeZone(state, action: PayloadAction<string>) {
       state.manualTimeZone = action.payload;
+    },
+    setTzOffsetMinutes(state, action: PayloadAction<number>) {
+      state.tzOffsetMinutes = action.payload;
     },
     setDraftName(state, action: PayloadAction<string>) {
       state.draftName = action.payload;
@@ -70,6 +76,7 @@ export const {
   setGuruPrograms,
   setTimeZoneMode,
   setManualTimeZone,
+  setTzOffsetMinutes,
   setDraftName,
   setDraftMode,
   setDraftPrograms,

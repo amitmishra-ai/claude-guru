@@ -580,7 +580,7 @@ export const demoSessions: Session[] = [
         ],
       },
       {
-        batch: "PGP-DS Online Feb 26 A", group: "Group 06", audienceType: "Group", learnerCount: 18, proficiency: "Beginner",
+        batch: "PGP-DS Online Feb 26 A", group: "Group 06", audienceType: "Group", learnerCount: 18,
         programManager: { name: "Ravi Kumar", email: "ravi.kumar@greatlearning.com", phone: "+91 91234 56789" },
         members: [
           { name: "Neha Gupta", email: "neha.g.pgds@gmail.com" },
@@ -601,6 +601,24 @@ export const demoSessions: Session[] = [
           { name: "Siddharth Rao", email: "siddharth.rao.ds@gmail.com" },
           { name: "Anjali Bhatt", email: "anjali.bhatt.pgds@gmail.com" },
           { name: "Vivek Chauhan", email: "vivek.chauhan.ds@gmail.com" },
+        ],
+      },
+      {
+        batch: "AIML Online July 25 B", group: "Group 03", audienceType: "Group", learnerCount: 12,
+        programManager: { name: "Ashish Saroh", email: "ashish.saroh@greatlearning.in", phone: "+91 91234 56789" },
+        members: [
+          { name: "Arjun Nair", email: "arjun.nair.aiml@gmail.com" },
+          { name: "Megha Rathore", email: "megha.rathore.aiml@gmail.com" },
+          { name: "Nitin Jain", email: "nitin.jain.aiml@gmail.com" },
+          { name: "Shruti Bose", email: "shruti.bose.aiml@gmail.com" },
+          { name: "Abhishek Yadav", email: "abhishek.yadav.aiml@gmail.com" },
+          { name: "Ritu Sharma", email: "ritu.sharma.aiml@gmail.com" },
+          { name: "Deepika Nair", email: "deepika.nair.aiml@gmail.com" },
+          { name: "Sameer Gupta", email: "sameer.gupta.aiml@gmail.com" },
+          { name: "Tanya Mishra", email: "tanya.mishra.aiml@gmail.com" },
+          { name: "Akash Reddy", email: "akash.reddy.aiml@gmail.com" },
+          { name: "Komal Aggarwal", email: "komal.aggarwal.aiml@gmail.com" },
+          { name: "Rajesh Pillai", email: "rajesh.pillai.aiml@gmail.com" },
         ],
       },
     ],
@@ -858,10 +876,13 @@ export const demoSessions: Session[] = [
           { name: "Harsh Malhotra", email: "harsh.malhotra.ds@gmail.com" },
         ],
       },
-      // Individual learner added by PM (missed previous session)
-      { batch: "AIML Online Jan 26 B", group: "", audienceType: "Individual", learnerCount: 1,
-        learnerName: "Arjun Nair", learnerEmail: "arjun.nair.aiml@gmail.com",
-        programManager: { name: "Ashish Saroh", email: "ashish.saroh@greatlearning.in", phone: "+91 91234 56789" },
+      // Individual learners added by PM (missed previous sessions)
+      { batch: "AIML Online Jan 26 B", group: "", audienceType: "Individual", learnerCount: 2,
+        learnerName: "Individual students",
+        members: [
+          { name: "Arjun Nair", email: "arjun.nair.aiml@gmail.com" },
+          { name: "Tanya Mishra", email: "tanya.mishra.aiml@gmail.com" },
+        ],
       },
     ],
   },

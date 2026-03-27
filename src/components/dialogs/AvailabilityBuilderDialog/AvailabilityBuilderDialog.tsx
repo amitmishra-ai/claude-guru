@@ -133,6 +133,10 @@ const AvailabilityBuilderDialog = () => {
   const [editingPresetKey, setEditingPresetKey] = useState<string | null>(null);
   const [editPresetStart, setEditPresetStart] = useState("");
   const [editPresetEnd, setEditPresetEnd] = useState("");
+  const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
+  const [editDraftDays, setEditDraftDays] = useState<string[]>([]);
+  const [editDraftStart, setEditDraftStart] = useState("");
+  const [editDraftEnd, setEditDraftEnd] = useState("");
 
   const effectiveTimezone =
     timeZoneMode === "manual"
@@ -213,7 +217,33 @@ const AvailabilityBuilderDialog = () => {
   };
 
   const handleSave = async () => {
-    const presetPatterns = cards
+    // Auto-save any in-progress preset edit
+    let finalCards = cards;
+    if (editingPresetKey && editPresetStart && editPresetEnd) {
+      finalCards = cards.map((c) => c.key === editingPresetKey ? { ...c, start: editPresetStart, end: editPresetEnd } : c);
+      dispatch(setPresetCards(finalCards));
+      setEditingPresetKey(null);
+    }
+
+    // Auto-save any in-progress draft edit
+    let finalDrafts = draftPatterns;
+    if (editingDraftId && editDraftDays.length > 0 && editDraftStart && editDraftEnd) {
+      const label = `${formatDayGroupShort(editDraftDays)} ${fmtTime12(parseHHMM(editDraftStart))}–${fmtTime12(parseHHMM(editDraftEnd))}`;
+      finalDrafts = draftPatterns.map((d) => d.id === editingDraftId ? { ...d, label, days: editDraftDays, start: parseHHMM(editDraftStart), end: parseHHMM(editDraftEnd) } : d);
+      dispatch(setAvailabilityDraftPatterns(finalDrafts));
+      setEditingDraftId(null);
+    }
+
+    // Auto-save any in-progress custom slot form
+    if (showCustomForm && builderDays.length > 0) {
+      const label = `${formatDayGroupShort(builderDays)} ${fmtTime12(parseHHMM(builderStart))}–${fmtTime12(parseHHMM(builderEnd))}`;
+      const newPattern = { id: `custom-${Date.now()}`, label, days: [...builderDays], start: parseHHMM(builderStart), end: parseHHMM(builderEnd) };
+      finalDrafts = [...finalDrafts, newPattern];
+      dispatch(setAvailabilityDraftPatterns(finalDrafts));
+      setShowCustomForm(false);
+    }
+
+    const presetPatterns = finalCards
       .filter((c) => c.enabled)
       .map((c) => ({
         id: `preset-${c.key}`,
@@ -224,7 +254,7 @@ const AvailabilityBuilderDialog = () => {
       }));
     const allPatterns = [
       ...presetPatterns,
-      ...draftPatterns.map((d) => ({ id: d.id, label: d.label, days: d.days, start: d.start, end: d.end })),
+      ...finalDrafts.map((d) => ({ id: d.id, label: d.label, days: d.days, start: d.start, end: d.end })),
     ];
 
     try {
@@ -453,21 +483,71 @@ const AvailabilityBuilderDialog = () => {
                     </Paper>
                   )
                 )}
-                {draftPatterns.map((p) => (
-                  <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Box>
-                        <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>{p.label}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {formatDayGroupShort(p.days)} · {fmtTime12(p.start)} – {fmtTime12(p.end)}
-                        </Typography>
+                {draftPatterns.map((p) =>
+                  editingDraftId === p.id ? (
+                    <Paper key={p.id} variant="outlined" sx={{ p: 1.25, borderRadius: 1.5, borderColor: "primary.main" }}>
+                      <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: "1rem", fontSize: "0.7rem" }}>Edit custom slot</Typography>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.4, mb: 1.5 }}>
+                        {DOW_LONG.map((day) => {
+                          const selected = editDraftDays.includes(day);
+                          return (
+                            <Chip key={day} label={day.slice(0, 3)} size="small"
+                              onClick={() => setEditDraftDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day])}
+                              sx={{ height: 24, width: 44, fontSize: "0.65rem", fontWeight: 600, border: "none", "& .MuiChip-label": { px: 0, width: "100%", textAlign: "center" }, cursor: "pointer", transition: "all 0.15s", ...(selected ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { bgcolor: "hsl(var(--md-surface-container) / 0.8)", color: "text.secondary", "&:hover": { bgcolor: "action.hover" } }) }}
+                            />
+                          );
+                        })}
                       </Box>
-                      <IconButton size="small" onClick={() => removeCustomSlot(p.id)}>
-                        <CloseOutlinedIcon sx={{ fontSize: 14 }} />
-                      </IconButton>
-                    </Stack>
-                  </Paper>
-                ))}
+                      <Stack direction="row" spacing={0.75} sx={{ mb: "1rem" }}>
+                        <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
+                          <InputLabel>Start</InputLabel>
+                          <Select label="Start" value={editDraftStart} onChange={(e) => setEditDraftStart(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
+                            {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                        <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
+                          <InputLabel>End</InputLabel>
+                          <Select label="End" value={editDraftEnd} onChange={(e) => setEditDraftEnd(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
+                            {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      </Stack>
+                      <Stack direction="row" spacing={0.75}>
+                        <Button size="small" variant="contained" disabled={!editDraftDays.length} sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }} onClick={() => {
+                          const label = `${formatDayGroupShort(editDraftDays)} ${fmtTime12(parseHHMM(editDraftStart))}–${fmtTime12(parseHHMM(editDraftEnd))}`;
+                          const updated = draftPatterns.map((d) => d.id === p.id ? { ...d, label, days: editDraftDays, start: parseHHMM(editDraftStart), end: parseHHMM(editDraftEnd) } : d);
+                          dispatch(setAvailabilityDraftPatterns(updated));
+                          setEditingDraftId(null);
+                        }}>Save</Button>
+                        <Button size="small" variant="text" color="inherit" sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }} onClick={() => setEditingDraftId(null)}>Cancel</Button>
+                      </Stack>
+                    </Paper>
+                  ) : (
+                    <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Box>
+                          <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>Custom time slot</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {formatDayGroupShort(p.days)} · {fmtTime12(p.start)} – {fmtTime12(p.end)}
+                          </Typography>
+                        </Box>
+                        <Stack direction="row" spacing={0.25}>
+                          <IconButton size="small" onClick={() => {
+                            setEditingDraftId(p.id);
+                            setEditDraftDays([...p.days]);
+                            setEditDraftStart(fmtTime(p.start));
+                            setEditDraftEnd(fmtTime(p.end));
+                          }}>
+                            <EditOutlinedIcon sx={{ fontSize: 14 }} />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => removeCustomSlot(p.id)}>
+                            <CloseOutlinedIcon sx={{ fontSize: 14 }} />
+                          </IconButton>
+                        </Stack>
+                      </Stack>
+                    </Paper>
+                  )
+                )}
               </Stack>
               </>
             )}

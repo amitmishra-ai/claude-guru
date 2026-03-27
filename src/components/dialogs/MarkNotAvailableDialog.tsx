@@ -274,21 +274,20 @@ export function MarkNotAvailableDialog() {
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="xs"
-      fullWidth
-      PaperProps={{ sx: { borderRadius: 3, overflow: "hidden" } }}
+      maxWidth={false}
+      PaperProps={{ sx: { width: 420, borderRadius: 3, overflow: "hidden" } }}
     >
       {/* ── Header ── */}
-      <Box sx={{ px: 3, pt: 2.5, pb: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Typography variant="subtitle1" fontWeight={700}>
+      <Box sx={{ px: 2.5, pt: 2, pb: 1.25, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.9rem" }}>
           {editingLeaveGroupId ? "Edit leave" : step === 2 ? "Conflicts found" : "Mark leave"}
         </Typography>
         <Chip
           label={step === 2 ? `${totalConflicts} conflict${totalConflicts > 1 ? "s" : ""}` : "Leave"}
           size="small"
           sx={{
-            height: 22,
-            fontSize: "0.7rem",
+            height: 20,
+            fontSize: "0.65rem",
             fontWeight: 600,
             ...(step === 2
               ? { bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)" }
@@ -297,15 +296,15 @@ export function MarkNotAvailableDialog() {
         />
       </Box>
 
-      <DialogContent sx={{ px: 3, pt: 1, pb: 2 }}>
+      <DialogContent sx={{ px: 2.5, pt: 0.5, pb: 1.5 }}>
         {step === 1 && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.82rem" }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
               Block off dates when you're not available for sessions.
             </Typography>
 
             {/* Date range */}
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
               <TextField
                 label="Start date"
                 type="date"
@@ -314,6 +313,7 @@ export function MarkNotAvailableDialog() {
                 size="small"
                 fullWidth
                 slotProps={{ inputLabel: { shrink: true } }}
+                sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}
               />
               <TextField
                 label="End date"
@@ -323,31 +323,32 @@ export function MarkNotAvailableDialog() {
                 size="small"
                 fullWidth
                 slotProps={{ inputLabel: { shrink: true } }}
+                sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}
               />
             </Box>
 
             {/* Time range */}
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
-              <FormControl fullWidth size="small">
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
+              <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
                 <InputLabel>Start time</InputLabel>
-                <Select label="Start time" value={naStart} onChange={(e) => dispatch(setNaStart(e.target.value))}>
+                <Select label="Start time" value={naStart} onChange={(e) => dispatch(setNaStart(e.target.value))} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
                   {timeOptions12.map((opt) => (
-                    <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                    <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
                 <InputLabel>End time</InputLabel>
-                <Select label="End time" value={naEnd} onChange={(e) => dispatch(setNaEnd(e.target.value))}>
+                <Select label="End time" value={naEnd} onChange={(e) => dispatch(setNaEnd(e.target.value))} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
                   {timeOptions12.map((opt) => (
-                    <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                    <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Box>
 
             {naStartDate && naEndDate && !isValid && (
-              <Typography variant="caption" sx={{ color: "error.main", fontSize: "0.75rem" }}>
+              <Typography variant="caption" sx={{ color: "error.main", fontSize: "0.7rem" }}>
                 End date/time must be after start date/time.
               </Typography>
             )}
@@ -359,6 +360,7 @@ export function MarkNotAvailableDialog() {
               placeholder="e.g. Vacation, Personal"
               size="small"
               fullWidth
+              sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}
             />
           </Box>
         )}
@@ -447,8 +449,8 @@ export function MarkNotAvailableDialog() {
       </DialogContent>
 
       {/* ── Footer ── */}
-      <Box sx={{ px: 3, pb: 2.5, pt: 0.5, display: "flex", justifyContent: "flex-end", gap: 1 }}>
-        <Button variant="text" color="inherit" size="small" onClick={step === 2 ? () => setStep(1) : handleClose}>
+      <Box sx={{ px: 2.5, pb: 2, pt: 0.5, display: "flex", justifyContent: "flex-end", gap: 1 }}>
+        <Button variant="text" color="inherit" size="small" onClick={step === 2 ? () => setStep(1) : handleClose} sx={{ fontSize: "0.75rem" }}>
           {step === 2 ? "Back" : "Cancel"}
         </Button>
         <Button
@@ -456,7 +458,7 @@ export function MarkNotAvailableDialog() {
           size="small"
           onClick={step === 2 ? handleConfirm : handleMarkLeave}
           disabled={step === 1 && !isValid}
-          sx={{ px: 3 }}
+          sx={{ px: 2.5, fontSize: "0.75rem" }}
         >
           {step === 2 ? "Confirm leave" : editingLeaveGroupId ? "Update" : "Mark leave"}
         </Button>

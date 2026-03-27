@@ -55,7 +55,7 @@ import {
 import { setOpenSessionDetails, setOpenDeclineReason, setOpenLearnerRatings, setLearnerRatingsSessionId } from "@/store/slices/uiSlice";
 import { addPoll, updatePoll, removePoll } from "@/store/slices/pollsSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
-import { fmtDateNice, fmtTime12, fmtDuration, fmtInr, getTimeZoneOffsetMinutes, formatGMTOffsetFromMinutesAhead } from "@/lib/helpers";
+import { fmtDateNice, fmtTime12, fmtDuration, fmtInr, getTimeZoneOffsetMinutes, formatGMTOffsetFromMinutesAhead, applyTzOffset } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
 import { demoCourseCatalog, demoLearnerRatingsBySessionId } from "@/data/demo-sessions";
 import { dateTimeMs, sortByDateTime } from "@/lib/helpers";
@@ -492,6 +492,8 @@ export function SessionDetailsModal() {
   const allSessions = useAppSelector((s) => s.sessions.items);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
   const nowMs = demoNow.getTime();
+  const tzOffset = useAppSelector((s) => s.profile.tzOffsetMinutes);
+  const [expandedCombinedBatch, setExpandedCombinedBatch] = useState<string | false>(false);
 
   const nextSessionId = sortByDateTime(allSessions).find(
     (s) => dateTimeMs(s.dateYmd, s.start) >= nowMs && !sessionDeclined[s.id]
@@ -614,7 +616,7 @@ export function SessionDetailsModal() {
                           {fmtDateNice(session.dateYmd)}
                         </Typography>
                         <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                          {fmtTime12(session.start)}&ndash;{fmtTime12(session.end)} &middot; {fmtDuration(session.start, session.end)}
+                          {fmtTime12(applyTzOffset(session.start, tzOffset))}&ndash;{fmtTime12(applyTzOffset(session.end, tzOffset))} &middot; {fmtDuration(session.start, session.end)}
                         </Typography>
                       </Box>
                     </Stack>
@@ -680,7 +682,7 @@ export function SessionDetailsModal() {
                                   {fmtDateNice(day.dateYmd)}
                                 </Typography>
                                 <Typography variant="body2" fontWeight={500}>
-                                  {fmtTime12(day.start)} – {fmtTime12(day.end)}
+                                  {fmtTime12(applyTzOffset(day.start, tzOffset))} – {fmtTime12(applyTzOffset(day.end, tzOffset))}
                                 </Typography>
                               </Stack>
                             ))}
@@ -738,14 +740,16 @@ export function SessionDetailsModal() {
                 {session.combinedBatches && session.combinedBatches.length > 0 && (
                   <Box sx={{ mb: 2.5 }}>
                     <SectionHeading icon={<CallMergeOutlinedIcon sx={{ fontSize: 14 }} />}>
-                      Combined session &middot; {session.combinedBatches.length}
+                      Combined session &middot; {session.combinedBatches.reduce((sum, cb) => sum + (cb.learnerCount ?? 0), 0)} members
                     </SectionHeading>
                     <Stack spacing={1}>
                       {session.combinedBatches.map((cb) => (
                         <Accordion
-                          key={cb.batch}
+                          key={cb.batch + (cb.group || "")}
                           disableGutters
                           elevation={0}
+                          expanded={expandedCombinedBatch === (cb.batch + (cb.group || ""))}
+                          onChange={(_, isExpanded) => setExpandedCombinedBatch(isExpanded ? cb.batch + (cb.group || "") : false)}
                           sx={{ border: "1px solid", borderColor: "divider", borderRadius: "8px !important", overflow: "hidden", "&::before": { display: "none" } }}
                         >
                           <AccordionSummary
@@ -753,11 +757,18 @@ export function SessionDetailsModal() {
                             sx={{ px: 1.5, minHeight: "unset", "& .MuiAccordionSummary-content": { my: 0.75 } }}
                           >
                             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%", mr: 1 }}>
-                              <Typography variant="caption" fontWeight={600}>
-                                {cb.audienceType === "Individual" ? cb.learnerName ?? cb.batch : cb.batch}
-                              </Typography>
+                              <Box>
+                                <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>
+                                  {cb.audienceType === "Individual" ? "Individual students" : cb.batch}
+                                </Typography>
+                                {cb.learnerCount && (
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem", display: "block", lineHeight: 1.2 }}>
+                                    {cb.audienceType === "Individual" ? `${cb.learnerCount} student${cb.learnerCount !== 1 ? "s" : ""}` : `${cb.learnerCount} learners`}
+                                  </Typography>
+                                )}
+                              </Box>
                               <Chip
-                                label={cb.audienceType === "Individual" ? "Individual" : cb.audienceType === "Batch" ? "Whole batch" : cb.group || "Group"}
+                                label={cb.audienceType === "Individual" ? "Individual" : cb.audienceType === "Batch" ? "Whole batch" : "Group"}
                                 size="small"
                                 variant="outlined"
                                 sx={{ height: 18, fontSize: "0.55rem", fontWeight: 600, borderRadius: 1 }}
@@ -777,8 +788,20 @@ export function SessionDetailsModal() {
                                 </Typography>
                               </Box>
                             </Stack>
-                            {/* Group Members (only for Group audienceType) */}
-                            {(cb.audienceType === "Group" || cb.audienceType === "Batch") && cb.members && cb.members.length > 0 && (
+                            {/* Group info — show group identifier + batch */}
+                            {cb.audienceType === "Group" && cb.group && (
+                              <Box sx={{ mb: 1.5 }}>
+                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.5, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
+                                  Group details
+                                </Typography>
+                                <Stack spacing={0.5}>
+                                  <Typography variant="caption" fontWeight={500}>{cb.group} &middot; {cb.batch}</Typography>
+                                  {cb.learnerCount && <Typography variant="caption" color="text.secondary">{cb.learnerCount} learners</Typography>}
+                                </Stack>
+                              </Box>
+                            )}
+                            {/* Group Members (only for Group, not whole batch) */}
+                            {cb.audienceType === "Group" && cb.members && cb.members.length > 0 && (
                               <Box>
                                 <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
                                   Members ({cb.members.length})
@@ -813,12 +836,31 @@ export function SessionDetailsModal() {
 
 
                             {/* Individual learner details */}
-                            {cb.audienceType === "Individual" && cb.learnerName && (
+                            {cb.audienceType === "Individual" && (cb.members && cb.members.length > 0 ? (
                               <Box>
                                 <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
-                                  Learner
+                                  Students ({cb.members.length})
                                 </Typography>
-                                <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+                                <Stack spacing={0.5}>
+                                  {cb.members.map((m) => (
+                                    <Stack key={m.email} direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
+                                      <Avatar sx={{ width: 28, height: 28, fontSize: "0.65rem", bgcolor: "action.selected", color: "text.primary", flexShrink: 0 }}>
+                                        {m.name.charAt(0)}
+                                      </Avatar>
+                                      <Box sx={{ minWidth: 0 }}>
+                                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.2 }}>{m.name}</Typography>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontSize: "0.7rem" }}>{m.email}</Typography>
+                                      </Box>
+                                    </Stack>
+                                  ))}
+                                </Stack>
+                              </Box>
+                            ) : cb.learnerName ? (
+                              <Box>
+                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
+                                  Student
+                                </Typography>
+                                <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
                                   <Avatar sx={{ width: 28, height: 28, fontSize: "0.65rem", bgcolor: "action.selected", color: "text.primary", flexShrink: 0 }}>
                                     {cb.learnerName.charAt(0)}
                                   </Avatar>
@@ -828,7 +870,7 @@ export function SessionDetailsModal() {
                                   </Box>
                                 </Stack>
                               </Box>
-                            )}
+                            ) : null)}
                           </AccordionDetails>
                         </Accordion>
                       ))}

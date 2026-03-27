@@ -161,6 +161,9 @@ export default function DashboardPage() {
   const requests = useAppSelector((s) => s.requests.items);
   const guruName = useAppSelector((s) => s.profile.guruName);
   const polls = useAppSelector((s) => s.polls.items);
+  const supportTickets = useAppSelector((s) => s.support.tickets);
+  const openTicketCount = supportTickets.filter((t) => t.status === "open" || t.status === "awaiting_reply").length;
+  const escalatedTicketCount = supportTickets.filter((t) => t.status === "escalated").length;
   const selectedSessionType = useAppSelector((s) => s.sessions.selectedSessionType);
   const selectedTimePeriod = useAppSelector((s) => s.sessions.selectedTimePeriod);
   const recentlyConfirmedIds = useAppSelector((s) => s.sessions.recentlyConfirmedIds);
@@ -286,43 +289,52 @@ export default function DashboardPage() {
         {/* Welcome skeleton */}
         <Skeleton variant="text" width={220} height={32} />
 
-        {/* Next Event skeleton */}
-        <Card variant="outlined" sx={{ p: 2 }}>
-          <Skeleton variant="text" width={100} height={20} sx={{ mb: 1 }} />
-          <Card variant="outlined" sx={{ p: 2 }}>
-            <Skeleton variant="rounded" width={80} height={22} sx={{ mb: 1, borderRadius: 9999 }} />
-            <Skeleton variant="text" width="70%" height={20} />
-            <Skeleton variant="text" width="50%" height={16} sx={{ mt: 0.5 }} />
-            <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
-              <Skeleton variant="rounded" width={100} height={30} />
-              <Skeleton variant="rounded" width={120} height={30} />
-            </Stack>
-          </Card>
-        </Card>
-
-        <Grid container spacing={2}>
+        <Grid container spacing={{ xs: 2, md: 3 }} alignItems="flex-start">
           {/* Left column skeleton */}
           <Grid size={{ xs: 12, md: 8 }}>
-            <Card variant="outlined" sx={{ p: 2 }}>
+            {/* Up next skeleton */}
+            <Card sx={{ p: 2, mb: 2 }}>
+              <Skeleton variant="text" width={80} height={20} sx={{ mb: 1.5 }} />
+              {[0, 1].map((i) => (
+                <Card key={i} variant="outlined" sx={{ p: 2, mb: 1.5 }}>
+                  {i === 0 && <Skeleton variant="rounded" width={90} height={20} sx={{ mb: 1, borderRadius: 9999 }} />}
+                  <Skeleton variant="text" width="65%" height={18} />
+                  <Skeleton variant="text" width="45%" height={14} sx={{ mt: 0.5 }} />
+                  <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                    <Skeleton variant="rounded" width={100} height={28} />
+                    <Skeleton variant="rounded" width={130} height={28} />
+                  </Stack>
+                </Card>
+              ))}
+            </Card>
+
+            {/* Activities card skeleton */}
+            <Card sx={{ p: 2 }}>
+              <Skeleton variant="text" width={90} height={22} sx={{ mb: 1.5 }} />
               {/* Tabs skeleton */}
               <Stack direction="row" spacing={3} sx={{ mb: 2, borderBottom: 1, borderColor: "divider", pb: 1 }}>
-                {[140, 130, 110].map((w, i) => (
-                  <Skeleton key={i} variant="text" width={w} height={24} />
+                {[130, 130, 110].map((w, i) => (
+                  <Skeleton key={i} variant="text" width={w} height={22} />
                 ))}
               </Stack>
+              {/* Header */}
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                <Skeleton variant="text" width={140} height={18} />
+                <Skeleton variant="text" width={90} height={14} />
+              </Stack>
               {/* Session cards skeleton */}
-              {[0, 1, 2, 3].map((i) => (
+              {[0, 1, 2].map((i) => (
                 <Card key={i} variant="outlined" sx={{ p: 2, mb: 1.5 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                     <Box sx={{ flex: 1 }}>
-                      <Skeleton variant="text" width="60%" height={20} />
-                      <Skeleton variant="text" width="40%" height={16} sx={{ mt: 0.5 }} />
+                      <Skeleton variant="text" width="60%" height={18} />
+                      <Skeleton variant="text" width="40%" height={14} sx={{ mt: 0.5 }} />
                     </Box>
-                    <Skeleton variant="rounded" width={70} height={22} sx={{ borderRadius: 9999 }} />
+                    <Skeleton variant="rounded" width={70} height={20} sx={{ borderRadius: 9999 }} />
                   </Stack>
                   <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
-                    <Skeleton variant="rounded" width={90} height={28} />
-                    <Skeleton variant="rounded" width={110} height={28} />
+                    <Skeleton variant="rounded" width={85} height={28} />
+                    <Skeleton variant="rounded" width={105} height={28} />
                   </Stack>
                 </Card>
               ))}
@@ -331,29 +343,60 @@ export default function DashboardPage() {
 
           {/* Right column skeleton */}
           <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: "none", md: "block" } }}>
-            {/* Performance skeleton */}
+            {/* Tasks skeleton */}
             <Card sx={{ p: 2, mb: 2 }}>
-              <Skeleton variant="text" width={140} height={20} sx={{ mb: 1.5 }} />
+              <Skeleton variant="text" width={50} height={20} sx={{ mb: 1.5 }} />
+              <Stack spacing={1.5}>
+                {/* Task card skeletons */}
+                {[0, 1].map((i) => (
+                  <Card key={i} variant="outlined" sx={{ px: 2.5, py: 1.5 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Skeleton variant="text" width={140} height={18} />
+                        <Skeleton variant="text" width={180} height={14} sx={{ mt: 0.25 }} />
+                      </Box>
+                      <Skeleton variant="rounded" width={70} height={20} sx={{ borderRadius: 9999 }} />
+                    </Stack>
+                  </Card>
+                ))}
+                {/* Availability card skeleton */}
+                <Card variant="outlined" sx={{ px: 2.5, py: 1.5 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Box>
+                      <Skeleton variant="text" width={150} height={18} />
+                      <Skeleton variant="text" width={120} height={14} sx={{ mt: 0.25 }} />
+                    </Box>
+                    <Skeleton variant="rounded" width={80} height={20} sx={{ borderRadius: 9999 }} />
+                  </Stack>
+                </Card>
+                {/* Support tickets skeleton */}
+                <Card variant="outlined" sx={{ px: 2.5, py: 1.5 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Box>
+                      <Skeleton variant="text" width={120} height={18} />
+                      <Skeleton variant="text" width={160} height={14} sx={{ mt: 0.25 }} />
+                    </Box>
+                    <Skeleton variant="rounded" width={60} height={20} sx={{ borderRadius: 9999 }} />
+                  </Stack>
+                </Card>
+              </Stack>
+            </Card>
+
+            {/* Performance skeleton */}
+            <Card sx={{ p: 2 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+                <Skeleton variant="text" width={120} height={20} />
+                <Skeleton variant="text" width={70} height={16} />
+              </Stack>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
                 {[0, 1, 2, 3].map((i) => (
                   <Box key={i} sx={{ p: 1.25, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-                    <Skeleton variant="text" width={60} height={12} />
-                    <Skeleton variant="text" width={50} height={22} sx={{ mt: 0.25 }} />
-                    <Skeleton variant="rectangular" width="100%" height={20} sx={{ mt: 0.5, borderRadius: 1 }} />
+                    <Skeleton variant="text" width={60} height={10} />
+                    <Skeleton variant="text" width={40} height={20} sx={{ mt: 0.25 }} />
+                    <Skeleton variant="rectangular" width="100%" height={18} sx={{ mt: 0.5, borderRadius: 1 }} />
                   </Box>
                 ))}
               </Box>
-            </Card>
-            {/* Tasks skeleton */}
-            <Card sx={{ p: 2 }}>
-              <Skeleton variant="text" width={60} height={20} sx={{ mb: 1.5 }} />
-              {[0, 1, 2].map((i) => (
-                <Card key={i} variant="outlined" sx={{ p: 1.5, mb: 1.5 }}>
-                  <Skeleton variant="text" width="70%" height={18} />
-                  <Skeleton variant="text" width="90%" height={14} sx={{ mt: 0.5 }} />
-                  <Skeleton variant="rounded" width="100%" height={30} sx={{ mt: 1 }} />
-                </Card>
-              ))}
             </Card>
           </Grid>
         </Grid>
@@ -404,7 +447,7 @@ export default function DashboardPage() {
               Set your availability to get started
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto', fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
-              Without marking your availability, no events will be scheduled with you. Let learners know when you're free so they can book time with you.
+              Without marking your availability, no activities will be scheduled with you. Let learners know when you're free so they can book time with you.
             </Typography>
           </Box>
           <Button
@@ -452,7 +495,7 @@ export default function DashboardPage() {
                         chipColor="var(--gl-status-declined-text)"
                         chipBg="var(--gl-status-declined-bg)"
                         chipBorder="var(--gl-status-declined-border)"
-                        title="Confirm upcoming events"
+                        title="Confirm upcoming activities"
                         description="Confirm by Wednesday 6 PM so our team can finalize allocations."
                         action={
                           <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
@@ -468,12 +511,13 @@ export default function DashboardPage() {
 
             {/* ── Big container for entire left section ── */}
             <Card sx={{ p: { xs: 1.5, sm: 2 } }}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Activities</Typography>
               <Stack spacing={{ xs: 2, md: 2.5 }}>
-                {/* Next Events — hidden when no today sessions */}
+                {/* Next Activities — hidden when no today sessions */}
                 {todaySessions.length > 0 && (
                 <Box>
                   <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
-                    {todaySessions.length > 1 ? "Next Events" : "Next Event"}
+                    {todaySessions.length > 1 ? "Up next" : "Up next"}
                   </Typography>
                     <Stack spacing={1.5}>
                       {todaySessions.map((s) => {
@@ -607,7 +651,7 @@ export default function DashboardPage() {
                 {!tabLoading && homeSessionsView === "next" && (
                   <Box>
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-                      <Typography variant="subtitle2" fontWeight={600}>Events</Typography>
+                      <Typography variant="subtitle2" fontWeight={600}>Upcoming activities</Typography>
                       <Typography variant="caption" color="text.secondary">{confirmedCount}/{upcomingSessions.length} confirmed</Typography>
                     </Stack>
                     <Stack spacing={1.5}>
@@ -738,15 +782,20 @@ export default function DashboardPage() {
                                   <AccordionDetails sx={{ p: 0 }}>
                                   <Stack divider={<Divider />}>
                                     {s.combinedBatches.map((cb) => (
-                                      <Box key={cb.batch} sx={{ px: 1.5, py: 0.75 }}>
-                                        <Stack direction="row" alignItems="center" spacing={1}>
-                                          <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
+                                      <Box key={cb.batch + (cb.group || "")} sx={{ px: 1.5, py: 0.75 }}>
+                                        <Stack direction="row" alignItems="center" spacing={0.75}>
                                           <Typography variant="caption" fontWeight={500}>
                                             {cb.audienceType === "Individual" ? cb.learnerName ?? cb.batch : cb.batch}
                                           </Typography>
                                           {cb.group && cb.audienceType !== "Individual" && (
                                             <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
                                           )}
+                                          <Chip
+                                            label={cb.audienceType === "Batch" ? "Batch" : cb.audienceType === "Group" ? "Group" : "Individual"}
+                                            size="small"
+                                            variant="outlined"
+                                            sx={{ height: 16, fontSize: "0.55rem", fontWeight: 600, "& .MuiChip-label": { px: 0.5 } }}
+                                          />
                                         </Stack>
                                       </Box>
                                     ))}
@@ -758,14 +807,14 @@ export default function DashboardPage() {
                           );
                         })
                       ) : (
-                        <Typography variant="body2" color="text.secondary">No upcoming events.</Typography>
+                        <Typography variant="body2" color="text.secondary">No upcoming activities.</Typography>
                       )}
                     </Stack>
 
                     {/* ── Planned Events (subject to change) ── */}
                     <Divider sx={{ mt: 2.5, mb: 0 }} />
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 2, mb: 1.5 }}>
-                      <Typography variant="subtitle2" fontWeight={600}>Planned Events</Typography>
+                      <Typography variant="subtitle2" fontWeight={600}>Planned activities</Typography>
                       <Typography variant="caption" color="text.secondary">(subject to change)</Typography>
                     </Stack>
                     {rolePlannedEvents.length > 0 ? (
@@ -1282,7 +1331,7 @@ export default function DashboardPage() {
                     chipColor="var(--gl-status-declined-text)"
                     chipBg="var(--gl-status-declined-bg)"
                     chipBorder="var(--gl-status-declined-border)"
-                    title="Confirm upcoming events"
+                    title="Confirm upcoming activities"
                     description="Confirm by Wednesday 6 PM so our team can finalize allocations."
                     action={
                       <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
@@ -1331,6 +1380,21 @@ export default function DashboardPage() {
                     title="Add your availability"
                     description={`Keep availability up-to-date for next ${rangeDays} days.`}
                   />
+                )}
+
+                {/* Support tickets task */}
+                {openTicketCount > 0 && (
+                  <Card variant="outlined" sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => navigate("/support")}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="subtitle2" fontWeight={600}>Support tickets</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {openTicketCount} open ticket{openTicketCount !== 1 ? "s" : ""}{escalatedTicketCount > 0 ? ` · ${escalatedTicketCount} escalated` : ""}
+                        </Typography>
+                      </Box>
+                      <Chip label={`${openTicketCount} open`} size="small" sx={{ bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                    </Stack>
+                  </Card>
                 )}
               </Stack>
             </Card>
