@@ -1,130 +1,95 @@
 import { useState } from "react";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import Box from "@mui/material/Box";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import ToggleButton from "@mui/material/ToggleButton";
-import { green, amber, red } from "@mui/material/colors";
+import { blue, green, grey, orange, red } from "@mui/material/colors";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setOpenLearnerRatings, setLearnerRatingsSessionId } from "@/store/slices/uiSlice";
 import { demoLearnerRatingsBySessionId, demoFeedbackSummaryBySessionId } from "@/data/demo-sessions";
-import type { ParameterRating } from "@/lib/types";
 
-type FeedbackFilter = "all" | "4plus" | "3to4" | "below3";
-
-const COLORS = {
-  fiveStar: green[500],
-  fourStar: amber[600],
-  threeAndBelow: red[500],
+/* ── Palette — MUI color tokens ── */
+const C = {
+  five: green[400],
+  four: orange[400],
+  three: red[400],
 } as const;
 
-/* ── SVG Donut Chart ── */
-function DonutChart({ fiveStar, fourStar, threeAndBelow }: { fiveStar: number; fourStar: number; threeAndBelow: number }) {
-  const total = fiveStar + fourStar + threeAndBelow;
-  if (total === 0) return null;
+type Filter = "5star" | "4star" | "3below";
 
-  const radius = 60;
-  const cx = 80;
-  const cy = 80;
-  const circumference = 2 * Math.PI * radius;
-  const strokeWidth = 32;
-
-  const fiveLen = (fiveStar / total) * circumference;
-  const fourLen = (fourStar / total) * circumference;
-  const threeLen = (threeAndBelow / total) * circumference;
-
-  const fiveOffset = 0;
-  const fourOffset = -(fiveLen);
-  const threeOffset = -(fiveLen + fourLen);
-
+/* ── Card shell — uses theme tokens, not hardcoded colors ── */
+function Card({ children, sx }: { children: React.ReactNode; sx?: object }) {
   return (
-    <svg width={160} height={160} viewBox="0 0 160 160">
-      {/* 5 star */}
-      <circle
-        cx={cx} cy={cy} r={radius} fill="none"
-        stroke={COLORS.fiveStar} strokeWidth={strokeWidth}
-        strokeDasharray={`${fiveLen} ${circumference - fiveLen}`}
-        strokeDashoffset={fiveOffset}
-        transform={`rotate(-90 ${cx} ${cy})`}
-      />
-      {/* 4 star */}
-      <circle
-        cx={cx} cy={cy} r={radius} fill="none"
-        stroke={COLORS.fourStar} strokeWidth={strokeWidth}
-        strokeDasharray={`${fourLen} ${circumference - fourLen}`}
-        strokeDashoffset={fourOffset}
-        transform={`rotate(-90 ${cx} ${cy})`}
-      />
-      {/* 3 & below */}
-      <circle
-        cx={cx} cy={cy} r={radius} fill="none"
-        stroke={COLORS.threeAndBelow} strokeWidth={strokeWidth}
-        strokeDasharray={`${threeLen} ${circumference - threeLen}`}
-        strokeDashoffset={threeOffset}
-        transform={`rotate(-90 ${cx} ${cy})`}
-      />
-      {/* Center labels */}
-      <text x={cx} y={cy - 4} textAnchor="middle" fontSize="22" fontWeight="700" fill="currentColor">{fiveStar}</text>
-      <text x={cx} y={cy + 14} textAnchor="middle" fontSize="9" fill="currentColor" opacity={0.6}>{fourStar} · {threeAndBelow}</text>
-    </svg>
-  );
-}
-
-/* ── Stacked Horizontal Bar ── */
-function ParameterBar({ param }: { param: ParameterRating }) {
-  const total = param.fiveStar + param.fourStar + param.threeAndBelow;
-  if (total === 0) return null;
-
-  const segments = [
-    { value: param.fiveStar, color: COLORS.fiveStar },
-    { value: param.fourStar, color: COLORS.fourStar },
-    { value: param.threeAndBelow, color: COLORS.threeAndBelow },
-  ];
-
-  return (
-    <Box>
-      <Typography variant="caption" sx={{ fontWeight: 500, mb: 0.5, display: "block" }}>
-        {param.label}
-      </Typography>
-      <Stack direction="row" sx={{ height: 22, borderRadius: "6px", overflow: "hidden" }}>
-        {segments.map((seg, i) =>
-          seg.value > 0 ? (
-            <Box
-              key={i}
-              sx={{
-                flex: seg.value,
-                backgroundColor: seg.color,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                minWidth: seg.value > 0 ? 24 : 0,
-              }}
-            >
-              <Typography sx={{ fontSize: "0.65rem", fontWeight: 600, color: "#fff", lineHeight: 1 }}>
-                {seg.value}
-              </Typography>
-            </Box>
-          ) : null
-        )}
-      </Stack>
+    <Box
+      sx={{
+        bgcolor: "background.paper",
+        borderRadius: 3,
+        border: "1px solid",
+        borderColor: "divider",
+        p: 2.5,
+        ...sx,
+      }}
+    >
+      {children}
     </Box>
   );
 }
 
-/* ── Legend Dot ── */
-function LegendItem({ color, label }: { color: string; label: string }) {
+/* ── Dot legend ── */
+function Dot({ color, label }: { color: string; label: string }) {
   return (
     <Stack direction="row" spacing={0.75} alignItems="center">
-      <Box sx={{ width: 10, height: 10, borderRadius: "3px", backgroundColor: color, flexShrink: 0 }} />
-      <Typography variant="caption" sx={{ color: "text.secondary" }}>{label}</Typography>
+      <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: color, flexShrink: 0 }} />
+      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{label}</Typography>
     </Stack>
+  );
+}
+
+/* ── Stacked bar row ── */
+function ParamRow({ label, five, four, three, maxTotal }: {
+  label: string; five: number; four: number; three: number; maxTotal: number;
+}) {
+  const total = five + four + three;
+  if (total === 0) return null;
+  const barWidthPct = maxTotal > 0 ? (total / maxTotal) * 100 : 100;
+  const segs = [
+    { v: five, c: C.five, tc: "#1b3a1b" },
+    { v: four, c: C.four, tc: "#3e2600" },
+    { v: three, c: C.three, tc: "#fff" },
+  ].filter((s) => s.v > 0);
+
+  return (
+    <Box sx={{ mb: 2, "&:last-child": { mb: 0 } }}>
+      <Typography variant="caption" sx={{ fontSize: "0.74rem", fontWeight: 500, mb: 0.5, display: "block", color: "text.primary" }}>
+        {label}
+      </Typography>
+      <Box sx={{ width: `${Math.max(barWidthPct, 18)}%` }}>
+        <Stack direction="row" sx={{ height: 18, borderRadius: 9, overflow: "hidden" }}>
+          {segs.map((s, i) => (
+            <Box
+              key={i}
+              sx={{
+                flex: s.v,
+                bgcolor: s.c,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: 20,
+              }}
+            >
+              <Typography sx={{ fontSize: "0.55rem", fontWeight: 700, color: s.tc, lineHeight: 1 }}>
+                {s.v}
+              </Typography>
+            </Box>
+          ))}
+        </Stack>
+      </Box>
+    </Box>
   );
 }
 
@@ -141,195 +106,315 @@ export function LearnerRatingsDialog() {
     ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(2)
     : "—";
 
-  // Aggregate donut values from parameter ratings
+  /* ── Benchmark metrics ── */
+  const above44 = ratings.length > 0
+    ? ((ratings.filter((r) => r.rating >= 4.4).length / ratings.length) * 100)
+    : 0;
+  const above4 = ratings.length > 0
+    ? ((ratings.filter((r) => r.rating >= 4).length / ratings.length) * 100)
+    : 0;
+
   const totalFive = summary?.parameterRatings.reduce((a, p) => a + p.fiveStar, 0) ?? 0;
   const totalFour = summary?.parameterRatings.reduce((a, p) => a + p.fourStar, 0) ?? 0;
   const totalThree = summary?.parameterRatings.reduce((a, p) => a + p.threeAndBelow, 0) ?? 0;
+  const donutTotal = totalFive + totalFour + totalThree;
 
-  const [feedbackFilter, setFeedbackFilter] = useState<FeedbackFilter>("all");
+  const donutData = [
+    { name: "5 Star", value: totalFive, color: C.five },
+    { name: "4 Star", value: totalFour, color: C.four },
+    { name: "3 & below", value: totalThree, color: C.three },
+  ].filter((d) => d.value > 0);
 
-  const filteredRatings = ratings.filter((r) => {
-    if (feedbackFilter === "4plus") return r.rating >= 4;
-    if (feedbackFilter === "3to4") return r.rating >= 3 && r.rating < 4;
-    if (feedbackFilter === "below3") return r.rating < 3;
-    return true;
+  const pct = (v: number) => donutTotal > 0 ? ((v / donutTotal) * 100).toFixed(1) : "0";
+
+  const maxParamTotal = summary
+    ? Math.max(...summary.parameterRatings.map((p) => p.fiveStar + p.fourStar + p.threeAndBelow))
+    : 0;
+
+  const [filter, setFilter] = useState<Filter>("5star");
+  const filtered = ratings.filter((r) => {
+    if (filter === "5star") return r.rating >= 4.5;
+    if (filter === "4star") return r.rating >= 3.5 && r.rating < 4.5;
+    return r.rating < 3.5;
   });
 
   const handleClose = () => {
     dispatch(setOpenLearnerRatings(false));
     dispatch(setLearnerRatingsSessionId(null));
-    setFeedbackFilter("all");
+    setFilter("5star");
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ pb: 0.5 }}>Online event feedback</DialogTitle>
-      <DialogContent
-        sx={{
-          "&::-webkit-scrollbar": { width: 4 },
-          "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "transparent",
-            borderRadius: 2,
-            transition: "background-color 0.2s",
-          },
-          "&:hover::-webkit-scrollbar-thumb": {
-            backgroundColor: "action.disabled",
-          },
-          "&:hover::-webkit-scrollbar-thumb:hover": {
-            backgroundColor: "action.active",
-          },
-          scrollbarWidth: "thin",
-          scrollbarColor: "transparent transparent",
-          "&:hover": {
-            scrollbarColor: "var(--mui-palette-action-disabled) transparent",
-          },
-        }}
-      >
-        {session ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 0.5 }}>
-            {/* ── Session title ── */}
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
-              {session.program}
-              <br />
-              <Typography component="span" variant="body2" sx={{ fontWeight: 500, color: "text.secondary" }}>
-                {session.title}
-              </Typography>
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={handleClose}
+      sx={{
+        "& .MuiDrawer-paper": {
+          width: { xs: "100vw", sm: 500 },
+          maxWidth: "100vw",
+          bgcolor: "hsl(var(--md-surface-container))",
+          border: "none",
+        },
+      }}
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        {/* ── Header ── */}
+        <Box
+          sx={{
+            position: "sticky", top: 0, zIndex: 10,
+            bgcolor: "background.paper",
+            borderBottom: 1, borderColor: "divider",
+            px: 2.5, py: 1.5,
+          }}
+        >
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="subtitle1" fontWeight={700}>
+              Online session feedback
             </Typography>
+            <IconButton size="small" onClick={handleClose} sx={{ color: "text.secondary" }}>
+              <CloseOutlinedIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Stack>
+        </Box>
 
-            {/* ── Summary strip ── */}
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{
-                backgroundColor: "hsl(var(--md-surface-container) / 0.4)",
-                borderRadius: "12px",
-                px: 2,
-                py: 1.25,
-              }}
-            >
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1 }}>
-                  {summary?.totalResponses ?? ratings.length}/{summary?.totalEnrolled ?? "—"}
+        {/* ── Content ── */}
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", p: 2, pb: 4 }}>
+          {session ? (
+            <Stack spacing={2}>
+              {/* ── Session + Stats ── */}
+              <Card>
+                <Typography variant="overline" color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.06em" }}>
+                  {session.sessionType}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">No. of feedback</Typography>
-              </Box>
-              <Box sx={{ textAlign: "right" }}>
-                <Stack direction="row" spacing={0.25} justifyContent="flex-end" sx={{ mb: 0.25 }}>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <StarOutlinedIcon
-                      key={i}
-                      sx={{
-                        fontSize: 14,
-                        color: i <= Math.round(Number(avgRating)) ? "var(--gl-star-color)" : "hsl(var(--md-outline-variant))",
-                      }}
-                    />
-                  ))}
-                </Stack>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.9rem", lineHeight: 1.3, mt: 0.25 }}>
+                  {session.title}
+                </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Session Rating: <b>{avgRating}/5</b>
+                  {session.program} · {session.batch}
                 </Typography>
-              </Box>
-            </Stack>
 
-            {/* ── Charts row ── */}
-            {summary && (
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="flex-start">
-                {/* Donut */}
-                <Box sx={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <Typography variant="caption" sx={{ fontWeight: 600, mb: 1 }}>Rating distribution</Typography>
-                  <DonutChart fiveStar={totalFive} fourStar={totalFour} threeAndBelow={totalThree} />
-                </Box>
+                <Stack direction="row" sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: "divider" }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h5" fontWeight={800} sx={{ lineHeight: 1 }}>
+                      {summary?.totalResponses ?? ratings.length}
+                      <Typography component="span" variant="caption" color="text.secondary">
+                        /{summary?.totalEnrolled ?? "—"}
+                      </Typography>
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.62rem" }}>
+                      No. of feedback
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: "right" }}>
+                    <Stack direction="row" spacing={0.25} justifyContent="flex-end" sx={{ mb: 0.25 }}>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <StarOutlinedIcon
+                          key={i}
+                          sx={{
+                            fontSize: 16,
+                            color: i <= Math.round(Number(avgRating)) ? "#f59e0b" : "action.disabled",
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.62rem" }}>
+                      Session Rating: <b>{avgRating}/5</b>
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Card>
 
-                {/* Parameter bars */}
-                <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 1.5, width: "100%" }}>
-                  <Typography variant="caption" sx={{ fontWeight: 600 }}>Parameter wise rating</Typography>
-                  {/* Legend */}
-                  <Stack direction="row" spacing={2}>
-                    <LegendItem color={COLORS.fiveStar} label="5 star" />
-                    <LegendItem color={COLORS.fourStar} label="4 star" />
-                    <LegendItem color={COLORS.threeAndBelow} label="3 & below" />
+              {/* ── Rating distribution (donut) ── */}
+              {summary && donutData.length > 0 && (
+                <Card>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 2 }}>
+                    Rating distribution
+                  </Typography>
+
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    {/* Donut */}
+                    <Box sx={{ position: "relative", width: 160, height: 160, flexShrink: 0 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={donutData}
+                            dataKey="value"
+                            innerRadius={46}
+                            outerRadius={70}
+                            paddingAngle={3}
+                            startAngle={90}
+                            endAngle={-270}
+                            stroke="none"
+                            label={({ cx, cy, midAngle, outerRadius: or, value }: {
+                              cx?: number; cy?: number; midAngle?: number; outerRadius?: number; value?: number;
+                            }) => {
+                              const RAD = Math.PI / 180;
+                              const r = (or ?? 70) + 16;
+                              const x = (cx ?? 0) + r * Math.cos(-(midAngle ?? 0) * RAD);
+                              const y = (cy ?? 0) + r * Math.sin(-(midAngle ?? 0) * RAD);
+                              return (
+                                <text x={x} y={y} textAnchor="middle" dominantBaseline="central"
+                                  fill="currentColor" fontSize={12} fontWeight={700}>
+                                  {value}
+                                </text>
+                              );
+                            }}
+                            labelLine={false}
+                          >
+                            {donutData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </Box>
+
+                    {/* Legend + percentages */}
+                    <Stack spacing={1.5} sx={{ flex: 1 }}>
+                      <Stack direction="row" spacing={1.5} flexWrap="wrap">
+                        <Dot color={C.five} label="5 star" />
+                        <Dot color={C.four} label="4 star" />
+                        <Dot color={C.three} label="3 & below" />
+                      </Stack>
+
+                      <Stack spacing={1} sx={{ pt: 1.5, borderTop: 1, borderColor: "divider" }}>
+                        {[
+                          { label: "5 Star", val: totalFive },
+                          { label: "4 Star", val: totalFour },
+                          { label: "3 & below", val: totalThree },
+                        ].map((row) => (
+                          <Stack key={row.label} direction="row" justifyContent="space-between">
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{row.label}</Typography>
+                            <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>
+                              {pct(row.val)}&thinsp;%
+                            </Typography>
+                          </Stack>
+                        ))}
+                      </Stack>
+                    </Stack>
+                  </Stack>
+                </Card>
+              )}
+
+              {/* ── Benchmark card ── */}
+              {ratings.length > 0 && (
+                <Card>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 2 }}>
+                    Session benchmark
+                  </Typography>
+                  <Stack spacing={1.5}>
+                    {[
+                      { label: "Ratings above 4.4", actual: above44, target: 90 },
+                      { label: "Ratings above 4.0", actual: above4, target: 98 },
+                    ].map((b) => {
+                      const met = b.actual >= b.target;
+                      return (
+                        <Box key={b.label}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="baseline" sx={{ mb: 0.5 }}>
+                            <Typography variant="caption" sx={{ fontSize: "0.72rem", color: "text.primary" }}>
+                              {b.label}
+                            </Typography>
+                            <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.72rem", color: met ? blue[400] : C.three }}>
+                              {b.actual.toFixed(1)}%
+                              <Typography component="span" variant="caption" color="text.secondary" sx={{ fontSize: "0.62rem", fontWeight: 400 }}>
+                                {" "}/ {b.target}% target
+                              </Typography>
+                            </Typography>
+                          </Stack>
+                          <Box sx={{ height: 4, borderRadius: 2, bgcolor: "action.selected", overflow: "hidden" }}>
+                            <Box
+                              sx={{
+                                height: "100%",
+                                width: `${Math.min(b.actual, b.target)}%`,
+                                borderRadius: 2,
+                                bgcolor: met ? blue[400] : C.three,
+                                transition: "width 0.4s ease",
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                </Card>
+              )}
+
+              {/* ── Parameter wise rating ── */}
+              {summary && summary.parameterRatings.length > 0 && (
+                <Card>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 0.5 }}>
+                    Parameter wise rating
+                  </Typography>
+                  <Stack direction="row" spacing={1.5} sx={{ mb: 2.5 }}>
+                    <Dot color={C.five} label="5 star" />
+                    <Dot color={C.four} label="4 star" />
+                    <Dot color={C.three} label="3 & below" />
                   </Stack>
                   {summary.parameterRatings.map((p, i) => (
-                    <ParameterBar key={i} param={p} />
+                    <ParamRow
+                      key={i}
+                      label={p.label}
+                      five={p.fiveStar}
+                      four={p.fourStar}
+                      three={p.threeAndBelow}
+                      maxTotal={maxParamTotal}
+                    />
                   ))}
-                </Box>
-              </Stack>
-            )}
+                </Card>
+              )}
 
-            {/* ── Legend ── */}
-            <Stack direction="row" spacing={2} justifyContent="center">
-              <LegendItem color={COLORS.fiveStar} label="5 Star" />
-              <LegendItem color={COLORS.fourStar} label="4 Star" />
-              <LegendItem color={COLORS.threeAndBelow} label="3 & below" />
-            </Stack>
-
-            <Divider />
-
-            {/* ── Student comments ── */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, textAlign: "center" }}>
-                Student&apos;s comments
-              </Typography>
-
-              {/* Segmented filter */}
-              <ToggleButtonGroup
-                value={feedbackFilter}
-                exclusive
-                onChange={(_, val) => { if (val) setFeedbackFilter(val); }}
-                size="small"
-                fullWidth
-                sx={{ mb: 2 }}
-              >
-                <ToggleButton value="all" sx={{ textTransform: "none", fontSize: "0.75rem" }}>
-                  All ({ratings.length})
-                </ToggleButton>
-                <ToggleButton value="4plus" sx={{ textTransform: "none", fontSize: "0.75rem", color: green[700] }}>
-                  4+ stars ({ratings.filter((r) => r.rating >= 4).length})
-                </ToggleButton>
-                <ToggleButton value="3to4" sx={{ textTransform: "none", fontSize: "0.75rem", color: amber[800] }}>
-                  3–4 stars ({ratings.filter((r) => r.rating >= 3 && r.rating < 4).length})
-                </ToggleButton>
-                <ToggleButton value="below3" sx={{ textTransform: "none", fontSize: "0.75rem", color: red[600] }}>
-                  &lt;3 stars ({ratings.filter((r) => r.rating < 3).length})
-                </ToggleButton>
-              </ToggleButtonGroup>
-
-              <Stack spacing={0} divider={<Divider />}>
-                {filteredRatings.map((r, i) => (
-                  <Box key={i} sx={{ py: 1.25 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      {r.feedback || "No comment provided."}
-                    </Typography>
-                    <Stack direction="row" spacing={0.5} alignItems="center">
-                      <StarOutlinedIcon
+              {/* ── Student's comments ── */}
+              <Card>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 2 }}>
+                  Student's comments
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                  {([
+                    { key: "5star" as Filter, label: "5 Star", c: C.five },
+                    { key: "4star" as Filter, label: "4 Star", c: C.four },
+                    { key: "3below" as Filter, label: "3 & below", c: C.three },
+                  ]).map((t) => {
+                    const active = filter === t.key;
+                    return (
+                      <Chip
+                        key={t.key}
+                        label={t.label}
+                        size="small"
+                        onClick={() => setFilter(t.key)}
                         sx={{
-                          fontSize: 12,
-                          color: r.rating >= 4 ? green[500] : r.rating >= 3 ? amber[600] : red[500],
+                          fontWeight: 600, fontSize: "0.68rem", cursor: "pointer",
+                          borderRadius: 5, height: 28,
+                          bgcolor: active ? t.c : "transparent",
+                          color: active ? "#fff" : "text.secondary",
+                          border: "1.5px solid",
+                          borderColor: active ? t.c : "divider",
+                          "&:hover": { bgcolor: active ? t.c : "action.hover" },
                         }}
                       />
-                      <Typography variant="caption" sx={{ fontWeight: 600, color: r.rating >= 4 ? green[700] : r.rating >= 3 ? amber[800] : red[700] }}>
-                        {r.rating}
+                    );
+                  })}
+                </Stack>
+
+                <Stack spacing={0} divider={<Box sx={{ borderBottom: 1, borderColor: "divider" }} />}>
+                  {filtered.map((r, i) => (
+                    <Box key={i} sx={{ py: 1.5 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem", lineHeight: 1.4 }}>
+                        {r.feedback || "No comment provided."}
                       </Typography>
-                    </Stack>
-                  </Box>
-                ))}
-                {filteredRatings.length === 0 && (
-                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 2 }}>
-                    No feedback in this range.
-                  </Typography>
-                )}
-              </Stack>
-            </Box>
-          </Box>
-        ) : (
-          <Typography variant="body2" color="text.secondary">No event selected.</Typography>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button variant="text" color="inherit" onClick={handleClose}>Close</Button>
-      </DialogActions>
-    </Dialog>
+                    </Box>
+                  ))}
+                  {filtered.length === 0 && (
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 4 }}>
+                      No feedback in this range.
+                    </Typography>
+                  )}
+                </Stack>
+              </Card>
+            </Stack>
+          ) : (
+            <Typography variant="body2" color="text.secondary">No session selected.</Typography>
+          )}
+        </Box>
+      </Box>
+    </Drawer>
   );
 }

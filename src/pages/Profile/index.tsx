@@ -43,8 +43,9 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import MuiTooltip from "@mui/material/Tooltip";
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip,
+  LineChart, Line, Area, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
+  BarChart, Bar,
 } from "recharts";
 import MentorImpactCard from "@/components/shared/MentorImpactCard";
 import FlexBox from "@/components/Utils/FlexBox";
@@ -861,27 +862,41 @@ export default function ProfilePage() {
               <Box sx={{ width: "100%", height: 200 }}>
                 <ResponsiveContainer>
                   <LineChart data={ratingChartData} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
-                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} axisLine={false} tickLine={false} />
-                    <YAxis domain={[4.2, 5]} tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }} tickCount={5} axisLine={false} tickLine={false} />
+                    <defs>
+                      <linearGradient id="ratingGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(217, 70%, 55%)" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="hsl(217, 70%, 55%)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant) / 0.4)" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.6)" }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[4.2, 5]} tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.6)" }} tickCount={5} axisLine={false} tickLine={false} />
                     <Tooltip
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null;
                         const d = payload[0].payload;
                         return (
-                          <Card variant="outlined" sx={{ p: 1.5, borderRadius: 1 }}>
-                            <Typography variant="caption" fontWeight={600}>{d.month}</Typography>
-                            <Typography variant="caption" display="block">Avg: {d.avg ?? "—"}</Typography>
+                          <Card variant="outlined" sx={{ p: 1.25, borderRadius: 2, boxShadow: 1 }}>
+                            <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>{d.month}</Typography>
+                            <Typography variant="caption" display="block" sx={{ fontSize: "0.65rem" }}>Avg: <b>{d.avg ?? "—"}</b></Typography>
                           </Card>
                         );
                       }}
                     />
+                    <Area
+                      type="monotone"
+                      dataKey="avg"
+                      fill="url(#ratingGradient)"
+                      stroke="none"
+                      connectNulls
+                    />
                     <Line
                       type="monotone"
                       dataKey="avg"
-                      stroke="var(--gl-stat-hours)"
-                      strokeWidth={2}
-                      dot={{ r: 4, fill: "hsl(var(--md-surface))", stroke: "var(--gl-stat-hours)", strokeWidth: 2 }}
+                      stroke="hsl(217, 70%, 55%)"
+                      strokeWidth={2.5}
+                      dot={{ r: 4, fill: "hsl(217, 70%, 55%)", stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
+                      activeDot={{ r: 6, fill: "hsl(217, 70%, 55%)", stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
                       connectNulls
                     />
                   </LineChart>
@@ -944,28 +959,51 @@ export default function ProfilePage() {
               </Typography>
             </Box>
           ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-            {demoCoursePerf.map((c) => (
-              <FlexBox key={c.name} sx={{ alignItems: "center", gap: 1.5 }}>
-                <Typography variant="caption" sx={{ minWidth: 210, flexShrink: 0, color: "text.secondary" }}>
-                  {c.name}
-                </Typography>
-                <Box sx={{ flex: 1, bgcolor: "action.hover", borderRadius: 1, height: 8, overflow: "hidden" }}>
-                  <Box
-                    sx={{
-                      height: "100%",
-                      bgcolor: "text.primary",
-                      borderRadius: 1,
-                      width: `${((c.rating - 1) / 4) * 100}%`,
-                    }}
-                  />
-                </Box>
-                <Typography variant="caption" fontWeight={600} sx={{ minWidth: 28, textAlign: "right" }}>
-                  {c.rating.toFixed(1)}
-                </Typography>
-                <DeltaLabel value={c.delta} />
-              </FlexBox>
-            ))}
+          <Box sx={{ width: "100%", height: demoCoursePerf.length * 36 + 10 }}>
+            <ResponsiveContainer>
+              <BarChart
+                data={demoCoursePerf.map((c) => ({ ...c, shortName: c.name.length > 22 ? c.name.slice(0, 22) + "…" : c.name }))}
+                layout="vertical"
+                margin={{ top: 0, right: 40, left: 10, bottom: 0 }}
+                barCategoryGap="30%"
+              >
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant) / 0.3)" />
+                <XAxis type="number" domain={[0, 5]} hide />
+                <YAxis
+                  type="category"
+                  dataKey="shortName"
+                  width={160}
+                  tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.7)" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "hsl(var(--md-surface-container) / 0.3)" }}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <Card variant="outlined" sx={{ p: 1.25, borderRadius: 2, boxShadow: 1 }}>
+                        <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>{d.name}</Typography>
+                        <Typography variant="caption" display="block" sx={{ fontSize: "0.65rem" }}>Rating: <b>{d.rating.toFixed(1)}</b></Typography>
+                        {d.delta !== 0 && (
+                          <Typography variant="caption" sx={{ fontSize: "0.6rem", color: d.delta > 0 ? "hsl(130, 50%, 45%)" : "hsl(0, 60%, 55%)" }}>
+                            {d.delta > 0 ? "+" : ""}{d.delta.toFixed(2)} vs prev
+                          </Typography>
+                        )}
+                      </Card>
+                    );
+                  }}
+                />
+                <Bar
+                  dataKey="rating"
+                  fill="hsl(217, 70%, 55%)"
+                  radius={[0, 6, 6, 0]}
+                  barSize={14}
+                  label={{ position: "right", fontSize: 10, fontWeight: 600, fill: "hsl(var(--md-on-surface))", formatter: (v) => typeof v === "number" ? v.toFixed(1) : String(v) }}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </Box>
           )}
         </CardContent>
