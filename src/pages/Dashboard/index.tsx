@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState, useEffect } from "react";
+import { Fragment, useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
@@ -127,7 +127,7 @@ function TaskCard({
   return (
     <Card
       variant="outlined"
-      sx={{ p: 2.5 }}
+      sx={{ p: 2.5, transition: "border-color 0.2s", "&:hover": { borderColor: "primary.main" } }}
     >
       <Stack spacing={1.5}>
         <Box>
@@ -157,6 +157,7 @@ export default function DashboardPage() {
   const sessions = useMemo(() => isEmpty ? [] : filterSessionsByRole(allSessions, selectedRole), [allSessions, selectedRole, isEmpty]);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
+  const sessionDeclinedReasons = useAppSelector((s) => s.sessions.sessionDeclinedReasons);
   const homeSessionsView = useAppSelector((s) => s.sessions.homeSessionsView);
   const hasUserConfiguredAvailability = useAppSelector((s) => s.availability.hasUserConfiguredAvailability);
   const maxPerWeek = useAppSelector((s) => s.availability.maxPerWeek);
@@ -182,6 +183,18 @@ export default function DashboardPage() {
 
   /* ── local state for exit animation ─────────────────────────────── */
   const [exitingId, setExitingId] = useState<string | null>(null);
+
+  /* ── highlight unconfirmed sessions ─────────────────────────────── */
+  const [highlightUnconfirmed, setHighlightUnconfirmed] = useState(false);
+  const upcomingRef = useRef<HTMLDivElement>(null);
+  const handleHighlightUnconfirmed = () => {
+    dispatch(setHomeSessionsView("next"));
+    setHighlightUnconfirmed(true);
+    setTimeout(() => {
+      upcomingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+    setTimeout(() => setHighlightUnconfirmed(false), 3000);
+  };
 
   /* ── planned event detail dialog state ───────────────────────── */
   const [plannedEventDetailId, setPlannedEventDetailId] = useState<string | null>(null);
@@ -494,19 +507,14 @@ export default function DashboardPage() {
                     </Box>
                   )}
                   {needsWednesdayConfirm && (
-                    <Box>
+                    <Box onClick={handleHighlightUnconfirmed} sx={{ cursor: "pointer" }}>
                       <TaskCard
                         chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
                         chipColor="var(--gl-status-declined-text)"
                         chipBg="var(--gl-status-declined-bg)"
                         chipBorder="var(--gl-status-declined-border)"
                         title="Confirm upcoming activities"
-                        description="Confirm by Wednesday 6 PM so our team can finalize allocations."
-                        action={
-                          <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
-                            Review confirmations
-                          </Button>
-                        }
+                        description="Confirm by Wed 6 PM to finalize allocations."
                       />
                     </Box>
                   )}
@@ -656,7 +664,7 @@ export default function DashboardPage() {
                 {!tabLoading && homeSessionsView === "next" && (
                   <Box>
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-                      <Typography variant="subtitle2" fontWeight={600}>Upcoming activities</Typography>
+                      <Typography ref={upcomingRef} variant="subtitle2" fontWeight={600}>Upcoming activities</Typography>
                       <Typography variant="caption" color="text.secondary">{confirmedCount}/{upcomingSessions.length} confirmed</Typography>
                     </Stack>
                     <Stack spacing={1.5}>
@@ -668,6 +676,11 @@ export default function DashboardPage() {
                           return (
                             <Card key={s.id} variant="outlined" sx={{
                               p: { xs: 1.5, sm: 2 },
+                              transition: "box-shadow 0.3s ease, border-color 0.3s ease",
+                              ...(highlightUnconfirmed && !isConfirmed && {
+                                borderColor: "primary.main",
+                                boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}40`,
+                              }),
                               ...(isExiting && {
                                 animation: `${slideOutDown} 0.38s ease forwards`,
                                 pointerEvents: 'none',
@@ -1003,7 +1016,7 @@ export default function DashboardPage() {
                                 <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
                                   <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
                                   <Typography variant="caption" color="text.secondary">
-                                    {fmtDateNice(pe.startDateYmd)} &ndash; {fmtDateNice(pe.endDateYmd)} &bull; {pe.batch}
+                                    {fmtDateNice(pe.startDateYmd)} &ndash; {fmtDateNice(pe.endDateYmd)} &middot; {pe.batch}
                                   </Typography>
                                 </Stack>
                                 <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}>
@@ -1236,7 +1249,7 @@ export default function DashboardPage() {
                                   <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
                                     <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
                                     <Typography variant="caption" color="text.secondary">
-                                      {fmtDateNice(s.dateYmd)} &bull; {s.batch}
+                                      {fmtDateNice(s.dateYmd)} &middot; {s.batch}
                                     </Typography>
                                   </Stack>
                                   <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
@@ -1296,7 +1309,12 @@ export default function DashboardPage() {
                                 onCourseClick={getOnCourseClick(s)}
                                 status={STATUS_DECLINED}
                               />
-                              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                              {sessionDeclinedReasons[s.id] && (
+                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
+                                  Reason: {sessionDeclinedReasons[s.id]}
+                                </Typography>
+                              )}
+                              <Typography variant="caption" color="text.secondary" sx={{ mt: sessionDeclinedReasons[s.id] ? 0.5 : 1, display: "block" }}>
                                 To re-accept this session, contact {s.scheduledByName || "the scheduler"}{s.scheduledByEmail ? ` at ${s.scheduledByEmail}` : ""}.
                               </Typography>
                             </Card>
@@ -1310,7 +1328,7 @@ export default function DashboardPage() {
                         <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Previously declined</Typography>
                         <Stack spacing={1.5}>
                           {rolePreviouslyDeclined.map((s) => (
-                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 }, opacity: 0.6 }}>
+                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
                               <SessionCard
                                 title={s.title}
                                 topic={s.topic}
@@ -1320,6 +1338,11 @@ export default function DashboardPage() {
                                 end={s.end}
                                 status={{ label: "Declined", bg: "action.hover", color: "text.secondary", border: "transparent" }}
                               />
+                              {s.declineReason && (
+                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
+                                  Reason: {s.declineReason}
+                                </Typography>
+                              )}
                             </Card>
                           ))}
                         </Stack>
@@ -1349,19 +1372,16 @@ export default function DashboardPage() {
               <Stack spacing={2}>
                 {/* Confirm events task */}
                 {needsWednesdayConfirm && (
-                  <TaskCard
-                    chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
-                    chipColor="var(--gl-status-declined-text)"
-                    chipBg="var(--gl-status-declined-bg)"
-                    chipBorder="var(--gl-status-declined-border)"
-                    title="Confirm upcoming activities"
-                    description="Confirm by Wednesday 6 PM so our team can finalize allocations."
-                    action={
-                      <Button size="small" variant="soft" onClick={() => dispatch(setOpenSession(true))}>
-                        Review Confirmations
-                      </Button>
-                    }
-                  />
+                  <Box onClick={handleHighlightUnconfirmed} sx={{ cursor: "pointer" }}>
+                    <TaskCard
+                      chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
+                      chipColor="var(--gl-status-declined-text)"
+                      chipBg="var(--gl-status-declined-bg)"
+                      chipBorder="var(--gl-status-declined-border)"
+                      title="Confirm upcoming activities"
+                      description="Confirm by Wed 6 PM to finalize allocations."
+                    />
+                  </Box>
                 )}
 
                 {/* Calendar connection task */}

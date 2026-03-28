@@ -270,8 +270,7 @@ body {
   font-family: 'Inter', sans-serif;
   background: hsl(var(--md-surface-bright));
   color: hsl(var(--md-on-surface));
-  scrollbar-gutter: stable;
-  overflow-y: scroll;
+  overflow: hidden;
 }
 
 /* Themed scrollbars for app-level scroll containers */

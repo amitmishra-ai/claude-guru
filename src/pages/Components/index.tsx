@@ -249,7 +249,7 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd,
       <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
         <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
         <Typography variant="caption" color="text.secondary">
-          {fmtDateNice(startDateYmd)} &ndash; {fmtDateNice(endDateYmd)} &bull; {batch}
+          {fmtDateNice(startDateYmd)} &ndash; {fmtDateNice(endDateYmd)} &middot; {batch}
         </Typography>
       </Stack>
       {onViewDetails && (
@@ -1044,8 +1044,8 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                     <GroupOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
                   </Box>
                   <Box>
-                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>{groupName} &bull; {domain}</Typography>
-                    <Typography variant="caption" color="text.secondary">Group &bull; Domain</Typography>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>{groupName} &middot; {domain}</Typography>
+                    <Typography variant="caption" color="text.secondary">Group &middot; Domain</Typography>
                   </Box>
                 </Stack>
                 {isConfirmed && (
@@ -2116,7 +2116,7 @@ function EvaluationCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">15 Mar – 22 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">15 Mar – 22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
@@ -2136,7 +2136,7 @@ function EvaluationCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">1 Apr – 10 Apr, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">1 Apr – 10 Apr, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("tentative")}>View details</Button>
@@ -2159,7 +2159,7 @@ function EvaluationCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction="row" justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>
@@ -2182,7 +2182,7 @@ function EvaluationCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">1 Mar – 8 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">1 Mar – 8 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
             <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
@@ -2215,7 +2215,7 @@ function ModerationCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">15 Mar – 20 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">15 Mar – 20 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
@@ -2235,7 +2235,7 @@ function ModerationCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">5 Apr – 15 Apr, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">5 Apr – 15 Apr, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("tentative")}>View details</Button>
@@ -2258,7 +2258,7 @@ function ModerationCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction="row" justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>
@@ -2281,7 +2281,7 @@ function ModerationCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">25 Feb – 5 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">25 Feb – 5 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
             <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
@@ -2388,7 +2388,7 @@ function CVReviewCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">22 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
             <Button variant="contained" size="small">Submit CV Review</Button>
@@ -2412,7 +2412,7 @@ function CVReviewCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">22 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed-submitted")}>View details</Button>
@@ -2432,7 +2432,7 @@ function CVReviewCards() {
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">5 Mar, 2026 &bull; PGP-AIML-BA-UTA-Nov25-C</Typography>
+            <Typography variant="caption" color="text.secondary">5 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
             <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}>View Reviewed CV</Button>

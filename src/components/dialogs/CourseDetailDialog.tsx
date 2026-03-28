@@ -222,7 +222,7 @@ export function CourseDetailDialog() {
                 {course.title}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontSize: "0.8rem" }}>
-                {course.program} &bull; {course.batch}
+                {course.program} &middot; {course.batch}
               </Typography>
 
             </Box>

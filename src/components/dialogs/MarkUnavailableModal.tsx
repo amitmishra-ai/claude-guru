@@ -56,7 +56,7 @@ export function MarkUnavailableModal() {
     if (target.type === "session") {
       const session = sessions.find((s) => s.id === target.id);
       if (session) {
-        dispatch(declineSession({ id: session.id, dateYmd: session.dateYmd }));
+        dispatch(declineSession({ id: session.id, dateYmd: session.dateYmd, reason }));
         dispatch(
           pushToast({
             title: "Event declined",
@@ -124,6 +124,11 @@ export function MarkUnavailableModal() {
               label="Please specify"
               value={customReason}
               onChange={(e) => setCustomReason(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && e.metaKey && canSubmit) {
+                  handleSubmit();
+                }
+              }}
               size="small"
               fullWidth
               multiline

@@ -200,9 +200,9 @@ export function SessionCard({
       <Stack direction="row" alignItems="center" spacing={0.5}>
         <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
         <Typography variant="caption" color="text.secondary">
-          {fmtDateNice(dateYmd)}{endDateYmd ? <> &rarr; {fmtDateNice(endDateYmd)}</> : null} &bull; {fmtTime12(tzStart)}&ndash;{fmtTime12(tzEnd)}
-          {batch ? <> &bull; {batch}</> : null}
-          {locationText ? <> &bull; {locationText}</> : null}
+          {fmtDateNice(dateYmd)}{endDateYmd ? <> &rarr; {fmtDateNice(endDateYmd)}</> : null} &middot; {fmtTime12(tzStart)}&ndash;{fmtTime12(tzEnd)}
+          {batch ? <> &middot; <span style={{ whiteSpace: "nowrap" }}>{batch}</span></> : null}
+          {locationText ? <> &middot; {locationText}</> : null}
         </Typography>
       </Stack>
       {group && (

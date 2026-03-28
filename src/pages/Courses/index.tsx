@@ -76,7 +76,7 @@ function MappedSessionsOverflow({
                 {SESSION_TYPE_SHORT[s.sessionType] ?? s.sessionType}
               </Typography>
               <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                {fmtDateNice(s.dateYmd)} &bull; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
+                {fmtDateNice(s.dateYmd)} &middot; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
               </Typography>
             </Box>
           ))}
@@ -176,7 +176,7 @@ function CourseCard({
 
           {/* Program · Batch */}
           <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.8rem", mb: 1.5 }}>
-            {c.program} &bull; {c.batch}
+            {c.program} &middot; {c.batch}
           </Typography>
 
           {/* Mapped sessions — only for teach courses */}

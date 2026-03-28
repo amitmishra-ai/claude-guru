@@ -83,7 +83,7 @@ export default function AvailabilityPage() {
                   <Box>
                     <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{p.label}</Box>
                     <Box sx={{ mt: 0.25, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
-                      {formatDayGroupShort(p.days)} &bull; {fmtTime12(p.start)}&ndash;{fmtTime12(p.end)}
+                      {formatDayGroupShort(p.days)} &middot; {fmtTime12(p.start)}&ndash;{fmtTime12(p.end)}
                     </Box>
                   </Box>
                 </Box>

@@ -46,7 +46,7 @@ export function DeclineReasonDialog() {
   const handleSubmit = () => {
     if (!declineSessionFocus) return;
     const s = declineSessionFocus;
-    dispatch(declineSession({ id: s.id, dateYmd: toYmd(demoNow) }));
+    dispatch(declineSession({ id: s.id, dateYmd: toYmd(demoNow), reason: declineReason.trim() }));
     dispatch(setOpenDeclineReason(false));
     dispatch(setOpenSession(false));
     dispatch(setSessionFocus(null));
@@ -56,24 +56,11 @@ export function DeclineReasonDialog() {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={handleClose} disableRestoreFocus maxWidth="xs" fullWidth>
       <DialogTitle>Mark unavailable</DialogTitle>
       <DialogContent>
         {declineSessionFocus ? (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
-            <Box
-              sx={{
-                borderRadius: "16px",
-                border: 1,
-                borderColor: "divider",
-                backgroundColor: "hsl(var(--md-surface-container) / 0.3)",
-                p: 1.5,
-                fontSize: "0.875rem",
-                color: "hsl(var(--md-on-surface-variant))",
-              }}
-            >
-              This will mark your calendar as unavailable for this session slot.
-            </Box>
             <SessionCard
               title={declineSessionFocus.title}
               sessionType={declineSessionFocus.sessionType}
@@ -137,10 +124,16 @@ export function DeclineReasonDialog() {
               label="Reason (required)"
               value={declineReason}
               onChange={(e) => dispatch(setDeclineReason(e.target.value))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && e.metaKey && declineReason.trim()) {
+                  handleSubmit();
+                }
+              }}
               placeholder="E.g., travel / personal commitment / overlap"
               size="small"
               fullWidth
               required
+              autoFocus
             />
           </Box>
         ) : null}
@@ -150,10 +143,16 @@ export function DeclineReasonDialog() {
           Cancel
         </Button>
         <Button
-          variant="contained"
-          color="error"
+          variant="soft"
           onClick={handleSubmit}
           disabled={!declineReason.trim()}
+          sx={{
+            fontWeight: 600,
+            bgcolor: "rgba(211,47,47,0.08)",
+            color: "error.main",
+            "&:hover": { bgcolor: "rgba(211,47,47,0.16)" },
+            "&.Mui-disabled": { bgcolor: "rgba(211,47,47,0.05)", color: "rgba(211,47,47,0.4)" },
+          }}
         >
           I'm unavailable
         </Button>

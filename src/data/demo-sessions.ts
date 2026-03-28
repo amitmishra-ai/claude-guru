@@ -2038,6 +2038,7 @@ export const demoPreviouslyDeclinedSessions: DeclinedSession[] = [
     start: minutes(10),
     end: minutes(12),
     declinedOnYmd: "2026-02-01",
+    declineReason: "Travel — attending a conference in Bangalore",
   },
   {
     id: "pd2",
@@ -2051,6 +2052,7 @@ export const demoPreviouslyDeclinedSessions: DeclinedSession[] = [
     start: minutes(18),
     end: minutes(20),
     declinedOnYmd: "2026-02-08",
+    declineReason: "Personal commitment — family event",
   },
 ];
 

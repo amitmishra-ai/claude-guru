@@ -265,6 +265,7 @@ export type DeclinedSession = {
   start: number;
   end: number;
   declinedOnYmd: string;
+  declineReason?: string;
 };
 
 // ─── Preferences Type ───────────────────────────────────────────────────────

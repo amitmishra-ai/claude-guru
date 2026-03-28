@@ -304,6 +304,8 @@ export function Sidebar() {
           px: isNavCollapsed ? 0.5 : 1,
           overflowY: "auto",
           overflowX: "hidden",
+          scrollbarWidth: isNavCollapsed ? "none" : "thin",
+          "&::-webkit-scrollbar": isNavCollapsed ? { display: "none" } : {},
         }}
       >
         {/* Home */}

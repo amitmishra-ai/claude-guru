@@ -43,7 +43,7 @@ export function GroupProfileDialog() {
           >
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <Box>
-                <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>Cohort Feb &bull; Group 07</Box>
+                <Box sx={{ fontSize: "0.875rem", fontWeight: 600 }}>Cohort Feb &middot; Group 07</Box>
                 <Box sx={{ mt: 0.5, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>(Placeholder preview)</Box>
               </Box>
               <Chip size="small" color="primary" label="PDF" />

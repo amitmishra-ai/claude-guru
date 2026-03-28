@@ -7,6 +7,7 @@ interface SessionsState {
   confirmations: Record<string, boolean>;
   sessionDeclined: Record<string, boolean>;
   sessionDeclinedAtYmd: Record<string, string>;
+  sessionDeclinedReasons: Record<string, string>;
   sessionFocus: Session | null;
   homeSessionsView: "next" | "completed" | "declined";
   selectedSessionType: "All" | SessionType;
@@ -24,6 +25,7 @@ const initialState: SessionsState = {
   confirmations: { s0: true },
   sessionDeclined: {},
   sessionDeclinedAtYmd: {},
+  sessionDeclinedReasons: {},
   sessionFocus: null,
   homeSessionsView: "next",
   selectedSessionType: "All",
@@ -53,9 +55,12 @@ const sessionsSlice = createSlice({
     unconfirmSession(state, action: PayloadAction<string>) {
       delete state.confirmations[action.payload];
     },
-    declineSession(state, action: PayloadAction<{ id: string; dateYmd: string }>) {
+    declineSession(state, action: PayloadAction<{ id: string; dateYmd: string; reason?: string }>) {
       state.sessionDeclined[action.payload.id] = true;
       state.sessionDeclinedAtYmd[action.payload.id] = action.payload.dateYmd;
+      if (action.payload.reason) {
+        state.sessionDeclinedReasons[action.payload.id] = action.payload.reason;
+      }
     },
     /** §8.3 Accept from Declined — undecline + re-confirm */
     acceptSession(state, action: PayloadAction<string>) {
