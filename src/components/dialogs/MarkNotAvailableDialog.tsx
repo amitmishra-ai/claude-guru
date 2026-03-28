@@ -275,7 +275,7 @@ export function MarkNotAvailableDialog() {
       open={open}
       onClose={handleClose}
       maxWidth={false}
-      PaperProps={{ sx: { width: 420, borderRadius: 3, overflow: "hidden" } }}
+      PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 }, borderRadius: 3, overflow: "hidden" } }}
     >
       {/* ── Header ── */}
       <Box sx={{ px: 2.5, pt: 2, pb: 1.25, display: "flex", alignItems: "center", justifyContent: "space-between" }}>

@@ -371,33 +371,21 @@ export default function CalendarPage() {
   /* ═══════════════════════════════════════════════════════════════════════ */
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: { md: "calc(100vh - 48px)" }, overflow: "hidden", gap: 2 }}>
-      {/* ── Single-line toolbar ── */}
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ flexWrap: "wrap", gap: 1, flexShrink: 0 }}>
-        {/* Left: title + nav + date + view dropdown */}
-        <Stack direction="row" alignItems="center" sx={{ gap: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mr: 2 }}>Calendar</Typography>
-          <Button
-            variant="outlined"
-            size="small"
-            sx={{ textTransform: "none", fontSize: "0.78rem", fontWeight: 500, height: 32, px: 1.5, borderColor: "divider", color: "text.primary" }}
-            onClick={() => { dispatch(setAnchorDate(realNow.toISOString())); if (calendarViewMode === "weekend") dispatch(setCalendarViewMode("week")); }}
-          >
-            Today
-          </Button>
-          <Button variant="text" size="small" aria-label="Previous" sx={{ minWidth: 0, height: 32, width: 32, p: 0, color: "text.secondary", borderRadius: "50%", "&:hover": { bgcolor: "action.hover" } }} onClick={navPrev}>
-            <ChevronLeftIcon sx={{ fontSize: 22 }} />
-          </Button>
-          <Button variant="text" size="small" aria-label="Next" sx={{ minWidth: 0, height: 32, width: 32, p: 0, color: "text.secondary", borderRadius: "50%", "&:hover": { bgcolor: "action.hover" } }} onClick={navNext}>
-            <ChevronRightIcon sx={{ fontSize: 22 }} />
-          </Button>
-          <Typography sx={{ fontSize: { xs: "0.85rem", sm: "0.95rem" }, fontWeight: 600, whiteSpace: "nowrap" }}>
-            {calendarViewMode === "month"
-              ? monthLabel(anchorDate)
-              : calendarViewMode === "day"
-                ? anchorDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
-                : weekLabel(anchorDate)}
-          </Typography>
-          {/* View mode dropdown — next to date */}
+      {/* ── Toolbar ── */}
+      <Stack sx={{ gap: { xs: 0.75, sm: 1 }, flexShrink: 0 }}>
+        {/* Row 1: title + today + view dropdown + actions */}
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack direction="row" alignItems="center" sx={{ gap: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: "1.05rem", sm: "1.25rem" } }}>Calendar</Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              sx={{ textTransform: "none", fontSize: "0.78rem", fontWeight: 500, height: 32, px: 1.5, borderColor: "divider", color: "text.primary" }}
+              onClick={() => { dispatch(setAnchorDate(realNow.toISOString())); if (calendarViewMode === "weekend") dispatch(setCalendarViewMode("week")); }}
+            >
+              Today
+            </Button>
+          {/* View mode dropdown */}
           <Button
             variant="outlined"
             size="small"
@@ -446,29 +434,47 @@ export default function CalendarPage() {
               </Box>
             ))}
           </Menu>
+          </Stack>
+
+          {/* Right: action buttons (desktop only) */}
+          <Stack direction="row" spacing={1.5} sx={{ display: { xs: "none", sm: "flex" } }}>
+            <Button
+              variant="soft"
+              size="small"
+              startIcon={<EventBusyIcon sx={{ fontSize: 14 }} />}
+              sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }}
+              onClick={() => dispatch(setOpenNotAvailable(true))}
+            >
+              Leave
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<EditCalendarIcon sx={{ fontSize: 14 }} />}
+              sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }}
+              onClick={() => dispatch(setOpenAvailability(true))}
+            >
+              {hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}
+            </Button>
+          </Stack>
         </Stack>
 
-        {/* Right: action buttons */}
-        <Stack direction="row" spacing={1.5} sx={{ display: { xs: "none", sm: "flex" } }}>
-          <Button
-            variant="soft"
-            size="small"
-            startIcon={<EventBusyIcon sx={{ fontSize: 14 }} />}
-            sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }}
-            onClick={() => dispatch(setOpenNotAvailable(true))}
-          >
-            Leave
+        {/* Row 2: prev/next nav + date label */}
+        <Stack direction="row" alignItems="center" justifyContent="center" sx={{ gap: 0.5 }}>
+          <Button variant="text" size="small" aria-label="Previous" sx={{ minWidth: 0, height: 32, width: 32, p: 0, color: "text.secondary", borderRadius: "50%", "&:hover": { bgcolor: "action.hover" } }} onClick={navPrev}>
+            <ChevronLeftIcon sx={{ fontSize: 22 }} />
           </Button>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<EditCalendarIcon sx={{ fontSize: 14 }} />}
-            sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }}
-            onClick={() => dispatch(setOpenAvailability(true))}
-          >
-            {hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}
+          <Typography sx={{ fontSize: { xs: "0.82rem", sm: "0.95rem" }, fontWeight: 600, whiteSpace: "nowrap" }}>
+            {calendarViewMode === "month"
+              ? monthLabel(anchorDate)
+              : calendarViewMode === "day"
+                ? anchorDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
+                : weekLabel(anchorDate)}
+          </Typography>
+          <Button variant="text" size="small" aria-label="Next" sx={{ minWidth: 0, height: 32, width: 32, p: 0, color: "text.secondary", borderRadius: "50%", "&:hover": { bgcolor: "action.hover" } }} onClick={navNext}>
+            <ChevronRightIcon sx={{ fontSize: 22 }} />
           </Button>
-          </Stack>
+        </Stack>
       </Stack>
 
       {/* ── Availability gate ─────────────────────────────────────────── */}

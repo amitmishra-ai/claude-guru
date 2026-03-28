@@ -33,6 +33,8 @@ export function RequestDetailDialog() {
         dispatch(setOpenRequest(false));
         dispatch(setRequestFocus(null));
       }}
+      maxWidth="xs"
+      fullWidth
     >
       <DialogTitle>Event request</DialogTitle>
 

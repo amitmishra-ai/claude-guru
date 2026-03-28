@@ -13,7 +13,7 @@ export function GroupProfileDialog() {
   const open = useAppSelector((s) => s.ui.openGroupProfile);
 
   return (
-    <Dialog open={open} onClose={() => dispatch(setOpenGroupProfile(false))}>
+    <Dialog open={open} onClose={() => dispatch(setOpenGroupProfile(false))} maxWidth="xs" fullWidth>
       <DialogTitle>Group profile (PDF)</DialogTitle>
 
       <DialogContent>
@@ -66,11 +66,11 @@ export function GroupProfileDialog() {
         </Box>
       </DialogContent>
 
-      <DialogActions>
-        <Button variant="text" color="inherit" onClick={() => dispatch(setOpenGroupProfile(false))}>
+      <DialogActions sx={{ flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 0 }, "& > :not(:first-of-type)": { ml: { xs: 0, sm: 1 } } }}>
+        <Button variant="text" color="inherit" onClick={() => dispatch(setOpenGroupProfile(false))} sx={{ width: { xs: "100%", sm: "auto" } }}>
           Close
         </Button>
-        <Button variant="contained">
+        <Button variant="contained" sx={{ width: { xs: "100%", sm: "auto" } }}>
           Download / open PDF
         </Button>
       </DialogActions>

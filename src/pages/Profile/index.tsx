@@ -460,7 +460,7 @@ export default function ProfilePage() {
   return (
     <>
       {/* ── Page header ──────────────────────────────────────────────────── */}
-      <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+      <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 3, flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 0 } }}>
         <Box>
           <Typography variant="h6" fontWeight={700}>Profile</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -523,12 +523,12 @@ export default function ProfilePage() {
       {/* ── Identity card ────────────────────────────────────────────────── */}
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent sx={{ px: 3, py: 2.5 }}>
-          <FlexBox sx={{ flexWrap: "wrap", gap: 4 }}>
-            <Box sx={{ minWidth: 160 }}>
+          <FlexBox sx={{ flexWrap: "wrap", gap: { xs: 2, sm: 4 } }}>
+            <Box sx={{ minWidth: { xs: "100%", sm: 160 } }}>
               <Typography variant="caption" color="text.secondary">Name</Typography>
               <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25 }}>{guruName}</Typography>
             </Box>
-            <Box sx={{ minWidth: 200 }}>
+            <Box sx={{ minWidth: { xs: "100%", sm: 200 } }}>
               <Typography variant="caption" color="text.secondary">Timezone</Typography>
               <Typography
                 variant="body2"
@@ -539,11 +539,11 @@ export default function ProfilePage() {
                 {tzLabel}
               </Typography>
             </Box>
-            <Box sx={{ minWidth: 140 }}>
+            <Box sx={{ minWidth: { xs: "100%", sm: 140 } }}>
               <Typography variant="caption" color="text.secondary">Primary mode</Typography>
               <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25 }}>{primaryMode}</Typography>
             </Box>
-            <Box sx={{ minWidth: 160 }}>
+            <Box sx={{ minWidth: { xs: "100%", sm: 160 } }}>
               <Typography variant="caption" color="text.secondary">Programs</Typography>
               <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25 }}>{guruPrograms}</Typography>
             </Box>
@@ -903,7 +903,7 @@ export default function ProfilePage() {
                 </ResponsiveContainer>
               </Box>
 
-              <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5 }}>
+              <FlexBox sx={{ justifyContent: "space-between", mt: 1.5, flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "flex-start", sm: "center" }, gap: { xs: 0.75, sm: 0 } }}>
                 <FlexBox sx={{ gap: 1, alignItems: "center" }}>
                   <Chip label={`Avg ${avgRating}`} size="small" sx={{ fontWeight: 600, bgcolor: "action.selected" }} />
                   <Typography variant="caption" color="text.secondary">
@@ -1017,11 +1017,11 @@ export default function ProfilePage() {
             <Table size="small" sx={{ tableLayout: "auto" }}>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, fontSize: 11, borderBottom: "1px solid", borderColor: "divider", pl: 0 }}>
+                  <TableCell sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, borderBottom: "1px solid", borderColor: "divider", pl: 0, px: { xs: 0.5, sm: 1 } }}>
                     Course
                   </TableCell>
                   {MONTHS.map((m) => (
-                    <TableCell key={m} sx={{ fontWeight: 600, fontSize: 11, textAlign: "center", borderBottom: "1px solid", borderColor: "divider", px: 1 }}>
+                    <TableCell key={m} sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, textAlign: "center", borderBottom: "1px solid", borderColor: "divider", px: { xs: 0.5, sm: 1 } }}>
                       {m}
                     </TableCell>
                   ))}
@@ -1035,7 +1035,7 @@ export default function ProfilePage() {
                     : demoMatrix
                 ).map((row) => (
                   <TableRow key={row.course} sx={{ "&:last-child td": { border: 0 } }}>
-                    <TableCell sx={{ fontSize: 11, color: isNewOrEarly ? "text.disabled" : "text.secondary", pl: 0, whiteSpace: "nowrap" }}>
+                    <TableCell sx={{ fontSize: { xs: 10, sm: 11 }, color: isNewOrEarly ? "text.disabled" : "text.secondary", pl: 0, whiteSpace: "nowrap", px: { xs: 0.5, sm: 1 } }}>
                       {row.course}
                     </TableCell>
                     {row.scores.map((s, i) => (
@@ -1068,6 +1068,34 @@ export default function ProfilePage() {
         </Paper>
       ) : (
       <Card variant="outlined" sx={{ mb: 4 }}>
+        {/* Mobile card layout */}
+        <Box sx={{ display: { xs: "block", sm: "none" } }}>
+          <Stack spacing={0} divider={<Divider />}>
+            {(isEarlyUser ? demoContracts.filter(c => c.active).slice(0, 1) : demoContracts).map((c, i) => (
+              <Box key={i} sx={{ px: 2, py: 1.5 }}>
+                <Typography variant="body2" fontWeight={700}>{c.program}</Typography>
+                <Typography variant="caption" color="text.secondary">{c.role}</Typography>
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 0.75 }}>
+                  <Typography variant="caption" color="text.secondary">{c.start} – {c.end}</Typography>
+                  <Chip
+                    label={c.active ? "Active" : "Expired"}
+                    size="small"
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: "0.65rem",
+                      height: 22,
+                      bgcolor: c.active ? "var(--gl-status-confirmed-bg)" : "action.hover",
+                      color: c.active ? "var(--gl-status-confirmed-text)" : "text.disabled",
+                      border: c.active ? "1px solid var(--gl-status-confirmed-border)" : "none",
+                    }}
+                  />
+                </Stack>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
+        {/* Desktop table layout */}
+        <Box sx={{ display: { xs: "none", sm: "block" } }}>
         <TableContainer>
           <Table size="small">
             <TableHead>
@@ -1115,6 +1143,7 @@ export default function ProfilePage() {
             </TableBody>
           </Table>
         </TableContainer>
+        </Box>
       </Card>
       )}
 
@@ -1122,7 +1151,7 @@ export default function ProfilePage() {
       <Dialog
         open={openProfileEdit}
         onClose={() => dispatch(setOpenProfileEdit(false))}
-        PaperProps={{ sx: { minWidth: 360 } }}
+        PaperProps={{ sx: { minWidth: { xs: "auto", sm: 360 } } }}
       >
         <DialogTitle sx={{ fontWeight: 700 }}>Edit your details</DialogTitle>
         <DialogContent>
@@ -1395,7 +1424,7 @@ export default function ProfilePage() {
           </Stack>
 
           {/* Summary stats row */}
-          <Stack direction="row" spacing={3} sx={{ mt: 2.5 }} divider={<Divider orientation="vertical" flexItem />}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, auto)" }, gap: { xs: 1.5, sm: 3 }, mt: 2.5 }}>
             <Box>
               <Typography variant="caption" color="text.secondary">Courses taught</Typography>
               <Typography variant="h6" fontWeight={700}>{demoCoursePerf.length}</Typography>
@@ -1416,7 +1445,7 @@ export default function ProfilePage() {
                 {demoCoursePerf.filter((c) => c.delta < 0).length} courses
               </Typography>
             </Box>
-          </Stack>
+          </Box>
         </Box>
 
         <DialogContent sx={{ px: 3, pt: 2.5 }}>

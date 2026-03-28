@@ -66,7 +66,7 @@ export function PollBuilderDialog() {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle>{pollEditingId ? "Edit poll" : "Create poll"}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
@@ -111,10 +111,10 @@ export function PollBuilderDialog() {
           </Box>
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button variant="text" color="inherit" onClick={handleClose}>Cancel</Button>
-        <Button variant="soft" onClick={handleSaveDraft} disabled={!pollQuestion.trim()}>Save draft</Button>
-        <Button variant="contained" onClick={handleQueue} disabled={!pollQuestion.trim()}>Queue to Zoom</Button>
+      <DialogActions sx={{ flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 0 }, "& > :not(:first-of-type)": { ml: { xs: 0, sm: 1 } } }}>
+        <Button variant="text" color="inherit" onClick={handleClose} sx={{ width: { xs: "100%", sm: "auto" } }}>Cancel</Button>
+        <Button variant="soft" onClick={handleSaveDraft} disabled={!pollQuestion.trim()} sx={{ width: { xs: "100%", sm: "auto" } }}>Save draft</Button>
+        <Button variant="contained" onClick={handleQueue} disabled={!pollQuestion.trim()} sx={{ width: { xs: "100%", sm: "auto" } }}>Queue to Zoom</Button>
       </DialogActions>
     </Dialog>
   );

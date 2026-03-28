@@ -245,7 +245,7 @@ export function SessionCard({
             >
               {titleContent}
             </Typography>
-            <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1 }} flexWrap="wrap" useFlexGap justifyContent="flex-end" sx={{ flexShrink: 0, maxWidth: { xs: "55%", sm: "auto" } }}>
+            <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1 }} flexWrap="wrap" useFlexGap justifyContent="flex-end" sx={{ flexShrink: 0, maxWidth: { xs: "45%", sm: "auto" } }}>
               {statusChip}
               {topRight}
             </Stack>

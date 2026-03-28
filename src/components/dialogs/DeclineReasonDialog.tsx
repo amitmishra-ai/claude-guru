@@ -91,25 +91,25 @@ export function DeclineReasonDialog() {
                 <Stack direction="row" spacing={1} alignItems="flex-start">
                   <WarningAmberOutlinedIcon sx={{ fontSize: 18, color: "var(--gl-status-declined-text)", flexShrink: 0, mt: '2px' }} />
                   <Box>
-                    <Typography variant="body2" fontWeight={600} sx={{ color: "var(--gl-status-declined-text)", mb: 0.5 }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ color: "var(--gl-status-declined-text)", mb: 0.5, fontSize: { xs: "0.78rem", sm: "0.875rem" } }}>
                       This cancellation is very close to the session
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "hsl(var(--md-on-surface-variant))", mb: 1.5 }}>
+                    <Typography variant="body2" sx={{ color: "hsl(var(--md-on-surface-variant))", mb: 1.5, fontSize: { xs: "0.75rem", sm: "0.875rem" } }}>
                       Please inform {declineSessionFocus.scheduledByName || "the scheduler"} directly so they can arrange a replacement.
                     </Typography>
                     <Stack spacing={0.75}>
                       {declineSessionFocus.scheduledByEmail && (
                         <Stack direction="row" alignItems="center" spacing={0.75}>
-                          <EmailOutlinedIcon sx={{ fontSize: 14, color: "hsl(var(--md-on-surface-variant))" }} />
-                          <Typography variant="body2" fontWeight={500}>
+                          <EmailOutlinedIcon sx={{ fontSize: { xs: 12, sm: 14 }, color: "hsl(var(--md-on-surface-variant))" }} />
+                          <Typography variant="body2" fontWeight={500} sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" }, wordBreak: "break-all" }}>
                             {declineSessionFocus.scheduledByEmail}
                           </Typography>
                         </Stack>
                       )}
                       {declineSessionFocus.scheduledByPhone && (
                         <Stack direction="row" alignItems="center" spacing={0.75}>
-                          <PhoneOutlinedIcon sx={{ fontSize: 14, color: "hsl(var(--md-on-surface-variant))" }} />
-                          <Typography variant="body2" fontWeight={500}>
+                          <PhoneOutlinedIcon sx={{ fontSize: { xs: 12, sm: 14 }, color: "hsl(var(--md-on-surface-variant))" }} />
+                          <Typography variant="body2" fontWeight={500} sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" } }}>
                             {declineSessionFocus.scheduledByPhone}
                           </Typography>
                         </Stack>
@@ -138,8 +138,8 @@ export function DeclineReasonDialog() {
           </Box>
         ) : null}
       </DialogContent>
-      <DialogActions>
-        <Button variant="text" color="inherit" onClick={handleClose}>
+      <DialogActions sx={{ flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 0 }, "& > :not(:first-of-type)": { ml: { xs: 0, sm: 1 } } }}>
+        <Button variant="text" color="inherit" onClick={handleClose} sx={{ width: { xs: "100%", sm: "auto" } }}>
           Cancel
         </Button>
         <Button
@@ -147,6 +147,7 @@ export function DeclineReasonDialog() {
           onClick={handleSubmit}
           disabled={!declineReason.trim()}
           sx={{
+            width: { xs: "100%", sm: "auto" },
             fontWeight: 600,
             bgcolor: "rgba(211,47,47,0.08)",
             color: "error.main",

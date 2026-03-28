@@ -58,7 +58,7 @@ export function TimezoneDialog() {
   }, [effectiveTimeZone]);
 
   return (
-    <Dialog open={open} onClose={() => dispatch(setOpenTimezone(false))} maxWidth={false} PaperProps={{ sx: { width: 420, borderRadius: 3 } }}>
+    <Dialog open={open} onClose={() => dispatch(setOpenTimezone(false))} maxWidth={false} PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 }, borderRadius: 3 } }}>
       <DialogTitle>Timezone</DialogTitle>
 
       <DialogContent>

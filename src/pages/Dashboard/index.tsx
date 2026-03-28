@@ -110,6 +110,7 @@ function TaskCard({
   chipBorder,
   title,
   description,
+  shortDescription,
   action,
   extra,
   body,
@@ -120,6 +121,7 @@ function TaskCard({
   chipBorder?: string;
   title: string;
   description: string;
+  shortDescription?: string;
   action?: React.ReactNode;
   extra?: React.ReactNode;
   body?: React.ReactNode;
@@ -127,18 +129,25 @@ function TaskCard({
   return (
     <Card
       variant="outlined"
-      sx={{ p: 2.5, transition: "border-color 0.2s", "&:hover": { borderColor: "primary.main" } }}
+      sx={{ p: { xs: 2, sm: 2.5 }, height: "100%", transition: "border-color 0.2s", "&:hover": { borderColor: "primary.main" } }}
     >
       <Stack spacing={1.5}>
         <Box>
+          {/* Chip above title on mobile */}
+          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ display: { xs: "flex", sm: "none" }, mb: 0.5 }}>
+            <Chip label={chipLabel} size="small" sx={{ bgcolor: chipBg, color: chipColor, border: chipBorder ? `1px solid ${chipBorder}` : undefined, fontWeight: 500, fontSize: "0.75rem" }} />
+            {extra}
+          </Stack>
+          {/* Title + chip side by side on desktop */}
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
             <Typography variant="subtitle2" fontWeight={600}>{title}</Typography>
-            <Stack direction="row" spacing={0.75} alignItems="center">
+            <Stack direction="row" spacing={0.75} alignItems="center" sx={{ display: { xs: "none", sm: "flex" } }}>
               <Chip label={chipLabel} size="small" sx={{ bgcolor: chipBg, color: chipColor, border: chipBorder ? `1px solid ${chipBorder}` : undefined, fontWeight: 500, fontSize: "0.75rem" }} />
               {extra}
             </Stack>
           </Stack>
-          <Typography variant="caption" color="text.secondary">{description}</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: shortDescription ? { xs: "none", sm: "block" } : "block" }}>{description}</Typography>
+          {shortDescription && <Typography variant="caption" color="text.secondary" sx={{ display: { xs: "block", sm: "none" } }}>{shortDescription}</Typography>}
         </Box>
         {body}
         {action}
@@ -425,7 +434,7 @@ export default function DashboardPage() {
   return (
     <Stack spacing={2}>
       {/* ── Welcome header ── */}
-      <Typography variant="h6" fontWeight={700} sx={{ mb: -0.5 }}>
+      <Typography variant="h6" fontWeight={700} sx={{ mb: -0.5, fontSize: { xs: "1.05rem", sm: "1.25rem" } }}>
         Welcome {guruName}
       </Typography>
 
@@ -485,46 +494,95 @@ export default function DashboardPage() {
         <Grid size={{ xs: 12, md: 8 }}>
           <Stack>
             {/* Mobile tasks (horizontal scroll) */}
-            {(needsWednesdayConfirm || !hasUserConfiguredAvailability) && (
-              <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><AssignmentOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Tasks</Typography></Stack>
-                <Stack spacing={1.5}>
-                  {!hasUserConfiguredAvailability && (
-                    <Box>
-                      <TaskCard
-                        chipLabel="Needs update"
-                        chipColor="var(--gl-status-declined-text)"
-                        chipBg="var(--gl-status-declined-bg)"
-                        chipBorder="var(--gl-status-declined-border)"
-                        title="Add your availability"
-                        description={`Keep availability up-to-date for next ${rangeDays} days.`}
-                        action={
-                          <Button size="small" variant="contained" onClick={() => dispatch(setOpenAvailability(true))}>
-                            Update availability
-                          </Button>
-                        }
-                      />
-                    </Box>
-                  )}
-                  {needsWednesdayConfirm && (
-                    <Box onClick={handleHighlightUnconfirmed} sx={{ cursor: "pointer" }}>
-                      <TaskCard
-                        chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
-                        chipColor="var(--gl-status-declined-text)"
-                        chipBg="var(--gl-status-declined-bg)"
-                        chipBorder="var(--gl-status-declined-border)"
-                        title="Confirm upcoming activities"
-                        description="Confirm by Wed 6 PM to finalize allocations."
-                      />
-                    </Box>
-                  )}
-                </Stack>
+            <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 2 }}>
+              <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><AssignmentOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Tasks</Typography></Stack>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1.5,
+                  overflowX: "auto",
+                  scrollSnapType: "x mandatory",
+                  pb: 0.5,
+                  "&::-webkit-scrollbar": { display: "none" },
+                  scrollbarWidth: "none",
+                }}
+              >
+                {needsWednesdayConfirm && (
+                  <Box onClick={handleHighlightUnconfirmed} sx={{ cursor: "pointer", width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start" }}>
+                    <TaskCard
+                      chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
+                      chipColor="var(--gl-status-declined-text)"
+                      chipBg="var(--gl-status-declined-bg)"
+                      chipBorder="var(--gl-status-declined-border)"
+                      title="Confirm upcoming activities"
+                      description="Confirm by Wed 6 PM to finalize allocations."
+                      shortDescription="Confirm by Wed 6 PM."
+                    />
+                  </Box>
+                )}
+                {!calendarConnected && (
+                  <Box sx={{ width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start" }}>
+                    <TaskCard
+                      chipLabel="Not connected"
+                      chipColor="var(--gl-status-pending-text)"
+                      chipBg="var(--gl-status-pending-bg)"
+                      chipBorder="var(--gl-status-pending-border)"
+                      title="Avoid double booking"
+                      description="Connect calendar to detect conflicts."
+                      action={
+                        <Button size="small" variant="contained">
+                          Connect Google Calendar
+                        </Button>
+                      }
+                    />
+                  </Box>
+                )}
+                {hasUserConfiguredAvailability ? (
+                  <Box sx={{ width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start", cursor: "pointer" }} onClick={() => dispatch(setOpenAvailability(true))}>
+                    <TaskCard
+                      chipLabel="Configured"
+                      chipColor="var(--gl-status-confirmed-text)"
+                      chipBg="var(--gl-status-confirmed-bg)"
+                      chipBorder="var(--gl-status-confirmed-border)"
+                      title="Availability summary"
+                      description={`${patterns.length} slot${patterns.length !== 1 ? "s" : ""} configured`}
+                    />
+                  </Box>
+                ) : (
+                  <Box sx={{ width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start" }}>
+                    <TaskCard
+                      chipLabel="Needs update"
+                      chipColor="var(--gl-status-declined-text)"
+                      chipBg="var(--gl-status-declined-bg)"
+                      chipBorder="var(--gl-status-declined-border)"
+                      title="Add your availability"
+                      description={`Keep availability up-to-date for next ${rangeDays} days.`}
+                      action={
+                        <Button size="small" variant="contained" onClick={() => dispatch(setOpenAvailability(true))}>
+                          Update availability
+                        </Button>
+                      }
+                    />
+                  </Box>
+                )}
+                {openTicketCount > 0 && (
+                  <Box sx={{ width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start", cursor: "pointer" }} onClick={() => navigate("/support")}>
+                    <TaskCard
+                      chipLabel={`${openTicketCount} open`}
+                      chipColor="var(--gl-status-declined-text)"
+                      chipBg="var(--gl-status-declined-bg)"
+                      chipBorder="var(--gl-status-declined-border)"
+                      title="Support tickets"
+                      description={`${openTicketCount} open ticket${openTicketCount !== 1 ? "s" : ""}${escalatedTicketCount > 0 ? ` · ${escalatedTicketCount} escalated` : ""}`}
+                    />
+                  </Box>
+                )}
               </Box>
-            )}
+            </Box>
 
             {/* ── Big container for entire left section ── */}
             <Card sx={{ p: { xs: 1.5, sm: 2 } }}>
-              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Activities</Typography>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: { xs: 1, sm: 1.5 } }}>Activities</Typography>
               <Stack spacing={{ xs: 2, md: 2.5 }}>
                 {/* Next Activities — hidden when no today sessions */}
                 {todaySessions.length > 0 && (
@@ -593,7 +651,7 @@ export default function DashboardPage() {
                                       dispatch(setOpenSessionMaterials(true));
                                     }}
                                   >
-                                    View Session Material
+                                    <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>View </Box>Session Material
                                   </Button>
                                 </>
                               }
@@ -634,9 +692,9 @@ export default function DashboardPage() {
                   },
                   }}
                 >
-                  <Tab icon={<EventNoteOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Upcoming (${upcomingSessions.length})`} value="next" />
-                  <Tab icon={<TaskAltOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Completed (${completedSessions.length})`} value="completed" />
-                  <Tab icon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Declined (${declinedSessions.length})`} value="declined" />
+                  <Tab icon={<EventNoteOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Upcoming (${upcomingSessions.length})`} value="next" sx={{ "& .MuiTab-iconWrapper": { display: { xs: "none", sm: "flex" } } }} />
+                  <Tab icon={<TaskAltOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Completed (${completedSessions.length})`} value="completed" sx={{ "& .MuiTab-iconWrapper": { display: { xs: "none", sm: "flex" } } }} />
+                  <Tab icon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Declined (${declinedSessions.length})`} value="declined" sx={{ "& .MuiTab-iconWrapper": { display: { xs: "none", sm: "flex" } } }} />
                 </Tabs>
 
                 {/* ── Tab loading skeleton ── */}
@@ -725,7 +783,7 @@ export default function DashboardPage() {
                                         dispatch(setOpenSessionMaterials(true));
                                       }}
                                     >
-                                      View Session Material
+                                      <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>View </Box>Session Material
                                     </Button>
                                     <Button
                                       variant="soft"
@@ -736,7 +794,7 @@ export default function DashboardPage() {
                                         dispatch(pushToast({ title: "Course content", description: `Viewing content for ${s.title}` }));
                                       }}
                                     >
-                                      View Course content
+                                      <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>View </Box>Course content
                                     </Button>
                                   </>
                                 ) : (
@@ -1095,9 +1153,9 @@ export default function DashboardPage() {
 
                           // Payment chip helper
                           const paymentChip = isPaid
-                            ? <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                            ? <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 500, fontSize: { xs: "0.65rem", sm: "0.75rem" } }} />
                             : hasPaymentStatus
-                              ? <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                              ? <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 500, fontSize: { xs: "0.65rem", sm: "0.75rem" } }} />
                               : null;
 
                           // Feedback chip helper
@@ -1240,7 +1298,7 @@ export default function DashboardPage() {
                               {/* Card header: title row + date + actions — custom for non-SessionCard types */}
                               {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
                                 <>
-                                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
+                                  <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "flex-start" }} sx={{ mb: 0.5, gap: { xs: 0.5, sm: 1 } }}>
                                     <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>{cardTitle}</Typography>
                                     <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
                                       {topRightContent}

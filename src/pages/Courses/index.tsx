@@ -126,7 +126,7 @@ function CourseCard({
     ? Math.round(sections.reduce((acc, s) => acc + s.progress, 0) / totalSections)
     : 0;
   return (
-    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+    <Grid size={{ xs: 6, sm: 6, md: 4 }}>
       <Card
         variant="outlined"
         onClick={onCardClick}
@@ -142,11 +142,11 @@ function CourseCard({
           }),
         }}
       >
-        <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", flex: 1 }}>
+        <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, display: "flex", flexDirection: "column", flex: 1 }}>
 
           {/* Thumbnail row: pattern left, chips right */}
-          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, mb: 1.5 }}>
-            <CoursePatternThumb color={c.color ?? "#1976d2"} pattern={c.pattern ?? 0} size={72} />
+          <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, mb: { xs: 1, sm: 1.5 } }}>
+            <CoursePatternThumb color={c.color ?? "#1976d2"} pattern={c.pattern ?? 0} size={52} />
             {c.isNew && !isPast && !isLearn && (
               <Chip
                 label="New"
@@ -165,7 +165,7 @@ function CourseCard({
           <Typography
             variant="h6"
             sx={{
-              fontWeight: 700, lineHeight: 1.3, mb: 0.5, fontSize: "1rem",
+              fontWeight: 700, lineHeight: 1.3, mb: 0.5, fontSize: { xs: "0.8rem", sm: "1rem" },
               display: "-webkit-box", WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical", overflow: "hidden",
               color: "text.primary",
@@ -175,24 +175,24 @@ function CourseCard({
           </Typography>
 
           {/* Program · Batch */}
-          <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.8rem", mb: 1.5 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary", fontSize: { xs: "0.68rem", sm: "0.8rem" }, mb: { xs: 1, sm: 1.5 } }}>
             {c.program} &middot; {c.batch}
           </Typography>
 
           {/* Mapped sessions — only for teach courses */}
           {!isLearn && (
             <>
-              <Divider sx={{ mb: 1.5 }} />
+              <Divider sx={{ mb: { xs: 0.75, sm: 1.5 } }} />
               <Box sx={{ mt: "auto" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.75 }}>
-                  <CalendarMonthIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-                  <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                    {isPast ? "Events taught" : "Upcoming events"}
+                  <CalendarMonthIcon sx={{ fontSize: { xs: 12, sm: 14 }, color: "text.secondary" }} />
+                  <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", fontSize: { xs: "0.6rem", sm: "0.68rem" }, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    {isPast ? "Events taught" : "Upcoming"}
                   </Typography>
                 </Box>
                 {mapped.length === 0 ? (
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic" }}>
-                    {isPast ? "No events yet." : "No events scheduled yet."}
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic", fontSize: { xs: "0.62rem", sm: "0.75rem" } }}>
+                    {isPast ? "No events yet." : "None scheduled."}
                   </Typography>
                 ) : (
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, alignItems: "center" }}>
@@ -201,12 +201,12 @@ function CourseCard({
                       size="small"
                       onClick={(e) => { e.stopPropagation(); onOpenSession(firstSession); }}
                       sx={{
-                        cursor: "pointer", fontSize: "0.7rem", height: 24,
+                        cursor: "pointer", fontSize: { xs: "0.58rem", sm: "0.7rem" }, height: { xs: 20, sm: 24 },
                         bgcolor: "var(--gl-mapped-session-bg)",
                         color: "var(--gl-mapped-session-text)",
                         "&:hover": { bgcolor: "var(--gl-mapped-session-hover)" },
-                        maxWidth: 220,
-                        "& .MuiChip-label": { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                        maxWidth: { xs: 140, sm: 220 },
+                        "& .MuiChip-label": { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", px: { xs: 0.5, sm: 1 } },
                       }}
                     />
                     {rest.length > 0 && <MappedSessionsOverflow sessions={rest} onSelect={onOpenSession} />}
@@ -224,7 +224,7 @@ function CourseCard({
 /* ─── Course card skeleton ────────────────────────────────────────────────── */
 function CourseCardSkeleton() {
   return (
-    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+    <Grid size={{ xs: 6, sm: 6, md: 4 }}>
       <Card variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", flex: 1 }}>
           {/* Tags row */}
