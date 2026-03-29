@@ -70,6 +70,8 @@ export function AppLayout() {
           minWidth: 0,
           overflowY: "auto",
           overflowX: "clip",
+          scrollbarWidth: { xs: "none", md: "thin" },
+          "&::-webkit-scrollbar": { display: { xs: "none", md: "block" } },
           p: { xs: 1.5, sm: 2, md: 3 },
           pt: { xs: "calc(56px + 12px + env(safe-area-inset-top))", md: 3 },
           pb: { xs: "calc(5rem + env(safe-area-inset-bottom))", md: 3 },
