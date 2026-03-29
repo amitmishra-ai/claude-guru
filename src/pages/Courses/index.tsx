@@ -348,7 +348,7 @@ export default function CoursesPage() {
       {/* ── Page header ── */}
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2} sx={{ mb: 0.5 }}>
         <Box>
-          <Typography variant="h6" sx={{ lineHeight: 1.35, fontWeight: 700 }}>Courses</Typography>
+          <Typography variant="h6" sx={{ lineHeight: 1.35, fontWeight: 700, fontSize: { xs: "1rem", sm: "1.25rem" } }}>Courses</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
             Your teaching assignments and learning content
           </Typography>
@@ -381,6 +381,31 @@ export default function CoursesPage() {
           />
         </Box>
       </Stack>
+
+      {/* Mobile search bar */}
+      <Box
+        sx={{
+          display: { xs: "flex", sm: "none" },
+          alignItems: "center",
+          gap: 1,
+          height: 40,
+          px: 1.5,
+          mt: 1.5,
+          borderRadius: "12px",
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          "&:focus-within": { borderColor: "primary.main" },
+        }}
+      >
+        <SearchIcon sx={{ fontSize: 18, color: "text.secondary", flexShrink: 0 }} />
+        <InputBase
+          placeholder="Search courses…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ flex: 1, fontSize: "0.85rem", "& .MuiInputBase-input::placeholder": { color: "text.secondary", opacity: 0.7 } }}
+        />
+      </Box>
 
       <Box sx={{ mt: 2.5 }}>
 

@@ -510,7 +510,7 @@ export default function CalendarPage() {
             <EventNoteIcon sx={{ fontSize: 36, color: 'primary.contrastText' }} />
           </Box>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.75 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.75, fontSize: { xs: "1rem", sm: "1.25rem" } }}>
               Set your availability to get started
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420, mx: 'auto' }}>

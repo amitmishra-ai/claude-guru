@@ -581,7 +581,7 @@ export default function DashboardPage() {
 
             {/* ── Big container for entire left section ── */}
             <Card sx={{ p: { xs: 1.5, sm: 2 } }}>
-              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: { xs: 1, sm: 1.5 } }}>Activities</Typography>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: { xs: 1, sm: 1.5 }, fontSize: { xs: "0.875rem", sm: "1rem" } }}>Activities</Typography>
               <Stack spacing={{ xs: 2, md: 2.5 }}>
                 {/* Next Activities — hidden when no today sessions */}
                 {todaySessions.length > 0 && (
@@ -967,7 +967,7 @@ export default function DashboardPage() {
                                       {[plannedEventDetail.batch, plannedEventDetail.sessionType].filter(Boolean).join(" · ")}
                                     </Typography>
                                     {/* Title */}
-                                    <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3, mb: 0.25 }}>
+                                    <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "0.95rem", sm: "1.05rem" }, lineHeight: 1.3, mb: 0.25 }}>
                                       {plannedEventDetail.title}
                                     </Typography>
 

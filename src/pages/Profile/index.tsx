@@ -462,7 +462,7 @@ export default function ProfilePage() {
       {/* ── Page header ──────────────────────────────────────────────────── */}
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 3, flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 0 } }}>
         <Box>
-          <Typography variant="h6" fontWeight={700}>Profile</Typography>
+          <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Profile</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Your identity, performance trends, and financial overview.
           </Typography>
@@ -522,39 +522,39 @@ export default function ProfilePage() {
 
       {/* ── Identity card ────────────────────────────────────────────────── */}
       <Card variant="outlined" sx={{ mb: 4 }}>
-        <CardContent sx={{ px: 3, py: 2.5 }}>
-          <FlexBox sx={{ flexWrap: "wrap", gap: { xs: 2, sm: 4 } }}>
-            <Box sx={{ minWidth: { xs: "100%", sm: 160 } }}>
-              <Typography variant="caption" color="text.secondary">Name</Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25 }}>{guruName}</Typography>
+        <CardContent sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 2.5 } }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, auto)" }, gap: { xs: 1.5, sm: 4 } }}>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>Name</Typography>
+              <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25, fontSize: { xs: "0.78rem", sm: "0.875rem" } }}>{guruName}</Typography>
             </Box>
-            <Box sx={{ minWidth: { xs: "100%", sm: 200 } }}>
-              <Typography variant="caption" color="text.secondary">Timezone</Typography>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>Timezone</Typography>
               <Typography
                 variant="body2"
                 fontWeight={600}
-                sx={{ mt: 0.25, color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+                sx={{ mt: 0.25, fontSize: { xs: "0.78rem", sm: "0.875rem" }, color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
                 onClick={() => dispatch(setOpenTimezone(true))}
               >
                 {tzLabel}
               </Typography>
             </Box>
-            <Box sx={{ minWidth: { xs: "100%", sm: 140 } }}>
-              <Typography variant="caption" color="text.secondary">Primary mode</Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25 }}>{primaryMode}</Typography>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>Primary mode</Typography>
+              <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25, fontSize: { xs: "0.78rem", sm: "0.875rem" } }}>{primaryMode}</Typography>
             </Box>
-            <Box sx={{ minWidth: { xs: "100%", sm: 160 } }}>
-              <Typography variant="caption" color="text.secondary">Programs</Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25 }}>{guruPrograms}</Typography>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>Programs</Typography>
+              <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25, fontSize: { xs: "0.78rem", sm: "0.875rem" } }}>{guruPrograms}</Typography>
             </Box>
-          </FlexBox>
+          </Box>
         </CardContent>
       </Card>
 
       {/* ══ PERFORMANCE SECTION ════════════════════════════════════════════ */}
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "baseline", mb: 1.5 }}>
         <Box>
-          <Typography variant="h6" fontWeight={700}>Performance</Typography>
+          <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Performance</Typography>
           <Typography variant="body2" color="text.secondary">
             {isNewUser
               ? "Your stats will build as you complete sessions. Here's what you'll track:"
@@ -566,7 +566,7 @@ export default function ProfilePage() {
       </FlexBox>
 
       {/* KPI stat cards */}
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: { xs: 1.5, sm: 2 }, mb: 3 }}>
         {statCards.map((card) => {
           const maxBar = Math.max(...card.bars);
           const zeroMessages: Record<string, string> = {
@@ -591,6 +591,7 @@ export default function ProfilePage() {
             <Card
               key={card.label}
               elevation={0}
+              onClick={() => { if (!isNewOrEarly) setReportModal(card.label); }}
               sx={{
                 borderRadius: 3,
                 bgcolor: card.bg,
@@ -599,61 +600,66 @@ export default function ProfilePage() {
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
+                cursor: { xs: isNewOrEarly ? "default" : "pointer", sm: "default" },
+                "&:hover": { xs: isNewOrEarly ? {} : { borderColor: "primary.main" } },
+                transition: "border-color 0.2s",
               }}
             >
-              <CardContent sx={{ p: 2.5, flex: 1, display: "flex", flexDirection: "column" }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, flex: 1, display: "flex", flexDirection: "column" }}>
                 {/* Label */}
                 <Typography
                   variant="caption"
                   fontWeight={700}
-                  sx={{ letterSpacing: "0.08em", color: card.accent, fontSize: "0.65rem", mb: 1.5 }}
+                  sx={{ letterSpacing: "0.08em", color: card.accent, fontSize: { xs: "0.55rem", sm: "0.65rem" }, mb: { xs: 1, sm: 1.5 } }}
                 >
                   {card.label}
                 </Typography>
 
                 {/* Hero number */}
-                <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", mb: 1, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
+                <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", mb: { xs: 0.5, sm: 1 }, fontSize: { xs: "1.5rem", sm: "3rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
                   {isNewUser ? "—" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
                 </Typography>
 
                 {/* Description */}
-                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: { xs: "none", sm: "block" } }}>
                   {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
                 </Typography>
 
-                {/* Delta + benchmark */}
-                {!isNewOrEarly && card.delta && (
-                  <Box sx={{ mb: card.primaryBenchmark ? 0.5 : 1.5 }}>
-                    <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600 }}>
-                      {card.deltaPositive ? "↗" : "↘"} {card.delta}
+                {/* Delta + benchmark — desktop only */}
+                <Box sx={{ display: { xs: "none", sm: "block" } }}>
+                  {!isNewOrEarly && card.delta && (
+                    <Box sx={{ mb: card.primaryBenchmark ? 0.5 : 1.5 }}>
+                      <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600 }}>
+                        {card.deltaPositive ? "↗" : "↘"} {card.delta}
+                      </Typography>
+                      <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5, fontSize: "0.65rem" }}>
+                        {card.deltaLabel}
+                      </Typography>
+                    </Box>
+                  )}
+                  {!isNewOrEarly && card.primaryBenchmark && (
+                    <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem", mb: 0.5 }}>
+                      {card.primaryBenchmark}
                     </Typography>
-                    <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5, fontSize: "0.65rem" }}>
-                      {card.deltaLabel}
-                    </Typography>
-                  </Box>
-                )}
-                {!isNewOrEarly && card.primaryBenchmark && (
-                  <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem", mb: 0.5 }}>
-                    {card.primaryBenchmark}
-                  </Typography>
-                )}
+                  )}
 
-                {/* Secondary metric (e.g. < 4.0 threshold) */}
-                {!isNewOrEarly && card.secondaryValue && (
-                  <Box sx={{ mb: 1.5, pt: 0.75, borderTop: "1px dashed", borderColor: "divider" }}>
-                    <Stack direction="row" alignItems="baseline" spacing={0.5}>
-                      <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontSize: "0.7rem" }}>
-                        {card.secondaryLabel}:
+                  {/* Secondary metric (e.g. < 4.0 threshold) */}
+                  {!isNewOrEarly && card.secondaryValue && (
+                    <Box sx={{ mb: 1.5, pt: 0.75, borderTop: "1px dashed", borderColor: "divider" }}>
+                      <Stack direction="row" alignItems="baseline" spacing={0.5}>
+                        <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontSize: "0.7rem" }}>
+                          {card.secondaryLabel}:
+                        </Typography>
+                        <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.85rem" }}>
+                          {card.secondaryValue}
+                        </Typography>
+                      </Stack>
+                      <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem" }}>
+                        {card.secondaryBenchmark}
                       </Typography>
-                      <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.85rem" }}>
-                        {card.secondaryValue}
-                      </Typography>
-                    </Stack>
-                    <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem" }}>
-                      {card.secondaryBenchmark}
-                    </Typography>
-                  </Box>
-                )}
+                    </Box>
+                  )}
+                </Box>
 
                 {/* Mini line chart (SVG sparkline with tooltips) */}
                 {isNewOrEarly ? (
@@ -733,13 +739,13 @@ export default function ProfilePage() {
 
               </CardContent>
 
-              {/* CTA footer */}
+              {/* CTA footer — desktop only (whole card is clickable on mobile) */}
               {!isNewOrEarly && (
-                <>
+                <Box sx={{ display: { xs: "none", sm: "block" } }}>
                   <Divider />
                   <Box
                     sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { bgcolor: "action.hover" }, transition: "background-color 0.15s" }}
-                    onClick={() => setReportModal(card.label)}
+                    onClick={(e) => { e.stopPropagation(); setReportModal(card.label); }}
                   >
                     <FlexBox sx={{ justifyContent: "space-between", alignItems: "center" }}>
                       <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>
@@ -748,7 +754,7 @@ export default function ProfilePage() {
                       <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
                     </FlexBox>
                   </Box>
-                </>
+                </Box>
               )}
             </Card>
           );
@@ -768,7 +774,7 @@ export default function ProfilePage() {
       ) : (
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-          <Typography variant="subtitle1" fontWeight={600}>What learners say</Typography>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>What learners say</Typography>
           <Stack direction="row" spacing={0.5}>
             <IconButton
               size="small"
@@ -844,7 +850,7 @@ export default function ProfilePage() {
       {/* Rating trend chart */}
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent sx={{ p: 2.5 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>Rating trend (last 6 months)</Typography>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2, fontSize: { xs: "0.875rem", sm: "1rem" } }}>Rating trend (last 6 months)</Typography>
 
           {isNewOrEarly ? (
             <EmptyState
@@ -927,7 +933,7 @@ export default function ProfilePage() {
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent sx={{ p: 2.5 }}>
           <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-            <Typography variant="subtitle1" fontWeight={600}>Course performance</Typography>
+            <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>Course performance</Typography>
             {!isNewOrEarly && (
               <Button size="small" variant="text" sx={{ fontSize: 12, textTransform: "none", p: 0, color: "text.secondary" }} onClick={() => setShowCourseReport(true)}>
                 View full
@@ -959,52 +965,73 @@ export default function ProfilePage() {
               </Typography>
             </Box>
           ) : (
-          <Box sx={{ width: "100%", height: demoCoursePerf.length * 36 + 10 }}>
-            <ResponsiveContainer>
-              <BarChart
-                data={demoCoursePerf.map((c) => ({ ...c, shortName: c.name.length > 22 ? c.name.slice(0, 22) + "…" : c.name }))}
-                layout="vertical"
-                margin={{ top: 0, right: 40, left: 10, bottom: 0 }}
-                barCategoryGap="30%"
-              >
-                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant) / 0.3)" />
-                <XAxis type="number" domain={[0, 5]} hide />
-                <YAxis
-                  type="category"
-                  dataKey="shortName"
-                  width={160}
-                  tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.7)" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: "hsl(var(--md-surface-container) / 0.3)" }}
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const d = payload[0].payload;
-                    return (
-                      <Card variant="outlined" sx={{ p: 1.25, borderRadius: 2, boxShadow: 1 }}>
-                        <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>{d.name}</Typography>
-                        <Typography variant="caption" display="block" sx={{ fontSize: "0.65rem" }}>Rating: <b>{d.rating.toFixed(1)}</b></Typography>
-                        {d.delta !== 0 && (
-                          <Typography variant="caption" sx={{ fontSize: "0.6rem", color: d.delta > 0 ? "hsl(130, 50%, 45%)" : "hsl(0, 60%, 55%)" }}>
-                            {d.delta > 0 ? "+" : ""}{d.delta.toFixed(2)} vs prev
-                          </Typography>
-                        )}
-                      </Card>
-                    );
-                  }}
-                />
-                <Bar
-                  dataKey="rating"
-                  fill="hsl(217, 70%, 55%)"
-                  radius={[0, 6, 6, 0]}
-                  barSize={14}
-                  label={{ position: "right", fontSize: 10, fontWeight: 600, fill: "hsl(var(--md-on-surface))", formatter: (v) => typeof v === "number" ? v.toFixed(1) : String(v) }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </Box>
+          <>
+            {/* Mobile: stacked list layout */}
+            <Stack spacing={1.5} sx={{ display: { xs: "flex", sm: "none" } }}>
+              {demoCoursePerf.map((c) => (
+                <Box key={c.name}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="baseline" sx={{ mb: 0.5 }}>
+                    <Typography variant="caption" sx={{ fontSize: "0.72rem", color: "text.primary", fontWeight: 500 }}>
+                      {c.name}
+                    </Typography>
+                    <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.75rem", flexShrink: 0, ml: 1 }}>
+                      {c.rating.toFixed(1)}
+                    </Typography>
+                  </Stack>
+                  <Box sx={{ height: 6, bgcolor: "action.hover", borderRadius: 3, overflow: "hidden" }}>
+                    <Box sx={{ height: "100%", bgcolor: "hsl(217, 70%, 55%)", borderRadius: 3, width: `${((c.rating - 1) / 4) * 100}%` }} />
+                  </Box>
+                </Box>
+              ))}
+            </Stack>
+            {/* Desktop: horizontal bar chart */}
+            <Box sx={{ display: { xs: "none", sm: "block" }, width: "100%", height: demoCoursePerf.length * 36 + 10 }}>
+              <ResponsiveContainer>
+                <BarChart
+                  data={demoCoursePerf.map((c) => ({ ...c, shortName: c.name.length > 22 ? c.name.slice(0, 22) + "…" : c.name }))}
+                  layout="vertical"
+                  margin={{ top: 0, right: 40, left: 10, bottom: 0 }}
+                  barCategoryGap="30%"
+                >
+                  <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant) / 0.3)" />
+                  <XAxis type="number" domain={[0, 5]} hide />
+                  <YAxis
+                    type="category"
+                    dataKey="shortName"
+                    width={160}
+                    tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.7)" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "hsl(var(--md-surface-container) / 0.3)" }}
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const d = payload[0].payload;
+                      return (
+                        <Card variant="outlined" sx={{ p: 1.25, borderRadius: 2, boxShadow: 1 }}>
+                          <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>{d.name}</Typography>
+                          <Typography variant="caption" display="block" sx={{ fontSize: "0.65rem" }}>Rating: <b>{d.rating.toFixed(1)}</b></Typography>
+                          {d.delta !== 0 && (
+                            <Typography variant="caption" sx={{ fontSize: "0.6rem", color: d.delta > 0 ? "hsl(130, 50%, 45%)" : "hsl(0, 60%, 55%)" }}>
+                              {d.delta > 0 ? "+" : ""}{d.delta.toFixed(2)} vs prev
+                            </Typography>
+                          )}
+                        </Card>
+                      );
+                    }}
+                  />
+                  <Bar
+                    dataKey="rating"
+                    fill="hsl(217, 70%, 55%)"
+                    radius={[0, 6, 6, 0]}
+                    barSize={14}
+                    label={{ position: "right", fontSize: 10, fontWeight: 600, fill: "hsl(var(--md-on-surface))", formatter: (v) => typeof v === "number" ? v.toFixed(1) : String(v) }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
+          </>
           )}
         </CardContent>
       </Card>
@@ -1012,7 +1039,7 @@ export default function ProfilePage() {
       {/* Monthly matrix — compact heatmap */}
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent sx={{ p: 2.5 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>Monthly matrix</Typography>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2, fontSize: { xs: "0.875rem", sm: "1rem" } }}>Monthly matrix</Typography>
           <TableContainer>
             <Table size="small" sx={{ tableLayout: "auto" }}>
               <TableHead>
@@ -1053,7 +1080,7 @@ export default function ProfilePage() {
       {/* ══ CONTRACTS SECTION ═══════════════════════════════════════════════ */}
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "baseline", mb: 1.5 }}>
         <Box>
-          <Typography variant="h6" fontWeight={700}>Contracts</Typography>
+          <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Contracts</Typography>
           <Typography variant="body2" color="text.secondary">
             Your active and past program contracts.
           </Typography>
@@ -1217,7 +1244,7 @@ export default function ProfilePage() {
         <Box sx={{ px: 3, pt: 3, pb: 0 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Box>
-              <Typography variant="h6" fontWeight={700}>Share your impact</Typography>
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Share your impact</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 Download your stats card or share directly to social media.
               </Typography>
@@ -1413,7 +1440,7 @@ export default function ProfilePage() {
         <Box sx={{ px: 3, pt: 2.5, pb: 0 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Box>
-              <Typography variant="h5" fontWeight={700}>Course Performance</Typography>
+              <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}>Course Performance</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 Detailed ratings across all courses with monthly trends and learner feedback volume.
               </Typography>
@@ -1427,21 +1454,21 @@ export default function ProfilePage() {
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, auto)" }, gap: { xs: 1.5, sm: 3 }, mt: 2.5 }}>
             <Box>
               <Typography variant="caption" color="text.secondary">Courses taught</Typography>
-              <Typography variant="h6" fontWeight={700}>{demoCoursePerf.length}</Typography>
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>{demoCoursePerf.length}</Typography>
             </Box>
             <Box>
               <Typography variant="caption" color="text.secondary">Highest rated</Typography>
-              <Typography variant="h6" fontWeight={700}>{demoCoursePerf[0].name.split(" ").slice(0, 2).join(" ")}</Typography>
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>{demoCoursePerf[0].name.split(" ").slice(0, 2).join(" ")}</Typography>
             </Box>
             <Box>
               <Typography variant="caption" color="text.secondary">Biggest gain</Typography>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "success.main" }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: "success.main", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                 +{Math.max(...demoCoursePerf.map((c) => c.delta)).toFixed(2)}
               </Typography>
             </Box>
             <Box>
               <Typography variant="caption" color="text.secondary">Needs attention</Typography>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "error.main" }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: "error.main", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                 {demoCoursePerf.filter((c) => c.delta < 0).length} courses
               </Typography>
             </Box>
@@ -1555,7 +1582,7 @@ export default function ProfilePage() {
                   <Typography variant="caption" fontWeight={700} sx={{ letterSpacing: "0.08em", color: activeCard.accent, fontSize: "0.65rem" }}>
                     {activeCard.label}
                   </Typography>
-                  <Typography variant="h5" fontWeight={700} sx={{ mt: 0.5 }}>
+                  <Typography variant="h5" fontWeight={700} sx={{ mt: 0.5, fontSize: { xs: "1.1rem", sm: "1.5rem" } }}>
                     {activeCard.reportTitle}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>

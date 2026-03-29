@@ -240,7 +240,7 @@ export function SessionCard({
       useFlexGap
     >
       {actions && (
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ "& .MuiButton-root": { fontSize: { xs: "0.7rem", sm: "0.8125rem" }, px: { xs: 1, sm: 1.5 }, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: { xs: 160, sm: "none" } } }}>
+        <Stack direction="row" spacing={1} flexWrap="nowrap" useFlexGap sx={{ width: { xs: "100%", sm: "auto" }, "& .MuiButton-root": { flex: { xs: 1, sm: "0 0 auto" }, fontSize: { xs: "0.78rem", sm: "0.8125rem" }, px: { xs: 1.5, sm: 1.5 }, py: { xs: 0.75, sm: 0.5 }, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 } }}>
           {actions}
         </Stack>
       )}
