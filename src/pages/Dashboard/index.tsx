@@ -257,7 +257,6 @@ export default function DashboardPage() {
 
   const todayYmd = demoNow.toISOString().slice(0, 10);
   const todaySessions = upcomingSessions.filter((s) => s.dateYmd === todayYmd);
-  const nextSession = todaySessions[0] ?? null;
   const todaySessionIds = new Set(todaySessions.map((s) => s.id));
   const confirmedCount = upcomingSessions.filter((s) => confirmations[s.id] || todaySessionIds.has(s.id)).length;
   const scheduled = upcomingSessions
@@ -655,14 +654,10 @@ export default function DashboardPage() {
                                   </Button>
                                 </>
                               }
-                              secondaryAction={
-                                <Button variant="text" size="small" onClick={() => {
-                                  dispatch(setSessionFocus(s));
-                                  dispatch(setOpenSessionDetails(true));
-                                }}>
-                                  View details
-                                </Button>
-                              }
+                              onViewDetails={() => {
+                                dispatch(setSessionFocus(s));
+                                dispatch(setOpenSessionDetails(true));
+                              }}
                             />
                           </Card>
                         );
@@ -726,10 +721,9 @@ export default function DashboardPage() {
                       <Typography variant="caption" color="text.secondary">{confirmedCount}/{upcomingSessions.length} confirmed</Typography>
                     </Stack>
                     <Stack spacing={1.5}>
-                      {upcomingSessions.length ? (
-                        upcomingSessions.map((s) => {
-                          const isNextSession = nextSession?.id === s.id;
-                          const isConfirmed = !!confirmations[s.id] || isNextSession;
+                      {upcomingSessions.filter((s) => !todaySessionIds.has(s.id)).length ? (
+                        upcomingSessions.filter((s) => !todaySessionIds.has(s.id)).map((s) => {
+                          const isConfirmed = !!confirmations[s.id];
                           const isExiting = s.id === exitingId && isConfirmed;
                           return (
                             <Card key={s.id} variant="outlined" sx={{
@@ -764,16 +758,6 @@ export default function DashboardPage() {
                                 chips={undefined}
                                 actions={isConfirmed ? (
                                   <>
-                                    {s.location.toLowerCase() === "online" && (
-                                      <Button
-                                        variant="soft"
-                                        size="small"
-                                        disabled
-                                        startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}
-                                      >
-                                        Join session
-                                      </Button>
-                                    )}
                                     <Button
                                       variant="soft"
                                       size="small"
@@ -826,16 +810,19 @@ export default function DashboardPage() {
                                     </Button>
                                   </>
                                 )}
-                                secondaryAction={
-                                  <Button variant="text" size="small" onClick={() => {
+                                onViewDetails={s.combinedBatches ? undefined : () => {
+                                  dispatch(setSessionFocus(s));
+                                  dispatch(setOpenSessionDetails(true));
+                                }}
+                                secondaryAction={s.combinedBatches ? (
+                                  <Button variant="text" size="small" sx={{ display: { xs: "none", sm: "inline-flex" } }} onClick={() => {
                                     dispatch(setSessionFocus(s));
                                     dispatch(setOpenSessionDetails(true));
-                                  }}>
-                                    View details
-                                  </Button>
-                                }
+                                  }}>View details</Button>
+                                ) : undefined}
                               />
                               {s.combinedBatches && (
+                                <>
                                 <Accordion
                                   disableGutters
                                   elevation={0}
@@ -878,6 +865,29 @@ export default function DashboardPage() {
                                   </Stack>
                                   </AccordionDetails>
                                 </Accordion>
+                                {/* Mobile view details row — below accordion */}
+                                <Box
+                                  onClick={() => { dispatch(setSessionFocus(s)); dispatch(setOpenSessionDetails(true)); }}
+                                  sx={{
+                                    display: { xs: "flex", sm: "none" },
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    mt: 1.5,
+                                    mx: { xs: -1.5, sm: -2 },
+                                    mb: { xs: -1.5, sm: -2 },
+                                    px: 2, py: 1.25,
+                                    cursor: "pointer",
+                                    borderTop: 1, borderColor: "divider",
+                                    bgcolor: "action.hover",
+                                    borderRadius: "0 0 12px 12px",
+                                    "&:hover": { bgcolor: "action.selected" },
+                                    transition: "background-color 0.15s",
+                                  }}
+                                >
+                                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
+                                  <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+                                </Box>
+                                </>
                               )}
                             </Card>
                           );
@@ -1071,15 +1081,40 @@ export default function DashboardPage() {
                                     sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }}
                                   />
                                 </Stack>
-                                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
-                                  <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-                                  <Typography variant="caption" color="text.secondary">
+                                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", minWidth: 0 }}>
+                                  <CalendarTodayOutlinedIcon sx={{ fontSize: 12, flexShrink: 0 }} />
+                                  <Typography variant="caption" color="text.secondary" noWrap sx={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
                                     {fmtDateNice(pe.startDateYmd)} &ndash; {fmtDateNice(pe.endDateYmd)} &middot; {pe.batch}
                                   </Typography>
                                 </Stack>
-                                <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}>
+                                {/* Desktop: text button */}
+                                <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1, display: { xs: "none", sm: "flex" } }}>
                                   <Button variant="text" size="small" onClick={() => setPlannedEventDetailId(pe.id)}>View details</Button>
                                 </Stack>
+                                {/* Mobile: full-width row */}
+                                <Box
+                                  onClick={() => setPlannedEventDetailId(pe.id)}
+                                  sx={{
+                                    display: { xs: "flex", sm: "none" },
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    mt: 1.5,
+                                    mx: -1.5,
+                                    mb: -1.5,
+                                    px: 2,
+                                    py: 1.25,
+                                    cursor: "pointer",
+                                    borderTop: 1,
+                                    borderColor: "divider",
+                                    bgcolor: "action.hover",
+                                    borderRadius: "0 0 12px 12px",
+                                    "&:hover": { bgcolor: "action.selected" },
+                                    transition: "background-color 0.15s",
+                                  }}
+                                >
+                                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
+                                  <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+                                </Box>
                               </Card>
                             );
                           })}
@@ -1203,11 +1238,12 @@ export default function DashboardPage() {
                           }
 
                           // Build actions per activity type
+                          const handleViewDetails = () => {
+                            dispatch(setSessionFocus(s));
+                            dispatch(setOpenSessionDetails(true));
+                          };
                           const viewDetailsBtn = (
-                            <Button variant="text" size="small" onClick={() => {
-                              dispatch(setSessionFocus(s));
-                              dispatch(setOpenSessionDetails(true));
-                            }}>
+                            <Button variant="text" size="small" onClick={handleViewDetails}>
                               View details
                             </Button>
                           );
@@ -1312,8 +1348,28 @@ export default function DashboardPage() {
                                   </Stack>
                                   <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
                                     <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>{cardActions}</Stack>
-                                    {viewDetailsBtn}
+                                    <Box sx={{ display: { xs: "none", sm: "block" } }}>{viewDetailsBtn}</Box>
                                   </Stack>
+                                  {/* Mobile: full-width view details row */}
+                                  <Box
+                                    onClick={handleViewDetails}
+                                    sx={{
+                                      display: { xs: "flex", sm: "none" },
+                                      justifyContent: "space-between",
+                                      alignItems: "center",
+                                      mt: 1.5, mx: { xs: -1.5, sm: -2 }, mb: { xs: -1.5, sm: -2 },
+                                      px: 2, py: 1.25,
+                                      cursor: "pointer",
+                                      borderTop: 1, borderColor: "divider",
+                                      bgcolor: "action.hover",
+                                      borderRadius: "0 0 12px 12px",
+                                      "&:hover": { bgcolor: "action.selected" },
+                                      transition: "background-color 0.15s",
+                                    }}
+                                  >
+                                    <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
+                                    <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+                                  </Box>
                                 </>
                               ) : (
                                 <SessionCard
@@ -1328,7 +1384,7 @@ export default function DashboardPage() {
                                   topRight={topRightContent}
                                   chips={undefined}
                                   actions={cardActions}
-                                  secondaryAction={viewDetailsBtn}
+                                  onViewDetails={handleViewDetails}
                                 />
                               )}
                             </Card>

@@ -3,6 +3,7 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -51,6 +52,8 @@ export type SessionCardProps = {
   actions?: ReactNode;
   /** Secondary action (right-aligned, e.g. "Group profile") */
   secondaryAction?: ReactNode;
+  /** When provided, renders a mobile-style "View details →" row on xs and a text button on sm+ */
+  onViewDetails?: () => void;
   /** When provided, makes the course name (title) a clickable link */
   onCourseClick?: () => void;
   /** Container sx overrides (animation, opacity, etc.) */
@@ -101,6 +104,7 @@ export function SessionCard({
   topRight,
   actions,
   secondaryAction,
+  onViewDetails,
   onCourseClick,
   sx,
 }: SessionCardProps) {
@@ -197,11 +201,11 @@ export function SessionCard({
       useFlexGap
       sx={{ mb: actions || secondaryAction ? 1.5 : 0, color: "text.secondary" }}
     >
-      <Stack direction="row" alignItems="center" spacing={0.5}>
-        <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-        <Typography variant="caption" color="text.secondary">
+      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0 }}>
+        <CalendarTodayOutlinedIcon sx={{ fontSize: 12, flexShrink: 0 }} />
+        <Typography variant="caption" color="text.secondary" noWrap sx={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
           {fmtDateNice(dateYmd)}{endDateYmd ? <> &rarr; {fmtDateNice(endDateYmd)}</> : null} &middot; {fmtTime12(tzStart)}&ndash;{fmtTime12(tzEnd)}
-          {batch ? <> &middot; <span style={{ whiteSpace: "nowrap" }}>{batch}</span></> : null}
+          {batch ? <> &middot; {batch}</> : null}
           {locationText ? <> &middot; {locationText}</> : null}
         </Typography>
       </Stack>
@@ -217,20 +221,58 @@ export function SessionCard({
     </Stack>
   );
 
-  const actionsRow = (actions || secondaryAction) && (
+  /* Desktop-only secondary for onViewDetails */
+  const desktopViewDetailsBtn = onViewDetails && (
+    <Box sx={{ display: { xs: "none", sm: "block" } }}>
+      <Button variant="text" size="small" onClick={onViewDetails}>View details</Button>
+    </Box>
+  );
+
+  const resolvedSecondary = onViewDetails ? desktopViewDetailsBtn : secondaryAction;
+
+  const actionsRow = (actions || resolvedSecondary) && (
     <Stack
-      direction={{ xs: "column", sm: "row" }}
+      direction="row"
       justifyContent={actions ? "space-between" : "flex-end"}
-      alignItems={{ xs: actions ? "flex-start" : "flex-end", sm: "center" }}
+      alignItems="center"
       spacing={1}
+      flexWrap="wrap"
+      useFlexGap
     >
       {actions && (
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ "& .MuiButton-root": { fontSize: { xs: "0.7rem", sm: "0.8125rem" }, px: { xs: 1, sm: 1.5 }, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: { xs: 160, sm: "none" } } }}>
           {actions}
         </Stack>
       )}
-      {secondaryAction}
+      {resolvedSecondary}
     </Stack>
+  );
+
+  /* Mobile full-width "View details →" row — rendered outside actionsRow to span full card width */
+  const mobileViewDetailsRow = onViewDetails && (
+    <Box
+      onClick={onViewDetails}
+      sx={{
+        display: { xs: "flex", sm: "none" },
+        justifyContent: "space-between",
+        alignItems: "center",
+        mt: 1.5,
+        mx: { xs: -1.5, sm: -2 },
+        mb: { xs: -1.5, sm: -2 },
+        px: 2,
+        py: 1.25,
+        cursor: "pointer",
+        borderTop: 1,
+        borderColor: "divider",
+        bgcolor: "action.hover",
+        borderRadius: "0 0 12px 12px",
+        "&:hover": { bgcolor: "action.selected" },
+        transition: "background-color 0.15s",
+      }}
+    >
+      <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
+      <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+    </Box>
   );
 
   return (
@@ -263,6 +305,7 @@ export function SessionCard({
         </>
       )}
       {actionsRow}
+      {mobileViewDetailsRow}
     </Box>
   );
 }
