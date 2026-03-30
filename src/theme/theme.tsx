@@ -409,6 +409,8 @@ function buildTheme(mode: "light" | "dark") {
 const lightTheme = buildTheme("light");
 const darkTheme = buildTheme("dark");
 
+export { lightTheme };
+
 export function AppThemeProvider({
   children,
 }: {

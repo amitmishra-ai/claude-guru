@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, ThemeProvider } from "@mui/material/styles";
+import { lightTheme } from "@/theme/theme";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import StarIcon from "@mui/icons-material/Star";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
@@ -534,6 +535,7 @@ export default function ProfilePage() {
       {!isNewOrEarly && (() => {
         /* Shared card JSX — rendered identically in thumbnail & dialog */
         const shareCardContent = (
+          <ThemeProvider theme={lightTheme}>
           <Card
             elevation={0}
             sx={{ borderRadius: 1, bgcolor: shareTheme.bg, position: "relative", overflow: "hidden", transition: "background-color 0.4s ease" }}
@@ -588,6 +590,7 @@ export default function ProfilePage() {
               </Stack>
             </Box>
           </Card>
+          </ThemeProvider>
         );
 
         const thumbScaleXs = 320 / SHARE_CARD_WIDTH;
