@@ -169,7 +169,7 @@ function ComponentSection({ title, description, children }: { title: string; des
 
 function StarRatingNumeric({ rating }: { rating: number }) {
   return (
-    <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
+    <Stack direction="row" spacing={0.5} alignItems="center" className="star-rating-numeric" sx={{ flexShrink: 0 }}>
       <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
       <Typography variant="subtitle2" fontWeight={600}>{rating.toFixed(1)}</Typography>
     </Stack>
@@ -1140,7 +1140,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
 
         {/* ── Sticky footer ── */}
         <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
-          <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}>View Student Progress</Button>
+          <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}>Progress</Button>
           {isConfirmed && (
             <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Group Details (LMS)</Button>
           )}
@@ -1294,7 +1294,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Reviewed CV</Typography>
                     <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 500, fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}>
-                      View Reviewed CV <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
+                      Reviewed CV <OpenInNewOutlinedIcon sx={{ fontSize: 10, verticalAlign: "middle" }} />
                     </Typography>
                   </Stack>
                 </Box>
@@ -1392,7 +1392,7 @@ function ResidencyCards() {
       {/* ── Confirmed ── */}
       <ComponentSection
         title="Residency — Confirmed"
-        description="Confirmed residency with 3-day schedule. Date range with → arrow. View Session Material + View Course content actions."
+        description="Confirmed residency with 3-day schedule. Date range with → arrow. Material + Course actions."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
@@ -1407,8 +1407,8 @@ function ResidencyCards() {
             status={STATUS_CONFIRMED()}
             actions={
               <>
-                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
-                <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>View Course content</Button>
+                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>Material</Button>
+                <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Course</Button>
               </>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyConfirmed)}>View details</Button>}
@@ -1435,8 +1435,8 @@ function ResidencyCards() {
             status={STATUS_CONFIRMED()}
             actions={
               <>
-                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
-                <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>View Course content</Button>
+                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>Material</Button>
+                <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Course</Button>
               </>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyCombined)}>View details</Button>}
@@ -1532,7 +1532,7 @@ function ResidencyCards() {
       {/* ── Completed — with rating ── */}
       <ComponentSection
         title="Residency — Completed (with feedback)"
-        description="Past residency with rating. Payment processed chip + star rating. Detailed Feedback button."
+        description="Past residency with rating. Payment processed chip + star rating. Feedback button."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
@@ -1549,7 +1549,7 @@ function ResidencyCards() {
                 <StarRatingNumeric rating={4.2} />
               </Stack>
             }
-            actions={<Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>}
+            actions={<Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>}
             secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoResidencyCompletedWithRating)}>View details</Button>}
             onCourseClick={() => {}}
           />
@@ -1582,7 +1582,7 @@ function OnlineSessionCards() {
       />
 
       {/* 1. Mentoring — Confirmed */}
-      <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Disabled Join session + View Session Material on card.">
+      <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Disabled Join session + Material on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1596,7 +1596,7 @@ function OnlineSessionCards() {
             actions={
               <>
                 <Button variant="soft" size="small" disabled startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
-                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
+                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>Material</Button>
               </>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoMentoringConfirmed)}>View details</Button>}
@@ -1619,7 +1619,7 @@ function OnlineSessionCards() {
             actions={
               <>
                 <Button variant="soft" size="small" disabled startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
-                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>View Session Material</Button>
+                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>Material</Button>
               </>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoMentoringCombinedConfirmed)}>View details</Button>}
@@ -1772,7 +1772,7 @@ function OnlineSessionCards() {
       </ComponentSection>
 
       {/* 7. Mentoring — Completed (Gathering feedback) */}
-      <ComponentSection title="Mentoring — Completed (Gathering feedback)" description="Event done, learners haven't rated yet. Payment pending + Gathering feedback chips top-right. Watch recording on card.">
+      <ComponentSection title="Mentoring — Completed (Gathering feedback)" description="Event done, learners haven't rated yet. Payment pending + Gathering feedback chips top-right. Recording on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1789,7 +1789,7 @@ function OnlineSessionCards() {
               </Stack>
             }
             actions={
-              <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+              <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCompletedGathering)}>View details</Button>}
           />
@@ -1797,7 +1797,7 @@ function OnlineSessionCards() {
       </ComponentSection>
 
       {/* 7b. Mentoring — Completed (Recording processing) */}
-      <ComponentSection title="Mentoring — Completed (Recording processing)" description="Session just ended, recording not yet processed. Watch recording button is disabled. Typically takes up to an hour.">
+      <ComponentSection title="Mentoring — Completed (Recording processing)" description="Session just ended, recording not yet processed. Recording button is disabled. Typically takes up to an hour.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1815,7 +1815,7 @@ function OnlineSessionCards() {
             }
             actions={
               <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />} disabled>
-                Watch recording
+                Recording
               </Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCompletedGathering)}>View details</Button>}
@@ -1844,7 +1844,7 @@ function OnlineSessionCards() {
               </Stack>
             }
             actions={
-              <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+              <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCompletedNoFeedback)}>View details</Button>}
           />
@@ -1852,7 +1852,7 @@ function OnlineSessionCards() {
       </ComponentSection>
 
       {/* 9. Mentoring — Completed (with rating) */}
-      <ComponentSection title="Mentoring — Completed (with rating)" description="Past mentoring event. Payment processed chip + star rating top-right. Watch recording + Detailed Feedback on card.">
+      <ComponentSection title="Mentoring — Completed (with rating)" description="Past mentoring event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1870,8 +1870,8 @@ function OnlineSessionCards() {
             }
             actions={
               <>
-                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
-                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</Button>
+                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>
               </>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCompletedWithRating)}>View details</Button>}
@@ -1899,8 +1899,8 @@ function OnlineSessionCards() {
               }
               actions={
                 <>
-                  <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
-                  <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                  <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</Button>
+                  <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>
                 </>
               }
               secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCombinedCompleted)}>View details</Button>}
@@ -1923,8 +1923,8 @@ function OnlineSessionCards() {
               }
               actions={
                 <>
-                  <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
-                  <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                  <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</Button>
+                  <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>
                 </>
               }
               secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoMentoringCombinedCompleted)}>View details</Button>}
@@ -2027,7 +2027,7 @@ function CareerMentorOnlineSessionCards() {
               </Stack>
             }
             actions={
-              <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
+              <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</Button>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoCareerCompletedGathering)}>View details</Button>}
           />
@@ -2035,7 +2035,7 @@ function CareerMentorOnlineSessionCards() {
       </ComponentSection>
 
       {/* 5. Career — Completed (with rating) */}
-      <ComponentSection title="Career — Completed (with rating)" description="Past career event. Payment processed chip + star rating top-right. Watch recording + Detailed Feedback on card.">
+      <ComponentSection title="Career — Completed (with rating)" description="Past career event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -2052,8 +2052,8 @@ function CareerMentorOnlineSessionCards() {
             }
             actions={
               <>
-                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
-                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</Button>
+                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>
               </>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoCareerCompletedWithRating)}>View details</Button>}
@@ -2062,7 +2062,7 @@ function CareerMentorOnlineSessionCards() {
       </ComponentSection>
 
       {/* 6. Mock — Completed (with Share Feedback) */}
-      <ComponentSection title="Mock — Completed (with Share Feedback)" description="Past mock interview. Payment processed chip + star rating top-right. Watch recording + Detailed Feedback + Share Feedback.">
+      <ComponentSection title="Mock — Completed (with Share Feedback)" description="Past mock interview. Payment processed chip + star rating top-right. Recording + Feedback + Share Feedback.">
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
@@ -2079,8 +2079,8 @@ function CareerMentorOnlineSessionCards() {
             }
             actions={
               <>
-                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Watch recording</Button>
-                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+                <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</Button>
+                <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>
                 <Button variant="soft" size="small" startIcon={<ChatBubbleOutlineOutlinedIcon sx={{ fontSize: 14 }} />}>Share Feedback</Button>
               </>
             }
@@ -2170,7 +2170,7 @@ function EvaluationCards() {
       {/* ── Completed — with rating ── */}
       <ComponentSection
         title="Evaluation — Completed (with rating)"
-        description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Detailed Feedback button."
+        description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Feedback button."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
@@ -2185,7 +2185,7 @@ function EvaluationCards() {
             <Typography variant="caption" color="text.secondary">1 Mar – 8 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-            <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+            <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
           </Stack>
         </Card>
@@ -2269,7 +2269,7 @@ function ModerationCards() {
       {/* ── Completed — with rating ── */}
       <ComponentSection
         title="Moderation — Completed (with rating)"
-        description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Detailed Feedback button."
+        description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Feedback button."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
@@ -2284,7 +2284,7 @@ function ModerationCards() {
             <Typography variant="caption" color="text.secondary">25 Feb – 5 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-            <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Detailed Feedback</Button>
+            <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
           </Stack>
         </Card>
@@ -2305,7 +2305,7 @@ function CapstoneCards() {
       {/* ── Confirmed ── */}
       <ComponentSection
         title="Capstone Project — Confirmed"
-        description="Date range (start → presentation), 'Capstone — [Batch]', group, domain, next session date, contact. View Student Progress + Group Details in dialog. No tentative state."
+        description="Date range (start → presentation), 'Capstone — [Batch]', group, domain, next session date, contact. Progress + Group Details in dialog. No tentative state."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
@@ -2325,7 +2325,7 @@ function CapstoneCards() {
       {/* ── Completed — payment pending ── */}
       <ComponentSection
         title="Capstone Project — Completed (Payment pending)"
-        description="No rating for capstones. Payment pending chip top-right. View Student Progress button always shown."
+        description="No rating for capstones. Payment pending chip top-right. Progress button always shown."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
@@ -2337,7 +2337,7 @@ function CapstoneCards() {
             <Typography variant="caption" color="text.secondary">15 Jul – 20 Nov, 2025</Typography>
           </Stack>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-            <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View Student Progress</Button>
+            <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>Progress</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("paymentPending")}>View details</Button>
           </Stack>
         </Card>
@@ -2346,7 +2346,7 @@ function CapstoneCards() {
       {/* ── Completed — payment processed ── */}
       <ComponentSection
         title="Capstone Project — Completed"
-        description="No rating. Payment processed chip top-right. View Student Progress always shown."
+        description="No rating. Payment processed chip top-right. Progress always shown."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
@@ -2358,7 +2358,7 @@ function CapstoneCards() {
             <Typography variant="caption" color="text.secondary">15 Jul – 20 Nov, 2025</Typography>
           </Stack>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-            <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>View Student Progress</Button>
+            <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}>Progress</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
           </Stack>
         </Card>
@@ -2423,7 +2423,7 @@ function CVReviewCards() {
       {/* ── Completed ── */}
       <ComponentSection
         title="CV Review — Completed"
-        description="No LinkedIn, no comments, no submit. 'View CV' becomes 'View Reviewed CV'. Payment processed chip top-right. No rating, no feedback."
+        description="No LinkedIn, no comments, no submit. 'View CV' becomes 'Reviewed CV'. Payment processed chip top-right. No rating, no feedback."
       >
         <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
@@ -2435,7 +2435,7 @@ function CVReviewCards() {
             <Typography variant="caption" color="text.secondary">5 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-            <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}>View Reviewed CV</Button>
+            <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}>Reviewed CV</Button>
             <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
           </Stack>
         </Card>

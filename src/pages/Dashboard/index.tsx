@@ -650,7 +650,7 @@ export default function DashboardPage() {
                                       dispatch(setOpenSessionMaterials(true));
                                     }}
                                   >
-                                    <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>View </Box>Session Material
+                                    Material
                                   </Button>
                                 </>
                               }
@@ -767,7 +767,7 @@ export default function DashboardPage() {
                                         dispatch(setOpenSessionMaterials(true));
                                       }}
                                     >
-                                      <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>View </Box>Session Material
+                                      Material
                                     </Button>
                                     <Button
                                       variant="soft"
@@ -778,7 +778,7 @@ export default function DashboardPage() {
                                         dispatch(pushToast({ title: "Course content", description: `Viewing content for ${s.title}` }));
                                       }}
                                     >
-                                      <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>View </Box>Course content
+                                      Course
                                     </Button>
                                   </>
                                 ) : (
@@ -896,7 +896,7 @@ export default function DashboardPage() {
                         <EmptyState
                           icon={<EventNoteOutlinedIcon />}
                           title="Nothing on the horizon"
-                          subtitle="Scheduled sessions will appear here once they're assigned to you by the program team"
+                          subtitle="Scheduled activities will appear here once they're assigned to you by the program team"
                           compact
                         />
                       )}
@@ -1124,7 +1124,7 @@ export default function DashboardPage() {
                       <EmptyState
                         icon={<DateRangeOutlinedIcon />}
                         title="No activities planned yet"
-                        subtitle="Tentative events from the program team will show up here as they're scheduled"
+                        subtitle="Tentative activities from the program team will show up here as they're planned"
                         compact
                       />
                     )}
@@ -1200,7 +1200,7 @@ export default function DashboardPage() {
 
                           // Star rating helpers — numeric for Online/Residency, icons-only for Evaluation/Moderation
                           const numericRating = avg ? (
-                            <Stack direction="row" spacing={0.5} alignItems="center">
+                            <Stack direction="row" spacing={0.5} alignItems="center" className="star-rating-numeric">
                               <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
                               <Typography variant="subtitle2" fontWeight={600}>{avg}</Typography>
                             </Stack>
@@ -1219,18 +1219,10 @@ export default function DashboardPage() {
                           if (isCapstone || isCVReview) {
                             // No rating — just payment chip
                             topRightContent = paymentChip;
-                          } else if (isEvaluation || isModeration) {
-                            // Star icons only (no numeric)
-                            topRightContent = (
-                              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-                                {paymentChip}
-                                {numericRating ?? feedbackChip}
-                              </Stack>
-                            );
                           } else {
-                            // Online/Residency — numeric star rating
+                            // Eval/Mod/Online/Residency — payment + rating or feedback chip
                             topRightContent = (
-                              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                              <Stack direction="row" spacing={0.75} alignItems="center">
                                 {paymentChip}
                                 {numericRating ?? feedbackChip}
                               </Stack>
@@ -1253,28 +1245,28 @@ export default function DashboardPage() {
                             cardActions = (
                               <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />}
                                 onClick={() => dispatch(pushToast({ title: "Student Progress", description: "Loading student progress..." }))}>
-                                View Student Progress
+                                Progress
                               </Button>
                             );
                           } else if (isCVReview) {
                             cardActions = (
                               <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}
                                 onClick={() => dispatch(pushToast({ title: "View CV", description: "Opening reviewed CV..." }))}>
-                                View Reviewed CV
+                                Reviewed CV
                               </Button>
                             );
                           } else if (isEvaluation || isModeration) {
                             cardActions = hasRatings ? (
                               <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
                                 onClick={() => { dispatch(setLearnerRatingsSessionId(s.id)); dispatch(setOpenLearnerRatings(true)); }}>
-                                Detailed Feedback
+                                Feedback
                               </Button>
                             ) : null;
                           } else if (isResidency) {
                             cardActions = hasRatings ? (
                               <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}
                                 onClick={() => { dispatch(setLearnerRatingsSessionId(s.id)); dispatch(setOpenLearnerRatings(true)); }}>
-                                Detailed Feedback
+                                Feedback
                               </Button>
                             ) : null;
                           } else {
@@ -1284,13 +1276,13 @@ export default function DashboardPage() {
                                 {s.recordingUrl && (
                                   <Button startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
                                     onClick={() => dispatch(pushToast({ title: "Opening recording", description: `Launching recording for ${s.title}` }))}>
-                                    Watch recording
+                                    Recording
                                   </Button>
                                 )}
                                 {hasRatings && (
                                   <Button startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
                                     onClick={() => { dispatch(setLearnerRatingsSessionId(s.id)); dispatch(setOpenLearnerRatings(true)); }}>
-                                    Detailed Feedback
+                                    Feedback
                                   </Button>
                                 )}
                                 {isMockInterview && (
@@ -1301,7 +1293,7 @@ export default function DashboardPage() {
                                 )}
                                 <Button startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 14 }} />} variant="soft" size="small"
                                   onClick={() => navigate(`/payments?highlight=${s.id}`)}>
-                                  View in payments
+                                  Payments
                                 </Button>
                               </>
                             );
@@ -1334,9 +1326,16 @@ export default function DashboardPage() {
                               {/* Card header: title row + date + actions — custom for non-SessionCard types */}
                               {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
                                 <>
-                                  <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "flex-start" }} sx={{ mb: 0.5, gap: { xs: 0.5, sm: 1 } }}>
+                                  {/* MOBILE: chips on top line, rating pushed right */}
+                                  <Box sx={{ display: { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.75, mb: 0.75, "& > .MuiStack-root": { width: "100%", "& .star-rating-numeric": { ml: "auto" } } }}>
+                                    {topRightContent}
+                                  </Box>
+                                  {/* MOBILE: title full width */}
+                                  <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>{cardTitle}</Typography>
+                                  {/* DESKTOP: title + chips side by side */}
+                                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5, gap: 1 }}>
                                     <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>{cardTitle}</Typography>
-                                    <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                                    <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
                                       {topRightContent}
                                     </Stack>
                                   </Stack>
@@ -1347,7 +1346,7 @@ export default function DashboardPage() {
                                     </Typography>
                                   </Stack>
                                   <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>{cardActions}</Stack>
+                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ "& .MuiButton-startIcon": { display: { xs: "none", sm: "inline-flex" } } }}>{cardActions}</Stack>
                                     <Box sx={{ display: { xs: "none", sm: "block" } }}>{viewDetailsBtn}</Box>
                                   </Stack>
                                   {/* Mobile: full-width view details row */}
@@ -1395,8 +1394,8 @@ export default function DashboardPage() {
                     ) : (
                       <EmptyState
                         icon={<CheckCircleOutlinedIcon />}
-                        title="No sessions completed yet"
-                        subtitle="Once you deliver your first session, it'll appear here with ratings and payment info"
+                        title="No activities completed yet"
+                        subtitle="Once you complete your first activity, it'll appear here with feedback and payment info"
                         compact
                       />
                     )}

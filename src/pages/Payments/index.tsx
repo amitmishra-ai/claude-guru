@@ -334,7 +334,7 @@ export default function PaymentsPage() {
           <EmptyState
             icon={<SavingsOutlinedIcon />}
             title="No payments recorded yet"
-            subtitle="Session-wise payment details, transaction IDs, and invoices will appear here after your first completed session"
+            subtitle="Activity-wise payment details, transaction IDs, and invoices will appear here post completion"
           />
         </Box>
       ) : (

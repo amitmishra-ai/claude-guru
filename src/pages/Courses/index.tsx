@@ -443,8 +443,8 @@ export default function CoursesPage() {
           ) : (
             <EmptyState
               icon={<AutoStoriesOutlinedIcon />}
-              title="No courses yet"
-              subtitle="Courses you're enrolled in or teaching will appear here"
+              title="No courses available yet"
+              subtitle="Courses you're enrolled in as Teacher or Teaching Assistant (TA) will appear here"
             />
           )
         )}

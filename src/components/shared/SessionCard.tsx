@@ -240,7 +240,7 @@ export function SessionCard({
       useFlexGap
     >
       {actions && (
-        <Stack direction="row" spacing={1} flexWrap="nowrap" useFlexGap sx={{ width: { xs: "100%", sm: "auto" }, "& .MuiButton-root": { flex: { xs: 1, sm: "0 0 auto" }, fontSize: { xs: "0.78rem", sm: "0.8125rem" }, px: { xs: 1.5, sm: 1.5 }, py: { xs: 0.75, sm: 0.5 }, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 } }}>
+        <Stack direction="row" spacing={1} flexWrap="nowrap" useFlexGap sx={{ width: { xs: "100%", sm: "auto" }, "& .MuiButton-root": { flex: { xs: 1, sm: "0 0 auto" }, fontSize: { xs: "0.78rem", sm: "0.8125rem" }, px: { xs: 1.5, sm: 1.5 }, py: { xs: 0.75, sm: 0.5 }, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }, "& .MuiButton-startIcon": { display: { xs: "none", sm: "inline-flex" } } }}>
           {actions}
         </Stack>
       )}
@@ -279,15 +279,30 @@ export function SessionCard({
     <Box sx={sx}>
       {topRight ? (
         <>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: { xs: 0.75, sm: 1 } }}>
+          {/* ── MOBILE (xs): chips on top line, title below ── */}
+          <Box sx={{ display: { xs: "block", sm: "none" } }}>
+            <Box sx={{ mb: 0.75, display: "flex", alignItems: "center", gap: 0.75, "& > .MuiStack-root": { width: "100%", "& .star-rating-numeric": { ml: "auto" } } }}>
+              {statusChip}
+              {topRight}
+            </Box>
             <Typography
               variant={titleVariant}
               fontWeight={600}
-              sx={{ fontSize: titleVariant === "h5" ? { xs: "0.9rem", sm: "1rem", md: "1.125rem" } : { xs: "0.8rem", sm: "0.875rem" }, minWidth: 0 }}
+              sx={{ fontSize: { xs: "0.8rem" }, mb: 0.5 }}
             >
               {titleContent}
             </Typography>
-            <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1 }} flexWrap="wrap" useFlexGap justifyContent="flex-end" sx={{ flexShrink: 0, maxWidth: { xs: "45%", sm: "auto" } }}>
+          </Box>
+          {/* ── DESKTOP (sm+): chips beside title ── */}
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5, gap: 1 }}>
+            <Typography
+              variant={titleVariant}
+              fontWeight={600}
+              sx={{ fontSize: titleVariant === "h5" ? { sm: "1rem", md: "1.125rem" } : "0.875rem", minWidth: 0 }}
+            >
+              {titleContent}
+            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap justifyContent="flex-end" sx={{ flexShrink: 0 }}>
               {statusChip}
               {topRight}
             </Stack>
