@@ -76,8 +76,7 @@ export function AppLayout() {
           overflowX: "clip",
           scrollbarWidth: { xs: "none", md: "thin" },
           "&::-webkit-scrollbar": { display: { xs: "none", md: "block" } },
-          px: { xs: isAccountPage ? 2 : 2, sm: 2, md: 3 },
-          py: { xs: 0, sm: 2, md: 3 },
+          px: { xs: 2, sm: 2, md: 3 },
           pt: { xs: isAccountPage ? "env(safe-area-inset-top)" : "calc(56px + 12px + env(safe-area-inset-top))", md: 3 },
           pb: { xs: isAccountPage ? "env(safe-area-inset-bottom)" : "calc(5rem + env(safe-area-inset-bottom))", md: 3 },
         }}
