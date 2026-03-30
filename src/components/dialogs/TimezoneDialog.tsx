@@ -58,14 +58,14 @@ export function TimezoneDialog() {
   }, [effectiveTimeZone]);
 
   return (
-    <Dialog open={open} onClose={() => dispatch(setOpenTimezone(false))} maxWidth={false} PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 }, borderRadius: 3 } }}>
+    <Dialog open={open} onClose={() => dispatch(setOpenTimezone(false))} maxWidth={false} PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 }, borderRadius: 1 } }}>
       <DialogTitle>Timezone</DialogTitle>
 
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Box
             sx={{
-              borderRadius: "16px",
+              borderRadius: "8px",
               border: 1,
               borderColor: "divider",
               backgroundColor: "hsl(var(--md-surface-container) / 0.3)",

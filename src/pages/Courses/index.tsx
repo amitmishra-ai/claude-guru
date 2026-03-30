@@ -55,7 +55,7 @@ function MappedSessionsOverflow({
         onClick={(e) => e.stopPropagation()}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}
-        PaperProps={{ sx: { mt: 0.5, borderRadius: 2, minWidth: 260, boxShadow: 4 } }}
+        PaperProps={{ sx: { mt: 0.5, borderRadius: 0.5, minWidth: 260, boxShadow: 4 } }}
       >
         <Box sx={{ p: 1.5 }}>
           <Typography variant="caption" sx={{ px: 0.5, mb: 1, display: "block", color: "text.secondary", fontWeight: 500 }}>
@@ -229,8 +229,8 @@ function CourseCardSkeleton() {
         <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", flex: 1 }}>
           {/* Tags row */}
           <Box sx={{ display: "flex", gap: 0.75, mb: 1.25 }}>
-            <Skeleton variant="rounded" width={48} height={22} sx={{ borderRadius: 10 }} />
-            <Skeleton variant="rounded" width={64} height={22} sx={{ borderRadius: 10 }} />
+            <Skeleton variant="rounded" width={48} height={22} sx={{ borderRadius: 1 }} />
+            <Skeleton variant="rounded" width={64} height={22} sx={{ borderRadius: 1 }} />
           </Box>
           {/* Title */}
           <Skeleton variant="text" sx={{ fontSize: "1rem", mb: 0.5 }} />
@@ -244,7 +244,7 @@ function CourseCardSkeleton() {
             <Skeleton variant="circular" width={14} height={14} />
             <Skeleton variant="text" width={100} sx={{ fontSize: "0.68rem" }} />
           </Box>
-          <Skeleton variant="rounded" width={140} height={24} sx={{ borderRadius: 10 }} />
+          <Skeleton variant="rounded" width={140} height={24} sx={{ borderRadius: 1 }} />
         </CardContent>
       </Card>
     </Grid>
@@ -360,7 +360,7 @@ export default function CoursesPage() {
             gap: 1,
             height: 42,
             px: 2,
-            borderRadius: "24px",
+            borderRadius: "8px",
             border: "1px solid",
             borderColor: "divider",
             bgcolor: "background.paper",
@@ -391,7 +391,7 @@ export default function CoursesPage() {
           height: 40,
           px: 1.5,
           mt: 1.5,
-          borderRadius: "12px",
+          borderRadius: "4px",
           border: "1px solid",
           borderColor: "divider",
           bgcolor: "background.paper",
@@ -413,13 +413,13 @@ export default function CoursesPage() {
         {loading && (
           <Stack spacing={2.5}>
             {[0, 1].map((section) => (
-              <Card key={section} variant="outlined" sx={{ borderRadius: 3, overflow: "hidden" }}>
+              <Card key={section} variant="outlined" sx={{ borderRadius: 1, overflow: "hidden" }}>
                 <Box sx={{ px: 2.5, py: 2 }}>
                   <Stack direction="row" alignItems="center" spacing={1.5}>
                     <Skeleton variant="circular" width={20} height={20} />
                     <Skeleton variant="text" width={280} height={24} />
                     <Box sx={{ flex: 1 }} />
-                    <Skeleton variant="rounded" width={28} height={22} sx={{ borderRadius: 10 }} />
+                    <Skeleton variant="rounded" width={28} height={22} sx={{ borderRadius: 1 }} />
                   </Stack>
                 </Box>
                 <Box sx={{ px: 2.5, pb: 2.5 }}>
@@ -456,7 +456,7 @@ export default function CoursesPage() {
             disableGutters
             elevation={0}
             sx={{
-              border: 1, borderColor: "divider", borderRadius: "12px !important",
+              border: 1, borderColor: "divider", borderRadius: "8px !important",
               overflow: "hidden", mb: 2.5,
               "&::before": { display: "none" },
               "& .MuiAccordionSummary-root:hover": { bgcolor: "action.hover" },
@@ -466,7 +466,7 @@ export default function CoursesPage() {
               expandIcon={<ExpandMoreIcon sx={{ fontSize: 20 }} />}
               sx={{ px: { xs: 2, sm: 2.5 }, py: 1.25, "& .MuiAccordionSummary-content": { my: 1, alignItems: "center", gap: 1.25 } }}
             >
-              <Box sx={{ p: 0.75, borderRadius: 1.5, bgcolor: "primary.main", display: "flex", flexShrink: 0 }}>
+              <Box sx={{ p: 0.75, borderRadius: 0.5, bgcolor: "primary.main", display: "flex", flexShrink: 0 }}>
                 <SchoolOutlinedIcon sx={{ fontSize: 16, color: "primary.contrastText" }} />
               </Box>
               <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -523,7 +523,7 @@ export default function CoursesPage() {
             disableGutters
             elevation={0}
             sx={{
-              border: 1, borderColor: "divider", borderRadius: "12px !important",
+              border: 1, borderColor: "divider", borderRadius: "8px !important",
               overflow: "hidden", mb: 2,
               "&::before": { display: "none" },
               "& .MuiAccordionSummary-root:hover": { bgcolor: "action.hover" },
@@ -533,7 +533,7 @@ export default function CoursesPage() {
               expandIcon={<ExpandMoreIcon sx={{ fontSize: 20 }} />}
               sx={{ px: { xs: 2, sm: 2.5 }, py: 1.25, "& .MuiAccordionSummary-content": { my: 1, alignItems: "center", gap: 1.25 } }}
             >
-              <Box sx={{ p: 0.75, borderRadius: 1.5, bgcolor: "secondary.main", display: "flex", flexShrink: 0 }}>
+              <Box sx={{ p: 0.75, borderRadius: 0.5, bgcolor: "secondary.main", display: "flex", flexShrink: 0 }}>
                 <MenuBookOutlinedIcon sx={{ fontSize: 16, color: "secondary.contrastText" }} />
               </Box>
               <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -542,7 +542,7 @@ export default function CoursesPage() {
               <Chip label={learnCatalog.length} size="small" sx={{ fontWeight: 700, fontSize: "0.75rem", height: 24, mr: 0.5, alignSelf: "flex-start", mt: 0.5 }} />
             </AccordionSummary>
             <AccordionDetails sx={{ px: { xs: 2, sm: 2.5 }, pb: 3, pt: 0.5 }}>
-              <Box sx={{ mb: 2, px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "rgba(25,118,210,0.08)" }}>
+              <Box sx={{ mb: 2, px: 1.5, py: 1, borderRadius: 0.5, bgcolor: "rgba(25,118,210,0.08)" }}>
                 <Typography variant="caption" fontWeight={600} sx={{ color: "primary.main", lineHeight: 1.4 }}>
                   Enrolled in a GL program as a student? Switch to the Learner Dashboard from the menu to access those courses.
                 </Typography>

@@ -88,7 +88,7 @@ function NavItemCollapsed({ icon, label, isActive }: NavItemCollapsedProps) {
           justifyContent: "center",
           width: 56,
           height: 32,
-          borderRadius: "16px",
+          borderRadius: "9999px",
           backgroundColor: isActive
             ? "hsl(var(--md-primary-container))"
             : "transparent",
@@ -137,7 +137,7 @@ function NavItemExpanded({ icon, label, isActive }: NavItemExpandedProps) {
         width: "100%",
         px: 2,
         height: 48,
-        borderRadius: "28px",
+        borderRadius: "9999px",
         backgroundColor: isActive
           ? "hsl(var(--md-primary-container))"
           : "transparent",
@@ -474,7 +474,7 @@ export function Sidebar() {
                 width: "100%",
                 px: 2,
                 py: 1,
-                borderRadius: "28px",
+                borderRadius: "9999px",
                 transition: "background-color 0.15s",
                 "&:hover": { backgroundColor: "hsl(var(--md-surface-container) / 0.3)" },
               }}
@@ -506,7 +506,7 @@ export function Sidebar() {
           paper: {
             sx: {
               minWidth: 240,
-              borderRadius: 2.5,
+              borderRadius: 1,
               boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
               mt: -1,
             },

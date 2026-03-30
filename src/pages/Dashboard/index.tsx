@@ -431,7 +431,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} sx={{ ...(isEmpty && { minHeight: { xs: "calc(100vh - 5rem - env(safe-area-inset-bottom) - 32px)", sm: "auto" } }) }}>
       {/* ── Welcome header ── */}
       <Typography variant="h6" fontWeight={700} sx={{ mb: -0.5, fontSize: { xs: "1.05rem", sm: "1.25rem" } }}>
         Welcome {guruName}
@@ -447,7 +447,7 @@ export default function DashboardPage() {
             justifyContent: 'center',
             gap: { xs: 2, md: 2.5 },
             py: { xs: 6, md: 12 },
-            borderRadius: 3,
+            borderRadius: 1,
             border: '2px dashed',
             borderColor: 'divider',
             bgcolor: 'action.hover',
@@ -490,22 +490,28 @@ export default function DashboardPage() {
       {/* ── Main layout ── */}
       {hasUserConfiguredAvailability && <Grid container spacing={{ xs: 2, md: 3 }} alignItems="flex-start">
         {/* Left column (2/3) */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Stack>
+        <Grid size={{ xs: 12, md: 8 }} sx={{ ...(isEmpty && { display: "flex", flexDirection: "column", flex: { xs: 1, sm: "unset" } }) }}>
+          <Stack sx={{ ...(isEmpty && { flex: 1 }) }}>
             {/* Mobile tasks (horizontal scroll) */}
-            <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 2 }}>
-              <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}><AssignmentOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} /><Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: "0.9rem" }}>Tasks</Typography></Stack>
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 1.5,
-                  overflowX: "auto",
-                  scrollSnapType: "x mandatory",
-                  pb: 0.5,
-                  "&::-webkit-scrollbar": { display: "none" },
-                  scrollbarWidth: "none",
-                }}
-              >
+            <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 1.5 }}>
+              <Card sx={{ p: 2 }}>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Tasks</Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 1.5,
+                    overflowX: "auto",
+                    scrollSnapType: "x mandatory",
+                    mx: -2,
+                    pb: 0.5,
+                    "&::-webkit-scrollbar": { display: "none" },
+                    scrollbarWidth: "none",
+                    /* Scroll-padding so first/last snap positions respect 16px inset */
+                    scrollPaddingInline: "16px",
+                    /* Pseudo-elements as inline spacers that scroll with content */
+                    "&::before, &::after": { content: '""', minWidth: 16, flexShrink: 0 },
+                  }}
+                >
                 {needsWednesdayConfirm && (
                   <Box onClick={handleHighlightUnconfirmed} sx={{ cursor: "pointer", width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start" }}>
                     <TaskCard
@@ -577,12 +583,13 @@ export default function DashboardPage() {
                   </Box>
                 )}
               </Box>
+              </Card>
             </Box>
 
             {/* ── Big container for entire left section ── */}
-            <Card sx={{ p: { xs: 1.5, sm: 2 } }}>
+            <Card sx={{ p: { xs: 2, sm: 2 }, ...(isEmpty && { flex: { xs: 1, sm: "unset" }, display: "flex", flexDirection: "column" }) }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: { xs: 1, sm: 1.5 }, fontSize: { xs: "0.875rem", sm: "1rem" } }}>Activities</Typography>
-              <Stack spacing={{ xs: 2, md: 2.5 }}>
+              <Stack spacing={{ xs: 2, md: 2.5 }} sx={{ ...(isEmpty && { flex: 1 }) }}>
                 {/* Next Activities — hidden when no today sessions */}
                 {todaySessions.length > 0 && (
                 <Box>
@@ -599,7 +606,7 @@ export default function DashboardPage() {
                             key={s.id}
                             variant="outlined"
                             sx={{
-                              p: { xs: 1.5, sm: 2 },
+                              p: { xs: 2, sm: 2 },
                               ...(startsWithin30
                                 ? { bgcolor: 'hsl(var(--md-primary-container) / 0.12)', borderColor: 'hsl(var(--md-primary) / 0.4)' }
                                 : {}),
@@ -727,7 +734,7 @@ export default function DashboardPage() {
                           const isExiting = s.id === exitingId && isConfirmed;
                           return (
                             <Card key={s.id} variant="outlined" sx={{
-                              p: { xs: 1.5, sm: 2 },
+                              p: { xs: 2, sm: 2 },
                               transition: "box-shadow 0.3s ease, border-color 0.3s ease",
                               ...(highlightUnconfirmed && !isConfirmed && {
                                 borderColor: "primary.main",
@@ -810,16 +817,11 @@ export default function DashboardPage() {
                                     </Button>
                                   </>
                                 )}
-                                onViewDetails={s.combinedBatches ? undefined : () => {
+                                onViewDetails={() => {
                                   dispatch(setSessionFocus(s));
                                   dispatch(setOpenSessionDetails(true));
                                 }}
-                                secondaryAction={s.combinedBatches ? (
-                                  <Button variant="text" size="small" sx={{ display: { xs: "none", sm: "inline-flex" } }} onClick={() => {
-                                    dispatch(setSessionFocus(s));
-                                    dispatch(setOpenSessionDetails(true));
-                                  }}>View details</Button>
-                                ) : undefined}
+                                hideMobileViewDetails={!!s.combinedBatches}
                               />
                               {s.combinedBatches && (
                                 <>
@@ -873,13 +875,13 @@ export default function DashboardPage() {
                                     justifyContent: "space-between",
                                     alignItems: "center",
                                     mt: 1.5,
-                                    mx: { xs: -1.5, sm: -2 },
-                                    mb: { xs: -1.5, sm: -2 },
-                                    px: 2, py: 1.25,
+                                    mx: -2,
+                                    mb: -2,
+                                    px: 2, py: 1.75,
                                     cursor: "pointer",
                                     borderTop: 1, borderColor: "divider",
                                     bgcolor: "action.hover",
-                                    borderRadius: "0 0 12px 12px",
+                                    borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
                                     "&:hover": { bgcolor: "action.selected" },
                                     transition: "background-color 0.15s",
                                   }}
@@ -902,14 +904,14 @@ export default function DashboardPage() {
                       )}
                     </Stack>
 
-                    {/* ── Planned Events (subject to change) ── */}
-                    <Divider sx={{ mt: 2.5, mb: 0 }} />
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 2, mb: 1.5 }}>
-                      <Typography variant="subtitle2" fontWeight={600}>Planned activities</Typography>
-                      <Typography variant="caption" color="text.secondary">(subject to change)</Typography>
-                    </Stack>
-                    {rolePlannedEvents.length > 0 ? (
+                    {/* ── Planned Events (subject to change) — only show when data exists ── */}
+                    {rolePlannedEvents.length > 0 && (
                       <>
+                        <Divider sx={{ mt: 2.5, mb: 0 }} />
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 2, mb: 1.5 }}>
+                          <Typography variant="subtitle2" fontWeight={600}>Planned activities</Typography>
+                          <Typography variant="caption" color="text.secondary">(subject to change)</Typography>
+                        </Stack>
                         {/* Planned Event Detail Drawer (right-side, matching confirmed events) */}
                         <Drawer
                           anchor="right"
@@ -976,7 +978,7 @@ export default function DashboardPage() {
                                       sx={{
                                         mt: 2,
                                         p: 1.75,
-                                        borderRadius: "10px",
+                                        borderRadius: "8px",
                                         bgcolor: "hsl(var(--md-surface-container) / 0.5)",
                                         border: "1px solid",
                                         borderColor: "divider",
@@ -1028,7 +1030,7 @@ export default function DashboardPage() {
                                         </Typography>
                                       </Stack>
                                       {/* SectionCard */}
-                                      <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                                      <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                                         {/* DetailRow: Batch */}
                                         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                                           <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Batch</Typography>
@@ -1070,16 +1072,20 @@ export default function DashboardPage() {
                               ? { label: "To be confirmed", bg: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "var(--gl-status-pending-border)" }
                               : { label: "Confirmed", bg: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "var(--gl-status-confirmed-border)" };
                             return (
-                              <Card key={pe.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                              <Card key={pe.id} variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+                                {/* Mobile: chip on top */}
+                                <Box sx={{ display: { xs: "block", sm: "none" }, mb: 0.75 }}>
+                                  <Chip label={statusCfg.label} size="small" sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem" }} />
+                                </Box>
+                                <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>
+                                  {pe.sessionType}: {pe.title}
+                                </Typography>
+                                {/* Desktop: chip beside title */}
+                                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5 }}>
                                   <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
                                     {pe.sessionType}: {pe.title}
                                   </Typography>
-                                  <Chip
-                                    label={statusCfg.label}
-                                    size="small"
-                                    sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }}
-                                  />
+                                  <Chip label={statusCfg.label} size="small" sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }} />
                                 </Stack>
                                 <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", minWidth: 0 }}>
                                   <CalendarTodayOutlinedIcon sx={{ fontSize: 12, flexShrink: 0 }} />
@@ -1099,15 +1105,15 @@ export default function DashboardPage() {
                                     justifyContent: "space-between",
                                     alignItems: "center",
                                     mt: 1.5,
-                                    mx: -1.5,
-                                    mb: -1.5,
+                                    mx: -2,
+                                    mb: -2,
                                     px: 2,
-                                    py: 1.25,
+                                    py: 1.75,
                                     cursor: "pointer",
                                     borderTop: 1,
                                     borderColor: "divider",
                                     bgcolor: "action.hover",
-                                    borderRadius: "0 0 12px 12px",
+                                    borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
                                     "&:hover": { bgcolor: "action.selected" },
                                     transition: "background-color 0.15s",
                                   }}
@@ -1120,13 +1126,6 @@ export default function DashboardPage() {
                           })}
                         </Stack>
                       </>
-                    ) : (
-                      <EmptyState
-                        icon={<DateRangeOutlinedIcon />}
-                        title="No activities planned yet"
-                        subtitle="Tentative activities from the program team will show up here as they're planned"
-                        compact
-                      />
                     )}
                   </Box>
                 )}
@@ -1322,7 +1321,7 @@ export default function DashboardPage() {
                                   <Divider sx={{ flex: 1 }} />
                                 </Stack>
                               )}
-                            <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+                            <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
                               {/* Card header: title row + date + actions — custom for non-SessionCard types */}
                               {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
                                 <>
@@ -1356,12 +1355,12 @@ export default function DashboardPage() {
                                       display: { xs: "flex", sm: "none" },
                                       justifyContent: "space-between",
                                       alignItems: "center",
-                                      mt: 1.5, mx: { xs: -1.5, sm: -2 }, mb: { xs: -1.5, sm: -2 },
-                                      px: 2, py: 1.25,
+                                      mt: 1.5, mx: -2, mb: -2,
+                                      px: 2, py: 1.75,
                                       cursor: "pointer",
                                       borderTop: 1, borderColor: "divider",
                                       bgcolor: "action.hover",
-                                      borderRadius: "0 0 12px 12px",
+                                      borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
                                       "&:hover": { bgcolor: "action.selected" },
                                       transition: "background-color 0.15s",
                                     }}
@@ -1410,7 +1409,7 @@ export default function DashboardPage() {
                         <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Active declined</Typography>
                         <Stack spacing={1.5}>
                           {declinedSessions.map((s) => (
-                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
                               <SessionCard
                                 title={s.title}
                                 sessionType={s.sessionType}
@@ -1441,7 +1440,7 @@ export default function DashboardPage() {
                         <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Previously declined</Typography>
                         <Stack spacing={1.5}>
                           {rolePreviouslyDeclined.map((s) => (
-                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
                               <SessionCard
                                 title={s.title}
                                 topic={s.topic}
@@ -1585,7 +1584,7 @@ export default function DashboardPage() {
                     bgcolor: s.bg,
                     border: "1px solid",
                     borderColor: "divider",
-                    borderRadius: 2,
+                    borderRadius: 0.5,
                     cursor: "pointer",
                     transition: "border-color 0.2s",
                     "&:hover": { borderColor: s.accent },

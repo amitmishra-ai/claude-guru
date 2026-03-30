@@ -68,7 +68,7 @@ export function InfoBox({
         gap: 1.5,
         alignItems: "flex-start",
         p: 1.5,
-        borderRadius: 2,
+        borderRadius: 0.5,
         border: "1px solid",
         borderColor: styles.borderColor,
         bgcolor: styles.bgcolor,

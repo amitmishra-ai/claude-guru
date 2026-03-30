@@ -28,7 +28,7 @@ function Card({ children, sx }: { children: React.ReactNode; sx?: object }) {
     <Box
       sx={{
         bgcolor: "background.paper",
-        borderRadius: 3,
+        borderRadius: 1,
         border: "1px solid",
         borderColor: "divider",
         p: 2.5,
@@ -320,12 +320,12 @@ export function LearnerRatingsDialog() {
                               </Typography>
                             </Typography>
                           </Stack>
-                          <Box sx={{ height: 4, borderRadius: 2, bgcolor: "action.selected", overflow: "hidden" }}>
+                          <Box sx={{ height: 4, borderRadius: 0.5, bgcolor: "action.selected", overflow: "hidden" }}>
                             <Box
                               sx={{
                                 height: "100%",
                                 width: `${Math.min(b.actual, b.target)}%`,
-                                borderRadius: 2,
+                                borderRadius: 0.5,
                                 bgcolor: met ? blue[400] : C.three,
                                 transition: "width 0.4s ease",
                               }}
@@ -382,7 +382,7 @@ export function LearnerRatingsDialog() {
                         onClick={() => setFilter(t.key)}
                         sx={{
                           fontWeight: 600, fontSize: "0.68rem", cursor: "pointer",
-                          borderRadius: 5, height: 28,
+                          borderRadius: 1, height: 28,
                           bgcolor: active ? t.c : "transparent",
                           color: active ? "#fff" : "text.secondary",
                           border: "1.5px solid",

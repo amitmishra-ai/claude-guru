@@ -204,12 +204,13 @@ function buildTheme(mode: "light" | "dark") {
         styleOverrides: {
           root: {
             textTransform: "none" as const,
-            borderRadius: 8,
+            borderRadius: 4,
             fontWeight: 500,
           },
           sizeSmall: {
             fontSize: "0.8125rem",
             padding: "4px 12px",
+            "@media (max-width: 599.95px)": { minHeight: 40, padding: "8px 14px" },
           },
         },
         variants: [
@@ -243,22 +244,22 @@ function buildTheme(mode: "light" | "dark") {
         ],
       },
 
-      /* Chip — 8px rounded-square default; use sx borderRadius 9999px for pills */
+      /* Chip — 4px inner radius */
       MuiChip: {
         styleOverrides: {
           root: {
-            borderRadius: 8,
+            borderRadius: 4,
             fontWeight: 500,
           },
         },
       },
 
-      /* Card — 12px radius, outlined, no shadow */
+      /* Card — 8px radius, outlined, no shadow */
       MuiCard: {
         defaultProps: { variant: "outlined" as const },
         styleOverrides: {
           root: {
-            borderRadius: 12,
+            borderRadius: 8,
             boxShadow: "none",
             borderColor,
           },
@@ -290,7 +291,7 @@ function buildTheme(mode: "light" | "dark") {
       /* Dialog — 16px radius (replaces className="rounded-2xl" on every dialog) */
       MuiDialog: {
         styleOverrides: {
-          paper: { borderRadius: 16 },
+          paper: { borderRadius: 8 },
         },
       },
 
@@ -328,7 +329,7 @@ function buildTheme(mode: "light" | "dark") {
       MuiPopover: {
         styleOverrides: {
           paper: {
-            borderRadius: 12,
+            borderRadius: 8,
             boxShadow:
               "0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
             border: "1px solid",
@@ -345,12 +346,16 @@ function buildTheme(mode: "light" | "dark") {
             fontWeight: 500,
             fontSize: "0.875rem",
             minHeight: 40,
+            "@media (max-width: 599.95px)": { minHeight: 48 },
           },
         },
       },
       MuiTabs: {
         styleOverrides: {
-          root: { minHeight: 40 },
+          root: {
+            minHeight: 40,
+            "@media (max-width: 599.95px)": { minHeight: 48 },
+          },
         },
       },
 
@@ -378,23 +383,23 @@ function buildTheme(mode: "light" | "dark") {
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              borderRadius: 8,
+              borderRadius: 4,
             },
           },
         },
       },
 
-      /* Select — 8px radius */
+      /* Select — 4px inner radius */
       MuiSelect: {
         styleOverrides: {
-          root: { borderRadius: 8 },
+          root: { borderRadius: 4 },
         },
       },
 
-      /* Avatar — square-ish with 8px radius */
+      /* Avatar — 4px inner radius (use borderRadius: "50%" in sx for circles) */
       MuiAvatar: {
         styleOverrides: {
-          root: { borderRadius: 8 },
+          root: { borderRadius: 4 },
         },
       },
     },

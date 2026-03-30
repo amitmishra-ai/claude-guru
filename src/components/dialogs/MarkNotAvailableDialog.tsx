@@ -275,7 +275,7 @@ export function MarkNotAvailableDialog() {
       open={open}
       onClose={handleClose}
       maxWidth={false}
-      PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 }, borderRadius: 3, overflow: "hidden" } }}
+      PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 }, borderRadius: 1, overflow: "hidden" } }}
     >
       {/* ── Header ── */}
       <Box sx={{ px: 2.5, pt: 2, pb: 1.25, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -374,7 +374,7 @@ export function MarkNotAvailableDialog() {
                 alignItems: "flex-start",
                 gap: 1.25,
                 p: 1.5,
-                borderRadius: 2,
+                borderRadius: 0.5,
                 bgcolor: "var(--gl-status-declined-bg)",
                 border: "1px solid var(--gl-status-declined-border)",
               }}
@@ -388,7 +388,7 @@ export function MarkNotAvailableDialog() {
             {/* Conflict list */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
               {conflictingSessions.map((s) => (
-                <Box key={s.id} sx={{ display: "flex", alignItems: "center", gap: 1.25, px: 1.5, py: 1, borderRadius: 1.5, border: 1, borderColor: "divider" }}>
+                <Box key={s.id} sx={{ display: "flex", alignItems: "center", gap: 1.25, px: 1.5, py: 1, borderRadius: 0.5, border: 1, borderColor: "divider" }}>
                   <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "error.main", flexShrink: 0 }} />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.82rem" }} noWrap>{s.title}</Typography>
@@ -399,7 +399,7 @@ export function MarkNotAvailableDialog() {
                 </Box>
               ))}
               {conflictingRequests.map((r) => (
-                <Box key={r.id} sx={{ display: "flex", alignItems: "center", gap: 1.25, px: 1.5, py: 1, borderRadius: 1.5, border: 1, borderColor: "divider" }}>
+                <Box key={r.id} sx={{ display: "flex", alignItems: "center", gap: 1.25, px: 1.5, py: 1, borderRadius: 0.5, border: 1, borderColor: "divider" }}>
                   <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "warning.main", flexShrink: 0 }} />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.82rem" }} noWrap>{r.title}</Typography>
@@ -416,7 +416,7 @@ export function MarkNotAvailableDialog() {
               sx={{
                 px: 1.5,
                 py: 1,
-                borderRadius: 2,
+                borderRadius: 0.5,
                 bgcolor: autoDecline ? "var(--gl-status-pending-bg)" : "action.hover",
                 border: "1px solid",
                 borderColor: autoDecline ? "var(--gl-status-pending-border)" : "divider",

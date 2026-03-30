@@ -54,6 +54,8 @@ export type SessionCardProps = {
   secondaryAction?: ReactNode;
   /** When provided, renders a mobile-style "View details →" row on xs and a text button on sm+ */
   onViewDetails?: () => void;
+  /** When true, suppresses the mobile "View details" row (parent handles it separately, e.g. after accordion) */
+  hideMobileViewDetails?: boolean;
   /** When provided, makes the course name (title) a clickable link */
   onCourseClick?: () => void;
   /** Container sx overrides (animation, opacity, etc.) */
@@ -105,6 +107,7 @@ export function SessionCard({
   actions,
   secondaryAction,
   onViewDetails,
+  hideMobileViewDetails,
   onCourseClick,
   sx,
 }: SessionCardProps) {
@@ -228,7 +231,12 @@ export function SessionCard({
     </Box>
   );
 
-  const resolvedSecondary = onViewDetails ? desktopViewDetailsBtn : secondaryAction;
+  /* On mobile, secondaryAction is hidden from actionsRow and rendered as a full-width bottom row instead */
+  const resolvedSecondary = onViewDetails
+    ? desktopViewDetailsBtn
+    : secondaryAction
+      ? <Box sx={{ display: { xs: "none", sm: "block" } }}>{secondaryAction}</Box>
+      : null;
 
   const actionsRow = (actions || resolvedSecondary) && (
     <Stack
@@ -248,8 +256,35 @@ export function SessionCard({
     </Stack>
   );
 
+  /* Mobile full-width row for secondaryAction (when not using onViewDetails) */
+  const mobileSecondaryRow = !onViewDetails && secondaryAction && (
+    <Box
+      sx={{
+        display: { xs: "flex", sm: "none" },
+        justifyContent: "space-between",
+        alignItems: "center",
+        mt: 1.5,
+        mx: -2,
+        mb: -2,
+        px: 2,
+        py: 1.75,
+        cursor: "pointer",
+        borderTop: 1,
+        borderColor: "divider",
+        bgcolor: "action.hover",
+        borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
+        "&:hover": { bgcolor: "action.selected" },
+        transition: "background-color 0.15s",
+        "& .MuiButton-root": { p: 0, minHeight: "unset", minWidth: "unset" },
+      }}
+    >
+      {secondaryAction}
+      <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+    </Box>
+  );
+
   /* Mobile full-width "View details →" row — rendered outside actionsRow to span full card width */
-  const mobileViewDetailsRow = onViewDetails && (
+  const mobileViewDetailsRow = onViewDetails && !hideMobileViewDetails && (
     <Box
       onClick={onViewDetails}
       sx={{
@@ -257,15 +292,15 @@ export function SessionCard({
         justifyContent: "space-between",
         alignItems: "center",
         mt: 1.5,
-        mx: { xs: -1.5, sm: -2 },
-        mb: { xs: -1.5, sm: -2 },
+        mx: { xs: -2, sm: -2 },
+        mb: { xs: -2, sm: -2 },
         px: 2,
-        py: 1.25,
+        py: 1.75,
         cursor: "pointer",
         borderTop: 1,
         borderColor: "divider",
         bgcolor: "action.hover",
-        borderRadius: "0 0 12px 12px",
+        borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
         "&:hover": { bgcolor: "action.selected" },
         transition: "background-color 0.15s",
       }}
@@ -313,13 +348,37 @@ export function SessionCard({
         </>
       ) : (
         <>
-          {titleRow}
+          {/* ── MOBILE (xs): status chip on top line, title below ── */}
+          {statusChip && (
+            <Box sx={{ display: { xs: "flex", sm: "none" }, mb: 0.75 }}>
+              {statusChip}
+            </Box>
+          )}
+          <Typography
+            variant={titleVariant}
+            fontWeight={600}
+            sx={{ display: { xs: "block", sm: "none" }, fontSize: titleVariant === "h5" ? "1rem" : "0.875rem", mb: 0.5 }}
+          >
+            {titleContent}
+          </Typography>
+          {/* ── DESKTOP (sm+): status chip beside title ── */}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5 }}>
+            <Typography
+              variant={titleVariant}
+              fontWeight={600}
+              sx={{ fontSize: titleVariant === "h5" ? { sm: "1rem", md: "1.125rem" } : "0.875rem", minWidth: 0 }}
+            >
+              {titleContent}
+            </Typography>
+            {statusChip}
+          </Stack>
           {dateRow}
 
           {chipsRow}
         </>
       )}
       {actionsRow}
+      {mobileSecondaryRow}
       {mobileViewDetailsRow}
     </Box>
   );

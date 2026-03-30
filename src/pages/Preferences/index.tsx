@@ -8,6 +8,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
+import { MobilePageHeader } from "@/components/layout/MobilePageHeader";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -31,6 +32,7 @@ export default function PreferencesPage() {
 
   return (
     <>
+      <MobilePageHeader title="Settings" />
       <PageHeader title="Settings" subtitle="Manage your appearance, notifications, and communication preferences." />
 
       {/* ── Appearance ── */}

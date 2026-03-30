@@ -46,7 +46,7 @@ export default function AvailabilityPage() {
       <Box sx={{ mt: 1.5, display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1.5 }}>
         <Box
           sx={{
-            borderRadius: "16px",
+            borderRadius: "8px",
             border: 1,
             borderColor: "divider",
             backgroundColor: "hsl(var(--md-surface))",
@@ -59,7 +59,7 @@ export default function AvailabilityPage() {
         </Box>
         <Box
           sx={{
-            borderRadius: "16px",
+            borderRadius: "8px",
             border: 1,
             borderColor: "divider",
             backgroundColor: "hsl(var(--md-surface))",
@@ -93,7 +93,7 @@ export default function AvailabilityPage() {
           {!patterns.length && (
             <Box
               sx={{
-                borderRadius: "16px",
+                borderRadius: "8px",
                 border: 1,
                 borderColor: "divider",
                 backgroundColor: "hsl(var(--md-surface-container) / 0.2)",

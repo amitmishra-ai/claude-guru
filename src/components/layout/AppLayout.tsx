@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
@@ -21,6 +21,10 @@ export function AppLayout() {
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
 
   const isOnboarding = guruStage === "onboarding";
+  const location = useLocation();
+  /** Pages that open as full-screen on mobile (no bottom nav, no top bar) */
+  const mobileFullScreenPages = ["/account", "/payments", "/preferences"];
+  const isAccountPage = mobileFullScreenPages.includes(location.pathname);
 
   // Resolve themeMode → isDarkMode and persist to localStorage
   useEffect(() => {
@@ -72,17 +76,18 @@ export function AppLayout() {
           overflowX: "clip",
           scrollbarWidth: { xs: "none", md: "thin" },
           "&::-webkit-scrollbar": { display: { xs: "none", md: "block" } },
-          p: { xs: 1.5, sm: 2, md: 3 },
-          pt: { xs: "calc(56px + 12px + env(safe-area-inset-top))", md: 3 },
-          pb: { xs: "calc(5rem + env(safe-area-inset-bottom))", md: 3 },
+          px: { xs: isAccountPage ? 2 : 2, sm: 2, md: 3 },
+          py: { xs: 0, sm: 2, md: 3 },
+          pt: { xs: isAccountPage ? "env(safe-area-inset-top)" : "calc(56px + 12px + env(safe-area-inset-top))", md: 3 },
+          pb: { xs: isAccountPage ? "env(safe-area-inset-bottom)" : "calc(5rem + env(safe-area-inset-bottom))", md: 3 },
         }}
       >
         <Box sx={{ mx: "auto", maxWidth: "72rem", display: "flex", flexDirection: "column", gap: 2.5 }}>
           <Outlet />
         </Box>
       </Box>
-      <MobileAppBar />
-      <MobileNav />
+      {!isAccountPage && <MobileAppBar />}
+      {!isAccountPage && <MobileNav />}
       <ToastViewport />
       <GlobalDialogs />
       <DevPanel />

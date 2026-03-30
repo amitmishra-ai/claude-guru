@@ -355,7 +355,7 @@ export const demoSessions: Session[] = [
   // ── Career Mentor sessions ──
   {
     id: "career1",
-    title: "Career Mentoring",
+    title: "Resume Review & Interview Prep",
     topic: "Resume Review & Interview Prep",
     batch: "PGP-AIML-BA-UTA-Nov25-C",
     program: "PGP-AIML",
@@ -377,7 +377,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "career2",
-    title: "Mock Interview",
+    title: "Technical Round — Data Structures",
     topic: "Technical Round — Data Structures",
     batch: "PGP-AIML-BA-UTA-Nov25-C",
     program: "PGP-AIML",
@@ -397,7 +397,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "career3",
-    title: "Career Mentoring",
+    title: "Industry Transition Strategy",
     topic: "Industry Transition Strategy",
     batch: "PGP-AIML-BA-UTA-Nov25-C",
     program: "PGP-AIML",
@@ -1020,7 +1020,7 @@ export const demoSessions: Session[] = [
   // ── Individual 1:1 session ──
   {
     id: "ind-1on1",
-    title: "Career Mentoring: Resume Review",
+    title: "Resume Review",
     topic: "1:1 Resume Feedback Session",
     batch: "PGP-AIML-BA-UTA-Nov25-C",
     program: "PGP-AIML",
@@ -3105,7 +3105,7 @@ export const demoPlannedEvents: PlannedEvent[] = [
   {
     id: "pe2",
     sessionType: "Career mentoring session",
-    title: "Career Mentoring",
+    title: "Portfolio Review",
     batch: "PGP-AIML-BA-UTA-Nov25-C",
     program: "PGP-AIML",
     contactEmail: "gurus_support@greatlearning.in",

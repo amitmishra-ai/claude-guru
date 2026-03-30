@@ -41,7 +41,7 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
   const visibleTestimonials = TESTIMONIALS.slice(tPage * perPage, tPage * perPage + perPage);
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 3, borderColor: "divider", overflow: "hidden", mb: 4 }}>
+    <Card variant="outlined" sx={{ borderRadius: 1, borderColor: "divider", overflow: "hidden", mb: 4 }}>
       <Box sx={{ px: 3, pt: 2.5, pb: 2 }}>
         {/* ── Hero + Metrics in one row ────────────────────────────────── */}
         <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} alignItems={{ md: "center" }}>
@@ -49,7 +49,7 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1, minWidth: 0 }}>
             <Box
               sx={{
-                width: 36, height: 36, borderRadius: 2, flexShrink: 0,
+                width: 36, height: 36, borderRadius: 0.5, flexShrink: 0,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 bgcolor: "action.hover", border: "1px solid", borderColor: "divider",
               }}
@@ -72,7 +72,7 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
               <Card
                 key={m.label}
                 elevation={0}
-                sx={{ px: 1.5, py: 1.25, borderRadius: 2, bgcolor: "transparent", border: "none", boxShadow: "none", minWidth: 115 }}
+                sx={{ px: 1.5, py: 1.25, borderRadius: 0.5, bgcolor: "transparent", border: "none", boxShadow: "none", minWidth: 115 }}
               >
                 <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", fontWeight: 500, display: "block", lineHeight: 1 }}>
                   {m.label}
@@ -114,7 +114,7 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
           {/* Two testimonial cards */}
           <Stack direction="row" spacing={2} sx={{ flex: 1, minWidth: 0 }}>
             {visibleTestimonials.map((t) => (
-              <Card key={t.name} variant="outlined" sx={{ flex: 1, px: 3, py: 2.5, borderRadius: 3, borderColor: "divider", display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <Card key={t.name} variant="outlined" sx={{ flex: 1, px: 3, py: 2.5, borderRadius: 1, borderColor: "divider", display: "flex", flexDirection: "column", minWidth: 0 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", mb: 2 }}>
                   &ldquo;{t.quote}&rdquo;
                 </Typography>
@@ -149,7 +149,7 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
                 key={i}
                 onClick={() => setTPage(i)}
                 sx={{
-                  width: tPage === i ? 12 : 5, height: 5, borderRadius: 3,
+                  width: tPage === i ? 12 : 5, height: 5, borderRadius: 1,
                   bgcolor: tPage === i ? "text.primary" : "action.disabled",
                   cursor: "pointer", transition: "all 0.2s ease",
                 }}

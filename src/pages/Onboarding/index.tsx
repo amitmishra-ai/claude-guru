@@ -421,7 +421,7 @@ function SidebarPanel({
           sx={{
             width: 120,
             height: 150,
-            borderRadius: 3,
+            borderRadius: 1,
             bgcolor: "rgba(255,255,255,0.1)",
             backdropFilter: "blur(8px)",
             border: "1px solid rgba(255,255,255,0.15)",
@@ -441,7 +441,7 @@ function SidebarPanel({
               sx={{
                 width: i === 3 ? 48 : 72,
                 height: 4,
-                borderRadius: 2,
+                borderRadius: 0.5,
                 bgcolor: "rgba(255,255,255,0.15)",
               }}
             />
@@ -489,7 +489,7 @@ function SidebarPanel({
         <Box
           sx={{
             height: 4,
-            borderRadius: 2,
+            borderRadius: 0.5,
             bgcolor: "rgba(255,255,255,0.15)",
             overflow: "hidden",
           }}
@@ -497,7 +497,7 @@ function SidebarPanel({
           <Box
             sx={{
               height: "100%",
-              borderRadius: 2,
+              borderRadius: 0.5,
               bgcolor: hasReachedBottom ? "#6ee7b7" : "#fff",
               width: `${scrollProgress}%`,
               transition: "width 0.15s linear, background-color 0.3s ease",
@@ -602,7 +602,7 @@ function CoCContent({ theme }: { theme: Theme }) {
       {/* Intro */}
       <Box
         sx={{
-          borderRadius: 2.5,
+          borderRadius: 1,
           border: 1,
           borderColor: "divider",
           bgcolor: "action.hover",
@@ -686,7 +686,7 @@ function IPContent({
       {/* Intro */}
       <Box
         sx={{
-          borderRadius: 2.5,
+          borderRadius: 1,
           border: 1,
           borderColor: "divider",
           bgcolor: "action.hover",
@@ -773,7 +773,7 @@ function IPContent({
       <Box
         sx={{
           mt: 4,
-          borderRadius: 2.5,
+          borderRadius: 1,
           border: 1,
           borderColor: alpha(theme.palette.warning.main, 0.3),
           bgcolor: alpha(theme.palette.warning.main, 0.04),
@@ -1040,7 +1040,7 @@ export default function OnboardingPage() {
               gap: 0.5,
               px: 2,
               py: 0.75,
-              borderRadius: 5,
+              borderRadius: 1,
               bgcolor: "background.paper",
               backdropFilter: "blur(12px)",
               border: 1,
@@ -1092,7 +1092,7 @@ export default function OnboardingPage() {
                     gap: 1.5,
                     px: 2,
                     py: 1,
-                    borderRadius: 2,
+                    borderRadius: 0.5,
                     bgcolor: bannerPulse ? "var(--gl-status-declined-bg)" : "var(--gl-status-pending-bg)",
                     border: bannerPulse ? "1.5px solid var(--gl-status-declined-border)" : "1px solid var(--gl-status-pending-border)",
                     transition: "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",

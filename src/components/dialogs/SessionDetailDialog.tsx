@@ -69,7 +69,7 @@ export function SessionDetailDialog() {
           <Box sx={{ px: 3, pt: 2.5, pb: 2, display: "flex", flexDirection: "column", gap: 2 }}>
             <Box
               sx={{
-                borderRadius: 2,
+                borderRadius: 0.5,
                 border: 1,
                 borderColor: "divider",
                 backgroundColor: "action.hover",

@@ -1,32 +1,16 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import SwapHorizOutlinedIcon from "@mui/icons-material/SwapHorizOutlined";
-import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { useAppSelector, useAppDispatch } from "@/store";
-import { setIsDarkMode } from "@/store/slices/uiSlice";
-import { pushToast } from "@/store/slices/toastsSlice";
+import { useAppSelector } from "@/store";
 
 export function MobileAppBar() {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const isDarkMode = useAppSelector((s) => s.ui.isDarkMode);
   const guruName = useAppSelector((s) => s.profile.guruName);
-  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
 
   const initials = guruName
     .split(" ")
@@ -34,8 +18,6 @@ export function MobileAppBar() {
     .join("")
     .toUpperCase()
     .slice(0, 2);
-
-  const handleMenuClose = () => setMenuAnchor(null);
 
   return (
     <>
@@ -67,31 +49,18 @@ export function MobileAppBar() {
             </Typography>
           </Box>
 
-          {/* Dark mode toggle */}
-          <IconButton
-            size="small"
-            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-            onClick={() => dispatch(setIsDarkMode(!isDarkMode))}
-            sx={{ color: "text.secondary", p: 1.25 }}
-          >
-            {isDarkMode
-              ? <LightModeOutlinedIcon sx={{ fontSize: 18 }} />
-              : <DarkModeOutlinedIcon sx={{ fontSize: 18 }} />
-            }
-          </IconButton>
-
-          {/* Account avatar */}
+          {/* Account avatar — navigates to /account on mobile */}
           <IconButton
             size="small"
             aria-label="Account"
-            onClick={(e) => setMenuAnchor(e.currentTarget)}
+            onClick={() => navigate("/account")}
             sx={{ p: 0.5 }}
           >
             <Avatar
-              variant="circular"
               sx={{
                 width: 28,
                 height: 28,
+                borderRadius: "50%",
                 fontSize: "0.6rem",
                 fontWeight: 700,
                 bgcolor: "primary.main",
@@ -104,54 +73,6 @@ export function MobileAppBar() {
         </Toolbar>
       </AppBar>
 
-      {/* ── Account menu ── */}
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        slotProps={{
-          paper: {
-            sx: {
-              minWidth: 240,
-              borderRadius: 2.5,
-              boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
-              mt: 0.5,
-            },
-          },
-        }}
-      >
-        <Box sx={{ px: 2, py: 1.5 }}>
-          <Typography variant="body2" fontWeight={600}>{guruName}</Typography>
-          <Typography variant="caption" color="text.secondary">
-            {guruName.toLowerCase().replace(/\s+/g, ".")}@greatlearning.in
-          </Typography>
-        </Box>
-        <Divider />
-
-        <MenuItem onClick={() => { handleMenuClose(); navigate("/preferences"); }}>
-          <ListItemIcon><SettingsOutlinedIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Settings</ListItemText>
-        </MenuItem>
-
-        <MenuItem onClick={() => { handleMenuClose(); dispatch(pushToast({ title: "Switching dashboard", description: "Redirecting to Learner Dashboard..." })); }}>
-          <ListItemIcon><SwapHorizOutlinedIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Switch to Learner Dashboard</ListItemText>
-        </MenuItem>
-
-        <MenuItem onClick={() => { handleMenuClose(); dispatch(pushToast({ title: "Refer participants", description: "Opening referral link..." })); }}>
-          <ListItemIcon><PersonAddAltOutlinedIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Refer Participants</ListItemText>
-        </MenuItem>
-
-        <Divider />
-
-        <MenuItem onClick={() => { handleMenuClose(); dispatch(pushToast({ title: "Logged out", description: "You have been signed out." })); }}>
-          <ListItemIcon><LogoutOutlinedIcon fontSize="small" sx={{ color: "error.main" }} /></ListItemIcon>
-          <ListItemText sx={{ "& .MuiListItemText-primary": { color: "error.main" } }}>Logout</ListItemText>
-        </MenuItem>
-      </Menu>
     </>
   );
 }

@@ -41,7 +41,7 @@ export function EmptyState({ icon, title, subtitle, action, compact }: EmptyStat
         py: compact ? 4 : 6,
         px: 3,
         textAlign: "center",
-        borderRadius: 3,
+        borderRadius: 1,
         position: "relative",
         overflow: "hidden",
         /* Soft elevated container — no dashed border */

@@ -87,7 +87,7 @@ function TicketCard({ ticket, onSelect, onToggleBookmark }: { ticket: SupportTic
             minWidth: 0,
             px: 1,
             py: 0.25,
-            borderRadius: 1.5,
+            borderRadius: 0.5,
             ...(ticket.isBookmarked
               ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }
               : { color: "text.secondary" }),

@@ -165,6 +165,20 @@ function ComponentSection({ title, description, children }: { title: string; des
   );
 }
 
+/** Card title row — chips on top on mobile, beside title on desktop */
+function CardTitleRow({ title, chips }: { title: string; chips: React.ReactNode }) {
+  return (
+    <>
+      <Box sx={{ display: { xs: "flex", sm: "none" }, gap: 0.75, mb: 0.75, flexWrap: "wrap" }}>{chips}</Box>
+      <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>{title}</Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5, gap: 1 }}>
+        <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>{title}</Typography>
+        <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>{chips}</Stack>
+      </Stack>
+    </>
+  );
+}
+
 /* ── Star rating row (numeric + stars) for Residency & Online Session ── */
 
 function StarRatingNumeric({ rating }: { rating: number }) {
@@ -208,7 +222,7 @@ function CombinedCompletedGroup({ children }: { children: React.ReactNode }) {
           top: 8,
           bottom: 8,
           width: 3,
-          borderRadius: 2,
+          borderRadius: 0.5,
           bgcolor: "divider",
         },
       }}
@@ -239,8 +253,16 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd,
   contactEmail?: string; program?: string; onViewDetails?: () => void;
 }) {
   return (
-    <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+    <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+      {/* Mobile: chip on top */}
+      <Box sx={{ display: { xs: "block", sm: "none" }, mb: 0.75 }}>
+        {CHIP_TO_BE_CONFIRMED}
+      </Box>
+      <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>
+        {sessionType}: {title}
+      </Typography>
+      {/* Desktop: chip beside title */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5 }}>
         <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
           {sessionType}: {title}
         </Typography>
@@ -252,10 +274,37 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd,
           {fmtDateNice(startDateYmd)} &ndash; {fmtDateNice(endDateYmd)} &middot; {batch}
         </Typography>
       </Stack>
+      {/* Desktop: text button */}
       {onViewDetails && (
-        <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}>
+        <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1, display: { xs: "none", sm: "flex" } }}>
           <Button variant="text" size="small" onClick={onViewDetails}>View details</Button>
         </Stack>
+      )}
+      {/* Mobile: full-width row */}
+      {onViewDetails && (
+        <Box
+          onClick={onViewDetails}
+          sx={{
+            display: { xs: "flex", sm: "none" },
+            justifyContent: "space-between",
+            alignItems: "center",
+            mt: 1.5,
+            mx: -2,
+            mb: -2,
+            px: 2,
+            py: 1.75,
+            cursor: "pointer",
+            borderTop: 1,
+            borderColor: "divider",
+            bgcolor: "action.hover",
+            borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
+            "&:hover": { bgcolor: "action.selected" },
+            transition: "background-color 0.15s",
+          }}
+        >
+          <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
+          <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+        </Box>
       )}
     </Card>
   );
@@ -300,7 +349,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
             <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3 }}>{title}</Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
                   <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -332,7 +381,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
           <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
-              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Batch</Typography>
                   <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{batch}</Typography>
@@ -374,7 +423,7 @@ function PollCard({ poll, onEdit, onDelete, onToggleStatus }: {
   return (
     <Box
       sx={{
-        borderRadius: 2,
+        borderRadius: 0.5,
         border: "1px solid",
         borderColor: "divider",
         overflow: "hidden",
@@ -437,7 +486,7 @@ function PollCard({ poll, onEdit, onDelete, onToggleStatus }: {
               sx={{
                 px: 1.25,
                 py: 0.5,
-                borderRadius: 1.5,
+                borderRadius: 0.5,
                 bgcolor: "hsl(var(--md-surface-container) / 0.3)",
                 border: "1px solid transparent",
               }}
@@ -504,7 +553,7 @@ function PollCreationForm({ onSave, onCancel, editingPoll }: {
   return (
     <Box
       sx={{
-        borderRadius: 2,
+        borderRadius: 0.5,
         border: "1px solid",
         borderColor: "primary.main",
         bgcolor: "hsl(var(--md-surface-container) / 0.2)",
@@ -655,7 +704,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             </Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
                   <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -699,7 +748,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {/* ── Details ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
-              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Assignment</Typography>
                   <Box sx={{ textAlign: "right" }}>
@@ -729,7 +778,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {(isConfirmed || isTentative) && (
               <Box sx={{ mb: 2.5 }}>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Student Progress</Typography>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {isTentative ? (
                     <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500} sx={{ py: 0.5 }}>To be confirmed</Typography>
                   ) : (
@@ -753,7 +802,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {(isGathering || isCompleted) && (
               <Box sx={{ mb: 2.5 }}>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Feedback</Typography>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {isGathering ? (
                     <Typography variant="body2" fontWeight={500} sx={{ py: 0.5 }}>Gathering feedback</Typography>
                   ) : (
@@ -773,7 +822,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
                   <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                   <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>Remuneration</Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
                     {isGathering
@@ -840,7 +889,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3 }}>{dqTitle}</Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
                   <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -880,7 +929,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {/* ── Details ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
-              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Discussion Question</Typography>
                   <Box sx={{ textAlign: "right" }}>
@@ -910,7 +959,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {(isConfirmed || isTentative) && (
               <Box sx={{ mb: 2.5 }}>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Student Response Progress</Typography>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {isTentative ? (
                     <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500} sx={{ py: 0.5 }}>To be confirmed</Typography>
                   ) : (
@@ -939,7 +988,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {(isGathering || isCompleted) && (
               <Box sx={{ mb: 2.5 }}>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Feedback</Typography>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {isGathering ? (
                     <Typography variant="body2" fontWeight={500} sx={{ py: 0.5 }}>Gathering feedback</Typography>
                   ) : (
@@ -959,7 +1008,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
                   <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                   <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>Remuneration</Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
                     {isGathering
@@ -1028,7 +1077,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
             </Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
                   <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -1070,7 +1119,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
             {/* ── Milestones ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Milestones</Typography>
-              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 {[
                   { label: "Start", date: "15 Jan, 2026" },
                   { label: "Synopsis", date: "5 Feb, 2026" },
@@ -1089,7 +1138,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
             {/* ── Details ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
-              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Batch</Typography>
                   <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{batchName}</Typography>
@@ -1118,7 +1167,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                   <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                   <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>Remuneration</Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
                     {isPaymentPending
@@ -1192,7 +1241,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
             </Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "10px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 {/* Due date */}
                 <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -1249,7 +1298,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                     Student Info
                   </Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {/* Student avatar + name */}
                   <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
                     <Avatar sx={{ width: 36, height: 36, bgcolor: "primary.main", fontSize: "0.8rem", fontWeight: 700 }}>AM</Avatar>
@@ -1290,7 +1339,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                     Links
                   </Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Reviewed CV</Typography>
                     <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 500, fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}>
@@ -1310,7 +1359,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                     Remuneration
                   </Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
                     <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
@@ -1394,7 +1443,7 @@ function ResidencyCards() {
         title="Residency — Confirmed"
         description="Confirmed residency with 3-day schedule. Date range with → arrow. Material + Course actions."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="AI in Practice Workshop"
             sessionType="Residency"
@@ -1422,7 +1471,7 @@ function ResidencyCards() {
         title="Residency — Confirmed (Combined session)"
         description="Multi-batch combined residency with 3-day schedule + combined session accordion."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Deep Learning Fundamentals"
             sessionType="Residency"
@@ -1451,7 +1500,7 @@ function ResidencyCards() {
         title="Residency — Scheduled"
         description="Awaiting guru confirmation. Confirm/Unavailable actions with 3-day schedule accordion."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Deep Learning Fundamentals"
             sessionType="Residency"
@@ -1479,7 +1528,7 @@ function ResidencyCards() {
         title="Residency — Scheduled (Combined session)"
         description="Unconfirmed combined residency. Confirm/Unavailable + schedule + combined session accordions."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="AI in Practice Workshop"
             sessionType="Residency"
@@ -1508,7 +1557,7 @@ function ResidencyCards() {
         title="Residency — Completed (Gathering feedback)"
         description="Residency done, no feedback yet. Payment pending + Gathering feedback chips."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Program Overview (All)"
             sessionType="Residency"
@@ -1534,7 +1583,7 @@ function ResidencyCards() {
         title="Residency — Completed (with feedback)"
         description="Past residency with rating. Payment processed chip + star rating. Feedback button."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Program Overview (All)"
             sessionType="Residency"
@@ -1583,7 +1632,7 @@ function OnlineSessionCards() {
 
       {/* 1. Mentoring — Confirmed */}
       <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Disabled Join session + Material on card.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1606,7 +1655,7 @@ function OnlineSessionCards() {
 
       {/* 2. Mentoring — Combined (Confirmed) */}
       <ComponentSection title="Mentoring — Combined (Confirmed)" description="Combined session across batches. Combined session accordion with batch details.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1661,7 +1710,7 @@ function OnlineSessionCards() {
 
       {/* 3. Mentoring — Scheduled */}
       <ComponentSection title="Mentoring — Scheduled" description="Unconfirmed mentoring event awaiting guru action.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Python Fundamentals"
             sessionType="Online session"
@@ -1684,7 +1733,7 @@ function OnlineSessionCards() {
 
       {/* 3b. Mentoring — Combined (Scheduled) */}
       <ComponentSection title="Mentoring — Combined (Scheduled)" description="Unconfirmed combined event awaiting guru action. Combined session accordion.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1736,7 +1785,7 @@ function OnlineSessionCards() {
 
       {/* 4. Mock Interview — Confirmed (secondary facilitator) */}
       <ComponentSection title="Mock Interview — Confirmed (secondary)" description="Mock interview event. Join session + Share Feedback on card. Secondary facilitator badge.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
             sessionType="Career mentoring session"
@@ -1773,7 +1822,7 @@ function OnlineSessionCards() {
 
       {/* 7. Mentoring — Completed (Gathering feedback) */}
       <ComponentSection title="Mentoring — Completed (Gathering feedback)" description="Event done, learners haven't rated yet. Payment pending + Gathering feedback chips top-right. Recording on card.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1798,7 +1847,7 @@ function OnlineSessionCards() {
 
       {/* 7b. Mentoring — Completed (Recording processing) */}
       <ComponentSection title="Mentoring — Completed (Recording processing)" description="Session just ended, recording not yet processed. Recording button is disabled. Typically takes up to an hour.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1828,7 +1877,7 @@ function OnlineSessionCards() {
 
       {/* 8. Mentoring — Completed (No feedback) */}
       <ComponentSection title="Mentoring — Completed (No feedback)" description="Event older than 30 days, no learner ratings. Payment processed + No feedback collected chips top-right.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Python Fundamentals"
             sessionType="Online session"
@@ -1853,7 +1902,7 @@ function OnlineSessionCards() {
 
       {/* 9. Mentoring — Completed (with rating) */}
       <ComponentSection title="Mentoring — Completed (with rating)" description="Past mentoring event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1883,7 +1932,7 @@ function OnlineSessionCards() {
       <ComponentSection title="Mentoring — Combined (Completed)" description="Combined session splits into separate cards per batch when completed — each batch has its own rating. Two cards shown below for Batch A and Batch B.">
         <CombinedCompletedGroup>
           {/* Batch A card */}
-          <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
             <SessionCard
               title="Statistics for Data Science"
               sessionType="Online session"
@@ -1907,7 +1956,7 @@ function OnlineSessionCards() {
             />
           </Card>
           {/* Batch B card */}
-          <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+          <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
             <SessionCard
               title="Statistics for Data Science"
               sessionType="Online session"
@@ -1949,7 +1998,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 1. Career 1:1 — Confirmed */}
       <ComponentSection title="Career 1:1 — Confirmed" description="1:1 career mentoring. Join session on card. Student info, LinkedIn, resume in View Details.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
             sessionType="Career mentoring session"
@@ -1968,7 +2017,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 2. Mock Interview — Confirmed */}
       <ComponentSection title="Mock Interview — Confirmed" description="Mock interview event. Join session + Share Feedback on card.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
             sessionType="Career mentoring session"
@@ -1990,7 +2039,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 3. Career 1:1 — Scheduled */}
       <ComponentSection title="Career 1:1 — Scheduled" description="Career mentoring event awaiting guru confirmation.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
             sessionType="Career mentoring session"
@@ -2012,7 +2061,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 4. Career — Completed (Gathering feedback) */}
       <ComponentSection title="Career — Completed (Gathering feedback)" description="Event done, no ratings yet. Payment pending + Gathering feedback chips top-right.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
             sessionType="Career mentoring session"
@@ -2036,7 +2085,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 5. Career — Completed (with rating) */}
       <ComponentSection title="Career — Completed (with rating)" description="Past career event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
             sessionType="Career mentoring session"
@@ -2063,7 +2112,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 6. Mock — Completed (with Share Feedback) */}
       <ComponentSection title="Mock — Completed (with Share Feedback)" description="Past mock interview. Payment processed chip + star rating top-right. Recording + Feedback + Share Feedback.">
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
             sessionType="Career mentoring session"
@@ -2106,14 +2155,8 @@ function EvaluationCards() {
         title="Evaluation — Confirmed"
         description="Date range (assessment due → grading due), assignment link to SpeedGrader, course template, batch, contact, student progress. Late submission badge if applicable."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Evaluation: Linear Regression Assignment</Typography>
-            <Stack direction="row" spacing={0.75}>
-              <Chip label="Late submission" size="small" sx={{ bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)", fontWeight: 500, fontSize: "0.75rem" }} />
-              {CHIP_CONFIRMED}
-            </Stack>
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={<><Chip label="Late submission" size="small" sx={{ bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)", fontWeight: 500, fontSize: "0.75rem" }} />{CHIP_CONFIRMED}</>} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Mar – 22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2129,11 +2172,8 @@ function EvaluationCards() {
         title="Evaluation — Tentative"
         description="Assignment label is plain text (no link). No student progress. 'To be confirmed' instead of submission counts."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Evaluation: Decision Tree Assignment</Typography>
-            {CHIP_TO_BE_CONFIRMED}
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Evaluation: Decision Tree Assignment" chips={CHIP_TO_BE_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">1 Apr – 10 Apr, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2149,14 +2189,8 @@ function EvaluationCards() {
         title="Evaluation — Completed (Gathering feedback)"
         description="Grading done, no ratings yet. Payment pending + Gathering feedback chips top-right."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Evaluation: Linear Regression Assignment</Typography>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-              {CHIP_PAYMENT_PENDING}
-              {CHIP_GATHERING}
-            </Stack>
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={<>{CHIP_PAYMENT_PENDING}{CHIP_GATHERING}</>} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2172,14 +2206,8 @@ function EvaluationCards() {
         title="Evaluation — Completed (with rating)"
         description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Feedback button."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Evaluation: Linear Regression Assignment</Typography>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-              {CHIP_PAYMENT_PROCESSED}
-              <StarRatingNumeric rating={4.0} />
-            </Stack>
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={<>{CHIP_PAYMENT_PROCESSED}<StarRatingNumeric rating={4.0} /></>} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">1 Mar – 8 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2208,11 +2236,8 @@ function ModerationCards() {
         title="Moderation — Confirmed"
         description="Date range (moderation start → concluding remark), DQ link to SpeedGrader, course template, batch, contact, student response progress (posts/unread/graded with activity color). No action buttons."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Moderation: Impact of AI on Healthcare</Typography>
-            {CHIP_CONFIRMED}
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={CHIP_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Mar – 20 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2228,11 +2253,8 @@ function ModerationCards() {
         title="Moderation — Tentative"
         description="DQ label is plain text (no link). No student progress. 'To be confirmed' instead of progress stats."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Moderation: Ethics in Machine Learning</Typography>
-            {CHIP_TO_BE_CONFIRMED}
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Moderation: Ethics in Machine Learning" chips={CHIP_TO_BE_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">5 Apr – 15 Apr, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2248,14 +2270,8 @@ function ModerationCards() {
         title="Moderation — Completed (Gathering feedback)"
         description="Moderation done, no ratings yet. Payment pending + Gathering feedback chips top-right."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Moderation: Impact of AI on Healthcare</Typography>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-              {CHIP_PAYMENT_PENDING}
-              {CHIP_GATHERING}
-            </Stack>
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={<>{CHIP_PAYMENT_PENDING}{CHIP_GATHERING}</>} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2271,14 +2287,8 @@ function ModerationCards() {
         title="Moderation — Completed (with rating)"
         description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Feedback button."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Moderation: Impact of AI on Healthcare</Typography>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-              {CHIP_PAYMENT_PROCESSED}
-              <StarRatingNumeric rating={4.5} />
-            </Stack>
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={<>{CHIP_PAYMENT_PROCESSED}<StarRatingNumeric rating={4.5} /></>} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">25 Feb – 5 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2307,11 +2317,8 @@ function CapstoneCards() {
         title="Capstone Project — Confirmed"
         description="Date range (start → presentation), 'Capstone — [Batch]', group, domain, next session date, contact. Progress + Group Details in dialog. No tentative state."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Capstone &mdash; PGPDS.O.MAR26.A</Typography>
-            {CHIP_CONFIRMED}
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Capstone — PGPDS.O.MAR26.A" chips={CHIP_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Jan – 20 Apr, 2026</Typography>
@@ -2327,11 +2334,8 @@ function CapstoneCards() {
         title="Capstone Project — Completed (Payment pending)"
         description="No rating for capstones. Payment pending chip top-right. Progress button always shown."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Capstone &mdash; PGPDS.O.JUL25.A</Typography>
-            {CHIP_PAYMENT_PENDING}
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Capstone — PGPDS.O.JUL25.A" chips={CHIP_PAYMENT_PENDING} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Jul – 20 Nov, 2025</Typography>
@@ -2348,11 +2352,8 @@ function CapstoneCards() {
         title="Capstone Project — Completed"
         description="No rating. Payment processed chip top-right. Progress always shown."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>Capstone &mdash; PGPDS.O.JUL25.A</Typography>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Capstone — PGPDS.O.JUL25.A" chips={CHIP_PAYMENT_PROCESSED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Jul – 20 Nov, 2025</Typography>
@@ -2381,11 +2382,8 @@ function CVReviewCards() {
         title="CV Review — Confirmed"
         description="Due date, batch, 'Due on' line. View LinkedIn, View CV, View User Comments, Submit CV Review as primary actions. No tentative state exists."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>CV Review</Typography>
-            {CHIP_CONFIRMED}
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="CV Review" chips={CHIP_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2402,14 +2400,8 @@ function CVReviewCards() {
         title="CV Review — Confirmed (Already Submitted)"
         description="Submit button replaced by 'Already Submitted' text. 'Due on' line hidden once submitted."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>CV Review</Typography>
-            <Stack direction="row" spacing={0.75}>
-              {CHIP_ALREADY_SUBMITTED}
-              {CHIP_CONFIRMED}
-            </Stack>
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="CV Review" chips={<>{CHIP_ALREADY_SUBMITTED}{CHIP_CONFIRMED}</>} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2425,11 +2417,8 @@ function CVReviewCards() {
         title="CV Review — Completed"
         description="No LinkedIn, no comments, no submit. 'View CV' becomes 'Reviewed CV'. Payment processed chip top-right. No rating, no feedback."
       >
-        <Card variant="outlined" sx={{ p: { xs: 1.5, sm: 2 } }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5, gap: 1 }}>
-            <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem" }}>CV Review</Typography>
-            {CHIP_PAYMENT_PROCESSED}
-          </Stack>
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="CV Review" chips={CHIP_PAYMENT_PROCESSED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">5 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>

@@ -38,6 +38,7 @@ import { keyframes } from "@mui/system";
 import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { MobilePageHeader } from "@/components/layout/MobilePageHeader";
 import { pushToast } from "@/store/slices/toastsSlice";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -223,10 +224,11 @@ export default function PaymentsPage() {
 
   return (
     <>
+      <MobilePageHeader title="Payments" />
       {/* ── Page header ── */}
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
         <Box>
-          <Typography variant="h6" fontWeight={700}>Payments</Typography>
+          <Typography variant="h6" fontWeight={700} sx={{ display: { xs: "none", sm: "block" } }}>Payments</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
             Track your month-on-month payouts and event-wise details.
           </Typography>
@@ -458,7 +460,7 @@ export default function PaymentsPage() {
                     />
                   </TableCell>
                   <TableCell sx={{ fontSize: 11, fontFamily: "monospace", color: "text.secondary", maxWidth: 110 }}>
-                    <MuiTooltip title={p.txn !== "–" ? p.txn : ""} arrow enterDelay={400} slotProps={{ tooltip: { sx: { fontSize: "0.75rem", fontWeight: 500, py: 0.75, px: 1.5, borderRadius: 1.5 } } }}>
+                    <MuiTooltip title={p.txn !== "–" ? p.txn : ""} arrow enterDelay={400} slotProps={{ tooltip: { sx: { fontSize: "0.75rem", fontWeight: 500, py: 0.75, px: 1.5, borderRadius: 0.5 } } }}>
                       <Typography variant="body2" sx={{ fontSize: 11, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {p.txn}
                       </Typography>

@@ -135,7 +135,7 @@ export function CompletedSessionDetailDialog() {
               sx={{
                 mt: 2,
                 p: 1.75,
-                borderRadius: "10px",
+                borderRadius: "8px",
                 bgcolor: "hsl(var(--md-surface-container) / 0.5)",
                 border: "1px solid",
                 borderColor: "divider",
@@ -184,7 +184,7 @@ export function CompletedSessionDetailDialog() {
                   Details
                 </Typography>
               </Stack>
-              <Box sx={{ borderRadius: "12px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 {session.scheduledByName && (
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Scheduled by</Typography>

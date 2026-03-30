@@ -402,7 +402,7 @@ export default function ProfilePage() {
         {/* Stat cards skeleton - 4 cards */}
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
           {[0, 1, 2, 3].map((i) => (
-            <Card key={i} elevation={0} sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider", p: 2.5 }}>
+            <Card key={i} elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider", p: 2.5 }}>
               <Skeleton variant="text" width={80} height={14} sx={{ mb: 1.5 }} />
               <Skeleton variant="text" width={100} height={40} sx={{ mb: 1 }} />
               <Skeleton variant="text" width="90%" height={14} />
@@ -506,7 +506,7 @@ export default function ProfilePage() {
               startIcon={<IosShareOutlinedIcon sx={{ fontSize: 14 }} />}
               onClick={() => setShowShareModal(true)}
               sx={{
-                borderRadius: "6px",
+                borderRadius: "4px",
                 position: "relative",
                 zIndex: 1,
                 width: "100%",
@@ -593,7 +593,7 @@ export default function ProfilePage() {
               elevation={0}
               onClick={() => { if (!isNewOrEarly) setReportModal(card.label); }}
               sx={{
-                borderRadius: 3,
+                borderRadius: 1,
                 bgcolor: card.bg,
                 border: "1px solid",
                 borderColor: "divider",
@@ -819,7 +819,7 @@ export default function ProfilePage() {
                 maxWidth: 320,
                 flexShrink: 0,
                 scrollSnapAlign: "start",
-                borderRadius: 3,
+                borderRadius: 1,
                 borderColor: "divider",
               }}
             >
@@ -882,7 +882,7 @@ export default function ProfilePage() {
                         if (!active || !payload?.length) return null;
                         const d = payload[0].payload;
                         return (
-                          <Card variant="outlined" sx={{ p: 1.25, borderRadius: 2, boxShadow: 1 }}>
+                          <Card variant="outlined" sx={{ p: 1.25, borderRadius: 0.5, boxShadow: 1 }}>
                             <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>{d.month}</Typography>
                             <Typography variant="caption" display="block" sx={{ fontSize: "0.65rem" }}>Avg: <b>{d.avg ?? "—"}</b></Typography>
                           </Card>
@@ -978,8 +978,8 @@ export default function ProfilePage() {
                       {c.rating.toFixed(1)}
                     </Typography>
                   </Stack>
-                  <Box sx={{ height: 6, bgcolor: "action.hover", borderRadius: 3, overflow: "hidden" }}>
-                    <Box sx={{ height: "100%", bgcolor: "hsl(217, 70%, 55%)", borderRadius: 3, width: `${((c.rating - 1) / 4) * 100}%` }} />
+                  <Box sx={{ height: 6, bgcolor: "action.hover", borderRadius: 1, overflow: "hidden" }}>
+                    <Box sx={{ height: "100%", bgcolor: "hsl(217, 70%, 55%)", borderRadius: 1, width: `${((c.rating - 1) / 4) * 100}%` }} />
                   </Box>
                 </Box>
               ))}
@@ -1009,7 +1009,7 @@ export default function ProfilePage() {
                       if (!active || !payload?.length) return null;
                       const d = payload[0].payload;
                       return (
-                        <Card variant="outlined" sx={{ p: 1.25, borderRadius: 2, boxShadow: 1 }}>
+                        <Card variant="outlined" sx={{ p: 1.25, borderRadius: 0.5, boxShadow: 1 }}>
                           <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>{d.name}</Typography>
                           <Typography variant="caption" display="block" sx={{ fontSize: "0.65rem" }}>Rating: <b>{d.rating.toFixed(1)}</b></Typography>
                           {d.delta !== 0 && (
@@ -1239,7 +1239,7 @@ export default function ProfilePage() {
         onClose={() => setShowShareModal(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3, maxWidth: 560 } }}
+        PaperProps={{ sx: { borderRadius: 1, maxWidth: 560 } }}
       >
         <Box sx={{ px: 3, pt: 3, pb: 0 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -1274,7 +1274,7 @@ export default function ProfilePage() {
           <Card
             elevation={0}
             sx={{
-              borderRadius: 3,
+              borderRadius: 1,
               mb: 3,
               bgcolor: shareTheme.bg,
               position: "relative",
@@ -1309,7 +1309,7 @@ export default function ProfilePage() {
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, flex: 1, minHeight: 0, mb: 1.5 }}>
                 {/* Left column — 2 tall cards with chips */}
                 <Stack spacing={1}>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 0.5, p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <Box>
                       <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
                         {shareMonthData.sessions}
@@ -1326,7 +1326,7 @@ export default function ProfilePage() {
                       sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }}
                     />
                   </Box>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 0.5, p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <Box>
                       <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
                         {shareMonthData.hours} Hrs
@@ -1346,7 +1346,7 @@ export default function ProfilePage() {
                 </Stack>
                 {/* Right column — 3 shorter cards */}
                 <Stack spacing={1}>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5 }}>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 0.5, p: 1.5 }}>
                     <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
                       {shareMonthData.learners}
                     </Typography>
@@ -1354,7 +1354,7 @@ export default function ProfilePage() {
                       Learners taught
                     </Typography>
                   </Box>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5 }}>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 0.5, p: 1.5 }}>
                     <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
                       {shareMonthData.rating}/5
                     </Typography>
@@ -1362,7 +1362,7 @@ export default function ProfilePage() {
                       Avg ratings this month
                     </Typography>
                   </Box>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 2, p: 1.5 }}>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: 0.5, p: 1.5 }}>
                     <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
                       {shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`}
                     </Typography>
@@ -1394,7 +1394,7 @@ export default function ProfilePage() {
             variant="contained"
             size="large"
             startIcon={<DownloadOutlinedIcon />}
-            sx={{ borderRadius: 2, mb: 2.5, textTransform: "none", fontWeight: 600 }}
+            sx={{ borderRadius: 0.5, mb: 2.5, textTransform: "none", fontWeight: 600 }}
           >
             Download stats card
           </Button>
@@ -1405,7 +1405,7 @@ export default function ProfilePage() {
               variant="soft"
               size="small"
               startIcon={<LinkedInIcon sx={{ fontSize: 16 }} />}
-              sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600, flex: 1 }}
+              sx={{ borderRadius: 0.5, textTransform: "none", fontWeight: 600, flex: 1 }}
             >
               LinkedIn
             </Button>
@@ -1413,7 +1413,7 @@ export default function ProfilePage() {
               variant="soft"
               size="small"
               startIcon={<XIcon sx={{ fontSize: 14 }} />}
-              sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600, flex: 1 }}
+              sx={{ borderRadius: 0.5, textTransform: "none", fontWeight: 600, flex: 1 }}
             >
               X
             </Button>
@@ -1421,7 +1421,7 @@ export default function ProfilePage() {
               variant="soft"
               size="small"
               startIcon={<FacebookIcon sx={{ fontSize: 16 }} />}
-              sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600, flex: 1 }}
+              sx={{ borderRadius: 0.5, textTransform: "none", fontWeight: 600, flex: 1 }}
             >
               Facebook
             </Button>
@@ -1435,7 +1435,7 @@ export default function ProfilePage() {
         onClose={() => setShowCourseReport(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3 } }}
+        PaperProps={{ sx: { borderRadius: 1 } }}
       >
         <Box sx={{ px: 3, pt: 2.5, pb: 0 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -1574,7 +1574,7 @@ export default function ProfilePage() {
             onClose={() => setReportModal(null)}
             maxWidth="sm"
             fullWidth
-            PaperProps={{ sx: { borderRadius: 3 } }}
+            PaperProps={{ sx: { borderRadius: 1 } }}
           >
             <Box sx={{ px: 3, pt: 2.5, pb: 0 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -1609,7 +1609,7 @@ export default function ProfilePage() {
 
             <DialogContent sx={{ px: 3, pt: 2 }}>
               {/* Expanded chart */}
-              <Card variant="outlined" sx={{ borderRadius: 2, mb: 3 }}>
+              <Card variant="outlined" sx={{ borderRadius: 0.5, mb: 3 }}>
                 <CardContent sx={{ p: 2 }}>
                   <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
                     6-month trend

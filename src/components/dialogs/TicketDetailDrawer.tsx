@@ -113,7 +113,7 @@ export function TicketDetailDrawer() {
           {/* Scrollable content */}
           <Box sx={{ flex: 1, overflow: "auto", px: 2.5, py: 2, "&::-webkit-scrollbar": { width: 4 }, "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: 2 } }}>
             {/* Student info */}
-            <Paper variant="outlined" sx={{ p: 1.5, mb: 2, borderRadius: 1.5 }}>
+            <Paper variant="outlined" sx={{ p: 1.5, mb: 2, borderRadius: 0.5 }}>
               <Stack direction="row" alignItems="center" spacing={1.5}>
                 <Avatar sx={{ width: 32, height: 32, fontSize: "0.8rem", bgcolor: "primary.main" }}>
                   {ticket.studentName.charAt(0)}
@@ -170,7 +170,7 @@ export function TicketDetailDrawer() {
                       variant="outlined"
                       sx={{
                         p: 1.5,
-                        borderRadius: 1.5,
+                        borderRadius: 0.5,
                         }}
                     >
                       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>

@@ -300,7 +300,7 @@ const AvailabilityBuilderDialog = () => {
           <IconButton
             onClick={handleClose}
             size="small"
-            sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 0.75 }}
+            sx={{ border: 1, borderColor: "divider", borderRadius: 0.5, p: 0.75 }}
           >
             <CloseOutlinedIcon sx={{ fontSize: 16 }} />
           </IconButton>
@@ -343,7 +343,7 @@ const AvailabilityBuilderDialog = () => {
               sx={{
                 border: 1,
                 borderColor: "divider",
-                borderRadius: 2,
+                borderRadius: 0.5,
                 p: 2,
                 bgcolor: "action.hover",
               }}
@@ -438,7 +438,7 @@ const AvailabilityBuilderDialog = () => {
               <Stack spacing={1}>
                 {cards.filter((c) => c.enabled).map((card) =>
                   editingPresetKey === card.key ? (
-                    <Paper key={card.key} variant="outlined" sx={{ p: 1.25, borderRadius: 1.5, borderColor: "primary.main" }}>
+                    <Paper key={card.key} variant="outlined" sx={{ p: 1.25, borderRadius: 0.5, borderColor: "primary.main" }}>
                       <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: "1rem", fontSize: "0.7rem" }}>{card.label}</Typography>
                       <Stack direction="row" spacing={0.75} sx={{ mb: "1rem" }}>
                         <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
@@ -463,7 +463,7 @@ const AvailabilityBuilderDialog = () => {
                       </Stack>
                     </Paper>
                   ) : (
-                    <Paper key={card.key} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
+                    <Paper key={card.key} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 0.5, bgcolor: "action.hover" }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Box>
                           <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>{card.label}</Typography>
@@ -485,7 +485,7 @@ const AvailabilityBuilderDialog = () => {
                 )}
                 {draftPatterns.map((p) =>
                   editingDraftId === p.id ? (
-                    <Paper key={p.id} variant="outlined" sx={{ p: 1.25, borderRadius: 1.5, borderColor: "primary.main" }}>
+                    <Paper key={p.id} variant="outlined" sx={{ p: 1.25, borderRadius: 0.5, borderColor: "primary.main" }}>
                       <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: "1rem", fontSize: "0.7rem" }}>Edit custom slot</Typography>
                       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.4, mb: 1.5 }}>
                         {DOW_LONG.map((day) => {
@@ -523,7 +523,7 @@ const AvailabilityBuilderDialog = () => {
                       </Stack>
                     </Paper>
                   ) : (
-                    <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 1.5, bgcolor: "action.hover" }}>
+                    <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: 0.5, bgcolor: "action.hover" }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Box>
                           <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>Custom time slot</Typography>
@@ -581,7 +581,7 @@ const AvailabilityBuilderDialog = () => {
 
             {/* Add custom slot */}
             {showCustomForm ? (
-              <Paper variant="outlined" sx={{ p: 1.25, borderRadius: 1.5, borderColor: "primary.main" }}>
+              <Paper variant="outlined" sx={{ p: 1.25, borderRadius: 0.5, borderColor: "primary.main" }}>
                 <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.75, fontSize: "0.7rem" }}>Add custom slot</Typography>
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.4, mb: 1.5 }}>
                   {DOW_LONG.map((day) => {
@@ -618,7 +618,7 @@ const AvailabilityBuilderDialog = () => {
                 Custom slot
               </Button>
             )}
-            <Stack direction="row" alignItems="center" spacing={1} sx={(theme) => ({ mt: 1.5, p: 1.25, borderRadius: 1.5, bgcolor: theme.palette.mode === "dark" ? "hsl(45 30% 12%)" : "hsl(45 100% 95%)", border: "1px solid", borderColor: theme.palette.mode === "dark" ? "hsl(45 30% 22%)" : "hsl(45 80% 80%)" })}>
+            <Stack direction="row" alignItems="center" spacing={1} sx={(theme) => ({ mt: 1.5, p: 1.25, borderRadius: 0.5, bgcolor: theme.palette.mode === "dark" ? "hsl(45 30% 12%)" : "hsl(45 100% 95%)", border: "1px solid", borderColor: theme.palette.mode === "dark" ? "hsl(45 30% 22%)" : "hsl(45 80% 80%)" })}>
               <TipsAndUpdatesOutlinedIcon sx={(theme) => ({ fontSize: 16, color: theme.palette.mode === "dark" ? "hsl(40 60% 60%)" : "hsl(40 80% 45%)" })} />
               <Typography variant="caption" sx={(theme) => ({ fontSize: "0.7rem", color: theme.palette.mode === "dark" ? "hsl(40 30% 75%)" : "hsl(40 50% 30%)", lineHeight: 1.3 })}>
                 Set recurring availability. Add exceptions later.

@@ -66,8 +66,8 @@ export function DevPanel() {
           onClick={() => dispatch(setDevPanelOpen(true))}
           sx={{
             position: "fixed",
-            bottom: 24,
-            right: 24,
+            bottom: { xs: "calc(5rem + env(safe-area-inset-bottom) + 16px)", md: 24 },
+            right: { xs: 16, md: 24 },
             zIndex: 1200,
             bgcolor: "background.paper",
             color: "text.secondary",
@@ -180,7 +180,7 @@ export function DevPanel() {
                 selected={isSelected}
                 onClick={() => dispatch(setGuruStage(stage.value))}
                 sx={{
-                  borderRadius: 1.5,
+                  borderRadius: 0.5,
                   mx: 0.5,
                   mb: 0.5,
                   py: 0.75,
@@ -218,7 +218,7 @@ export function DevPanel() {
 
         <List dense sx={{ px: 1, py: 0 }}>
           <ListItemButton
-            sx={{ borderRadius: 1.5, mx: 0.5, mb: 0.5, py: 0.75 }}
+            sx={{ borderRadius: 0.5, mx: 0.5, mb: 0.5, py: 0.75 }}
             onClick={() => {
               navigate("/components");
               dispatch(setDevPanelOpen(false));
