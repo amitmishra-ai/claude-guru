@@ -64,7 +64,8 @@ export function AppLayout() {
         display: "grid",
         gridTemplateColumns: { xs: "minmax(0, 1fr)", md: isNavCollapsed ? "80px minmax(0, 1fr)" : "256px minmax(0, 1fr)" },
         transition: "grid-template-columns 0.2s",
-        height: "100vh",
+        height: { xs: "auto", md: "100vh" },
+        minHeight: { xs: "100vh", md: "auto" },
       }}
     >
       <Sidebar />
@@ -72,8 +73,10 @@ export function AppLayout() {
         component="main"
         sx={{
           minWidth: 0,
-          overflowY: "auto",
+          overflowY: { xs: "visible", md: "auto" },
           overflowX: "clip",
+          WebkitOverflowScrolling: "touch",
+          overscrollBehavior: "contain",
           scrollbarWidth: { xs: "none", md: "thin" },
           "&::-webkit-scrollbar": { display: { xs: "none", md: "block" } },
           px: { xs: 2, sm: 2, md: 3 },

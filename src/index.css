@@ -273,6 +273,15 @@ body {
   overflow: hidden;
 }
 
+/* Mobile: allow native viewport scrolling (prevents nested scroll bounce on iOS) */
+@media (max-width: 599.95px) {
+  body {
+    overflow: visible;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Themed scrollbars for app-level scroll containers */
 .themed-scrollbar {
   scrollbar-width: thin;
