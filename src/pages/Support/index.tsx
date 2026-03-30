@@ -61,63 +61,60 @@ function TicketCard({ ticket, onSelect, onToggleBookmark }: { ticket: SupportTic
     <Card
       variant="outlined"
       sx={{
-        p: 2,
+        p: { xs: 1.5, sm: 2 },
         cursor: "pointer",
         transition: "border-color 0.15s, box-shadow 0.15s",
         "&:hover": { borderColor: "primary.main", boxShadow: 1 },
+        "&:active": { bgcolor: "action.hover" },
       }}
       onClick={onSelect}
     >
-      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+      {/* Row 1: ID + meta + bookmark */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ minWidth: 0 }}>
+        <Stack direction="row" spacing={0.5} alignItems="center" sx={{ minWidth: 0, overflow: "hidden" }}>
           {ticket.isUnread && <FiberManualRecordIcon sx={{ fontSize: 8, color: "primary.main", flexShrink: 0 }} />}
           <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ flexShrink: 0 }}>{ticket.id}</Typography>
-          <Typography variant="caption" color="text.secondary">·</Typography>
-          <Typography variant="caption" color="text.secondary">{timeAgo(ticket.lastActivityAt)} · {ticket.assignedTo}</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>·</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {timeAgo(ticket.lastActivityAt)}
+          </Typography>
         </Stack>
-        <Button
+        <IconButton
           size="small"
-          variant={ticket.isBookmarked ? "contained" : "text"}
-          startIcon={ticket.isBookmarked ? <StarOutlinedIcon sx={{ fontSize: 14 }} /> : <StarBorderOutlinedIcon sx={{ fontSize: 14 }} />}
           onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleBookmark(); }}
           sx={{
-            textTransform: "none",
-            fontSize: "0.7rem",
-            fontWeight: 600,
-            minWidth: 0,
-            px: 1,
-            py: 0.25,
-            borderRadius: "8px",
-            ...(ticket.isBookmarked
-              ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }
-              : { color: "text.secondary" }),
+            flexShrink: 0, ml: 0.5,
+            color: ticket.isBookmarked ? "primary.main" : "text.disabled",
+            width: 32, height: 32,
           }}
         >
-          {ticket.isBookmarked ? "Bookmarked" : "Bookmark"}
-        </Button>
+          {ticket.isBookmarked ? <StarOutlinedIcon sx={{ fontSize: 18 }} /> : <StarBorderOutlinedIcon sx={{ fontSize: 18 }} />}
+        </IconButton>
       </Stack>
 
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.75 }}>
-        <Avatar sx={{ width: 22, height: 22, fontSize: "0.6rem", bgcolor: "primary.main" }}>
-          {ticket.studentName.charAt(0)}
-        </Avatar>
-        <Typography variant="caption" fontWeight={600}>{ticket.studentName}</Typography>
-        <Typography variant="caption" color="text.secondary">·</Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {ticket.batchName}
-        </Typography>
-      </Stack>
-
-      <Typography variant="body2" sx={{ mt: 0.75, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>
+      {/* Row 2: Subject */}
+      <Typography variant="body2" sx={{ mt: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
         {ticket.subject}
       </Typography>
 
+      {/* Row 3: Student + batch */}
+      <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mt: 0.5 }}>
+        <Avatar sx={{ width: 20, height: 20, fontSize: "0.55rem", bgcolor: "primary.main" }}>
+          {ticket.studentName.charAt(0)}
+        </Avatar>
+        <Typography variant="caption" fontWeight={500} sx={{ fontSize: { xs: "0.68rem", sm: "0.75rem" } }}>{ticket.studentName}</Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>
+          · {ticket.batchName}
+        </Typography>
+      </Stack>
+
+      {/* Row 4: Chips */}
       <Stack direction="row" spacing={0.75} sx={{ mt: 1 }}>
-        <Chip label={ticket.category} size="small" variant="outlined" sx={{ height: 20, fontSize: "0.6rem", borderRadius: 1 }} />
+        <Chip label={ticket.category} size="small" variant="outlined" sx={{ height: 22, fontSize: { xs: "0.6rem", sm: "0.65rem" }, borderRadius: 1 }} />
         <Chip
           label={STATUS_LABELS[ticket.status]}
           size="small"
-          sx={{ height: 20, fontSize: "0.6rem", borderRadius: 1, bgcolor: statusStyle.bg, color: statusStyle.color, fontWeight: 600 }}
+          sx={{ height: 22, fontSize: { xs: "0.6rem", sm: "0.65rem" }, borderRadius: 1, bgcolor: statusStyle.bg, color: statusStyle.color, fontWeight: 600 }}
         />
       </Stack>
     </Card>
@@ -217,8 +214,8 @@ export default function SupportPage() {
   return (
     <>
       {/* Page header */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h6" fontWeight={700}>Support Tickets</Typography>
+      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} spacing={{ xs: 1, sm: 0 }} sx={{ mb: 2 }}>
+        <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Support Tickets</Typography>
         <TextField
           size="small"
           placeholder="Search tickets..."
@@ -231,26 +228,32 @@ export default function SupportPage() {
               </InputAdornment>
             ),
           }}
-          sx={{ width: 240, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+          sx={{ width: { xs: "100%", sm: 240 }, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
         />
       </Stack>
 
-      <Card sx={{ p: 2 }}>
-      {/* Tabs */}
+      <Card sx={{ p: { xs: 1.5, sm: 2 } }}>
+      {/* Tabs — scrollable on mobile */}
       <Tabs
         value={activeTab}
         onChange={(_e, v) => dispatch(setActiveTab(v))}
-        sx={{ mb: 2, minHeight: 36, "& .MuiTab-root": { textTransform: "none", minHeight: 36, py: 0, fontSize: "0.85rem" } }}
+        variant="scrollable"
+        scrollButtons={false}
+        sx={{
+          mb: 1.5,
+          minHeight: 36,
+          "& .MuiTab-root": { textTransform: "none", minHeight: 36, py: 0, fontSize: { xs: "0.78rem", sm: "0.85rem" }, minWidth: "auto", px: { xs: 1.25, sm: 2 } },
+        }}
       >
-        <Tab value="needs_action" label={<Stack direction="row" spacing={0.75} alignItems="center"><span>Needs Action</span>{needsActionCount > 0 && <Chip label={needsActionCount} size="small" color="error" sx={{ height: 18, fontSize: "0.65rem", "& .MuiChip-label": { px: 0.75 } }} />}</Stack>} />
-        <Tab value="all_open" label={`All Open (${allOpenCount})`} />
+        <Tab value="needs_action" label={<Stack direction="row" spacing={0.5} alignItems="center"><span>Needs Action</span>{needsActionCount > 0 && <Chip label={needsActionCount} size="small" color="error" sx={{ height: 18, fontSize: "0.6rem", "& .MuiChip-label": { px: 0.5 } }} />}</Stack>} />
+        <Tab value="all_open" label={`Open (${allOpenCount})`} />
         <Tab value="closed" label="Closed" />
-        <Tab value="bookmarked" label={bookmarkedCount > 0 ? `Bookmarked (${bookmarkedCount})` : "Bookmarked"} />
+        <Tab value="bookmarked" label={bookmarkedCount > 0 ? `Saved (${bookmarkedCount})` : "Saved"} />
       </Tabs>
 
       {/* Filters */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="caption" color="text.secondary">
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+        <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.68rem", sm: "0.75rem" } }}>
           {filteredTickets.length} ticket{filteredTickets.length !== 1 ? "s" : ""}
         </Typography>
         <Select
@@ -259,7 +262,7 @@ export default function SupportPage() {
           disableUnderline
           value={categoryFilter}
           onChange={(e) => dispatch(setCategoryFilter(e.target.value))}
-          sx={{ fontSize: "0.8rem", fontWeight: 600, color: "primary.main", "& .MuiSvgIcon-root": { color: "primary.main" } }}
+          sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem" }, fontWeight: 600, color: "primary.main", "& .MuiSvgIcon-root": { color: "primary.main" } }}
         >
           <MenuItem value="All">All categories</MenuItem>
           <MenuItem value="Learning Material">Learning Material</MenuItem>

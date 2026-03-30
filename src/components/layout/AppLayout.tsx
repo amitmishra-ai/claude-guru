@@ -1,6 +1,9 @@
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, useRef, lazy, Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box";
+import Slide from "@mui/material/Slide";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
 import { MobileAppBar } from "./MobileAppBar";
@@ -20,11 +23,19 @@ export function AppLayout() {
   const themeMode = useAppSelector((s) => s.ui.themeMode);
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
 
+  const muiTheme = useTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
+
   const isOnboarding = guruStage === "onboarding";
   const location = useLocation();
   /** Pages that open as full-screen on mobile (no bottom nav, no top bar) */
   const mobileFullScreenPages = ["/account", "/payments", "/preferences"];
   const isAccountPage = mobileFullScreenPages.includes(location.pathname);
+
+  // Track previous path to animate slide transitions on mobile
+  const prevPathRef = useRef(location.pathname);
+  const wasFullScreen = mobileFullScreenPages.includes(prevPathRef.current);
+  useEffect(() => { prevPathRef.current = location.pathname; }, [location.pathname]);
 
   // Resolve themeMode → isDarkMode and persist to localStorage
   useEffect(() => {
@@ -87,6 +98,20 @@ export function AppLayout() {
           px: { xs: 2, sm: 2, md: 3 },
           pt: { xs: isAccountPage ? "env(safe-area-inset-top)" : "calc(56px + 12px + env(safe-area-inset-top))", md: 3 },
           pb: { xs: isAccountPage ? "env(safe-area-inset-bottom)" : "calc(5rem + env(safe-area-inset-bottom))", md: 3 },
+          // On mobile, when a full-screen page is active, render as a fixed overlay
+          ...(isMobile && isAccountPage && {
+            position: "fixed", inset: 0, zIndex: 1200,
+            bgcolor: "background.default",
+            overflowY: "auto",
+          }),
+          // Slide-in animation on mobile full-screen pages
+          ...(isMobile && isAccountPage && {
+            animation: "mobilePageSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+            "@keyframes mobilePageSlideIn": {
+              "0%": { transform: "translateX(100%)" },
+              "100%": { transform: "translateX(0)" },
+            },
+          }),
         }}
       >
         <Box sx={{ mx: "auto", maxWidth: "72rem", display: "flex", flexDirection: "column", gap: 2.5 }}>

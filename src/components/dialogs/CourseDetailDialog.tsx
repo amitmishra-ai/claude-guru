@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import Drawer from "@mui/material/Drawer";
+import Slide from "@mui/material/Slide";
+import type { TransitionProps } from "@mui/material/transitions";
 import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
@@ -22,6 +23,13 @@ import { setOpenCourseDetail, setCourseDetailId } from "@/store/slices/uiSlice";
 import { demoCourseCatalog, demoCourseModules } from "@/data/demo-sessions";
 import { CoursePatternThumb } from "@/components/shared/CoursePatternThumb";
 import type { CourseSection } from "@/lib/types";
+
+const SlideFromRight = forwardRef(function SlideFromRight(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
 
 function SectionPanel({
   section,
@@ -165,6 +173,8 @@ function SectionPanel({
 
 export function CourseDetailDialog() {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const open = useAppSelector((s) => s.ui.openCourseDetail);
   const courseId = useAppSelector((s) => s.ui.courseDetailId);
 
@@ -185,10 +195,7 @@ export function CourseDetailDialog() {
     ? Math.round(sections.reduce((acc, s) => acc + s.progress, 0) / totalSections)
     : 0;
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  /* ── Shared content (used in both Dialog and Drawer) ── */
+  /* ── Shared content ── */
   const headerContent = (
     <Box sx={{ position: "sticky", top: 0, zIndex: 10, bgcolor: "background.paper", borderBottom: 1, borderColor: "divider" }}>
       {/* Mobile: M3 top app bar */}
@@ -251,38 +258,21 @@ export function CourseDetailDialog() {
     </Box>
   );
 
-  /* ── Mobile: full-screen bottom Drawer ── */
-  if (isMobile) {
-    return (
-      <Drawer
-        anchor="bottom"
-        open={open}
-        onClose={close}
-        sx={{
-          "& .MuiDrawer-paper": {
-            height: "100%",
-            maxHeight: "100%",
-            borderRadius: 0,
-          },
-        }}
-      >
-        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-          {headerContent}
-          <Box sx={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
-            {mobileInfoCard}
-            {bodyContent}
-          </Box>
-        </Box>
-      </Drawer>
-    );
-  }
-
-  /* ── Desktop: Dialog ── */
+  /* ── Desktop: standard dialog | Mobile: full-screen dialog ── */
   return (
-    <Dialog open={open} onClose={close} maxWidth="md" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "90vh", overflow: "hidden" } }}>
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
+    <Dialog
+      open={open}
+      onClose={close}
+      fullScreen={isMobile}
+      maxWidth="md"
+      fullWidth
+      {...(isMobile && { TransitionComponent: SlideFromRight })}
+      PaperProps={{ sx: { p: 0, ...(!isMobile && { maxHeight: "90vh", overflow: "hidden" }), ...(isMobile && { borderRadius: 0 }) } }}
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", height: isMobile ? "100%" : "auto", maxHeight: isMobile ? "100%" : "90vh" }}>
         {headerContent}
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", p: 0 }}>
+        {isMobile && mobileInfoCard}
+        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", p: 0 }}>
           {bodyContent}
         </DialogContent>
       </Box>

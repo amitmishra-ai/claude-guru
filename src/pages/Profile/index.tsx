@@ -9,6 +9,7 @@ import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
@@ -146,6 +147,7 @@ export default function ProfilePage() {
   const testimonialRef = useRef<HTMLDivElement>(null);
   const [shareMonth, setShareMonth] = useState("2026-03");
   const [shareOpen, setShareOpen] = useState(false);
+  const [monthSheetOpen, setMonthSheetOpen] = useState(false);
   const shareContainerRef = useRef<HTMLDivElement>(null);
   const [shareScale, setShareScale] = useState(1);
 
@@ -605,20 +607,65 @@ export default function ProfilePage() {
           <Box sx={{ px: { xs: 2, sm: 2.5 }, pt: { xs: 1.5, sm: 2 }, pb: 0 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.9rem", sm: "0.95rem" } }}>Share your impact</Typography>
-              <Select
-                size="small"
-                variant="standard"
-                disableUnderline
-                value={shareMonth}
-                onChange={(e) => setShareMonth(e.target.value as string)}
-                sx={{ fontSize: "0.8rem", fontWeight: 600, color: "primary.main", "& .MuiSelect-select": { py: 0.25, pr: "20px !important" }, "& .MuiSvgIcon-root": { color: "primary.main", fontSize: 18 } }}
-              >
-                {shareMonthOptions.map((m) => (
-                  <MenuItem key={m.value} value={m.value} sx={{ fontSize: "0.8rem" }}>{m.label}</MenuItem>
-                ))}
-              </Select>
+              {/* Desktop: standard Select | Mobile: button that opens bottom sheet */}
+              {isMobile ? (
+                <Button
+                  size="small"
+                  variant="text"
+                  onClick={() => setMonthSheetOpen(true)}
+                  sx={{ fontSize: "0.8rem", fontWeight: 600, color: "primary.main", textTransform: "none", px: 0.5, minWidth: 0 }}
+                >
+                  {shareMonthOptions.find((m) => m.value === shareMonth)?.label ?? shareMonth}
+                  <ChevronRightIcon sx={{ fontSize: 16, ml: 0.25, transform: "rotate(90deg)" }} />
+                </Button>
+              ) : (
+                <Select
+                  size="small"
+                  variant="standard"
+                  disableUnderline
+                  value={shareMonth}
+                  onChange={(e) => setShareMonth(e.target.value as string)}
+                  sx={{ fontSize: "0.8rem", fontWeight: 600, color: "primary.main", "& .MuiSelect-select": { py: 0.25, pr: "20px !important" }, "& .MuiSvgIcon-root": { color: "primary.main", fontSize: 18 } }}
+                >
+                  {shareMonthOptions.map((m) => (
+                    <MenuItem key={m.value} value={m.value} sx={{ fontSize: "0.8rem" }}>{m.label}</MenuItem>
+                  ))}
+                </Select>
+              )}
             </Stack>
           </Box>
+
+          {/* Month picker bottom sheet (mobile only) */}
+          <Drawer
+            anchor="bottom"
+            open={monthSheetOpen}
+            onClose={() => setMonthSheetOpen(false)}
+            sx={{ "& .MuiDrawer-paper": { borderRadius: "16px 16px 0 0", maxHeight: "50vh" } }}
+          >
+            <Box sx={{ pt: 1.5, pb: 1 }}>
+              <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: "divider", mx: "auto", mb: 1.5 }} />
+              <Typography variant="subtitle2" fontWeight={700} sx={{ px: 2, mb: 1 }}>Select month</Typography>
+              {shareMonthOptions.map((m) => (
+                <Box
+                  key={m.value}
+                  component="button"
+                  onClick={() => { setShareMonth(m.value); setMonthSheetOpen(false); }}
+                  sx={{
+                    display: "flex", alignItems: "center", width: "100%",
+                    px: 2, py: 1.5, border: "none",
+                    bgcolor: m.value === shareMonth ? "primary.50" : "transparent",
+                    cursor: "pointer", fontFamily: "inherit",
+                    "&:hover": { bgcolor: m.value === shareMonth ? "primary.100" : "action.hover" },
+                    "&:active": { bgcolor: "action.selected" },
+                  }}
+                >
+                  <Typography variant="body2" sx={{ fontWeight: m.value === shareMonth ? 700 : 400, color: m.value === shareMonth ? "primary.main" : "text.primary" }}>
+                    {m.label}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Drawer>
 
           {/* ── Content grid: thumbnail | stats + actions ──────────────── */}
           <Box sx={{
@@ -631,17 +678,17 @@ export default function ProfilePage() {
           }}>
             {/* Thumbnail — pixel-perfect scaled card */}
             <Box
-              onClick={() => setShareOpen(true)}
+              onClick={() => !isMobile && setShareOpen(true)}
               sx={{
                 justifySelf: { xs: "center", sm: "start" },
                 width: { xs: 320, sm: 200 },
                 height: { xs: thumbHXs, sm: thumbHSm },
                 flexShrink: 0,
                 overflow: "hidden",
-                cursor: "pointer",
+                cursor: { xs: "default", sm: "pointer" },
                 position: "relative",
                 borderRadius: "8px",
-                "&:hover .share-thumb-overlay": { opacity: 1 },
+                "&:hover .share-thumb-overlay": { opacity: { xs: 0, sm: 1 } },
               }}
             >
               <Box sx={{ width: SHARE_CARD_WIDTH, height: 420, transform: { xs: `scale(${thumbScaleXs})`, sm: `scale(${thumbScaleSm})` }, transformOrigin: "top left", pointerEvents: "none" }}>
@@ -651,7 +698,7 @@ export default function ProfilePage() {
                 className="share-thumb-overlay"
                 sx={{
                   position: "absolute", inset: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
+                  display: { xs: "none", sm: "flex" }, alignItems: "center", justifyContent: "center",
                   bgcolor: "rgba(0,0,0,0.35)", opacity: 0,
                   transition: "opacity 0.2s",
                   borderRadius: "8px",
@@ -664,12 +711,55 @@ export default function ProfilePage() {
               </Box>
             </Box>
 
-            {/* Stats + actions column */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, sm: 1.5 } }}>
+            {/* ── Mobile: CTA buttons directly below thumbnail ───────── */}
+            {isMobile && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {/* Primary action */}
+                <Button
+                  fullWidth
+                  variant="contained"
+                  startIcon={<DownloadOutlinedIcon sx={{ fontSize: 18 }} />}
+                  sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.8rem", py: 1 }}
+                >
+                  Download stats card
+                </Button>
+                {/* Social share row */}
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0.75 }}>
+                  <Button
+                    variant="soft"
+                    size="small"
+                    startIcon={<LinkedInIcon sx={{ fontSize: 16 }} />}
+                    sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
+                  >
+                    LinkedIn
+                  </Button>
+                  <Button
+                    variant="soft"
+                    size="small"
+                    startIcon={<XIcon sx={{ fontSize: 14 }} />}
+                    sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
+                  >
+                    X
+                  </Button>
+                  <Button
+                    variant="soft"
+                    size="small"
+                    startIcon={<FacebookIcon sx={{ fontSize: 16 }} />}
+                    sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
+                  >
+                    Facebook
+                  </Button>
+                </Box>
+              </Box>
+            )}
+
+            {/* ── Desktop: Stats + actions column ────────────────────── */}
+            {!isMobile && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               {/* Stats section */}
               <Box>
                 <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: "0.875rem", fontWeight: 600, mb: 0.75 }}>Your month at a glance</Typography>
-                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: { xs: 0.5, sm: 0.75 } }}>
+                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 0.75 }}>
                 {[
                   { value: shareMonthData.sessions, label: "Sessions", color: "#196ae5" },
                   { value: `${shareMonthData.hours}h`, label: "Hours", color: "#16a34a" },
@@ -677,9 +767,9 @@ export default function ProfilePage() {
                   { value: `${shareMonthData.rating}`, label: "Rating", color: "#f59e0b" },
                   { value: shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`, label: "4+ rated", color: "#0ea5e9" },
                 ].map((s) => (
-                  <Box key={s.label} sx={{ textAlign: "center", py: { xs: 1, sm: 1.25 }, px: 0.5, borderRadius: "8px", bgcolor: `${s.color}0a`, border: "1px solid", borderColor: `${s.color}14` }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.95rem", sm: "1.15rem" }, lineHeight: 1, color: s.color, letterSpacing: "-0.02em" }}>{s.value}</Typography>
-                    <Typography sx={{ fontSize: { xs: "0.5rem", sm: "0.6rem" }, color: "text.secondary", mt: 0.25, fontWeight: 500 }}>{s.label}</Typography>
+                  <Box key={s.label} sx={{ textAlign: "center", py: 1.25, px: 0.5, borderRadius: "8px", bgcolor: `${s.color}0a`, border: "1px solid", borderColor: `${s.color}14` }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: "1.15rem", lineHeight: 1, color: s.color, letterSpacing: "-0.02em" }}>{s.value}</Typography>
+                    <Typography sx={{ fontSize: "0.6rem", color: "text.secondary", mt: 0.25, fontWeight: 500 }}>{s.label}</Typography>
                   </Box>
                 ))}
               </Box>
@@ -694,14 +784,15 @@ export default function ProfilePage() {
                     size="small"
                     startIcon={<IosShareOutlinedIcon sx={{ fontSize: 14 }} />}
                     onClick={() => setShareOpen(true)}
-                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: { xs: "0.7rem", sm: "0.75rem" }, px: { xs: 1.5, sm: 2 }, py: 0.6 }}
+                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", px: 2, py: 0.6 }}
                   >
                     Preview & share
                   </Button>
-                  <Button variant="soft" size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 14 }} />} sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: { xs: "0.7rem", sm: "0.75rem" }, px: 1.5, minWidth: 0 }}>Download</Button>
-                  </Stack>
+                  <Button variant="soft" size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 14 }} />} sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", px: 1.5, minWidth: 0 }}>Download</Button>
+                </Stack>
               </Box>
             </Box>
+            )}
           </Box>
         </Card>
 
