@@ -11,8 +11,11 @@ import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import InputBase from "@mui/material/InputBase";
 import Skeleton from "@mui/material/Skeleton";
+import Drawer from "@mui/material/Drawer";
 import Popover from "@mui/material/Popover";
 import Stack from "@mui/material/Stack";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -39,15 +42,57 @@ function MappedSessionsOverflow({
   onSelect: (s: Session) => void;
 }) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const handleChipClick = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    if (isMobile) setDrawerOpen(true);
+    else setAnchor(e.currentTarget);
+  };
+
+  const handleSelect = (s: Session, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    onSelect(s);
+    setAnchor(null);
+    setDrawerOpen(false);
+  };
+
+  const sessionList = sessions.map((s) => (
+    <Box
+      key={s.id}
+      component="button"
+      onClick={(e) => handleSelect(s, e)}
+      sx={{
+        display: "flex", alignItems: "center", width: "100%", textAlign: "left",
+        px: 2, py: 1.5, border: "none", borderBottom: "1px solid", borderColor: "divider",
+        bgcolor: "transparent", cursor: "pointer", fontFamily: "inherit",
+        "&:hover": { bgcolor: "action.hover" }, "&:active": { bgcolor: "action.selected" },
+        "&:last-child": { borderBottom: "none" },
+      }}
+    >
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.3 }}>
+          {SESSION_TYPE_SHORT[s.sessionType] ?? s.sessionType}
+        </Typography>
+        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+          {fmtDateNice(s.dateYmd)} &middot; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
+        </Typography>
+      </Box>
+    </Box>
+  ));
 
   return (
     <>
       <Chip
         label={`+${sessions.length}`}
         size="small"
-        onClick={(e) => { e.stopPropagation(); setAnchor(e.currentTarget); }}
+        onClick={handleChipClick}
         sx={{ cursor: "pointer", fontSize: "0.7rem", height: 24, bgcolor: "action.selected", fontWeight: 600 }}
       />
+
+      {/* Desktop: Popover */}
       <Popover
         open={Boolean(anchor)}
         anchorEl={anchor}
@@ -55,33 +100,39 @@ function MappedSessionsOverflow({
         onClick={(e) => e.stopPropagation()}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}
-        PaperProps={{ sx: { mt: 0.5, borderRadius: "8px", minWidth: 260, boxShadow: 4 } }}
+        PaperProps={{ sx: { mt: 0.5, borderRadius: "12px", minWidth: 280, boxShadow: 4 } }}
       >
-        <Box sx={{ p: 1.5 }}>
-          <Typography variant="caption" sx={{ px: 0.5, mb: 1, display: "block", color: "text.secondary", fontWeight: 500 }}>
+        <Box sx={{ py: 0.5 }}>
+          <Typography variant="caption" sx={{ px: 2, py: 1, display: "block", color: "text.secondary", fontWeight: 600 }}>
             More sessions
           </Typography>
-          {sessions.map((s) => (
-            <Box
-              key={s.id}
-              component="button"
-              onClick={(e) => { e.stopPropagation(); onSelect(s); setAnchor(null); }}
-              sx={{
-                display: "block", width: "100%", textAlign: "left", px: 1.5, py: 1,
-                borderRadius: 1, border: "none", bgcolor: "transparent", cursor: "pointer",
-                fontFamily: "inherit", "&:hover": { bgcolor: "action.hover" },
-              }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.3 }} noWrap>
-                {SESSION_TYPE_SHORT[s.sessionType] ?? s.sessionType}
-              </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                {fmtDateNice(s.dateYmd)} &middot; {fmtTime12(s.start)}&ndash;{fmtTime12(s.end)}
-              </Typography>
-            </Box>
-          ))}
+          {sessionList}
         </Box>
       </Popover>
+
+      {/* Mobile: Bottom sheet */}
+      <Drawer
+        anchor="bottom"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onClick={(e) => e.stopPropagation()}
+        sx={{
+          "& .MuiDrawer-paper": {
+            borderRadius: "12px 12px 0 0",
+            maxHeight: "70vh",
+            pb: "env(safe-area-inset-bottom)",
+          },
+        }}
+      >
+        <Box sx={{ pt: 1.5, pb: 1 }}>
+          {/* Drag handle */}
+          <Box sx={{ width: 32, height: 4, borderRadius: 2, bgcolor: "action.disabled", mx: "auto", mb: 1.5 }} />
+          <Typography variant="subtitle2" fontWeight={600} sx={{ px: 2, mb: 1 }}>
+            More sessions
+          </Typography>
+          {sessionList}
+        </Box>
+      </Drawer>
     </>
   );
 }
@@ -126,7 +177,7 @@ function CourseCard({
     ? Math.round(sections.reduce((acc, s) => acc + s.progress, 0) / totalSections)
     : 0;
   return (
-    <Grid size={{ xs: 6, sm: 6, md: 4 }}>
+    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
       <Card
         variant="outlined"
         onClick={onCardClick}
@@ -142,7 +193,7 @@ function CourseCard({
           }),
         }}
       >
-        <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, display: "flex", flexDirection: "column", flex: 1 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, display: "flex", flexDirection: "column", flex: 1 }}>
 
           {/* Thumbnail row: pattern left, chips right */}
           <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, mb: { xs: 1, sm: 1.5 } }}>
@@ -201,12 +252,12 @@ function CourseCard({
                       size="small"
                       onClick={(e) => { e.stopPropagation(); onOpenSession(firstSession); }}
                       sx={{
-                        cursor: "pointer", fontSize: { xs: "0.58rem", sm: "0.7rem" }, height: { xs: 20, sm: 24 },
+                        cursor: "pointer", fontSize: { xs: "0.75rem", sm: "0.7rem" }, height: { xs: 28, sm: 24 },
                         bgcolor: "var(--gl-mapped-session-bg)",
                         color: "var(--gl-mapped-session-text)",
                         "&:hover": { bgcolor: "var(--gl-mapped-session-hover)" },
-                        maxWidth: { xs: 140, sm: 220 },
-                        "& .MuiChip-label": { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", px: { xs: 0.5, sm: 1 } },
+                        maxWidth: { xs: 200, sm: 220 },
+                        "& .MuiChip-label": { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", px: { xs: 1, sm: 1 } },
                       }}
                     />
                     {rest.length > 0 && <MappedSessionsOverflow sessions={rest} onSelect={onOpenSession} />}
@@ -224,7 +275,7 @@ function CourseCard({
 /* ─── Course card skeleton ────────────────────────────────────────────────── */
 function CourseCardSkeleton() {
   return (
-    <Grid size={{ xs: 6, sm: 6, md: 4 }}>
+    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
       <Card variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", flex: 1 }}>
           {/* Tags row */}

@@ -65,9 +65,11 @@ export function MobileNav() {
                   flex: 1,
                   cursor: "pointer",
                   WebkitTapHighlightColor: "transparent",
-                  /* Ripple-like active press */
+                  userSelect: "none",
+                  /* Press state only on pill, not whole button */
                   "&:active .nav-indicator": {
                     transform: "scaleX(0.92)",
+                    bgcolor: "hsl(var(--md-primary) / 0.12)",
                   },
                 }}
               >

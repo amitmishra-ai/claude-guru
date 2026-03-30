@@ -111,17 +111,17 @@ function computeEventLayout(
 
 /** Full-day time range for the calendar grid (midnight to midnight). */
 const CAL_START = 0;       // 00:00
-const CAL_END = 23 * 60;   // 23:00 (last label)
+const CAL_END = 24 * 60;   // 24:00 (midnight — includes 11 PM–12 AM slot)
 
 /** Convert minutes-since-midnight to a percentage within the visible grid. */
 function timeToPercent(mins: number) {
   return ((mins - CAL_START) / (CAL_END - CAL_START)) * 100;
 }
 
-/** Hours to render on the time axis (12 AM … 11 PM — full day). */
+/** Hours to render on the time axis (12 AM … 11 PM — 24 rows). */
 const HOUR_LABELS: number[] = (() => {
   const arr: number[] = [];
-  for (let m = CAL_START; m <= CAL_END; m += 60) arr.push(m);
+  for (let m = CAL_START; m < CAL_END; m += 60) arr.push(m);
   return arr;
 })();
 
@@ -368,6 +368,14 @@ export default function CalendarPage() {
 
   const gridCols = visibleDays.length;
 
+  // Sync mobile selected day when view mode changes
+  useEffect(() => {
+    const visibleYmds = visibleDays.map(toYmd);
+    if (visibleYmds.length > 0 && !visibleYmds.includes(mobileSelectedDay)) {
+      setMobileSelectedDay(visibleYmds[0]);
+    }
+  }, [visibleDays, mobileSelectedDay]);
+
   /* ═══════════════════════════════════════════════════════════════════════ */
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: { md: "calc(100vh - 48px)" }, overflow: "hidden", gap: 2 }}>
@@ -513,11 +521,11 @@ export default function CalendarPage() {
       {hasUserConfiguredAvailability && isWeekLike && (
         <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           {/* ── Mobile time-grid view (below md) ────────────────────────── */}
-          <Box sx={{ mt: 2, display: { md: "none" } }}>
+          <Box sx={{ display: { md: "none" } }}>
 
-            {/* Day strip */}
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", mb: 1.5 }}>
-              {weekDays.map((d, i) => {
+            {/* Day strip — respects view mode (day/weekend/week) */}
+            <Box sx={{ display: "grid", gridTemplateColumns: `repeat(${visibleDays.length}, 1fr)`, mb: 1.5 }}>
+              {visibleDays.map((d, i) => {
                 const ymd = toYmd(d);
                 const isToday = ymd === toYmd(realNow);
                 const isSelected = ymd === mobileSelectedDay;
@@ -548,7 +556,7 @@ export default function CalendarPage() {
                       variant="caption"
                       sx={{ fontWeight: 500, fontSize: '0.65rem', color: isSelected ? 'primary.main' : 'text.secondary' }}
                     >
-                      {DOW[i]}
+                      {DOW[d.getDay() === 0 ? 6 : d.getDay() - 1]}
                     </Typography>
                     {/* Date circle */}
                     <Box
@@ -587,16 +595,16 @@ export default function CalendarPage() {
                         right: 0,
                         height: GRID_ROW_PX,
                         display: 'grid',
-                        gridTemplateColumns: '48px 1fr',
+                        gridTemplateColumns: '62px 1fr',
                         borderTop: idx > 0 ? 1 : 0,
                         borderColor: 'divider',
                       }}
                     >
                       <Typography
                         variant="caption"
-                        sx={{ color: 'text.secondary', fontWeight: 500, pt: 0.5, pr: 1, textAlign: 'right', fontSize: '0.7rem' }}
+                        sx={{ color: 'text.secondary', fontWeight: 500, pt: 0.5, pr: 1, textAlign: 'right', fontSize: '0.65rem', whiteSpace: 'nowrap' }}
                       >
-                        {fmtTime(mins)}
+                        {fmtTime12(mins)}
                       </Typography>
                       <Box sx={{ borderLeft: 1, borderColor: 'divider' }} />
                     </Box>
@@ -636,7 +644,7 @@ export default function CalendarPage() {
                           }}
                         >
                           <Typography sx={{ fontSize: '0.7rem', color: sColors.text, fontWeight: 500, lineHeight: '14px' }} noWrap>
-                            {fmtTime(s.start)}
+                            {fmtTime12(s.start)}
                           </Typography>
                           <Typography sx={{ fontSize: '0.75rem', color: sColors.text, fontWeight: 700, lineHeight: '16px' }} noWrap>
                             {s.title}
@@ -675,7 +683,7 @@ export default function CalendarPage() {
                           }}
                         >
                           <Typography sx={{ fontSize: '0.7rem', color: 'var(--gl-cal-request-pending-text)', fontWeight: 500, lineHeight: '14px' }} noWrap>
-                            {fmtTime(r.start)}
+                            {fmtTime12(r.start)}
                           </Typography>
                           <Typography sx={{ fontSize: '0.75rem', color: 'var(--gl-cal-request-pending-text)', fontWeight: 700, lineHeight: '16px' }} noWrap>
                             {r.title}
@@ -704,75 +712,77 @@ export default function CalendarPage() {
             }}
           >
 
-            {/* Day-of-week header row */}
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: `56px repeat(${gridCols}, 1fr)`,
-                borderBottom: 1,
-                flexShrink: 0,
-                borderColor: 'divider',
-              }}
-            >
-              <Box /> {/* time gutter */}
-              {visibleDays.map((d, i) => {
-                const ymd = toYmd(d);
-                const isToday = ymd === toYmd(realNow);
-                const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1; // Mon=0 index
-                return (
-                  <Box
-                    key={ymd}
-                    sx={{
-                      py: 1.25,
-                      textAlign: 'center',
-                      borderLeft: 1,
-                      borderColor: 'divider',
-                    }}
-                    aria-label={`${DOW_LONG[dayIdx]} ${d.getDate()}`}
-                  >
-                    <Typography
-                      component="span"
+            {/* Time grid body — scrollable, auto-scrolled to 8 AM. Header is inside scroll container so columns align perfectly. */}
+            <Box ref={desktopGridRef} sx={{ flex: 1, minHeight: 0, overflowY: 'auto', scrollbarWidth: 'thin' }}>
+              {/* Day-of-week header row — sticky inside scroll */}
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: `56px repeat(${gridCols}, 1fr)`,
+                  borderBottom: 1,
+                  borderColor: 'divider',
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 10,
+                  bgcolor: 'background.paper',
+                }}
+              >
+                <Box /> {/* time gutter */}
+                {visibleDays.map((d) => {
+                  const ymd = toYmd(d);
+                  const isToday = ymd === toYmd(realNow);
+                  const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+                  return (
+                    <Box
+                      key={ymd}
                       sx={{
-                        fontWeight: 600,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.04em',
-                        color: isToday ? 'primary.main' : 'text.disabled',
-                        fontSize: '0.65rem',
+                        py: 1.25,
+                        textAlign: 'center',
+                        borderLeft: 1,
+                        borderColor: 'divider',
                       }}
+                      aria-label={`${DOW_LONG[dayIdx]} ${d.getDate()}`}
                     >
-                      {DOW[dayIdx]}
-                    </Typography>
-                    <Typography
-                      component="span"
-                      sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        ml: 0.75,
-                        fontWeight: 700,
-                        fontSize: '0.78rem',
-                        ...(isToday
-                          ? {
-                              bgcolor: 'primary.main',
-                              color: 'primary.contrastText',
-                              borderRadius: '50%',
-                              width: 24,
-                              height: 24,
-                            }
-                          : {
-                              color: 'text.primary',
-                            }),
-                      }}
-                    >
-                      {d.getDate()}
-                    </Typography>
-                  </Box>
-                );
-              })}
-            </Box>
-
-            {/* Time grid body — scrollable, auto-scrolled to 8 AM */}
-            <Box ref={desktopGridRef} sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+                      <Typography
+                        component="span"
+                        sx={{
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          color: isToday ? 'primary.main' : 'text.disabled',
+                          fontSize: '0.65rem',
+                        }}
+                      >
+                        {DOW[dayIdx]}
+                      </Typography>
+                      <Typography
+                        component="span"
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          ml: 0.75,
+                          fontWeight: 700,
+                          fontSize: '0.78rem',
+                          ...(isToday
+                            ? {
+                                bgcolor: 'primary.main',
+                                color: 'primary.contrastText',
+                                borderRadius: '50%',
+                                width: 24,
+                                height: 24,
+                              }
+                            : {
+                                color: 'text.primary',
+                              }),
+                        }}
+                      >
+                        {d.getDate()}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
               <Box
                 sx={{
                   display: 'grid',

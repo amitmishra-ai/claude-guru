@@ -48,6 +48,11 @@ export function AppLayout() {
   useEffect(() => {
     if (typeof document === "undefined") return;
     document.documentElement.classList.toggle("dark", isDarkMode);
+    // Update PWA status bar / theme-color meta tags
+    const color = isDarkMode ? "#121212" : "#ffffff";
+    document.querySelectorAll('meta[name="theme-color"]').forEach((el) => {
+      el.setAttribute("content", color);
+    });
   }, [isDarkMode]);
 
   if (isOnboarding) {

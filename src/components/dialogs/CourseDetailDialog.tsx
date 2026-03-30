@@ -3,9 +3,13 @@ import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
+import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -181,71 +185,105 @@ export function CourseDetailDialog() {
     ? Math.round(sections.reduce((acc, s) => acc + s.progress, 0) / totalSections)
     : 0;
 
-  return (
-    <Dialog
-      open={open}
-      onClose={close}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: {
-          p: 0,
-          maxHeight: "90vh",
-          overflow: "hidden",
-          width: { xs: "calc(100vw - 1.5rem)", sm: "100%" },
-        },
-      }}
-    >
-      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
-        {/* Header */}
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, bgcolor: "background.paper", borderBottom: 1, borderColor: "divider", px: 3, pt: 2.5, pb: 2 }}>
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  /* ── Shared content (used in both Dialog and Drawer) ── */
+  const headerContent = (
+    <Box sx={{ position: "sticky", top: 0, zIndex: 10, bgcolor: "background.paper", borderBottom: 1, borderColor: "divider" }}>
+      {/* Mobile: M3 top app bar */}
+      {isMobile ? (
+        <Box sx={{ display: "flex", alignItems: "center", height: 56, pl: 0.5, pr: 2 }}>
+          <IconButton onClick={close} sx={{ width: 48, height: 48, color: "text.primary" }}>
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
+          </IconButton>
+          <Typography variant="h6" sx={{ fontWeight: 500, fontSize: "1.125rem", ml: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {course.title}
+          </Typography>
+        </Box>
+      ) : (
+        /* Desktop: thumbnail + title + close */
+        <Box sx={{ px: 3, pt: 2.5, pb: 2 }}>
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
             <CoursePatternThumb color={course.color ?? "#6366f1"} pattern={course.pattern ?? 0} size={80} borderRadius={10} />
-
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
                 <Chip label={course.role} size="small" variant="outlined" />
                 {course.isNew && (
-                  <Chip
-                    label="New content"
-                    size="small"
-                    icon={<span style={{ fontSize: 10, marginLeft: 5 }}>✦</span>}
-                    sx={{
-                      bgcolor: "var(--gl-new-badge-bg)", color: "var(--gl-new-badge-text)",
-                      fontWeight: 700,
-                      "& .MuiChip-icon": { color: "var(--gl-new-badge-text)", ml: "4px" },
-                    }}
-                  />
+                  <Chip label="New content" size="small" icon={<span style={{ fontSize: 10, marginLeft: 5 }}>✦</span>} sx={{ bgcolor: "var(--gl-new-badge-bg)", color: "var(--gl-new-badge-text)", fontWeight: 700, "& .MuiChip-icon": { color: "var(--gl-new-badge-text)", ml: "4px" } }} />
                 )}
               </Box>
-              <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.3, fontSize: "1.05rem" }}>
-                {course.title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontSize: "0.8rem" }}>
-                {course.program} &middot; {course.batch}
-              </Typography>
-
+              <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.3, fontSize: "1.05rem" }}>{course.title}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontSize: "0.8rem" }}>{course.program} &middot; {course.batch}</Typography>
             </Box>
-
-            <IconButton size="small" onClick={close} sx={{ flexShrink: 0 }}>
-              <CloseIcon fontSize="small" />
-            </IconButton>
+            <IconButton size="small" onClick={close} sx={{ flexShrink: 0 }}><CloseIcon fontSize="small" /></IconButton>
           </Box>
         </Box>
+      )}
+    </Box>
+  );
 
-        {/* Content */}
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", p: 0 }}>
-          <Box sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 1.5 }}>
-            {sections.length === 0 ? (
-              <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
-                No modules available yet.
-              </Typography>
-            ) : (
-              sections.map((section, i) => (
-                <SectionPanel key={section.id} section={section} defaultOpen={i === 0} />
-              ))
-            )}
+  /* Mobile: course info card below top bar */
+  const mobileInfoCard = isMobile && (
+    <Box sx={{ px: 2, pt: 2, pb: 1.5, display: "flex", alignItems: "flex-start", gap: 1.5 }}>
+      <CoursePatternThumb color={course.color ?? "#6366f1"} pattern={course.pattern ?? 0} size={56} borderRadius={8} />
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.25 }}>
+          <Chip label={course.role} size="small" variant="outlined" />
+          {course.isNew && (
+            <Chip label="New" size="small" icon={<span style={{ fontSize: 9, marginLeft: 5 }}>✦</span>} sx={{ bgcolor: "var(--gl-new-badge-bg)", color: "var(--gl-new-badge-text)", fontWeight: 700, "& .MuiChip-icon": { color: "var(--gl-new-badge-text)", ml: "4px" } }} />
+          )}
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8rem" }}>{course.program} &middot; {course.batch}</Typography>
+      </Box>
+    </Box>
+  );
+
+  const bodyContent = (
+    <Box sx={{ p: { xs: 2, sm: 2.5 }, display: "flex", flexDirection: "column", gap: 1.5 }}>
+      {sections.length === 0 ? (
+        <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: "center" }}>No modules available yet.</Typography>
+      ) : (
+        sections.map((section, i) => (
+          <SectionPanel key={section.id} section={section} defaultOpen={i === 0} />
+        ))
+      )}
+    </Box>
+  );
+
+  /* ── Mobile: full-screen bottom Drawer ── */
+  if (isMobile) {
+    return (
+      <Drawer
+        anchor="bottom"
+        open={open}
+        onClose={close}
+        sx={{
+          "& .MuiDrawer-paper": {
+            height: "100%",
+            maxHeight: "100%",
+            borderRadius: 0,
+          },
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          {headerContent}
+          <Box sx={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+            {mobileInfoCard}
+            {bodyContent}
           </Box>
+        </Box>
+      </Drawer>
+    );
+  }
+
+  /* ── Desktop: Dialog ── */
+  return (
+    <Dialog open={open} onClose={close} maxWidth="md" fullWidth PaperProps={{ sx: { p: 0, maxHeight: "90vh", overflow: "hidden" } }}>
+      <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
+        {headerContent}
+        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", p: 0 }}>
+          {bodyContent}
         </DialogContent>
       </Box>
     </Dialog>
