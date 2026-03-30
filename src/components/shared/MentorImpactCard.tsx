@@ -49,7 +49,7 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1, minWidth: 0 }}>
             <Box
               sx={{
-                width: 36, height: 36, borderRadius: 0.5, flexShrink: 0,
+                width: 36, height: 36, borderRadius: "8px", flexShrink: 0,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 bgcolor: "action.hover", border: "1px solid", borderColor: "divider",
               }}
@@ -72,7 +72,7 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
               <Card
                 key={m.label}
                 elevation={0}
-                sx={{ px: 1.5, py: 1.25, borderRadius: 0.5, bgcolor: "transparent", border: "none", boxShadow: "none", minWidth: 115 }}
+                sx={{ px: 1.5, py: 1.25, borderRadius: "8px", bgcolor: "transparent", border: "none", boxShadow: "none", minWidth: 115 }}
               >
                 <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", fontWeight: 500, display: "block", lineHeight: 1 }}>
                   {m.label}

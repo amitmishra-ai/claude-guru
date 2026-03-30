@@ -111,7 +111,7 @@ export function LeavePopover({
         </Box>
 
         {/* Schedule card */}
-        <Box sx={{ p: 1.5, borderRadius: 0.5, bgcolor: "action.hover", mb: 2 }}>
+        <Box sx={{ p: 1.5, borderRadius: "8px", bgcolor: "action.hover", mb: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
             <Typography variant="body2" sx={{ fontSize: "0.82rem", fontWeight: 500 }}>
@@ -140,7 +140,7 @@ export function LeavePopover({
           </Box>
         ) : (
           <Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1.5, px: 1.5, py: 1, borderRadius: 0.5, bgcolor: "var(--gl-status-declined-bg)" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1.5, px: 1.5, py: 1, borderRadius: "8px", bgcolor: "var(--gl-status-declined-bg)" }}>
               <WarningAmberOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-status-declined-text)" }} />
               <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.82rem", color: "var(--gl-status-declined-text)" }}>
                 Remove this leave?

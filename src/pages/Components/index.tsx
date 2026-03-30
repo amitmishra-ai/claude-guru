@@ -222,7 +222,7 @@ function CombinedCompletedGroup({ children }: { children: React.ReactNode }) {
           top: 8,
           bottom: 8,
           width: 3,
-          borderRadius: 0.5,
+          borderRadius: "8px",
           bgcolor: "divider",
         },
       }}
@@ -297,7 +297,7 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd,
             borderTop: 1,
             borderColor: "divider",
             bgcolor: "action.hover",
-            borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
+            borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
             "&:hover": { bgcolor: "action.selected" },
             transition: "background-color 0.15s",
           }}
@@ -349,7 +349,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
             <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3 }}>{title}</Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "12px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
                   <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -381,7 +381,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
           <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
-              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Batch</Typography>
                   <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{batch}</Typography>
@@ -423,7 +423,7 @@ function PollCard({ poll, onEdit, onDelete, onToggleStatus }: {
   return (
     <Box
       sx={{
-        borderRadius: 0.5,
+        borderRadius: "8px",
         border: "1px solid",
         borderColor: "divider",
         overflow: "hidden",
@@ -486,7 +486,7 @@ function PollCard({ poll, onEdit, onDelete, onToggleStatus }: {
               sx={{
                 px: 1.25,
                 py: 0.5,
-                borderRadius: 0.5,
+                borderRadius: "8px",
                 bgcolor: "hsl(var(--md-surface-container) / 0.3)",
                 border: "1px solid transparent",
               }}
@@ -553,7 +553,7 @@ function PollCreationForm({ onSave, onCancel, editingPoll }: {
   return (
     <Box
       sx={{
-        borderRadius: 0.5,
+        borderRadius: "8px",
         border: "1px solid",
         borderColor: "primary.main",
         bgcolor: "hsl(var(--md-surface-container) / 0.2)",
@@ -704,7 +704,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             </Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "12px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
                   <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -748,7 +748,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {/* ── Details ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
-              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Assignment</Typography>
                   <Box sx={{ textAlign: "right" }}>
@@ -778,7 +778,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {(isConfirmed || isTentative) && (
               <Box sx={{ mb: 2.5 }}>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Student Progress</Typography>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {isTentative ? (
                     <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500} sx={{ py: 0.5 }}>To be confirmed</Typography>
                   ) : (
@@ -802,7 +802,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {(isGathering || isCompleted) && (
               <Box sx={{ mb: 2.5 }}>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Feedback</Typography>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {isGathering ? (
                     <Typography variant="body2" fontWeight={500} sx={{ py: 0.5 }}>Gathering feedback</Typography>
                   ) : (
@@ -822,7 +822,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
                   <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                   <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>Remuneration</Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
                     {isGathering
@@ -889,7 +889,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             <Typography variant="h6" fontWeight={700} sx={{ fontSize: "1.05rem", lineHeight: 1.3 }}>{dqTitle}</Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "12px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
                   <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -929,7 +929,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {/* ── Details ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
-              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Discussion Question</Typography>
                   <Box sx={{ textAlign: "right" }}>
@@ -959,7 +959,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {(isConfirmed || isTentative) && (
               <Box sx={{ mb: 2.5 }}>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Student Response Progress</Typography>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {isTentative ? (
                     <Typography variant="body2" color="var(--gl-status-pending-text)" fontWeight={500} sx={{ py: 0.5 }}>To be confirmed</Typography>
                   ) : (
@@ -988,7 +988,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
             {(isGathering || isCompleted) && (
               <Box sx={{ mb: 2.5 }}>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Feedback</Typography>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {isGathering ? (
                     <Typography variant="body2" fontWeight={500} sx={{ py: 0.5 }}>Gathering feedback</Typography>
                   ) : (
@@ -1008,7 +1008,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
                   <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                   <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>Remuneration</Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
                     {isGathering
@@ -1077,7 +1077,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
             </Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "12px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
                   <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -1119,7 +1119,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
             {/* ── Milestones ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Milestones</Typography>
-              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 {[
                   { label: "Start", date: "15 Jan, 2026" },
                   { label: "Synopsis", date: "5 Feb, 2026" },
@@ -1138,7 +1138,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
             {/* ── Details ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
-              <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+              <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Batch</Typography>
                   <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{batchName}</Typography>
@@ -1167,7 +1167,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                   <SavingsOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                   <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>Remuneration</Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
                     {isPaymentPending
@@ -1241,7 +1241,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
             </Typography>
 
             {/* Schedule at-a-glance card */}
-            <Box sx={{ mt: 2, p: 1.75, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
+            <Box sx={{ mt: 2, p: 1.75, borderRadius: "12px", bgcolor: "hsl(var(--md-surface-container) / 0.5)", border: "1px solid", borderColor: "divider" }}>
               <Stack spacing={1}>
                 {/* Due date */}
                 <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -1298,7 +1298,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                     Student Info
                   </Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   {/* Student avatar + name */}
                   <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
                     <Avatar sx={{ width: 36, height: 36, bgcolor: "primary.main", fontSize: "0.8rem", fontWeight: 700 }}>AM</Avatar>
@@ -1339,7 +1339,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                     Links
                   </Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Reviewed CV</Typography>
                     <Typography variant="body2" component="a" href="#" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 500, fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}>
@@ -1359,7 +1359,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                     Remuneration
                   </Typography>
                 </Stack>
-                <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Status</Typography>
                     <Chip label="Payment Processed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 600 }} />
@@ -1398,7 +1398,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
 const RESIDENCY_COMBINED_ACCORDION = (
   <Accordion
     disableGutters elevation={0} defaultExpanded={false}
-    sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+    sx={{ mt: 1.5, borderRadius: "12px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
   >
     <AccordionSummary
       expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
@@ -1675,7 +1675,7 @@ function OnlineSessionCards() {
           />
           <Accordion
             disableGutters elevation={0} defaultExpanded
-            sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+            sx={{ mt: 1.5, borderRadius: "12px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
           >
             <AccordionSummary
               expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
@@ -1753,7 +1753,7 @@ function OnlineSessionCards() {
           />
           <Accordion
             disableGutters elevation={0} defaultExpanded={false}
-            sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+            sx={{ mt: 1.5, borderRadius: "12px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
           >
             <AccordionSummary
               expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}

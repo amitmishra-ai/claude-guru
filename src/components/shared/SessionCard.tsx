@@ -272,7 +272,7 @@ export function SessionCard({
         borderTop: 1,
         borderColor: "divider",
         bgcolor: "action.hover",
-        borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
+        borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
         "&:hover": { bgcolor: "action.selected" },
         transition: "background-color 0.15s",
         "& .MuiButton-root": { p: 0, minHeight: "unset", minWidth: "unset" },
@@ -300,7 +300,7 @@ export function SessionCard({
         borderTop: 1,
         borderColor: "divider",
         bgcolor: "action.hover",
-        borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
+        borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
         "&:hover": { bgcolor: "action.selected" },
         transition: "background-color 0.15s",
       }}

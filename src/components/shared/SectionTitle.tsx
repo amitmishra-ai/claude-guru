@@ -16,7 +16,7 @@ export function SectionTitle({
         <Box
           sx={{
             mt: 0.25,
-            borderRadius: "8px",
+            borderRadius: "12px",
             border: 1,
             borderColor: "divider",
             backgroundColor: "hsl(var(--md-surface))",

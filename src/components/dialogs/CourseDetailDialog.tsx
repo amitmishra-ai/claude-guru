@@ -35,7 +35,7 @@ function SectionPanel({
       sx={{
         border: 1,
         borderColor: section.isNew ? "primary.main" : "divider",
-        borderRadius: 0.5,
+        borderRadius: "8px",
         overflow: "hidden",
         bgcolor: section.isNew ? "rgba(25, 106, 229, 0.08)" : "background.paper",
         ...(section.isNew && { boxShadow: "0 0 0 1px #196ae5" }),

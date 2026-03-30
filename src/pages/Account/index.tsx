@@ -61,7 +61,7 @@ export default function AccountPage() {
     <Box
       sx={{
         mb: 1.5,
-        borderRadius: "8px",
+        borderRadius: "12px",
         bgcolor: "hsl(var(--md-surface-container-low, var(--md-surface)) / 1)",
         border: "1px solid",
         borderColor: "divider",
@@ -89,7 +89,7 @@ export default function AccountPage() {
             sx={{
               width: 40,
               height: 40,
-              borderRadius: "4px",
+              borderRadius: "12px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -214,7 +214,7 @@ export default function AccountPage() {
             mt: 1,
             px: 1.5,
             py: 0.375,
-            borderRadius: "8px",
+            borderRadius: "12px",
             bgcolor: "hsl(var(--md-primary) / 0.08)",
             color: "primary.main",
           }}

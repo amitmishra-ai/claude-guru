@@ -28,7 +28,7 @@ export function PageHeader({
             sx={{
               mt: 0.25,
               p: 1,
-              borderRadius: 0.5,
+              borderRadius: "8px",
               border: 1,
               borderColor: "divider",
               bgcolor: "background.paper",

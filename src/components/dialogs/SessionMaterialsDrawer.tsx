@@ -146,7 +146,7 @@ export function SessionMaterialsDrawer() {
                             alignItems: "center",
                             gap: 1.5,
                             p: 1.5,
-                            borderRadius: 0.5,
+                            borderRadius: "8px",
                             border: 1,
                             borderColor: "divider",
                             transition: "all 0.15s ease",
@@ -157,7 +157,7 @@ export function SessionMaterialsDrawer() {
                             sx={{
                               width: 40,
                               height: 40,
-                              borderRadius: 0.5,
+                              borderRadius: "8px",
                               bgcolor: isVideo ? "hsl(var(--md-primary) / 0.08)" : "action.hover",
                               display: "flex",
                               alignItems: "center",

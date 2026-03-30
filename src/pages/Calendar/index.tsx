@@ -371,96 +371,35 @@ export default function CalendarPage() {
   /* ═══════════════════════════════════════════════════════════════════════ */
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: { md: "calc(100vh - 48px)" }, overflow: "hidden", gap: 2 }}>
-      {/* ── Toolbar ── */}
-      <Stack sx={{ gap: { xs: 0.75, sm: 1 }, flexShrink: 0 }}>
-        {/* Row 1: title + today + view dropdown + actions */}
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Stack direction="row" alignItems="center" sx={{ gap: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: "1.05rem", sm: "1.25rem" } }}>Calendar</Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              sx={{ textTransform: "none", fontSize: "0.78rem", fontWeight: 500, height: 32, px: 1.5, borderColor: "divider", color: "text.primary" }}
-              onClick={() => { dispatch(setAnchorDate(realNow.toISOString())); if (calendarViewMode === "weekend") dispatch(setCalendarViewMode("week")); }}
-            >
-              Today
-            </Button>
-          {/* View mode dropdown */}
+      {/* ── Toolbar — single row ── */}
+      <Stack direction="row" alignItems="center" sx={{ flexShrink: 0 }}>
+        {/* LEFT */}
+        <Stack direction="row" alignItems="center" sx={{ gap: 1 }}>
+          <Typography variant="h6" sx={{ display: { xs: "none", sm: "block" }, fontWeight: 700, fontSize: "1.25rem" }}>Calendar</Typography>
           <Button
             variant="outlined"
             size="small"
-            endIcon={<ArrowDropDownIcon sx={{ fontSize: 18 }} />}
-            onClick={(e) => setViewMenuAnchor(e.currentTarget)}
-            sx={{
-              textTransform: "none",
-              fontSize: "0.78rem",
-              fontWeight: 600,
-              height: 32,
-              px: 1.5,
-              borderColor: "divider",
-              color: "text.primary",
-              minWidth: 90,
-              justifyContent: "space-between",
-            }}
+            sx={{ textTransform: "none", fontSize: "0.78rem", fontWeight: 500, height: 32, px: 1.5, borderColor: "divider", color: "text.primary" }}
+            onClick={() => { dispatch(setAnchorDate(realNow.toISOString())); if (calendarViewMode === "weekend") dispatch(setCalendarViewMode("week")); }}
           >
-            {viewLabel}
+            Today
           </Button>
-          <Menu
-            anchorEl={viewMenuAnchor}
-            open={Boolean(viewMenuAnchor)}
-            onClose={() => setViewMenuAnchor(null)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            transformOrigin={{ vertical: "top", horizontal: "left" }}
-            slotProps={{ paper: { sx: { minWidth: 160, mt: 0.5 } } }}
-          >
-            {VIEW_OPTIONS.map((opt) => (
-              <Box key={opt.value}>
-                {opt.value === "day" && <Divider sx={{ my: 0.5 }} />}
-                <MenuItem
-                  selected={calendarViewMode === opt.value}
-                  onClick={() => {
-                    dispatch(setCalendarViewMode(opt.value));
-                    setViewMenuAnchor(null);
-                  }}
-                  sx={{ fontSize: "0.85rem", py: 0.75 }}
-                >
-                  {calendarViewMode === opt.value && (
-                    <CheckIcon sx={{ fontSize: 16, mr: 1, color: "primary.main" }} />
-                  )}
-                  <ListItemText sx={{ ml: calendarViewMode === opt.value ? 0 : 3.5 }}>
-                    {opt.label}
-                  </ListItemText>
-                </MenuItem>
-              </Box>
-            ))}
-          </Menu>
-          </Stack>
-
-          {/* Right: action buttons (desktop only) */}
-          <Stack direction="row" spacing={1.5} sx={{ display: { xs: "none", sm: "flex" } }}>
+          {/* Desktop: view dropdown in left group */}
+          <Box sx={{ display: { xs: "none", sm: "block" } }}>
             <Button
-              variant="soft"
+              variant="outlined"
               size="small"
-              startIcon={<EventBusyIcon sx={{ fontSize: 14 }} />}
-              sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }}
-              onClick={() => dispatch(setOpenNotAvailable(true))}
+              endIcon={<ArrowDropDownIcon sx={{ fontSize: 18 }} />}
+              onClick={(e) => setViewMenuAnchor(e.currentTarget)}
+              sx={{ textTransform: "none", fontSize: "0.78rem", fontWeight: 600, height: 32, px: 1.5, borderColor: "divider", color: "text.primary", minWidth: 90, justifyContent: "space-between" }}
             >
-              Leave
+              {viewLabel}
             </Button>
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<EditCalendarIcon sx={{ fontSize: 14 }} />}
-              sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }}
-              onClick={() => dispatch(setOpenAvailability(true))}
-            >
-              {hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}
-            </Button>
-          </Stack>
+          </Box>
         </Stack>
 
-        {/* Row 2: prev/next nav + date label */}
-        <Stack direction="row" alignItems="center" justifyContent="center" sx={{ gap: 0.5 }}>
+        {/* CENTER — date nav */}
+        <Stack direction="row" alignItems="center" justifyContent="center" sx={{ flex: 1, gap: 0.5 }}>
           <Button variant="text" size="small" aria-label="Previous" sx={{ minWidth: 0, height: 32, width: 32, p: 0, color: "text.secondary", borderRadius: "50%", "&:hover": { bgcolor: "action.hover" } }} onClick={navPrev}>
             <ChevronLeftIcon sx={{ fontSize: 22 }} />
           </Button>
@@ -468,14 +407,53 @@ export default function CalendarPage() {
             {calendarViewMode === "month"
               ? monthLabel(anchorDate)
               : calendarViewMode === "day"
-                ? anchorDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
+                ? anchorDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
                 : weekLabel(anchorDate)}
           </Typography>
           <Button variant="text" size="small" aria-label="Next" sx={{ minWidth: 0, height: 32, width: 32, p: 0, color: "text.secondary", borderRadius: "50%", "&:hover": { bgcolor: "action.hover" } }} onClick={navNext}>
             <ChevronRightIcon sx={{ fontSize: 22 }} />
           </Button>
         </Stack>
+
+        {/* RIGHT */}
+        {/* Mobile: view dropdown */}
+        <Box sx={{ display: { xs: "block", sm: "none" } }}>
+          <Button
+            variant="outlined"
+            size="small"
+            endIcon={<ArrowDropDownIcon sx={{ fontSize: 18 }} />}
+            onClick={(e) => setViewMenuAnchor(e.currentTarget)}
+            sx={{ textTransform: "none", fontSize: "0.78rem", fontWeight: 600, height: 32, px: 1.5, borderColor: "divider", color: "text.primary", minWidth: 80, justifyContent: "space-between" }}
+          >
+            {viewLabel}
+          </Button>
+        </Box>
+        {/* Desktop: Leave + Edit availability */}
+        <Stack direction="row" spacing={1.5} sx={{ display: { xs: "none", sm: "flex" } }}>
+          <Button variant="soft" size="small" startIcon={<EventBusyIcon sx={{ fontSize: 14 }} />} sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }} onClick={() => dispatch(setOpenNotAvailable(true))}>Leave</Button>
+          <Button variant="contained" size="small" startIcon={<EditCalendarIcon sx={{ fontSize: 14 }} />} sx={{ textTransform: "none", fontSize: "0.78rem", height: 32, px: 1.5 }} onClick={() => dispatch(setOpenAvailability(true))}>{hasUserConfiguredAvailability ? "Edit availability" : "Add availability"}</Button>
+        </Stack>
       </Stack>
+
+      {/* View mode menu (shared) */}
+      <Menu
+        anchorEl={viewMenuAnchor}
+        open={Boolean(viewMenuAnchor)}
+        onClose={() => setViewMenuAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+        slotProps={{ paper: { sx: { minWidth: 160, mt: 0.5 } } }}
+      >
+        {VIEW_OPTIONS.map((opt) => (
+          <Box key={opt.value}>
+            {opt.value === "day" && <Divider sx={{ my: 0.5 }} />}
+            <MenuItem selected={calendarViewMode === opt.value} onClick={() => { dispatch(setCalendarViewMode(opt.value)); setViewMenuAnchor(null); }} sx={{ fontSize: "0.85rem", py: 0.75 }}>
+              {calendarViewMode === opt.value && <CheckIcon sx={{ fontSize: 16, mr: 1, color: "primary.main" }} />}
+              <ListItemText sx={{ ml: calendarViewMode === opt.value ? 0 : 3.5 }}>{opt.label}</ListItemText>
+            </MenuItem>
+          </Box>
+        ))}
+      </Menu>
 
       {/* ── Availability gate ─────────────────────────────────────────── */}
       {!hasUserConfiguredAvailability && (
@@ -993,7 +971,7 @@ export default function CalendarPage() {
                             height: `${timeToPercent(b.end) - timeToPercent(b.start)}%`,
                             bgcolor: 'var(--gl-cal-busy-bg)',
                             borderLeft: '3px solid var(--gl-cal-busy-border)',
-                            borderRadius: '4px',
+                            borderRadius: '8px',
                             zIndex: 1,
                             pointerEvents: 'none',
                             px: 0.5,
@@ -1023,7 +1001,7 @@ export default function CalendarPage() {
                             bgcolor: 'var(--gl-cal-leave-bg)',
                             border: '1.5px dashed',
                             borderColor: 'error.main',
-                            borderRadius: '4px',
+                            borderRadius: '8px',
                             backgroundImage:
                               'repeating-linear-gradient(135deg, transparent, transparent 4px, var(--gl-cal-leave-bg) 4px, var(--gl-cal-leave-bg) 5px)',
                             zIndex: 2,
@@ -1068,7 +1046,7 @@ export default function CalendarPage() {
                               bgcolor: 'var(--gl-cal-avail-bg)',
                               border: '1.5px dashed',
                               borderColor: 'success.main',
-                              borderRadius: '4px',
+                              borderRadius: '8px',
                               zIndex: 3,
                               px: 0.5,
                               pt: 0.5,
@@ -1109,7 +1087,7 @@ export default function CalendarPage() {
                               bgcolor: 'var(--gl-cal-avail-bg)',
                               border: '1.5px dashed',
                               borderColor: 'success.main',
-                              borderRadius: '4px',
+                              borderRadius: '8px',
                               zIndex: 3,
                               px: 0.5,
                               pt: 0.5,
@@ -1153,7 +1131,7 @@ export default function CalendarPage() {
                               height: `${timeToPercent(r.end) - timeToPercent(r.start)}%`,
                               bgcolor: rColors.bg,
                               border: `1.5px dashed ${rColors.border}`,
-                              borderRadius: '4px',
+                              borderRadius: '8px',
                               zIndex: 4,
                               px: 0.75,
                               pt: 0.5,
@@ -1235,7 +1213,7 @@ export default function CalendarPage() {
                               height: `${blockHeight}%`,
                               bgcolor: sColors.bg,
                               border: 'none',
-                              borderRadius: '4px',
+                              borderRadius: '8px',
                               zIndex: 5,
                               px: 0.75,
                               pt: 0.5,
@@ -1531,7 +1509,7 @@ export default function CalendarPage() {
                           key={chip.key}
                           sx={{
                             mt: 0.25,
-                            borderRadius: 0.5,
+                            borderRadius: "8px",
                             bgcolor: chip.bg,
                             color: chip.color,
                             px: 0.5,

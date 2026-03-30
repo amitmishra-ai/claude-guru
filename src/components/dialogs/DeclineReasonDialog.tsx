@@ -70,7 +70,7 @@ export function DeclineReasonDialog() {
               start={declineSessionFocus.start}
               end={declineSessionFocus.end}
               sx={{
-                borderRadius: "8px",
+                borderRadius: "12px",
                 border: 1,
                 borderColor: "divider",
                 backgroundColor: "hsl(var(--md-surface))",
@@ -81,7 +81,7 @@ export function DeclineReasonDialog() {
             {isTooClose && (
               <Box
                 sx={{
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                   border: 1,
                   borderColor: "var(--gl-status-declined-border)",
                   bgcolor: "var(--gl-status-declined-bg)",

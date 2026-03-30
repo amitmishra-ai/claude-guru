@@ -105,7 +105,7 @@ function buildTheme(mode: "light" | "dark") {
 
     /* ── Shape ──────────────────────────────────────────────────── */
     shape: {
-      borderRadius: 8,
+      borderRadius: 12,
     },
 
     /* ── Typography Scale (MUI standard scale) ─────────────────── */
@@ -204,7 +204,7 @@ function buildTheme(mode: "light" | "dark") {
         styleOverrides: {
           root: {
             textTransform: "none" as const,
-            borderRadius: 4,
+            borderRadius: 8,
             fontWeight: 500,
           },
           sizeSmall: {
@@ -248,18 +248,18 @@ function buildTheme(mode: "light" | "dark") {
       MuiChip: {
         styleOverrides: {
           root: {
-            borderRadius: 4,
+            borderRadius: 8,
             fontWeight: 500,
           },
         },
       },
 
-      /* Card — 8px radius, outlined, no shadow */
+      /* Card — 12px outer radius, outlined, no shadow */
       MuiCard: {
         defaultProps: { variant: "outlined" as const },
         styleOverrides: {
           root: {
-            borderRadius: 8,
+            borderRadius: 12,
             boxShadow: "none",
             borderColor,
           },
@@ -291,7 +291,7 @@ function buildTheme(mode: "light" | "dark") {
       /* Dialog — 16px radius (replaces className="rounded-2xl" on every dialog) */
       MuiDialog: {
         styleOverrides: {
-          paper: { borderRadius: 8 },
+          paper: { borderRadius: 12 },
         },
       },
 
@@ -329,7 +329,7 @@ function buildTheme(mode: "light" | "dark") {
       MuiPopover: {
         styleOverrides: {
           paper: {
-            borderRadius: 8,
+            borderRadius: 12,
             boxShadow:
               "0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
             border: "1px solid",
@@ -383,7 +383,7 @@ function buildTheme(mode: "light" | "dark") {
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              borderRadius: 4,
+              borderRadius: 8,
             },
           },
         },
@@ -392,14 +392,14 @@ function buildTheme(mode: "light" | "dark") {
       /* Select — 4px inner radius */
       MuiSelect: {
         styleOverrides: {
-          root: { borderRadius: 4 },
+          root: { borderRadius: 8 },
         },
       },
 
       /* Avatar — 4px inner radius (use borderRadius: "50%" in sx for circles) */
       MuiAvatar: {
         styleOverrides: {
-          root: { borderRadius: 4 },
+          root: { borderRadius: 8 },
         },
       },
     },

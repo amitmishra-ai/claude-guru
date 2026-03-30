@@ -98,7 +98,7 @@ function SectionCard({ children }: { children: React.ReactNode }) {
   return (
     <Box
       sx={{
-        borderRadius: "4px",
+        borderRadius: "12px",
         border: 1,
         borderColor: "divider",
         bgcolor: "hsl(var(--md-surface))",
@@ -122,7 +122,7 @@ function PollCard({ poll, onEdit, onDelete, onToggleStatus }: {
   return (
     <Box
       sx={{
-        borderRadius: 0.5,
+        borderRadius: "8px",
         border: "1px solid",
         borderColor: "divider",
         overflow: "hidden",
@@ -183,7 +183,7 @@ function PollCard({ poll, onEdit, onDelete, onToggleStatus }: {
               sx={{
                 px: 1.25,
                 py: 0.5,
-                borderRadius: 0.5,
+                borderRadius: "8px",
                 bgcolor: "hsl(var(--md-surface-container) / 0.3)",
               }}
             >
@@ -248,7 +248,7 @@ function PollCreationForm({ onSave, onCancel, editingPoll }: {
   return (
     <Box
       sx={{
-        borderRadius: 0.5,
+        borderRadius: "8px",
         border: "1px solid",
         borderColor: "primary.main",
         bgcolor: "hsl(var(--md-surface-container) / 0.2)",
@@ -454,7 +454,7 @@ function PollsSection({ sessionId }: { sessionId: string }) {
             sx={{
               py: 3,
               px: 2,
-              borderRadius: 0.5,
+              borderRadius: "8px",
               border: "1px dashed",
               borderColor: "divider",
               textAlign: "center",
@@ -599,7 +599,7 @@ export function SessionDetailsModal() {
                   sx={{
                     mt: 2,
                     p: 1.75,
-                    borderRadius: "8px",
+                    borderRadius: "12px",
                     bgcolor: "hsl(var(--md-surface-container) / 0.5)",
                     border: "1px solid",
                     borderColor: "divider",
@@ -750,7 +750,7 @@ export function SessionDetailsModal() {
                           elevation={0}
                           expanded={expandedCombinedBatch === (cb.batch + (cb.group || ""))}
                           onChange={(_, isExpanded) => setExpandedCombinedBatch(isExpanded ? cb.batch + (cb.group || "") : false)}
-                          sx={{ border: "1px solid", borderColor: "divider", borderRadius: "8px !important", overflow: "hidden", "&::before": { display: "none" } }}
+                          sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px !important", overflow: "hidden", "&::before": { display: "none" } }}
                         >
                           <AccordionSummary
                             expandIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
@@ -777,7 +777,7 @@ export function SessionDetailsModal() {
                           </AccordionSummary>
                           <AccordionDetails sx={{ px: 1.5, pt: 0, pb: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
                             {/* Course name */}
-                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5, p: 1, borderRadius: "4px", bgcolor: "hsl(var(--md-surface-container) / 0.5)" }}>
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5, p: 1, borderRadius: "12px", bgcolor: "hsl(var(--md-surface-container) / 0.5)" }}>
                               <MenuBookOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
                               <Box>
                                 <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem", display: "block", lineHeight: 1.2 }}>
@@ -814,7 +814,7 @@ export function SessionDetailsModal() {
                                     pr: 0.5,
                                     "&::-webkit-scrollbar": { width: 2 },
                                     "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
-                                    "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: 0.5, "&:hover": { bgcolor: "text.disabled" } },
+                                    "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: "8px", "&:hover": { bgcolor: "text.disabled" } },
                                     scrollbarWidth: "thin",
                                     scrollbarColor: "var(--mui-palette-divider) transparent",
                                   }}
@@ -918,7 +918,7 @@ export function SessionDetailsModal() {
                             sx={{
                               py: 0.875,
                               px: 1.25,
-                              borderRadius: "8px",
+                              borderRadius: "12px",
                               border: "1px solid",
                               borderColor: "divider",
                               "&:hover": { bgcolor: "action.hover", borderColor: "text.disabled" },
@@ -993,7 +993,7 @@ export function SessionDetailsModal() {
                           sx={{
                             mt: 1.5,
                             p: 1.25,
-                            borderRadius: "8px",
+                            borderRadius: "12px",
                             bgcolor: "hsl(var(--md-surface-container) / 0.3)",
                             fontSize: "0.8rem",
                             color: "hsl(var(--md-on-surface-variant))",
@@ -1025,7 +1025,7 @@ export function SessionDetailsModal() {
                       sx={{
                         py: 0.875,
                         px: 1.25,
-                        borderRadius: "8px",
+                        borderRadius: "12px",
                         border: "1px solid",
                         borderColor: "divider",
                         "&:hover": { bgcolor: "action.hover", borderColor: "text.disabled" },
@@ -1120,7 +1120,7 @@ export function SessionDetailsModal() {
                           <Box
                             sx={{
                               p: 1.25,
-                              borderRadius: "8px",
+                              borderRadius: "12px",
                               bgcolor: "hsl(var(--md-surface-container) / 0.3)",
                             }}
                           >

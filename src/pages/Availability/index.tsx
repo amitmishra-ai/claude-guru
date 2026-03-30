@@ -25,7 +25,7 @@ export default function AvailabilityPage() {
             variant="soft"
             size="small"
             startIcon={<AccessTimeOutlinedIcon sx={{ fontSize: 14 }} />}
-            sx={{ borderRadius: "4px" }}
+            sx={{ borderRadius: "12px" }}
             onClick={() => dispatch(setOpenNotAvailable(true))}
           >
             Mark unavailable
@@ -34,7 +34,7 @@ export default function AvailabilityPage() {
             variant="contained"
             size="small"
             startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />}
-            sx={{ borderRadius: "4px" }}
+            sx={{ borderRadius: "12px" }}
             onClick={() => dispatch(setOpenAvailability(true))}
           >
             Add availability
@@ -46,7 +46,7 @@ export default function AvailabilityPage() {
       <Box sx={{ mt: 1.5, display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1.5 }}>
         <Box
           sx={{
-            borderRadius: "8px",
+            borderRadius: "12px",
             border: 1,
             borderColor: "divider",
             backgroundColor: "hsl(var(--md-surface))",
@@ -59,7 +59,7 @@ export default function AvailabilityPage() {
         </Box>
         <Box
           sx={{
-            borderRadius: "8px",
+            borderRadius: "12px",
             border: 1,
             borderColor: "divider",
             backgroundColor: "hsl(var(--md-surface))",
@@ -93,7 +93,7 @@ export default function AvailabilityPage() {
           {!patterns.length && (
             <Box
               sx={{
-                borderRadius: "8px",
+                borderRadius: "12px",
                 border: 1,
                 borderColor: "divider",
                 backgroundColor: "hsl(var(--md-surface-container) / 0.2)",

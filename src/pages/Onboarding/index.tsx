@@ -441,7 +441,7 @@ function SidebarPanel({
               sx={{
                 width: i === 3 ? 48 : 72,
                 height: 4,
-                borderRadius: 0.5,
+                borderRadius: "8px",
                 bgcolor: "rgba(255,255,255,0.15)",
               }}
             />
@@ -489,7 +489,7 @@ function SidebarPanel({
         <Box
           sx={{
             height: 4,
-            borderRadius: 0.5,
+            borderRadius: "8px",
             bgcolor: "rgba(255,255,255,0.15)",
             overflow: "hidden",
           }}
@@ -497,7 +497,7 @@ function SidebarPanel({
           <Box
             sx={{
               height: "100%",
-              borderRadius: 0.5,
+              borderRadius: "8px",
               bgcolor: hasReachedBottom ? "#6ee7b7" : "#fff",
               width: `${scrollProgress}%`,
               transition: "width 0.15s linear, background-color 0.3s ease",
@@ -1092,7 +1092,7 @@ export default function OnboardingPage() {
                     gap: 1.5,
                     px: 2,
                     py: 1,
-                    borderRadius: 0.5,
+                    borderRadius: "8px",
                     bgcolor: bannerPulse ? "var(--gl-status-declined-bg)" : "var(--gl-status-pending-bg)",
                     border: bannerPulse ? "1.5px solid var(--gl-status-declined-border)" : "1px solid var(--gl-status-pending-border)",
                     transition: "background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",

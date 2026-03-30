@@ -180,7 +180,7 @@ export function DevPanel() {
                 selected={isSelected}
                 onClick={() => dispatch(setGuruStage(stage.value))}
                 sx={{
-                  borderRadius: 0.5,
+                  borderRadius: "8px",
                   mx: 0.5,
                   mb: 0.5,
                   py: 0.75,
@@ -218,7 +218,7 @@ export function DevPanel() {
 
         <List dense sx={{ px: 1, py: 0 }}>
           <ListItemButton
-            sx={{ borderRadius: 0.5, mx: 0.5, mb: 0.5, py: 0.75 }}
+            sx={{ borderRadius: "8px", mx: 0.5, mb: 0.5, py: 0.75 }}
             onClick={() => {
               navigate("/components");
               dispatch(setDevPanelOpen(false));

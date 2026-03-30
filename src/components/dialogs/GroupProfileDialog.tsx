@@ -20,7 +20,7 @@ export function GroupProfileDialog() {
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           <Box
             sx={{
-              borderRadius: "8px",
+              borderRadius: "12px",
               border: 1,
               borderColor: "divider",
               backgroundColor: "hsl(var(--md-surface-container) / 0.3)",
@@ -34,7 +34,7 @@ export function GroupProfileDialog() {
 
           <Box
             sx={{
-              borderRadius: "8px",
+              borderRadius: "12px",
               border: 1,
               borderColor: "divider",
               backgroundColor: "hsl(var(--md-surface))",

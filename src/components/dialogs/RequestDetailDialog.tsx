@@ -43,7 +43,7 @@ export function RequestDetailDialog() {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 0.5 }}>
             <Box
               sx={{
-                borderRadius: "8px",
+                borderRadius: "12px",
                 border: 1,
                 borderColor: "divider",
                 backgroundColor: "hsl(var(--md-surface-container) / 0.3)",
@@ -63,7 +63,7 @@ export function RequestDetailDialog() {
               locationText={requestFocus.location}
               chips={[requestFocus.program, requestFocus.cohort, `Group hint: ${requestFocus.groupHint}`].filter(Boolean)}
               sx={{
-                borderRadius: "8px",
+                borderRadius: "12px",
                 border: 1,
                 borderColor: "divider",
                 backgroundColor: "hsl(var(--md-surface))",

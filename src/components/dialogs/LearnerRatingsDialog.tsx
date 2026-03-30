@@ -320,12 +320,12 @@ export function LearnerRatingsDialog() {
                               </Typography>
                             </Typography>
                           </Stack>
-                          <Box sx={{ height: 4, borderRadius: 0.5, bgcolor: "action.selected", overflow: "hidden" }}>
+                          <Box sx={{ height: 4, borderRadius: "8px", bgcolor: "action.selected", overflow: "hidden" }}>
                             <Box
                               sx={{
                                 height: "100%",
                                 width: `${Math.min(b.actual, b.target)}%`,
-                                borderRadius: 0.5,
+                                borderRadius: "8px",
                                 bgcolor: met ? blue[400] : C.three,
                                 transition: "width 0.4s ease",
                               }}

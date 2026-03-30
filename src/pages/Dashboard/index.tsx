@@ -512,76 +512,56 @@ export default function DashboardPage() {
                     "&::before, &::after": { content: '""', minWidth: 16, flexShrink: 0 },
                   }}
                 >
-                {needsWednesdayConfirm && (
-                  <Box onClick={handleHighlightUnconfirmed} sx={{ cursor: "pointer", width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start" }}>
-                    <TaskCard
-                      chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
-                      chipColor="var(--gl-status-declined-text)"
-                      chipBg="var(--gl-status-declined-bg)"
-                      chipBorder="var(--gl-status-declined-border)"
-                      title="Confirm upcoming activities"
-                      description="Confirm by Wed 6 PM to finalize allocations."
-                      shortDescription="Confirm by Wed 6 PM."
-                    />
-                  </Box>
-                )}
-                {!calendarConnected && (
-                  <Box sx={{ width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start" }}>
-                    <TaskCard
-                      chipLabel="Not connected"
-                      chipColor="var(--gl-status-pending-text)"
-                      chipBg="var(--gl-status-pending-bg)"
-                      chipBorder="var(--gl-status-pending-border)"
-                      title="Avoid double booking"
-                      description="Connect calendar to detect conflicts."
-                      action={
-                        <Button size="small" variant="contained">
-                          Connect Google Calendar
-                        </Button>
-                      }
-                    />
-                  </Box>
-                )}
-                {hasUserConfiguredAvailability ? (
-                  <Box sx={{ width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start", cursor: "pointer" }} onClick={() => dispatch(setOpenAvailability(true))}>
-                    <TaskCard
-                      chipLabel="Configured"
-                      chipColor="var(--gl-status-confirmed-text)"
-                      chipBg="var(--gl-status-confirmed-bg)"
-                      chipBorder="var(--gl-status-confirmed-border)"
-                      title="Availability summary"
-                      description={`${patterns.length} slot${patterns.length !== 1 ? "s" : ""} configured`}
-                    />
-                  </Box>
-                ) : (
-                  <Box sx={{ width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start" }}>
-                    <TaskCard
-                      chipLabel="Needs update"
-                      chipColor="var(--gl-status-declined-text)"
-                      chipBg="var(--gl-status-declined-bg)"
-                      chipBorder="var(--gl-status-declined-border)"
-                      title="Add your availability"
-                      description={`Keep availability up-to-date for next ${rangeDays} days.`}
-                      action={
-                        <Button size="small" variant="contained" onClick={() => dispatch(setOpenAvailability(true))}>
-                          Update availability
-                        </Button>
-                      }
-                    />
-                  </Box>
-                )}
-                {openTicketCount > 0 && (
-                  <Box sx={{ width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start", cursor: "pointer" }} onClick={() => navigate("/support")}>
-                    <TaskCard
-                      chipLabel={`${openTicketCount} open`}
-                      chipColor="var(--gl-status-declined-text)"
-                      chipBg="var(--gl-status-declined-bg)"
-                      chipBorder="var(--gl-status-declined-border)"
-                      title="Support tickets"
-                      description={`${openTicketCount} open ticket${openTicketCount !== 1 ? "s" : ""}${escalatedTicketCount > 0 ? ` · ${escalatedTicketCount} escalated` : ""}`}
-                    />
-                  </Box>
-                )}
+                {/* Priority-sorted task cards:
+                    Confirm pending=true → position 1, false → hidden
+                    Availability configured=false → position 2, true → position 3
+                    Support open=true → position 2, false → hidden
+                    Calendar not connected → last
+                */}
+                {(() => {
+                  const taskCardSx = { width: "70%", minWidth: "70%", maxWidth: "70%", flexShrink: 0, scrollSnapAlign: "start" } as const;
+                  const tasks: { priority: number; key: string; node: React.ReactNode }[] = [];
+
+                  if (needsWednesdayConfirm) {
+                    tasks.push({ priority: 1, key: "confirm", node: (
+                      <Box onClick={handleHighlightUnconfirmed} sx={{ ...taskCardSx, cursor: "pointer" }}>
+                        <TaskCard chipLabel={`${upcomingSessions.length - confirmedCount} pending`} chipColor="var(--gl-status-declined-text)" chipBg="var(--gl-status-declined-bg)" chipBorder="var(--gl-status-declined-border)" title="Confirm upcoming activities" description="Confirm by Wed 6 PM to finalize allocations." shortDescription="Confirm by Wed 6 PM." />
+                      </Box>
+                    )});
+                  }
+
+                  if (!hasUserConfiguredAvailability) {
+                    tasks.push({ priority: 2, key: "avail-setup", node: (
+                      <Box sx={taskCardSx}>
+                        <TaskCard chipLabel="Needs update" chipColor="var(--gl-status-declined-text)" chipBg="var(--gl-status-declined-bg)" chipBorder="var(--gl-status-declined-border)" title="Add your availability" description={`Keep availability up-to-date for next ${rangeDays} days.`} action={<Button size="small" variant="contained" onClick={() => dispatch(setOpenAvailability(true))}>Update availability</Button>} />
+                      </Box>
+                    )});
+                  } else {
+                    tasks.push({ priority: 3, key: "avail-summary", node: (
+                      <Box sx={{ ...taskCardSx, cursor: "pointer" }} onClick={() => dispatch(setOpenAvailability(true))}>
+                        <TaskCard chipLabel="Configured" chipColor="var(--gl-status-confirmed-text)" chipBg="var(--gl-status-confirmed-bg)" chipBorder="var(--gl-status-confirmed-border)" title="Availability summary" description={`${patterns.length} slot${patterns.length !== 1 ? "s" : ""} configured`} />
+                      </Box>
+                    )});
+                  }
+
+                  if (openTicketCount > 0) {
+                    tasks.push({ priority: hasUserConfiguredAvailability ? 2 : 3, key: "support", node: (
+                      <Box sx={{ ...taskCardSx, cursor: "pointer" }} onClick={() => navigate("/support")}>
+                        <TaskCard chipLabel={`${openTicketCount} open`} chipColor="var(--gl-status-declined-text)" chipBg="var(--gl-status-declined-bg)" chipBorder="var(--gl-status-declined-border)" title="Support tickets" description={`${openTicketCount} open ticket${openTicketCount !== 1 ? "s" : ""}${escalatedTicketCount > 0 ? ` · ${escalatedTicketCount} escalated` : ""}`} />
+                      </Box>
+                    )});
+                  }
+
+                  if (!calendarConnected) {
+                    tasks.push({ priority: 4, key: "calendar", node: (
+                      <Box sx={taskCardSx}>
+                        <TaskCard chipLabel="Not connected" chipColor="var(--gl-status-pending-text)" chipBg="var(--gl-status-pending-bg)" chipBorder="var(--gl-status-pending-border)" title="Avoid double booking" description="Connect calendar to detect conflicts." action={<Button size="small" variant="contained">Connect Google Calendar</Button>} />
+                      </Box>
+                    )});
+                  }
+
+                  return tasks.sort((a, b) => a.priority - b.priority).map((t) => <Fragment key={t.key}>{t.node}</Fragment>);
+                })()}
               </Box>
               </Card>
             </Box>
@@ -829,7 +809,7 @@ export default function DashboardPage() {
                                   disableGutters
                                   elevation={0}
                                   defaultExpanded={false}
-                                  sx={{ mt: 1.5, borderRadius: "8px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+                                  sx={{ mt: 1.5, borderRadius: "12px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
                                 >
                                   <AccordionSummary
                                     expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
@@ -881,7 +861,7 @@ export default function DashboardPage() {
                                     cursor: "pointer",
                                     borderTop: 1, borderColor: "divider",
                                     bgcolor: "action.hover",
-                                    borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
+                                    borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
                                     "&:hover": { bgcolor: "action.selected" },
                                     transition: "background-color 0.15s",
                                   }}
@@ -978,7 +958,7 @@ export default function DashboardPage() {
                                       sx={{
                                         mt: 2,
                                         p: 1.75,
-                                        borderRadius: "8px",
+                                        borderRadius: "12px",
                                         bgcolor: "hsl(var(--md-surface-container) / 0.5)",
                                         border: "1px solid",
                                         borderColor: "divider",
@@ -1030,7 +1010,7 @@ export default function DashboardPage() {
                                         </Typography>
                                       </Stack>
                                       {/* SectionCard */}
-                                      <Box sx={{ borderRadius: "4px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
+                                      <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
                                         {/* DetailRow: Batch */}
                                         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                                           <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Batch</Typography>
@@ -1113,7 +1093,7 @@ export default function DashboardPage() {
                                     borderTop: 1,
                                     borderColor: "divider",
                                     bgcolor: "action.hover",
-                                    borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
+                                    borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
                                     "&:hover": { bgcolor: "action.selected" },
                                     transition: "background-color 0.15s",
                                   }}
@@ -1360,7 +1340,7 @@ export default function DashboardPage() {
                                       cursor: "pointer",
                                       borderTop: 1, borderColor: "divider",
                                       bgcolor: "action.hover",
-                                      borderRadius: { xs: "0 0 8px 8px", sm: "0 0 8px 8px" },
+                                      borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
                                       "&:hover": { bgcolor: "action.selected" },
                                       transition: "background-color 0.15s",
                                     }}
@@ -1482,75 +1462,58 @@ export default function DashboardPage() {
             <Card sx={{ p: 2, mb: 2 }}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Tasks</Typography>
               <Stack spacing={2}>
-                {/* Confirm events task */}
-                {needsWednesdayConfirm && (
-                  <Box onClick={handleHighlightUnconfirmed} sx={{ cursor: "pointer" }}>
-                    <TaskCard
-                      chipLabel={`${upcomingSessions.length - confirmedCount} pending`}
-                      chipColor="var(--gl-status-declined-text)"
-                      chipBg="var(--gl-status-declined-bg)"
-                      chipBorder="var(--gl-status-declined-border)"
-                      title="Confirm upcoming activities"
-                      description="Confirm by Wed 6 PM to finalize allocations."
-                    />
-                  </Box>
-                )}
+                {/* Priority-sorted desktop tasks — same logic as mobile */}
+                {(() => {
+                  const dt: { p: number; k: string; n: React.ReactNode }[] = [];
 
-                {/* Calendar connection task */}
-                {!calendarConnected && (
-                  <TaskCard
-                    chipLabel="Not connected"
-                    chipColor="var(--gl-status-pending-text)"
-                    chipBg="var(--gl-status-pending-bg)"
-                    chipBorder="var(--gl-status-pending-border)"
-                    title="Avoid double booking"
-                    description="Connect calendar to detect conflicts."
-                    action={
-                      <Button size="small" variant="contained">
-                        Connect Google Calendar
-                      </Button>
-                    }
-                  />
-                )}
-
-                {/* Availability task */}
-                {hasUserConfiguredAvailability ? (
-                  <Card variant="outlined" sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => dispatch(setOpenAvailability(true))}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight={600}>Availability summary</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {patterns.length} slot{patterns.length !== 1 ? "s" : ""} configured
-                        </Typography>
+                  if (needsWednesdayConfirm) {
+                    dt.push({ p: 1, k: "confirm", n: (
+                      <Box onClick={handleHighlightUnconfirmed} sx={{ cursor: "pointer" }}>
+                        <TaskCard chipLabel={`${upcomingSessions.length - confirmedCount} pending`} chipColor="var(--gl-status-declined-text)" chipBg="var(--gl-status-declined-bg)" chipBorder="var(--gl-status-declined-border)" title="Confirm upcoming activities" description="Confirm by Wed 6 PM to finalize allocations." />
                       </Box>
-                      <Chip label="Configured" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 500, fontSize: "0.75rem" }} />
-                    </Stack>
-                  </Card>
-                ) : (
-                  <TaskCard
-                    chipLabel="Needs update"
-                    chipColor="var(--gl-status-declined-text)"
-                    chipBg="var(--gl-status-declined-bg)"
-                    chipBorder="var(--gl-status-declined-border)"
-                    title="Add your availability"
-                    description={`Keep availability up-to-date for next ${rangeDays} days.`}
-                  />
-                )}
+                    )});
+                  }
 
-                {/* Support tickets task */}
-                {openTicketCount > 0 && (
-                  <Card variant="outlined" sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => navigate("/support")}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight={600}>Support tickets</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {openTicketCount} open ticket{openTicketCount !== 1 ? "s" : ""}{escalatedTicketCount > 0 ? ` · ${escalatedTicketCount} escalated` : ""}
-                        </Typography>
-                      </Box>
-                      <Chip label={`${openTicketCount} open`} size="small" sx={{ bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)", fontWeight: 500, fontSize: "0.75rem" }} />
-                    </Stack>
-                  </Card>
-                )}
+                  if (!hasUserConfiguredAvailability) {
+                    dt.push({ p: 2, k: "avail-setup", n: (
+                      <TaskCard chipLabel="Needs update" chipColor="var(--gl-status-declined-text)" chipBg="var(--gl-status-declined-bg)" chipBorder="var(--gl-status-declined-border)" title="Add your availability" description={`Keep availability up-to-date for next ${rangeDays} days.`} />
+                    )});
+                  } else {
+                    dt.push({ p: 3, k: "avail-summary", n: (
+                      <Card variant="outlined" sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => dispatch(setOpenAvailability(true))}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={600}>Availability summary</Typography>
+                            <Typography variant="caption" color="text.secondary">{patterns.length} slot{patterns.length !== 1 ? "s" : ""} configured</Typography>
+                          </Box>
+                          <Chip label="Configured" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                        </Stack>
+                      </Card>
+                    )});
+                  }
+
+                  if (openTicketCount > 0) {
+                    dt.push({ p: hasUserConfiguredAvailability ? 2 : 3, k: "support", n: (
+                      <Card variant="outlined" sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => navigate("/support")}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={600}>Support tickets</Typography>
+                            <Typography variant="caption" color="text.secondary">{openTicketCount} open ticket{openTicketCount !== 1 ? "s" : ""}{escalatedTicketCount > 0 ? ` · ${escalatedTicketCount} escalated` : ""}</Typography>
+                          </Box>
+                          <Chip label={`${openTicketCount} open`} size="small" sx={{ bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                        </Stack>
+                      </Card>
+                    )});
+                  }
+
+                  if (!calendarConnected) {
+                    dt.push({ p: 4, k: "calendar", n: (
+                      <TaskCard chipLabel="Not connected" chipColor="var(--gl-status-pending-text)" chipBg="var(--gl-status-pending-bg)" chipBorder="var(--gl-status-pending-border)" title="Avoid double booking" description="Connect calendar to detect conflicts." action={<Button size="small" variant="contained">Connect Google Calendar</Button>} />
+                    )});
+                  }
+
+                  return dt.sort((a, b) => a.p - b.p).map((t) => <Fragment key={t.k}>{t.n}</Fragment>);
+                })()}
               </Stack>
             </Card>
 
@@ -1584,7 +1547,7 @@ export default function DashboardPage() {
                     bgcolor: s.bg,
                     border: "1px solid",
                     borderColor: "divider",
-                    borderRadius: 0.5,
+                    borderRadius: "8px",
                     cursor: "pointer",
                     transition: "border-color 0.2s",
                     "&:hover": { borderColor: s.accent },

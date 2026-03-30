@@ -460,7 +460,7 @@ export default function PaymentsPage() {
                     />
                   </TableCell>
                   <TableCell sx={{ fontSize: 11, fontFamily: "monospace", color: "text.secondary", maxWidth: 110 }}>
-                    <MuiTooltip title={p.txn !== "–" ? p.txn : ""} arrow enterDelay={400} slotProps={{ tooltip: { sx: { fontSize: "0.75rem", fontWeight: 500, py: 0.75, px: 1.5, borderRadius: 0.5 } } }}>
+                    <MuiTooltip title={p.txn !== "–" ? p.txn : ""} arrow enterDelay={400} slotProps={{ tooltip: { sx: { fontSize: "0.75rem", fontWeight: 500, py: 0.75, px: 1.5, borderRadius: "8px" } } }}>
                       <Typography variant="body2" sx={{ fontSize: 11, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {p.txn}
                       </Typography>
