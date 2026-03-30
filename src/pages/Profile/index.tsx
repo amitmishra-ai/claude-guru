@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import StarIcon from "@mui/icons-material/Star";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
@@ -117,6 +119,8 @@ function DeltaLabel({ value }: { value: number }) {
 
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
+  const muiTheme = useTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const [loading, setLoading] = useState(true);
   useEffect(() => { const t = setTimeout(() => setLoading(false), 800); return () => clearTimeout(t); }, []);
 
@@ -139,8 +143,10 @@ export default function ProfilePage() {
   const [reportModal, setReportModal] = useState<string | null>(null);
   const [showCourseReport, setShowCourseReport] = useState(false);
   const testimonialRef = useRef<HTMLDivElement>(null);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [shareMonth, setShareMonth] = useState("2026-03");
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareContainerRef = useRef<HTMLDivElement>(null);
+  const [shareScale, setShareScale] = useState(1);
 
   // Generate last 6 months for the share card dropdown
   const shareMonthOptions = useMemo(() => {
@@ -153,6 +159,21 @@ export default function ProfilePage() {
       months.push({ value: val, label: i === 0 ? `${label} (Current)` : label });
     }
     return months;
+  }, []);
+
+  // Measure share card container for scaling
+  const SHARE_CARD_WIDTH = 520;
+  useEffect(() => {
+    const container = shareContainerRef.current;
+    if (!container) return;
+    const measure = () => {
+      const w = container.clientWidth;
+      setShareScale(w >= SHARE_CARD_WIDTH ? 1 : w / SHARE_CARD_WIDTH);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(container);
+    return () => ro.disconnect();
   }, []);
 
   // Seasonal theme config per month
@@ -458,70 +479,28 @@ export default function ProfilePage() {
   }
 
   return (
-    <>
+    <Stack spacing={2}>
       {/* ── Page header ──────────────────────────────────────────────────── */}
-      <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 3, flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 0 } }}>
+      <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start",  flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 0 } }}>
         <Box>
           <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Profile</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Your identity, performance trends, and financial overview.
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1} sx={{ flexShrink: 0, mt: 0.5 }}>
-          <Button
-            variant="soft"
-            size="small"
-            startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
-            sx={{ borderRadius: 1 }}
-            onClick={() => { dispatch(populateDrafts()); dispatch(setOpenProfileEdit(true)); }}
-          >
-            Edit profile
-          </Button>
-          <Box
-            sx={{
-              position: "relative",
-              borderRadius: "12px",
-              padding: "2px",
-              overflow: "hidden",
-              ...(!isNewOrEarly && {
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: "-50%",
-                  left: "-50%",
-                  width: "200%",
-                  height: "200%",
-                  background: "conic-gradient(from 0deg, transparent 0deg, rgba(25,106,229,0.8) 60deg, transparent 120deg)",
-                  animation: `${borderRotate} 2.5s linear infinite`,
-                },
-              }),
-            }}
-          >
-            <MuiTooltip title={isNewOrEarly ? "Share unlocks after your first completed month" : ""} arrow>
-              <span>
-            <Button
-              variant="contained"
-              size="small"
-              disabled={isNewOrEarly}
-              startIcon={<IosShareOutlinedIcon sx={{ fontSize: 14 }} />}
-              onClick={() => setShowShareModal(true)}
-              sx={{
-                borderRadius: "12px",
-                position: "relative",
-                zIndex: 1,
-                width: "100%",
-              }}
-            >
-              Share
-            </Button>
-              </span>
-            </MuiTooltip>
-          </Box>
-        </Stack>
+        <Button
+          variant="soft"
+          size="small"
+          startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
+          sx={{ borderRadius: 1, flexShrink: 0, mt: 0.5 }}
+          onClick={() => { dispatch(populateDrafts()); dispatch(setOpenProfileEdit(true)); }}
+        >
+          Edit profile
+        </Button>
       </FlexBox>
 
       {/* ── Identity card ────────────────────────────────────────────────── */}
-      <Card variant="outlined" sx={{ mb: 4 }}>
+      <Card variant="outlined">
         <CardContent sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 2.5 } }}>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, auto)" }, gap: { xs: 1.5, sm: 4 } }}>
             <Box>
@@ -550,6 +529,260 @@ export default function ProfilePage() {
           </Box>
         </CardContent>
       </Card>
+
+      {/* ══ SHARE YOUR IMPACT ═════════════════════════════════════════════ */}
+      {!isNewOrEarly && (() => {
+        /* Shared card JSX — rendered identically in thumbnail & dialog */
+        const shareCardContent = (
+          <Card
+            elevation={0}
+            sx={{ borderRadius: 1, bgcolor: shareTheme.bg, position: "relative", overflow: "hidden", transition: "background-color 0.4s ease" }}
+          >
+            <Box sx={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: shareTheme.circles[0], opacity: 0.3 }} />
+            <Box sx={{ p: 3, position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+                <Box component="img" src="/gl-logo-navy.svg" alt="Great Learning" sx={{ height: 20 }} />
+                <Typography sx={{ color: shareTheme.headingColor, fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.05em" }}>{shareMonthData.monthLabel}</Typography>
+              </Stack>
+              <Typography sx={{ color: shareTheme.headingColor, letterSpacing: "0.1em", fontWeight: 700, fontSize: "0.45rem", mb: 0.15 }}>GURU SPOTLIGHT</Typography>
+              <Typography sx={{ color: shareTheme.nameColor, fontWeight: 800, fontSize: "1.3rem", lineHeight: 1.1 }}>{guruName}</Typography>
+              <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.65rem", mb: 1.5 }}>Machine Learning · Data Science</Typography>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, flex: 1, minHeight: 0, mb: 1.5 }}>
+                <Stack spacing={1}>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <Box>
+                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.sessions}</Typography>
+                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.7rem", fontWeight: 400, mt: 0.5, lineHeight: 1.43 }}>Sessions delivered this month</Typography>
+                    </Box>
+                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label="Top 10% Gurus" size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }} />
+                  </Box>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <Box>
+                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.hours} Hrs</Typography>
+                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Taught this month</Typography>
+                    </Box>
+                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label="Top 10% Gurus" size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }} />
+                  </Box>
+                </Stack>
+                <Stack spacing={1}>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5 }}>
+                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.learners}</Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Learners taught</Typography>
+                  </Box>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5 }}>
+                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.rating}/5</Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Avg ratings this month</Typography>
+                  </Box>
+                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5 }}>
+                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`}</Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Sessions rated 4+</Typography>
+                  </Box>
+                </Stack>
+              </Box>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pt: 1, borderTop: "1px dashed", borderColor: "rgba(0,0,0,0.08)" }}>
+                <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.55rem", fontWeight: 600 }}>Empowering careers, one lesson at a time.</Typography>
+                <Stack direction="row" alignItems="center" spacing={0.15}>
+                  {[1, 2, 3, 4, 5].map((i) => <StarIcon key={i} sx={{ fontSize: 12, color: "#f59e0b" }} />)}
+                  <Typography sx={{ color: shareTheme.nameColor, fontWeight: 700, fontSize: "0.65rem", ml: 0.25 }}>{shareMonthData.rating}</Typography>
+                </Stack>
+              </Stack>
+            </Box>
+          </Card>
+        );
+
+        const thumbScaleXs = 320 / SHARE_CARD_WIDTH;
+        const thumbScaleSm = 200 / SHARE_CARD_WIDTH;
+        const thumbHXs = Math.round(420 * thumbScaleXs);
+        const thumbHSm = Math.round(420 * thumbScaleSm);
+
+        return (
+        <>
+        <Card variant="outlined" sx={{ borderRadius: "12px" }}>
+          {/* ── Header row: full width ─────────────────────────────────── */}
+          <Box sx={{ px: { xs: 2, sm: 2.5 }, pt: { xs: 1.5, sm: 2 }, pb: 0 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.9rem", sm: "0.95rem" } }}>Share your impact</Typography>
+              <Select
+                size="small"
+                variant="standard"
+                disableUnderline
+                value={shareMonth}
+                onChange={(e) => setShareMonth(e.target.value as string)}
+                sx={{ fontSize: "0.8rem", fontWeight: 600, color: "primary.main", "& .MuiSelect-select": { py: 0.25, pr: "20px !important" }, "& .MuiSvgIcon-root": { color: "primary.main", fontSize: 18 } }}
+              >
+                {shareMonthOptions.map((m) => (
+                  <MenuItem key={m.value} value={m.value} sx={{ fontSize: "0.8rem" }}>{m.label}</MenuItem>
+                ))}
+              </Select>
+            </Stack>
+          </Box>
+
+          {/* ── Content grid: thumbnail | stats + actions ──────────────── */}
+          <Box sx={{
+            px: { xs: 2, sm: 2.5 },
+            py: { xs: 1.5, sm: 2 },
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "200px 1fr" },
+            gap: { xs: 1.5, sm: 2.5 },
+            alignItems: "start",
+          }}>
+            {/* Thumbnail — pixel-perfect scaled card */}
+            <Box
+              onClick={() => setShareOpen(true)}
+              sx={{
+                justifySelf: { xs: "center", sm: "start" },
+                width: { xs: 320, sm: 200 },
+                height: { xs: thumbHXs, sm: thumbHSm },
+                flexShrink: 0,
+                overflow: "hidden",
+                cursor: "pointer",
+                position: "relative",
+                borderRadius: "8px",
+                "&:hover .share-thumb-overlay": { opacity: 1 },
+              }}
+            >
+              <Box sx={{ width: SHARE_CARD_WIDTH, height: 420, transform: { xs: `scale(${thumbScaleXs})`, sm: `scale(${thumbScaleSm})` }, transformOrigin: "top left", pointerEvents: "none" }}>
+                {shareCardContent}
+              </Box>
+              <Box
+                className="share-thumb-overlay"
+                sx={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  bgcolor: "rgba(0,0,0,0.35)", opacity: 0,
+                  transition: "opacity 0.2s",
+                  borderRadius: "8px",
+                }}
+              >
+                <Stack alignItems="center" spacing={0.5}>
+                  <VisibilityOutlinedIcon sx={{ fontSize: 22, color: "#fff" }} />
+                  <Typography sx={{ fontSize: "0.65rem", color: "#fff", fontWeight: 600 }}>Preview</Typography>
+                </Stack>
+              </Box>
+            </Box>
+
+            {/* Stats + actions column */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, sm: 1.5 } }}>
+              {/* Stats section */}
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: "0.875rem", fontWeight: 600, mb: 0.75 }}>Your month at a glance</Typography>
+                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: { xs: 0.5, sm: 0.75 } }}>
+                {[
+                  { value: shareMonthData.sessions, label: "Sessions", color: "#196ae5" },
+                  { value: `${shareMonthData.hours}h`, label: "Hours", color: "#16a34a" },
+                  { value: shareMonthData.learners, label: "Learners", color: "#7c3aed" },
+                  { value: `${shareMonthData.rating}`, label: "Rating", color: "#f59e0b" },
+                  { value: shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`, label: "4+ rated", color: "#0ea5e9" },
+                ].map((s) => (
+                  <Box key={s.label} sx={{ textAlign: "center", py: { xs: 1, sm: 1.25 }, px: 0.5, borderRadius: "8px", bgcolor: `${s.color}0a`, border: "1px solid", borderColor: `${s.color}14` }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.95rem", sm: "1.15rem" }, lineHeight: 1, color: s.color, letterSpacing: "-0.02em" }}>{s.value}</Typography>
+                    <Typography sx={{ fontSize: { xs: "0.5rem", sm: "0.6rem" }, color: "text.secondary", mt: 0.25, fontWeight: 500 }}>{s.label}</Typography>
+                  </Box>
+                ))}
+              </Box>
+              </Box>
+
+              {/* Actions section */}
+              <Box>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem", fontWeight: 500, mb: 0.75, display: "block" }}>Download your stats card or share directly to social media.</Typography>
+                <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", gap: 0.75 }}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<IosShareOutlinedIcon sx={{ fontSize: 14 }} />}
+                    onClick={() => setShareOpen(true)}
+                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: { xs: "0.7rem", sm: "0.75rem" }, px: { xs: 1.5, sm: 2 }, py: 0.6 }}
+                  >
+                    Preview & share
+                  </Button>
+                  <Button variant="soft" size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 14 }} />} sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: { xs: "0.7rem", sm: "0.75rem" }, px: 1.5, minWidth: 0 }}>Download</Button>
+                  </Stack>
+              </Box>
+            </Box>
+          </Box>
+        </Card>
+
+        {/* ── Share Impact Dialog ─────────────────────────────────────── */}
+        <Dialog
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          fullScreen={isMobile}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{ sx: { borderRadius: isMobile ? 0 : 1, ...(!isMobile && { maxWidth: 560 }) } }}
+        >
+          <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 3 }, pb: 0 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+              <Box>
+                <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Share your impact</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Download your stats card or share directly to social media.
+                </Typography>
+              </Box>
+              <IconButton size="small" onClick={() => setShareOpen(false)}>
+                <CloseIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Stack>
+          </Box>
+
+          <DialogContent sx={{ px: { xs: 2, sm: 3 }, pt: 2.5, display: "flex", flexDirection: "column", alignItems: { xs: "center", sm: "stretch" } }}>
+            {/* Month selector */}
+            <Select
+              size="small"
+              variant="standard"
+              disableUnderline
+              value={shareMonth}
+              onChange={(e) => setShareMonth(e.target.value as string)}
+              sx={{ fontSize: "0.9rem", fontWeight: 600, color: "primary.main", mb: 1.5, alignSelf: "flex-start", "& .MuiSelect-select": { py: 0.5 }, "& .MuiSvgIcon-root": { color: "primary.main" } }}
+            >
+              {shareMonthOptions.map((m) => (
+                <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>
+              ))}
+            </Select>
+
+            {/* Preview card — 340px on mobile via transform scale, zoom on desktop */}
+            {isMobile ? (
+              <Box sx={{ width: 340, height: Math.round(420 * (340 / SHARE_CARD_WIDTH)), overflow: "hidden", mb: 3, borderRadius: "8px" }}>
+                <Box sx={{ width: SHARE_CARD_WIDTH, height: 420, transform: `scale(${340 / SHARE_CARD_WIDTH})`, transformOrigin: "top left" }}>
+                  {shareCardContent}
+                </Box>
+              </Box>
+            ) : (
+              <Box ref={shareContainerRef} sx={{ mb: 3 }}>
+                <Box sx={{ width: SHARE_CARD_WIDTH, zoom: shareScale }}>
+                  {shareCardContent}
+                </Box>
+              </Box>
+            )}
+
+            {/* Download */}
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              startIcon={<DownloadOutlinedIcon />}
+              sx={{ borderRadius: "8px", mb: 2.5, textTransform: "none", fontWeight: 600, maxWidth: { xs: 340, sm: "none" } }}
+            >
+              Download stats card
+            </Button>
+
+            {/* Social share buttons */}
+            <Stack direction="row" spacing={1} sx={{ width: "100%", maxWidth: { xs: 340, sm: "none" } }}>
+              <Button variant="soft" size="small" startIcon={<LinkedInIcon sx={{ fontSize: 16 }} />} sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, flex: 1 }}>
+                LinkedIn
+              </Button>
+              <Button variant="soft" size="small" startIcon={<XIcon sx={{ fontSize: 14 }} />} sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, flex: 1 }}>
+                X
+              </Button>
+              <Button variant="soft" size="small" startIcon={<FacebookIcon sx={{ fontSize: 16 }} />} sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, flex: 1 }}>
+                Facebook
+              </Button>
+            </Stack>
+          </DialogContent>
+        </Dialog>
+        </>
+        );
+      })()}
 
       {/* ══ PERFORMANCE SECTION ════════════════════════════════════════════ */}
       <FlexBox sx={{ justifyContent: "space-between", alignItems: "baseline", mb: 1.5 }}>
@@ -763,7 +996,7 @@ export default function ProfilePage() {
 
       {/* ── Testimonials horizontal scroll ────────────────────────────── */}
       {isNewOrEarly ? (
-        <Paper variant="outlined" sx={{ p: 3, mb: 3, textAlign: "center", borderStyle: "dashed", borderColor: "divider" }}>
+        <Paper variant="outlined" sx={{ p: 3,  textAlign: "center", borderStyle: "dashed", borderColor: "divider" }}>
           <Typography variant="body2" color="text.secondary" fontWeight={500}>
             Your learner testimonials will appear here after your first few sessions.
           </Typography>
@@ -850,7 +1083,7 @@ export default function ProfilePage() {
       {/* Rating trend chart */}
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent sx={{ p: 2.5 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2, fontSize: { xs: "0.875rem", sm: "1rem" } }}>Rating trend (last 6 months)</Typography>
+          <Typography variant="subtitle1" fontWeight={600} sx={{  fontSize: { xs: "0.875rem", sm: "1rem" } }}>Rating trend (last 6 months)</Typography>
 
           {isNewOrEarly ? (
             <EmptyState
@@ -1039,7 +1272,7 @@ export default function ProfilePage() {
       {/* Monthly matrix — compact heatmap */}
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent sx={{ p: 2.5 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2, fontSize: { xs: "0.875rem", sm: "1rem" } }}>Monthly matrix</Typography>
+          <Typography variant="subtitle1" fontWeight={600} sx={{  fontSize: { xs: "0.875rem", sm: "1rem" } }}>Monthly matrix</Typography>
           <TableContainer>
             <Table size="small" sx={{ tableLayout: "auto" }}>
               <TableHead>
@@ -1088,7 +1321,7 @@ export default function ProfilePage() {
       </FlexBox>
 
       {isNewUser ? (
-        <Paper variant="outlined" sx={{ p: 3, mb: 4, textAlign: "center", borderStyle: "dashed", borderColor: "divider" }}>
+        <Paper variant="outlined" sx={{ p: 3,  textAlign: "center", borderStyle: "dashed", borderColor: "divider" }}>
           <Typography variant="body2" color="text.disabled">
             No active contracts. Your program contracts will appear here once assigned.
           </Typography>
@@ -1231,202 +1464,6 @@ export default function ProfilePage() {
             Save
           </Button>
         </DialogActions>
-      </Dialog>
-
-      {/* ── Share Impact Modal ────────────────────────────────────────────── */}
-      <Dialog
-        open={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: 1, maxWidth: 560 } }}
-      >
-        <Box sx={{ px: 3, pt: 3, pb: 0 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-            <Box>
-              <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Share your impact</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                Download your stats card or share directly to social media.
-              </Typography>
-            </Box>
-            <IconButton size="small" onClick={() => setShowShareModal(false)}>
-              <CloseIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Stack>
-        </Box>
-
-        <DialogContent sx={{ px: 3, pt: 2.5 }}>
-          {/* Month selector */}
-          <Select
-            size="small"
-            variant="standard"
-            disableUnderline
-            value={shareMonth}
-            onChange={(e) => setShareMonth(e.target.value as string)}
-            sx={{ fontSize: "0.9rem", fontWeight: 600, color: "primary.main", mb: 1.5, "& .MuiSelect-select": { py: 0.5 }, "& .MuiSvgIcon-root": { color: "primary.main" } }}
-          >
-            {shareMonthOptions.map((m) => (
-              <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>
-            ))}
-          </Select>
-
-          {/* Preview card — 4:3 landscape */}
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 1,
-              mb: 3,
-              bgcolor: shareTheme.bg,
-              position: "relative",
-              overflow: "hidden",
-              transition: "background-color 0.4s ease",
-            }}
-          >
-            {/* Subtle decorative accent */}
-            <Box sx={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: shareTheme.circles[0], opacity: 0.3 }} />
-
-            <Box sx={{ p: 3, position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
-              {/* Row 1: Logo + Month */}
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-                <Box component="img" src="/gl-logo-navy.svg" alt="Great Learning" sx={{ height: 20 }} />
-                <Typography sx={{ color: shareTheme.headingColor, fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.05em" }}>
-                  {shareMonthData.monthLabel}
-                </Typography>
-              </Stack>
-
-              {/* Row 2: Name + subtitle */}
-              <Typography sx={{ color: shareTheme.headingColor, letterSpacing: "0.1em", fontWeight: 700, fontSize: "0.45rem", mb: 0.15 }}>
-                GURU SPOTLIGHT
-              </Typography>
-              <Typography sx={{ color: shareTheme.nameColor, fontWeight: 800, fontSize: "1.3rem", lineHeight: 1.1 }}>
-                {guruName}
-              </Typography>
-              <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.65rem", mb: 1.5 }}>
-                Machine Learning · Data Science
-              </Typography>
-
-              {/* Row 3: Bento stats grid */}
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, flex: 1, minHeight: 0, mb: 1.5 }}>
-                {/* Left column — 2 tall cards with chips */}
-                <Stack spacing={1}>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                    <Box>
-                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
-                        {shareMonthData.sessions}
-                      </Typography>
-                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.7rem", fontWeight: 400, mt: 0.5, lineHeight: 1.43 }}>
-                        Sessions delivered this month
-                      </Typography>
-                    </Box>
-                    <Chip
-                      icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}
-                      label="Top 10% Gurus"
-                      size="small"
-                      variant="outlined"
-                      sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }}
-                    />
-                  </Box>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                    <Box>
-                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
-                        {shareMonthData.hours} Hrs
-                      </Typography>
-                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>
-                        Taught this month
-                      </Typography>
-                    </Box>
-                    <Chip
-                      icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}
-                      label="Top 10% Gurus"
-                      size="small"
-                      variant="outlined"
-                      sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }}
-                    />
-                  </Box>
-                </Stack>
-                {/* Right column — 3 shorter cards */}
-                <Stack spacing={1}>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5 }}>
-                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
-                      {shareMonthData.learners}
-                    </Typography>
-                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>
-                      Learners taught
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5 }}>
-                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
-                      {shareMonthData.rating}/5
-                    </Typography>
-                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>
-                      Avg ratings this month
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5 }}>
-                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>
-                      {shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`}
-                    </Typography>
-                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>
-                      Sessions rated 4+
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Box>
-
-              {/* Row 4: Footer */}
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pt: 1, borderTop: "1px dashed", borderColor: "rgba(0,0,0,0.08)" }}>
-                <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.55rem", fontWeight: 600 }}>
-                  Empowering careers, one lesson at a time.
-                </Typography>
-                <Stack direction="row" alignItems="center" spacing={0.15}>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <StarIcon key={i} sx={{ fontSize: 12, color: "#f59e0b" }} />
-                  ))}
-                  <Typography sx={{ color: shareTheme.nameColor, fontWeight: 700, fontSize: "0.65rem", ml: 0.25 }}>{shareMonthData.rating}</Typography>
-                </Stack>
-              </Stack>
-            </Box>
-          </Card>
-
-          {/* Download */}
-          <Button
-            fullWidth
-            variant="contained"
-            size="large"
-            startIcon={<DownloadOutlinedIcon />}
-            sx={{ borderRadius: "8px", mb: 2.5, textTransform: "none", fontWeight: 600 }}
-          >
-            Download stats card
-          </Button>
-
-          {/* Social share buttons */}
-          <Stack direction="row" spacing={1}>
-            <Button
-              variant="soft"
-              size="small"
-              startIcon={<LinkedInIcon sx={{ fontSize: 16 }} />}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, flex: 1 }}
-            >
-              LinkedIn
-            </Button>
-            <Button
-              variant="soft"
-              size="small"
-              startIcon={<XIcon sx={{ fontSize: 14 }} />}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, flex: 1 }}
-            >
-              X
-            </Button>
-            <Button
-              variant="soft"
-              size="small"
-              startIcon={<FacebookIcon sx={{ fontSize: 16 }} />}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, flex: 1 }}
-            >
-              Facebook
-            </Button>
-          </Stack>
-        </DialogContent>
       </Dialog>
 
       {/* ── Course Performance Report Modal ────────────────────────────────── */}
@@ -1672,6 +1709,6 @@ export default function ProfilePage() {
           </Dialog>
         );
       })()}
-    </>
+    </Stack>
   );
 }
