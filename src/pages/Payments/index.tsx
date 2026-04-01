@@ -245,9 +245,9 @@ export default function PaymentsPage() {
             gap: 1,
             cursor: "pointer",
             userSelect: "none",
-            bgcolor: showNumbers ? "transparent" : "action.hover",
+            bgcolor: showNumbers ? "action.hover" : "transparent",
             border: "1px solid",
-            borderColor: showNumbers ? "divider" : "text.disabled",
+            borderColor: showNumbers ? "text.disabled" : "divider",
             borderRadius: "20px",
             pl: 1.5,
             pr: 0.5,
@@ -255,13 +255,13 @@ export default function PaymentsPage() {
             transition: "all 0.2s ease",
           }}
         >
-          <VisibilityOffOutlinedIcon sx={{ fontSize: 16, color: "text.secondary", opacity: showNumbers ? 0.5 : 1, transition: "opacity 0.2s" }} />
+          <VisibilityOffOutlinedIcon sx={{ fontSize: 16, color: "text.secondary", opacity: showNumbers ? 1 : 0.5, transition: "opacity 0.2s" }} />
           <Typography variant="caption" sx={{ fontSize: "0.75rem", fontWeight: 600, color: "text.secondary", whiteSpace: "nowrap" }}>
-            {showNumbers ? "Hide values" : "Hidden"}
+            Show values
           </Typography>
           <Switch
             size="small"
-            checked={!showNumbers}
+            checked={showNumbers}
             onChange={() => setShowNumbers((v) => !v)}
             sx={{
               width: 32,
