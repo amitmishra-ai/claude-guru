@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
@@ -303,7 +304,7 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd,
           }}
         >
           <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
-          <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+          <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
         </Box>
       )}
     </Card>

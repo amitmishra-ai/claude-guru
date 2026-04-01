@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import Box from "@mui/material/Box";
@@ -279,7 +280,7 @@ export function SessionCard({
       }}
     >
       {secondaryAction}
-      <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+      <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
     </Box>
   );
 
@@ -306,7 +307,7 @@ export function SessionCard({
       }}
     >
       <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
-      <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+      <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
     </Box>
   );
 

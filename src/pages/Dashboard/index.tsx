@@ -1,6 +1,7 @@
 import { Fragment, useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import Skeleton from "@mui/material/Skeleton";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
@@ -867,7 +868,7 @@ export default function DashboardPage() {
                                   }}
                                 >
                                   <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
-                                  <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+                                  <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
                                 </Box>
                                 </>
                               )}
@@ -1099,7 +1100,7 @@ export default function DashboardPage() {
                                   }}
                                 >
                                   <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
-                                  <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+                                  <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
                                 </Box>
                               </Card>
                             );
@@ -1346,7 +1347,7 @@ export default function DashboardPage() {
                                     }}
                                   >
                                     <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
-                                    <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
+                                    <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
                                   </Box>
                                 </>
                               ) : (
