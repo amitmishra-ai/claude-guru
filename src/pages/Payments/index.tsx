@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import Switch from "@mui/material/Switch";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -123,6 +125,8 @@ const demoPayments = [...completedSessionPayments, ...generatedPayments];
 const fmtInr = (n: number) =>
   `₹${n.toLocaleString("en-IN")}`;
 
+const maskValue = (val: string) => val.replace(/[0-9]/g, "•");
+
 const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** Show 12 months starting from the guru's first earning month. Empty future months get amount 0. */
@@ -161,6 +165,7 @@ export default function PaymentsPage() {
   const [page, setPage] = useState(0);
   const [chartLoading, setChartLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(true);
+  const [showNumbers, setShowNumbers] = useState(false);
   const rowsPerPage = 30;
 
   // Dispute state
@@ -233,6 +238,47 @@ export default function PaymentsPage() {
             Track your month-on-month payouts and event-wise details.
           </Typography>
         </Box>
+        <FlexBox
+          component="label"
+          sx={{
+            alignItems: "center",
+            gap: 1,
+            cursor: "pointer",
+            userSelect: "none",
+            bgcolor: showNumbers ? "transparent" : "action.hover",
+            border: "1px solid",
+            borderColor: showNumbers ? "divider" : "text.disabled",
+            borderRadius: "20px",
+            pl: 1.5,
+            pr: 0.5,
+            py: 0.25,
+            transition: "all 0.2s ease",
+          }}
+        >
+          <VisibilityOffOutlinedIcon sx={{ fontSize: 16, color: "text.secondary", opacity: showNumbers ? 0.5 : 1, transition: "opacity 0.2s" }} />
+          <Typography variant="caption" sx={{ fontSize: "0.75rem", fontWeight: 600, color: "text.secondary", whiteSpace: "nowrap" }}>
+            {showNumbers ? "Hide values" : "Hidden"}
+          </Typography>
+          <Switch
+            size="small"
+            checked={!showNumbers}
+            onChange={() => setShowNumbers((v) => !v)}
+            sx={{
+              width: 32,
+              height: 18,
+              p: 0,
+              "& .MuiSwitch-switchBase": {
+                p: "2px",
+                "&.Mui-checked": {
+                  transform: "translateX(14px)",
+                  "& + .MuiSwitch-track": { bgcolor: "primary.main", opacity: 0.35 },
+                },
+              },
+              "& .MuiSwitch-thumb": { width: 14, height: 14, boxShadow: "none" },
+              "& .MuiSwitch-track": { borderRadius: 9, bgcolor: "action.disabled", opacity: 1 },
+            }}
+          />
+        </FlexBox>
       </FlexBox>
 
       {/* ── Earnings overview + chart ── */}
@@ -259,7 +305,7 @@ export default function PaymentsPage() {
             <>
               <FlexBox sx={{ alignItems: "center", gap: 2, mb: 1.5, flexWrap: "wrap" }}>
                 <Box>
-                  <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1.2 }}>{fmtInr(totalEarnings)}</Typography>
+                  <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1.2 }}>{showNumbers ? fmtInr(totalEarnings) : maskValue(fmtInr(totalEarnings))}</Typography>
                   <Typography variant="caption" color="text.secondary">Total earnings</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
@@ -271,7 +317,7 @@ export default function PaymentsPage() {
                   <Box key={k.label} sx={{ minWidth: 100 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>{k.label}</Typography>
                     <Typography variant="body2" fontWeight={600} sx={{ color: (k as any).color ?? "text.primary", fontSize: "0.8rem" }}>
-                      {k.value}
+                      {showNumbers ? k.value : maskValue(k.value)}
                     </Typography>
                   </Box>
                 ))}
@@ -288,7 +334,7 @@ export default function PaymentsPage() {
                 />
                 <YAxis
                   tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={(v) => showNumbers ? `${(v / 1000).toFixed(0)}k` : "••"}
                   axisLine={false}
                   tickLine={false}
                 />
@@ -297,10 +343,11 @@ export default function PaymentsPage() {
                   content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
                     const val = Number(payload[0].value ?? 0);
+                    const amtStr = val > 0 ? fmtInr(val) : "–";
                     return (
                       <Chip
                         size="small"
-                        label={val > 0 ? `${label} · ${fmtInr(val)}` : `${label} · –`}
+                        label={`${label} · ${showNumbers ? amtStr : maskValue(amtStr)}`}
                         sx={{
                           fontSize: 11,
                           fontWeight: 600,
@@ -441,7 +488,7 @@ export default function PaymentsPage() {
                     />
                   </TableCell>
                   <TableCell sx={{ fontSize: 12 }}>{p.dur}</TableCell>
-                  <TableCell sx={{ fontSize: 12, fontWeight: 600 }}>{fmtInr(p.amount)}</TableCell>
+                  <TableCell sx={{ fontSize: 12, fontWeight: 600 }}>{showNumbers ? fmtInr(p.amount) : maskValue(fmtInr(p.amount))}</TableCell>
                   <TableCell>
                     <Chip
                       label={p.status}
@@ -460,9 +507,9 @@ export default function PaymentsPage() {
                     />
                   </TableCell>
                   <TableCell sx={{ fontSize: 11, fontFamily: "monospace", color: "text.secondary", maxWidth: 110 }}>
-                    <MuiTooltip title={p.txn !== "–" ? p.txn : ""} arrow enterDelay={400} slotProps={{ tooltip: { sx: { fontSize: "0.75rem", fontWeight: 500, py: 0.75, px: 1.5, borderRadius: "8px" } } }}>
+                    <MuiTooltip title={showNumbers && p.txn !== "–" ? p.txn : ""} arrow enterDelay={400} slotProps={{ tooltip: { sx: { fontSize: "0.75rem", fontWeight: 500, py: 0.75, px: 1.5, borderRadius: "8px" } } }}>
                       <Typography variant="body2" sx={{ fontSize: 11, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {p.txn}
+                        {showNumbers ? p.txn : (p.txn === "–" ? "–" : maskValue(p.txn))}
                       </Typography>
                     </MuiTooltip>
                   </TableCell>
@@ -474,7 +521,7 @@ export default function PaymentsPage() {
                           startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 12 }} />}
                           sx={{ fontSize: 11, textTransform: "none", p: 0, color: "text.secondary" }}
                         >
-                          {p.inv.length > 7 ? `${p.inv.slice(0, 7)}…` : p.inv}
+                          {showNumbers ? (p.inv.length > 7 ? `${p.inv.slice(0, 7)}…` : p.inv) : maskValue(p.inv.length > 7 ? `${p.inv.slice(0, 7)}…` : p.inv)}
                         </Button>
                         <IconButton size="small" sx={{ p: 0.25 }}>
                           <FileDownloadOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
@@ -556,7 +603,7 @@ export default function PaymentsPage() {
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Amount</Typography>
-                <Typography variant="body2" fontWeight={600}>{fmtInr(disputeModal.amount)}</Typography>
+                <Typography variant="body2" fontWeight={600}>{showNumbers ? fmtInr(disputeModal.amount) : maskValue(fmtInr(disputeModal.amount))}</Typography>
               </Box>
               <FormControl size="small" fullWidth>
                 <InputLabel>Reason</InputLabel>
