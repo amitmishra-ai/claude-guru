@@ -7,23 +7,27 @@ import IconButton from "@mui/material/IconButton";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { blue, green, grey, orange, red } from "@mui/material/colors";
+import { useTheme } from "@mui/material/styles";
+import type { SxProps, Theme } from "@mui/material/styles";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setOpenLearnerRatings, setLearnerRatingsSessionId } from "@/store/slices/uiSlice";
 import { demoLearnerRatingsBySessionId, demoFeedbackSummaryBySessionId } from "@/data/demo-sessions";
 
-/* ── Palette — MUI color tokens ── */
-const C = {
-  five: green[400],
-  four: orange[400],
-  three: red[400],
-} as const;
+/* ── Palette — derived from theme ── */
+function useRatingColors() {
+  const theme = useTheme();
+  return {
+    five: theme.palette.success.main,
+    four: theme.palette.warning.main,
+    three: theme.palette.error.main,
+  } as const;
+}
 
 type Filter = "5star" | "4star" | "3below";
 
 /* ── Card shell — uses theme tokens, not hardcoded colors ── */
-function Card({ children, sx }: { children: React.ReactNode; sx?: object }) {
+function Card({ children, sx }: { children: React.ReactNode; sx?: SxProps<Theme> }) {
   return (
     <Box
       sx={{
@@ -50,17 +54,19 @@ function Dot({ color, label }: { color: string; label: string }) {
   );
 }
 
+type RatingColors = ReturnType<typeof useRatingColors>;
+
 /* ── Stacked bar row ── */
-function ParamRow({ label, five, four, three, maxTotal }: {
-  label: string; five: number; four: number; three: number; maxTotal: number;
+function ParamRow({ label, five, four, three, maxTotal, colors }: {
+  label: string; five: number; four: number; three: number; maxTotal: number; colors: RatingColors;
 }) {
   const total = five + four + three;
   if (total === 0) return null;
   const barWidthPct = maxTotal > 0 ? (total / maxTotal) * 100 : 100;
   const segs = [
-    { v: five, c: C.five, tc: "#1b3a1b" },
-    { v: four, c: C.four, tc: "#3e2600" },
-    { v: three, c: C.three, tc: "#fff" },
+    { v: five, c: colors.five, tc: "common.white" },
+    { v: four, c: colors.four, tc: "common.white" },
+    { v: three, c: colors.three, tc: "common.white" },
   ].filter((s) => s.v > 0);
 
   return (
@@ -94,6 +100,7 @@ function ParamRow({ label, five, four, three, maxTotal }: {
 }
 
 export function LearnerRatingsDialog() {
+  const C = useRatingColors();
   const dispatch = useAppDispatch();
   const open = useAppSelector((s) => s.ui.openLearnerRatings);
   const sessionId = useAppSelector((s) => s.ui.learnerRatingsSessionId);
@@ -213,7 +220,7 @@ export function LearnerRatingsDialog() {
                           key={i}
                           sx={{
                             fontSize: 16,
-                            color: i <= Math.round(Number(avgRating)) ? "#f59e0b" : "action.disabled",
+                            color: i <= Math.round(Number(avgRating)) ? "var(--gl-star-color)" : "action.disabled",
                           }}
                         />
                       ))}
@@ -313,7 +320,7 @@ export function LearnerRatingsDialog() {
                             <Typography variant="caption" sx={{ fontSize: "0.72rem", color: "text.primary" }}>
                               {b.label}
                             </Typography>
-                            <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.72rem", color: met ? blue[400] : C.three }}>
+                            <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.72rem", color: met ? "info.main" : C.three }}>
                               {b.actual.toFixed(1)}%
                               <Typography component="span" variant="caption" color="text.secondary" sx={{ fontSize: "0.62rem", fontWeight: 400 }}>
                                 {" "}/ {b.target}% target
@@ -326,7 +333,7 @@ export function LearnerRatingsDialog() {
                                 height: "100%",
                                 width: `${Math.min(b.actual, b.target)}%`,
                                 borderRadius: "8px",
-                                bgcolor: met ? blue[400] : C.three,
+                                bgcolor: met ? "info.main" : C.three,
                                 transition: "width 0.4s ease",
                               }}
                             />
@@ -357,6 +364,7 @@ export function LearnerRatingsDialog() {
                       four={p.fourStar}
                       three={p.threeAndBelow}
                       maxTotal={maxParamTotal}
+                      colors={C}
                     />
                   ))}
                 </Card>
@@ -384,7 +392,7 @@ export function LearnerRatingsDialog() {
                           fontWeight: 600, fontSize: "0.68rem", cursor: "pointer",
                           borderRadius: 1, height: 28,
                           bgcolor: active ? t.c : "transparent",
-                          color: active ? "#fff" : "text.secondary",
+                          color: active ? "common.white" : "text.secondary",
                           border: "1.5px solid",
                           borderColor: active ? t.c : "divider",
                           "&:hover": { bgcolor: active ? t.c : "action.hover" },

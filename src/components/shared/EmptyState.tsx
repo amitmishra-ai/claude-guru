@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { keyframes } from "@mui/system";
@@ -45,15 +46,9 @@ export function EmptyState({ icon, title, subtitle, action, compact }: EmptyStat
         position: "relative",
         overflow: "hidden",
         /* Soft elevated container — no dashed border */
-        bgcolor: (t) =>
-          t.palette.mode === "light"
-            ? "rgba(25, 106, 229, 0.018)"
-            : "rgba(102, 187, 255, 0.025)",
+        bgcolor: (t) => alpha(t.palette.primary.main, t.palette.mode === "light" ? 0.018 : 0.025),
         border: "1px solid",
-        borderColor: (t) =>
-          t.palette.mode === "light"
-            ? "rgba(25, 106, 229, 0.07)"
-            : "rgba(102, 187, 255, 0.08)",
+        borderColor: (t) => alpha(t.palette.primary.main, t.palette.mode === "light" ? 0.07 : 0.08),
         /* Entry animation */
         animation: `${fadeUp} 0.5s cubic-bezier(0.22, 1, 0.36, 1) both`,
       }}
@@ -65,10 +60,7 @@ export function EmptyState({ icon, title, subtitle, action, compact }: EmptyStat
           inset: 0,
           backgroundImage: DOT_BG,
           backgroundSize: "18px 18px",
-          color: (t) =>
-            t.palette.mode === "light"
-              ? "rgba(25, 106, 229, 0.04)"
-              : "rgba(102, 187, 255, 0.04)",
+          color: (t) => alpha(t.palette.primary.main, 0.04),
           pointerEvents: "none",
         }}
       />
@@ -84,9 +76,7 @@ export function EmptyState({ icon, title, subtitle, action, compact }: EmptyStat
           height: 220,
           borderRadius: "50%",
           background: (t) =>
-            t.palette.mode === "light"
-              ? "radial-gradient(circle, rgba(25,106,229,0.06) 0%, transparent 70%)"
-              : "radial-gradient(circle, rgba(102,187,255,0.06) 0%, transparent 70%)",
+            `radial-gradient(circle, ${alpha(t.palette.primary.main, 0.06)} 0%, transparent 70%)`,
           pointerEvents: "none",
         }}
       />
@@ -103,10 +93,7 @@ export function EmptyState({ icon, title, subtitle, action, compact }: EmptyStat
             height: 64,
             borderRadius: "50%",
             mb: 2,
-            bgcolor: (t) =>
-              t.palette.mode === "light"
-                ? "rgba(25, 106, 229, 0.07)"
-                : "rgba(102, 187, 255, 0.08)",
+            bgcolor: (t) => alpha(t.palette.primary.main, t.palette.mode === "light" ? 0.07 : 0.08),
             color: "primary.main",
             animation: `${subtlePulse} 4s ease-in-out infinite`,
             "& > svg, & > .MuiSvgIcon-root": {

@@ -64,7 +64,7 @@ export function MobileAppBar() {
                 fontSize: "0.6rem",
                 fontWeight: 700,
                 bgcolor: "primary.main",
-                color: "#fff",
+                color: "primary.contrastText",
               }}
             >
               {initials}

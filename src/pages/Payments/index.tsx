@@ -454,7 +454,7 @@ export default function PaymentsPage() {
                         ...(p.status === "Completed"
                           ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" }
                           : p.status === "Disputed"
-                            ? { bgcolor: "#fff3e0", color: "#e65100" }
+                            ? { bgcolor: "var(--gl-status-disputed-bg)", color: "var(--gl-status-disputed-text)" }
                             : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)" }),
                       }}
                     />
@@ -493,7 +493,7 @@ export default function PaymentsPage() {
                       if (isDisputed) {
                         return (
                           <MuiTooltip title={`Reason: ${disputes[(p as { _idx: number })._idx].reason}`} arrow>
-                            <InfoOutlinedIcon sx={{ fontSize: 16, color: "#e65100", cursor: "pointer" }} />
+                            <InfoOutlinedIcon sx={{ fontSize: 16, color: "var(--gl-status-disputed-text)", cursor: "pointer" }} />
                           </MuiTooltip>
                         );
                       }

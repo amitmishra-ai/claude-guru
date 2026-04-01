@@ -342,7 +342,7 @@ function SidebarPanel({
         overflow: "hidden",
         background: STEP_GRADIENTS[currentStep] || STEP_GRADIENTS[0],
         transition: "background 0.6s ease",
-        color: "#fff",
+        color: "common.white",
       }}
     >
       {/* Decorative circles */}
@@ -456,7 +456,7 @@ function SidebarPanel({
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                bgcolor: "#fff",
+                bgcolor: "common.white",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -498,7 +498,7 @@ function SidebarPanel({
             sx={{
               height: "100%",
               borderRadius: "8px",
-              bgcolor: hasReachedBottom ? "#6ee7b7" : "#fff",
+              bgcolor: hasReachedBottom ? "success.light" : "common.white",
               width: `${scrollProgress}%`,
               transition: "width 0.15s linear, background-color 0.3s ease",
             }}
@@ -507,8 +507,8 @@ function SidebarPanel({
         {hasReachedBottom && (
           <Fade in>
             <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 1 }}>
-              <CheckCircleOutlineIcon sx={{ fontSize: 14, color: "#6ee7b7" }} />
-              <Typography sx={{ fontSize: "0.72rem", fontWeight: 600, color: "#6ee7b7" }}>
+              <CheckCircleOutlineIcon sx={{ fontSize: 14, color: "success.light" }} />
+              <Typography sx={{ fontSize: "0.72rem", fontWeight: 600, color: "success.light" }}>
                 Document fully reviewed
               </Typography>
             </Stack>

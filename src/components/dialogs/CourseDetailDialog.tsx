@@ -49,8 +49,8 @@ function SectionPanel({
         borderColor: section.isNew ? "primary.main" : "divider",
         borderRadius: "8px",
         overflow: "hidden",
-        bgcolor: section.isNew ? "rgba(25, 106, 229, 0.08)" : "background.paper",
-        ...(section.isNew && { boxShadow: "0 0 0 1px #196ae5" }),
+        bgcolor: section.isNew ? "action.hover" : "background.paper",
+        ...(section.isNew && { boxShadow: "0 0 0 1px var(--mui-palette-primary-main, hsl(var(--md-primary)))" }),
       }}
     >
       {/* Section header */}
@@ -62,7 +62,7 @@ function SectionPanel({
           px: 2, py: 1.75, border: "none", cursor: "pointer", textAlign: "left",
           bgcolor: "transparent",
           fontFamily: "inherit",
-          "&:hover": { bgcolor: section.isNew ? "rgba(25, 106, 229, 0.12)" : "action.hover" },
+          "&:hover": { bgcolor: "action.hover" },
         }}
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>

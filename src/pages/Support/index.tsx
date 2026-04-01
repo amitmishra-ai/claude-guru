@@ -30,7 +30,7 @@ import type { SupportTicket, TicketStatus } from "@/lib/types";
 
 const STATUS_COLORS: Record<TicketStatus, { bg: string; color: string }> = {
   open: { bg: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)" },
-  awaiting_reply: { bg: "#fff3e0", color: "#e65100" },
+  awaiting_reply: { bg: "var(--gl-status-disputed-bg)", color: "var(--gl-status-disputed-text)" },
   closed: { bg: "action.hover", color: "text.secondary" },
   escalated: { bg: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)" },
 };

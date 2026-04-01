@@ -196,7 +196,7 @@ export default function AccountPage() {
             fontSize: "1.5rem",
             fontWeight: 700,
             bgcolor: "primary.main",
-            color: "#fff",
+            color: "primary.contrastText",
             mb: 1.5,
             boxShadow: "0 4px 16px rgba(25,106,229,0.2)",
           }}

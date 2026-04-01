@@ -748,7 +748,7 @@ export function SessionDetailsModal() {
                       elevation={0}
                       expanded={expandedGroup}
                       onChange={(_, isExpanded) => setExpandedGroup(isExpanded)}
-                      sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px !important", overflow: "hidden", "&::before": { display: "none" } }}
+                      sx={{ border: "1px solid", borderColor: "divider", "&.MuiAccordion-root": { borderRadius: "12px" }, overflow: "hidden", "&::before": { display: "none" } }}
                     >
                       <AccordionSummary
                         expandIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
@@ -821,7 +821,7 @@ export function SessionDetailsModal() {
                           elevation={0}
                           expanded={expandedCombinedBatch === (cb.batch + (cb.group || ""))}
                           onChange={(_, isExpanded) => setExpandedCombinedBatch(isExpanded ? cb.batch + (cb.group || "") : false)}
-                          sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px !important", overflow: "hidden", "&::before": { display: "none" } }}
+                          sx={{ border: "1px solid", borderColor: "divider", "&.MuiAccordion-root": { borderRadius: "12px" }, overflow: "hidden", "&::before": { display: "none" } }}
                         >
                           <AccordionSummary
                             expandIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { alpha, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
@@ -20,9 +21,9 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 /* ── Mock data ───────────────────────────────────────────────────────────── */
 
 const METRICS = [
-  { icon: <GroupsOutlinedIcon sx={{ fontSize: 16 }} />, value: "1,240", label: "Learners", delta: "+213 in Feb", iconBg: "rgba(25,106,229,0.08)", iconColor: "#196ae5" },
-  { icon: <AccessTimeOutlinedIcon sx={{ fontSize: 16 }} />, value: "186h", label: "Teaching hours", delta: "+32h in Feb", iconBg: "rgba(34,187,52,0.08)", iconColor: "#22bb34" },
-  { icon: <StarOutlinedIcon sx={{ fontSize: 16 }} />, value: "94%", label: "4 & 5 star", delta: "+2.1% MoM", iconBg: "rgba(245,158,11,0.08)", iconColor: "#f59e0b" },
+  { icon: <GroupsOutlinedIcon sx={{ fontSize: 16 }} />, value: "1,240", label: "Learners", delta: "+213 in Feb", themeColor: "primary" as const },
+  { icon: <AccessTimeOutlinedIcon sx={{ fontSize: 16 }} />, value: "186h", label: "Teaching hours", delta: "+32h in Feb", themeColor: "success" as const },
+  { icon: <StarOutlinedIcon sx={{ fontSize: 16 }} />, value: "94%", label: "4 & 5 star", delta: "+2.1% MoM", themeColor: "warning" as const },
 ];
 
 const TESTIMONIALS = [
@@ -35,6 +36,7 @@ const TESTIMONIALS = [
 /* ── Main component ──────────────────────────────────────────────────────── */
 
 export default function MentorImpactCard({ guruName }: { guruName: string }) {
+  const theme = useTheme();
   const [tPage, setTPage] = useState(0);
   const perPage = 2;
   const totalPages = Math.ceil(TESTIMONIALS.length / perPage);
@@ -85,7 +87,7 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
                     sx={{
                       display: "inline-flex", alignItems: "center", gap: 0.25,
                       px: 0.5, py: 0.125, borderRadius: 0.75,
-                      bgcolor: m.iconBg, color: m.iconColor,
+                      bgcolor: alpha(theme.palette[m.themeColor].main, 0.08), color: `${m.themeColor}.main`,
                     }}
                   >
                     {m.icon}

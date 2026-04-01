@@ -105,7 +105,7 @@ export function TicketDetailDrawer() {
             </Stack>
             <IconButton size="small" onClick={() => dispatch(toggleBookmark(ticket.id))}>
               {ticket.isBookmarked
-                ? <StarOutlinedIcon sx={{ fontSize: 18, color: "#f59e0b" }} />
+                ? <StarOutlinedIcon sx={{ fontSize: 18, color: "var(--gl-star-color)" }} />
                 : <StarBorderOutlinedIcon sx={{ fontSize: 18 }} />}
             </IconButton>
           </Stack>

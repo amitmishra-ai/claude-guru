@@ -28,10 +28,33 @@ self.addEventListener('activate', (event) => {
 
 // Fetch: network-first strategy
 self.addEventListener('fetch', (event) => {
-  if (!event.request.url.startsWith('http')) return;
+  const url = event.request.url;
+  if (!url.startsWith('http')) return;
+
+  // Skip Vite dev server requests (HMR, source files) — they must not be cached
+  if (
+    url.includes('/@vite') ||
+    url.includes('/@fs') ||
+    url.includes('node_modules') ||
+    url.includes('.tsx') ||
+    url.includes('.ts?') ||
+    url.includes('.jsx') ||
+    url.includes('?t=') ||
+    url.includes('__vite')
+  ) {
+    return;
+  }
+
+  // Only cache navigation and static asset requests
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
+        // Only cache valid responses
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
         const clone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         return response;

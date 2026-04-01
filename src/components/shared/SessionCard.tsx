@@ -160,7 +160,7 @@ export function SessionCard({
 
   const titleContent = sessionType ? (
     <>
-      <span>{sessionType}: </span>
+      <Box component="span">{sessionType}: </Box>
       {onCourseClick ? (
         <Box
           component="span"
@@ -170,7 +170,7 @@ export function SessionCard({
           {title}
         </Box>
       ) : (
-        <span>{title}</span>
+        <Box component="span">{title}</Box>
       )}
     </>
   ) : onCourseClick ? (

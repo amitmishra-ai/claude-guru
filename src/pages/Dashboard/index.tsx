@@ -294,20 +294,20 @@ export default function DashboardPage() {
   const isNewOrEarly = isNewUser || isEarlyUser;
 
   const homeStatCards = isNewUser ? [
-    { label: "Avg Rating", value: "-", delta: null, positive: true, accent: "#196ae5", bg: "rgba(25,106,229,0.06)", bars: [] as number[] },
-    { label: "Avg Sessions", value: "-", delta: null, positive: true, accent: "#f59e0b", bg: "rgba(245,158,11,0.06)", bars: [] as number[] },
-    { label: "Avg Quality", value: "-", delta: null, positive: true, accent: "#9c27b0", bg: "rgba(156,39,176,0.06)", bars: [] as number[] },
-    { label: "Avg Confirm", value: "-", delta: null, positive: true, accent: "#22bb34", bg: "rgba(34,187,52,0.06)", bars: [] as number[] },
+    { label: "Avg Rating", value: "-", delta: null, positive: true, accent: "var(--gl-accent-primary)", bg: "var(--gl-accent-primary-bg)", bars: [] as number[] },
+    { label: "Avg Sessions", value: "-", delta: null, positive: true, accent: "var(--gl-accent-amber)", bg: "var(--gl-accent-amber-bg)", bars: [] as number[] },
+    { label: "Avg Quality", value: "-", delta: null, positive: true, accent: "var(--gl-accent-purple)", bg: "var(--gl-accent-purple-bg)", bars: [] as number[] },
+    { label: "Avg Confirm", value: "-", delta: null, positive: true, accent: "var(--gl-accent-success)", bg: "var(--gl-accent-success-bg)", bars: [] as number[] },
   ] : isEarlyUser ? [
-    { label: "Avg Rating", value: "4.7", delta: null, positive: true, accent: "#196ae5", bg: "rgba(25,106,229,0.06)", bars: [] as number[] },
-    { label: "Avg Sessions", value: "2/mo", delta: null, positive: true, accent: "#f59e0b", bg: "rgba(245,158,11,0.06)", bars: [] as number[] },
-    { label: "Avg Quality", value: "100%", delta: null, positive: true, accent: "#9c27b0", bg: "rgba(156,39,176,0.06)", bars: [] as number[] },
-    { label: "Avg Confirm", value: "3.5h", delta: null, positive: true, accent: "#22bb34", bg: "rgba(34,187,52,0.06)", bars: [] as number[] },
+    { label: "Avg Rating", value: "4.7", delta: null, positive: true, accent: "var(--gl-accent-primary)", bg: "var(--gl-accent-primary-bg)", bars: [] as number[] },
+    { label: "Avg Sessions", value: "2/mo", delta: null, positive: true, accent: "var(--gl-accent-amber)", bg: "var(--gl-accent-amber-bg)", bars: [] as number[] },
+    { label: "Avg Quality", value: "100%", delta: null, positive: true, accent: "var(--gl-accent-purple)", bg: "var(--gl-accent-purple-bg)", bars: [] as number[] },
+    { label: "Avg Confirm", value: "3.5h", delta: null, positive: true, accent: "var(--gl-accent-success)", bg: "var(--gl-accent-success-bg)", bars: [] as number[] },
   ] : [
-    { label: "Avg Rating", value: "4.65", delta: "+0.12", positive: true, accent: "#196ae5", bg: "rgba(25,106,229,0.06)", bars: [4.52, 4.58, 4.71, 4.65, 4.68, 4.74] },
-    { label: "Avg Sessions", value: "6/mo", delta: "+2", positive: true, accent: "#f59e0b", bg: "rgba(245,158,11,0.06)", bars: [5, 5, 6, 6, 8, 7] },
-    { label: "Avg Quality", value: "96.8%", delta: "+0.5%", positive: true, accent: "#9c27b0", bg: "rgba(156,39,176,0.06)", bars: [95.2, 96.0, 96.8, 97.1, 97.5, 98.0] },
-    { label: "Avg Confirm", value: "7.2h", delta: "-1.3h", positive: true, accent: "#22bb34", bg: "rgba(34,187,52,0.06)", bars: [12, 9, 7, 6, 5, 4.2] },
+    { label: "Avg Rating", value: "4.65", delta: "+0.12", positive: true, accent: "var(--gl-accent-primary)", bg: "var(--gl-accent-primary-bg)", bars: [4.52, 4.58, 4.71, 4.65, 4.68, 4.74] },
+    { label: "Avg Sessions", value: "6/mo", delta: "+2", positive: true, accent: "var(--gl-accent-amber)", bg: "var(--gl-accent-amber-bg)", bars: [5, 5, 6, 6, 8, 7] },
+    { label: "Avg Quality", value: "96.8%", delta: "+0.5%", positive: true, accent: "var(--gl-accent-purple)", bg: "var(--gl-accent-purple-bg)", bars: [95.2, 96.0, 96.8, 97.1, 97.5, 98.0] },
+    { label: "Avg Confirm", value: "7.2h", delta: "-1.3h", positive: true, accent: "var(--gl-accent-success)", bg: "var(--gl-accent-success-bg)", bars: [12, 9, 7, 6, 5, 4.2] },
   ];
 
   if (pageLoading) {
@@ -898,15 +898,15 @@ export default function DashboardPage() {
                           anchor="right"
                           open={plannedEventDetail !== null}
                           onClose={() => setPlannedEventDetailId(null)}
-                          sx={{
+                          sx={(t) => ({
                             "& .MuiDrawer-paper": {
                               width: { xs: "100vw", sm: 480 },
                               maxWidth: "100vw",
-                              boxShadow: "-4px 0 24px rgba(0,0,0,0.06)",
+                              boxShadow: `-4px 0 24px ${t.palette.mode === "light" ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.24)"}`,
                               borderLeft: "1px solid",
                               borderColor: "divider",
                             },
-                          }}
+                          })}
                         >
                           {plannedEventDetail && (() => {
                             const peStatusLabel = plannedEventDetail.status === "to_be_confirmed" ? "To be confirmed" : "Confirmed";

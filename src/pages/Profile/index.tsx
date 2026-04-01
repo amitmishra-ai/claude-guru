@@ -191,48 +191,48 @@ export default function ProfilePage() {
     "2025-09": {
       bg: "#e0f2f1", circles: ["#4db6ac", "#b2dfdb", "#80cbc4"],
       chipBg: "#b2dfdb", chipColor: "#00695c",
-      stats: [{ bg: "#b2dfdb", color: "#004d40" }, { bg: "#4db6ac", color: "#fff" }, { bg: "#e0f2f1", color: "#00695c" }, { bg: "#80cbc4", color: "#004d40" }, { bg: "#e0f2f1", color: "#00695c" }],
+      stats: [{ bg: "#b2dfdb", color: "#004d40" }, { bg: "#4db6ac", color: "common.white" }, { bg: "#e0f2f1", color: "#00695c" }, { bg: "#80cbc4", color: "#004d40" }, { bg: "#e0f2f1", color: "#00695c" }],
       headingColor: "#00695c", taglineColor: "#00897b", spotlightColor: "#00897b", nameColor: "#004d40", subtitleColor: "#4db6ac",
       pattern: "repeating-linear-gradient(135deg, transparent, transparent 8px, rgba(0,105,92,0.03) 8px, rgba(0,105,92,0.03) 9px)",
     },
     "2025-10": {
       bg: "#fff3e0", circles: ["#ffd54f", "#ff8a65", "#ffcc80"],
       chipBg: "#ffd54f", chipColor: "#bf360c",
-      stats: [{ bg: "#ffd54f", color: "#4e342e" }, { bg: "#ff8a65", color: "#fff" }, { bg: "#ffe0b2", color: "#bf360c" }, { bg: "#ffcc80", color: "#4e342e" }, { bg: "#fff3e0", color: "#bf360c" }],
+      stats: [{ bg: "#ffd54f", color: "#4e342e" }, { bg: "#ff8a65", color: "common.white" }, { bg: "#ffe0b2", color: "#bf360c" }, { bg: "#ffcc80", color: "#4e342e" }, { bg: "#fff3e0", color: "#bf360c" }],
       headingColor: "#bf360c", taglineColor: "#e65100", spotlightColor: "#e65100", nameColor: "#3e2723", subtitleColor: "#ff8a65",
       pattern: "repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(191,54,12,0.025) 12px, rgba(191,54,12,0.025) 24px, transparent 24px, transparent 36px)",
     },
     "2025-11": {
       bg: "#fce4ec", circles: ["#f48fb1", "#ce93d8", "#f8bbd0"],
       chipBg: "#f48fb1", chipColor: "#880e4f",
-      stats: [{ bg: "#f48fb1", color: "#fff" }, { bg: "#ce93d8", color: "#fff" }, { bg: "#fce4ec", color: "#880e4f" }, { bg: "#e1bee7", color: "#4a148c" }, { bg: "#fce4ec", color: "#880e4f" }],
+      stats: [{ bg: "#f48fb1", color: "common.white" }, { bg: "#ce93d8", color: "common.white" }, { bg: "#fce4ec", color: "#880e4f" }, { bg: "#e1bee7", color: "#4a148c" }, { bg: "#fce4ec", color: "#880e4f" }],
       headingColor: "#880e4f", taglineColor: "#ad1457", spotlightColor: "#ad1457", nameColor: "#4a148c", subtitleColor: "#ce93d8",
       pattern: "radial-gradient(circle 40px at 20% 30%, rgba(136,14,79,0.03) 0%, transparent 60%), radial-gradient(circle 30px at 70% 60%, rgba(74,20,140,0.03) 0%, transparent 60%)",
     },
     "2025-12": {
       bg: "#e8eaf6", circles: ["#81d4fa", "#b0bec5", "#c5cae9"],
       chipBg: "#81d4fa", chipColor: "#0d47a1",
-      stats: [{ bg: "#81d4fa", color: "#0d47a1" }, { bg: "#42a5f5", color: "#fff" }, { bg: "#e3f2fd", color: "#0d47a1" }, { bg: "#bbdefb", color: "#0d47a1" }, { bg: "#e3f2fd", color: "#0d47a1" }],
+      stats: [{ bg: "#81d4fa", color: "#0d47a1" }, { bg: "#42a5f5", color: "common.white" }, { bg: "#e3f2fd", color: "#0d47a1" }, { bg: "#bbdefb", color: "#0d47a1" }, { bg: "#e3f2fd", color: "#0d47a1" }],
       headingColor: "#1a237e", taglineColor: "#283593", spotlightColor: "#1565c0", nameColor: "#0d47a1", subtitleColor: "#7986cb",
       pattern: "radial-gradient(circle 2px at 15% 20%, rgba(13,71,161,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 45% 70%, rgba(13,71,161,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 75% 35%, rgba(13,71,161,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 90% 80%, rgba(13,71,161,0.06) 0%, transparent 50%)",
     },
     "2026-01": {
       bg: "#eceff1", circles: ["#90a4ae", "#b0bec5", "#cfd8dc"],
       chipBg: "#b0bec5", chipColor: "#263238",
-      stats: [{ bg: "#cfd8dc", color: "#263238" }, { bg: "#90a4ae", color: "#fff" }, { bg: "#eceff1", color: "#263238" }, { bg: "#b0bec5", color: "#1a237e" }, { bg: "#eceff1", color: "#263238" }],
+      stats: [{ bg: "#cfd8dc", color: "#263238" }, { bg: "#90a4ae", color: "common.white" }, { bg: "#eceff1", color: "#263238" }, { bg: "#b0bec5", color: "#1a237e" }, { bg: "#eceff1", color: "#263238" }],
       headingColor: "#263238", taglineColor: "#37474f", spotlightColor: "#455a64", nameColor: "#263238", subtitleColor: "#78909c",
       pattern: "radial-gradient(circle 1.5px at 10% 15%, rgba(38,50,56,0.05) 0%, transparent 50%), radial-gradient(circle 1.5px at 35% 55%, rgba(38,50,56,0.05) 0%, transparent 50%), radial-gradient(circle 1.5px at 60% 25%, rgba(38,50,56,0.05) 0%, transparent 50%), radial-gradient(circle 1.5px at 85% 75%, rgba(38,50,56,0.05) 0%, transparent 50%)",
     },
     "2026-02": {
       bg: "#dbeafe", circles: ["#fde68a", "#bfdbfe", "#93c5fd"],
       chipBg: "#fde68a", chipColor: "#1e3a5f",
-      stats: [{ bg: "#fde68a", color: "#1e3a5f" }, { bg: "#60a5fa", color: "#fff" }, { bg: "#bfdbfe", color: "#1e3a5f" }, { bg: "#93c5fd", color: "#1e3a5f" }, { bg: "#e0f2fe", color: "#1e3a5f" }],
+      stats: [{ bg: "#fde68a", color: "#1e3a5f" }, { bg: "#60a5fa", color: "common.white" }, { bg: "#bfdbfe", color: "#1e3a5f" }, { bg: "#93c5fd", color: "#1e3a5f" }, { bg: "#e0f2fe", color: "#1e3a5f" }],
       headingColor: "#2563eb", taglineColor: "#2563eb", spotlightColor: "#2563eb", nameColor: "#0f172a", subtitleColor: "#64748b",
     },
     "2026-03": {
       bg: "#ecfdf5", circles: ["#6ee7b7", "#a7f3d0", "#d1fae5"],
       chipBg: "#6ee7b7", chipColor: "#064e3b",
-      stats: [{ bg: "#6ee7b7", color: "#064e3b" }, { bg: "#34d399", color: "#fff" }, { bg: "#a7f3d0", color: "#064e3b" }, { bg: "#d1fae5", color: "#065f46" }, { bg: "#ecfdf5", color: "#065f46" }],
+      stats: [{ bg: "#6ee7b7", color: "#064e3b" }, { bg: "#34d399", color: "common.white" }, { bg: "#a7f3d0", color: "#064e3b" }, { bg: "#d1fae5", color: "#065f46" }, { bg: "#ecfdf5", color: "#065f46" }],
       headingColor: "#059669", taglineColor: "#059669", spotlightColor: "#059669", nameColor: "#064e3b", subtitleColor: "#6ee7b7",
     },
   };
@@ -292,8 +292,8 @@ export default function ProfilePage() {
       deltaPositive: true,
       bars: [45, 52, 98, 88, 37, 61],
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-      bg: "rgba(25, 106, 229, 0.06)",
-      accent: "#196ae5",
+      bg: "var(--gl-accent-primary-bg)",
+      accent: "var(--gl-accent-primary)",
       reportTitle: "Average Rating Report",
       reportSummary: "Your average rating across all programs over the last 6 months.",
       chartData: [
@@ -318,8 +318,8 @@ export default function ProfilePage() {
       deltaPositive: true,
       bars: [5, 5, 6, 6, 8, 7],
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-      bg: "rgba(245, 158, 11, 0.06)",
-      accent: "#f59e0b",
+      bg: "var(--gl-accent-amber-bg)",
+      accent: "var(--gl-accent-amber)",
       reportTitle: "Sessions per Month Report",
       reportSummary: "Monthly breakdown of sessions delivered across all programs.",
       chartData: [
@@ -344,8 +344,8 @@ export default function ProfilePage() {
       deltaPositive: true,
       bars: [95.2, 96.0, 96.8, 97.1, 97.5, 98.0],
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-      bg: "rgba(156, 39, 176, 0.06)",
-      accent: "#9c27b0",
+      bg: "var(--gl-accent-purple-bg)",
+      accent: "var(--gl-accent-purple)",
       reportTitle: "Session Quality Report",
       reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
       chartData: [
@@ -371,8 +371,8 @@ export default function ProfilePage() {
       deltaPositive: true,
       bars: [12, 9, 7, 6, 5, 4.2],
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-      bg: "rgba(34, 187, 52, 0.06)",
-      accent: "#22bb34",
+      bg: "var(--gl-accent-success-bg)",
+      accent: "var(--gl-accent-success)",
       reportTitle: "Confirmation Time Report",
       reportSummary: "Average hours taken to confirm scheduled sessions each month. Lower is better.",
       chartData: [
@@ -553,14 +553,14 @@ export default function ProfilePage() {
               <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.65rem", mb: 1.5 }}>Machine Learning · Data Science</Typography>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, flex: 1, minHeight: 0, mb: 1.5 }}>
                 <Stack spacing={1}>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <Box>
                       <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.sessions}</Typography>
                       <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.7rem", fontWeight: 400, mt: 0.5, lineHeight: 1.43 }}>Sessions delivered this month</Typography>
                     </Box>
                     <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label="Top 10% Gurus" size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }} />
                   </Box>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <Box>
                       <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.hours} Hrs</Typography>
                       <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Taught this month</Typography>
@@ -569,24 +569,24 @@ export default function ProfilePage() {
                   </Box>
                 </Stack>
                 <Stack spacing={1}>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5 }}>
+                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
                     <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.learners}</Typography>
                     <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Learners taught</Typography>
                   </Box>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5 }}>
+                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
                     <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.rating}/5</Typography>
                     <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Avg ratings this month</Typography>
                   </Box>
-                  <Box sx={{ flex: 1, bgcolor: "rgba(25,106,229,0.04)", borderRadius: "8px", p: 1.5 }}>
+                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
                     <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`}</Typography>
                     <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Sessions rated 4+</Typography>
                   </Box>
                 </Stack>
               </Box>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pt: 1, borderTop: "1px dashed", borderColor: "rgba(0,0,0,0.08)" }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pt: 1, borderTop: "1px dashed", borderColor: "divider" }}>
                 <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.55rem", fontWeight: 600 }}>Empowering careers, one lesson at a time.</Typography>
                 <Stack direction="row" alignItems="center" spacing={0.15}>
-                  {[1, 2, 3, 4, 5].map((i) => <StarIcon key={i} sx={{ fontSize: 12, color: "#f59e0b" }} />)}
+                  {[1, 2, 3, 4, 5].map((i) => <StarIcon key={i} sx={{ fontSize: 12, color: "var(--gl-star-color)" }} />)}
                   <Typography sx={{ color: shareTheme.nameColor, fontWeight: 700, fontSize: "0.65rem", ml: 0.25 }}>{shareMonthData.rating}</Typography>
                 </Stack>
               </Stack>
@@ -705,8 +705,8 @@ export default function ProfilePage() {
                 }}
               >
                 <Stack alignItems="center" spacing={0.5}>
-                  <VisibilityOutlinedIcon sx={{ fontSize: 22, color: "#fff" }} />
-                  <Typography sx={{ fontSize: "0.65rem", color: "#fff", fontWeight: 600 }}>Preview</Typography>
+                  <VisibilityOutlinedIcon sx={{ fontSize: 22, color: "common.white" }} />
+                  <Typography sx={{ fontSize: "0.65rem", color: "common.white", fontWeight: 600 }}>Preview</Typography>
                 </Stack>
               </Box>
             </Box>
@@ -755,21 +755,21 @@ export default function ProfilePage() {
 
             {/* ── Desktop: Stats + actions column ────────────────────── */}
             {!isMobile && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
               {/* Stats section */}
               <Box>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: "0.875rem", fontWeight: 600, mb: 0.75 }}>Your month at a glance</Typography>
-                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 0.75 }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.75 }}>Your month at a glance</Typography>
+                <Box sx={{ display: "flex", gap: 0 }}>
                 {[
-                  { value: shareMonthData.sessions, label: "Sessions", color: "#196ae5" },
-                  { value: `${shareMonthData.hours}h`, label: "Hours", color: "#16a34a" },
-                  { value: shareMonthData.learners, label: "Learners", color: "#7c3aed" },
-                  { value: `${shareMonthData.rating}`, label: "Rating", color: "#f59e0b" },
-                  { value: shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`, label: "4+ rated", color: "#0ea5e9" },
-                ].map((s) => (
-                  <Box key={s.label} sx={{ textAlign: "center", py: 1.25, px: 0.5, borderRadius: "8px", bgcolor: `${s.color}0a`, border: "1px solid", borderColor: `${s.color}14` }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: "1.15rem", lineHeight: 1, color: s.color, letterSpacing: "-0.02em" }}>{s.value}</Typography>
-                    <Typography sx={{ fontSize: "0.6rem", color: "text.secondary", mt: 0.25, fontWeight: 500 }}>{s.label}</Typography>
+                  { value: shareMonthData.sessions, label: "Sessions" },
+                  { value: `${shareMonthData.hours}h`, label: "Hours" },
+                  { value: shareMonthData.learners, label: "Learners" },
+                  { value: `${shareMonthData.rating}`, label: "Rating" },
+                  { value: shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`, label: "4+ rated" },
+                ].map((s, i, arr) => (
+                  <Box key={s.label} sx={{ textAlign: "center", flex: 1, px: 0.5, ...(i < arr.length - 1 && { borderRight: "1px solid", borderColor: "divider" }) }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: "1rem", color: "text.primary", lineHeight: 1.2, letterSpacing: "-0.01em" }}>{s.value}</Typography>
+                    <Typography sx={{ fontSize: "0.6rem", color: "text.secondary", fontWeight: 500, mt: 0.25 }}>{s.label}</Typography>
                   </Box>
                 ))}
               </Box>
@@ -1670,9 +1670,9 @@ export default function ProfilePage() {
                                 <Line
                                   type="monotone"
                                   dataKey="rating"
-                                  stroke={course.delta >= 0 ? "#22bb34" : "#f44336"}
+                                  stroke={course.delta >= 0 ? "var(--gl-accent-success)" : "var(--gl-status-declined-text)"}
                                   strokeWidth={1.5}
-                                  dot={{ r: 2.5, fill: "hsl(var(--md-surface))", stroke: course.delta >= 0 ? "#22bb34" : "#f44336", strokeWidth: 1.5 }}
+                                  dot={{ r: 2.5, fill: "hsl(var(--md-surface))", stroke: course.delta >= 0 ? "var(--gl-accent-success)" : "var(--gl-status-declined-text)", strokeWidth: 1.5 }}
                                   connectNulls
                                 />
                               </LineChart>
