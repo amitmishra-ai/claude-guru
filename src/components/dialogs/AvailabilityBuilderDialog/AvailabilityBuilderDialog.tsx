@@ -406,7 +406,7 @@ const AvailabilityBuilderDialog = () => {
                         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%" }}>
                           <Box>
                             <Typography variant="body2" sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
-                              {isAuto ? `System — ${sysTz}` : tz.label}
+                              {isAuto ? `System - ${sysTz}` : tz.label}
                             </Typography>
                           </Box>
                           <Typography variant="caption" color="text.secondary" sx={{ ml: 2, flexShrink: 0 }}>

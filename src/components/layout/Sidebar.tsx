@@ -312,7 +312,7 @@ export function Sidebar() {
         <NavLink to="/" end style={{ textDecoration: "none" }}>
           {({ isActive }) =>
             isNavCollapsed ? (
-              <Tooltip title="Home" placement="right" arrow>
+              <Tooltip title="Home" placement="right">
                 <span>
                   <NavItemCollapsed
                     icon={<HomeOutlinedIcon fontSize="small" />}
@@ -335,7 +335,7 @@ export function Sidebar() {
         <NavLink to="/calendar" style={{ textDecoration: "none" }}>
           {({ isActive }) =>
             isNavCollapsed ? (
-              <Tooltip title="Calendar" placement="right" arrow>
+              <Tooltip title="Calendar" placement="right">
                 <span>
                   <NavItemCollapsed
                     icon={<CalendarMonthOutlinedIcon fontSize="small" />}
@@ -358,7 +358,7 @@ export function Sidebar() {
         <NavLink to="/courses" style={{ textDecoration: "none" }}>
           {({ isActive }) =>
             isNavCollapsed ? (
-              <Tooltip title="Courses" placement="right" arrow>
+              <Tooltip title="Courses" placement="right">
                 <span>
                   <NavItemCollapsed
                     icon={<DescriptionOutlinedIcon fontSize="small" />}
@@ -381,7 +381,7 @@ export function Sidebar() {
         <NavLink to="/payments" style={{ textDecoration: "none" }}>
           {({ isActive }) =>
             isNavCollapsed ? (
-              <Tooltip title="Payments" placement="right" arrow>
+              <Tooltip title="Payments" placement="right">
                 <span>
                   <NavItemCollapsed
                     icon={<AccountBalanceWalletOutlinedIcon fontSize="small" />}
@@ -404,7 +404,7 @@ export function Sidebar() {
         <NavLink to="/profile" style={{ textDecoration: "none" }}>
           {({ isActive }) =>
             isNavCollapsed ? (
-              <Tooltip title="Profile" placement="right" arrow>
+              <Tooltip title="Profile" placement="right">
                 <span>
                   <NavItemCollapsed
                     icon={<GroupOutlinedIcon fontSize="small" />}
@@ -430,7 +430,7 @@ export function Sidebar() {
         <NavLink to="/support" style={{ textDecoration: "none" }}>
           {({ isActive }) =>
             isNavCollapsed ? (
-              <Tooltip title="Support" placement="right" arrow>
+              <Tooltip title="Support" placement="right">
                 <span>
                   <NavItemCollapsed
                     icon={<ConfirmationNumberOutlinedIcon fontSize="small" />}
@@ -452,7 +452,7 @@ export function Sidebar() {
         {/* ── User profile button ── */}
         <Box sx={{ mt: 1.5, mb: 3 }}>
           {isNavCollapsed ? (
-            <Tooltip title={guruName} placement="right" arrow>
+            <Tooltip title={guruName} placement="right">
               <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <ButtonBase
                   onClick={(e) => setMenuAnchor(e.currentTarget)}

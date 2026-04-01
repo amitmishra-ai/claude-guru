@@ -165,7 +165,7 @@ function ComponentSection({ title, description, children }: { title: string; des
   );
 }
 
-/** Card title row — chips on top on mobile, beside title on desktop */
+/** Card title row -chips on top on mobile, beside title on desktop */
 function CardTitleRow({ title, chips }: { title: string; chips: React.ReactNode }) {
   return (
     <>
@@ -1440,7 +1440,7 @@ function ResidencyCards() {
 
       {/* ── Confirmed ── */}
       <ComponentSection
-        title="Residency — Confirmed"
+        title="Residency - Confirmed"
         description="Confirmed residency with 3-day schedule. Date range with → arrow. Material + Course actions."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -1468,7 +1468,7 @@ function ResidencyCards() {
 
       {/* ── Confirmed (Combined Session) ── */}
       <ComponentSection
-        title="Residency — Confirmed (Combined session)"
+        title="Residency - Confirmed (Combined session)"
         description="Multi-batch combined residency with 3-day schedule + combined session accordion."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -1497,7 +1497,7 @@ function ResidencyCards() {
 
       {/* ── Scheduled ── */}
       <ComponentSection
-        title="Residency — Scheduled"
+        title="Residency - Scheduled"
         description="Awaiting guru confirmation. Confirm/Unavailable actions with 3-day schedule accordion."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -1525,7 +1525,7 @@ function ResidencyCards() {
 
       {/* ── Scheduled (Combined) ── */}
       <ComponentSection
-        title="Residency — Scheduled (Combined session)"
+        title="Residency - Scheduled (Combined session)"
         description="Unconfirmed combined residency. Confirm/Unavailable + schedule + combined session accordions."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -1552,9 +1552,9 @@ function ResidencyCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed — Gathering feedback ── */}
+      {/* ── Completed - Gathering feedback ── */}
       <ComponentSection
-        title="Residency — Completed (Gathering feedback)"
+        title="Residency - Completed (Gathering feedback)"
         description="Residency done, no feedback yet. Payment pending + Gathering feedback chips."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -1578,9 +1578,9 @@ function ResidencyCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed — with rating ── */}
+      {/* ── Completed -with rating ── */}
       <ComponentSection
-        title="Residency — Completed (with feedback)"
+        title="Residency - Completed (with feedback)"
         description="Past residency with rating. Payment processed chip + star rating. Feedback button."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -1630,8 +1630,8 @@ function OnlineSessionCards() {
         endDateYmd="2026-02-14"
       />
 
-      {/* 1. Mentoring — Confirmed */}
-      <ComponentSection title="Mentoring — Confirmed" description="Virtual mentoring event. Disabled Join session + Material on card.">
+      {/* 1. Mentoring - Confirmed */}
+      <ComponentSection title="Mentoring - Confirmed" description="Virtual mentoring event. Disabled Join session + Material on card.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1653,8 +1653,8 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 2. Mentoring — Combined (Confirmed) */}
-      <ComponentSection title="Mentoring — Combined (Confirmed)" description="Combined session across batches. Combined session accordion with batch details.">
+      {/* 2. Mentoring - Combined (Confirmed) */}
+      <ComponentSection title="Mentoring - Combined (Confirmed)" description="Combined session across batches. Combined session accordion with batch details.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1708,8 +1708,8 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 3. Mentoring — Scheduled */}
-      <ComponentSection title="Mentoring — Scheduled" description="Unconfirmed mentoring event awaiting guru action.">
+      {/* 3. Mentoring - Scheduled */}
+      <ComponentSection title="Mentoring - Scheduled" description="Unconfirmed mentoring event awaiting guru action.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Python Fundamentals"
@@ -1731,8 +1731,8 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 3b. Mentoring — Combined (Scheduled) */}
-      <ComponentSection title="Mentoring — Combined (Scheduled)" description="Unconfirmed combined event awaiting guru action. Combined session accordion.">
+      {/* 3b. Mentoring - Combined (Scheduled) */}
+      <ComponentSection title="Mentoring - Combined (Scheduled)" description="Unconfirmed combined event awaiting guru action. Combined session accordion.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1783,8 +1783,8 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 4. Mock Interview — Confirmed (secondary facilitator) */}
-      <ComponentSection title="Mock Interview — Confirmed (secondary)" description="Mock interview event. Join session + Share Feedback on card. Secondary facilitator badge.">
+      {/* 4. Mock Interview - Confirmed (secondary facilitator) */}
+      <ComponentSection title="Mock Interview - Confirmed (secondary)" description="Mock interview event. Join session + Share Feedback on card. Secondary facilitator badge.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
@@ -1806,8 +1806,8 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 6. Mentoring — Tentative */}
-      <ComponentSection title="Mentoring — Tentative" description="Planned mentoring event, time not yet confirmed. View details opens dialog with schedule (to be confirmed), batch, program, contact.">
+      {/* 6. Mentoring - Tentative */}
+      <ComponentSection title="Mentoring - Tentative" description="Planned mentoring event, time not yet confirmed. View details opens dialog with schedule (to be confirmed), batch, program, contact.">
         <PlannedEventCard
           sessionType="Online session"
           title="Machine Learning"
@@ -1820,8 +1820,8 @@ function OnlineSessionCards() {
         />
       </ComponentSection>
 
-      {/* 7. Mentoring — Completed (Gathering feedback) */}
-      <ComponentSection title="Mentoring — Completed (Gathering feedback)" description="Event done, learners haven't rated yet. Payment pending + Gathering feedback chips top-right. Recording on card.">
+      {/* 7. Mentoring - Completed (Gathering feedback) */}
+      <ComponentSection title="Mentoring - Completed (Gathering feedback)" description="Event done, learners haven't rated yet. Payment pending + Gathering feedback chips top-right. Recording on card.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1845,8 +1845,8 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 7b. Mentoring — Completed (Recording processing) */}
-      <ComponentSection title="Mentoring — Completed (Recording processing)" description="Session just ended, recording not yet processed. Recording button is disabled. Typically takes up to an hour.">
+      {/* 7b. Mentoring - Completed (Recording processing) */}
+      <ComponentSection title="Mentoring - Completed (Recording processing)" description="Session just ended, recording not yet processed. Recording button is disabled. Typically takes up to an hour.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1875,8 +1875,8 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 8. Mentoring — Completed (No feedback) */}
-      <ComponentSection title="Mentoring — Completed (No feedback)" description="Event older than 30 days, no learner ratings. Payment processed + No feedback collected chips top-right.">
+      {/* 8. Mentoring - Completed (No feedback) */}
+      <ComponentSection title="Mentoring - Completed (No feedback)" description="Event older than 30 days, no learner ratings. Payment processed + No feedback collected chips top-right.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Python Fundamentals"
@@ -1900,8 +1900,8 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 9. Mentoring — Completed (with rating) */}
-      <ComponentSection title="Mentoring — Completed (with rating)" description="Past mentoring event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
+      {/* 9. Mentoring - Completed (with rating) */}
+      <ComponentSection title="Mentoring - Completed (with rating)" description="Past mentoring event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Statistics for Data Science"
@@ -1928,8 +1928,8 @@ function OnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 10. Mentoring — Combined (Completed) */}
-      <ComponentSection title="Mentoring — Combined (Completed)" description="Combined session splits into separate cards per batch when completed — each batch has its own rating. Two cards shown below for Batch A and Batch B.">
+      {/* 10. Mentoring - Combined (Completed) */}
+      <ComponentSection title="Mentoring - Combined (Completed)" description="Combined session splits into separate cards per batch when completed -each batch has its own rating. Two cards shown below for Batch A and Batch B.">
         <CombinedCompletedGroup>
           {/* Batch A card */}
           <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -1996,8 +1996,8 @@ function CareerMentorOnlineSessionCards() {
   return (
     <>
 
-      {/* 1. Career 1:1 — Confirmed */}
-      <ComponentSection title="Career 1:1 — Confirmed" description="1:1 career mentoring. Join session on card. Student info, LinkedIn, resume in View Details.">
+      {/* 1. Career 1:1 - Confirmed */}
+      <ComponentSection title="Career 1:1 - Confirmed" description="1:1 career mentoring. Join session on card. Student info, LinkedIn, resume in View Details.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -2015,8 +2015,8 @@ function CareerMentorOnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 2. Mock Interview — Confirmed */}
-      <ComponentSection title="Mock Interview — Confirmed" description="Mock interview event. Join session + Share Feedback on card.">
+      {/* 2. Mock Interview - Confirmed */}
+      <ComponentSection title="Mock Interview - Confirmed" description="Mock interview event. Join session + Share Feedback on card.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
@@ -2037,8 +2037,8 @@ function CareerMentorOnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 3. Career 1:1 — Scheduled */}
-      <ComponentSection title="Career 1:1 — Scheduled" description="Career mentoring event awaiting guru confirmation.">
+      {/* 3. Career 1:1 - Scheduled */}
+      <ComponentSection title="Career 1:1 - Scheduled" description="Career mentoring event awaiting guru confirmation.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -2059,8 +2059,8 @@ function CareerMentorOnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 4. Career — Completed (Gathering feedback) */}
-      <ComponentSection title="Career — Completed (Gathering feedback)" description="Event done, no ratings yet. Payment pending + Gathering feedback chips top-right.">
+      {/* 4. Career - Completed (Gathering feedback) */}
+      <ComponentSection title="Career - Completed (Gathering feedback)" description="Event done, no ratings yet. Payment pending + Gathering feedback chips top-right.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -2083,8 +2083,8 @@ function CareerMentorOnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 5. Career — Completed (with rating) */}
-      <ComponentSection title="Career — Completed (with rating)" description="Past career event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
+      {/* 5. Career - Completed (with rating) */}
+      <ComponentSection title="Career - Completed (with rating)" description="Past career event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Career Mentoring"
@@ -2110,8 +2110,8 @@ function CareerMentorOnlineSessionCards() {
         </Card>
       </ComponentSection>
 
-      {/* 6. Mock — Completed (with Share Feedback) */}
-      <ComponentSection title="Mock — Completed (with Share Feedback)" description="Past mock interview. Payment processed chip + star rating top-right. Recording + Feedback + Share Feedback.">
+      {/* 6. Mock - Completed (with Share Feedback) */}
+      <ComponentSection title="Mock - Completed (with Share Feedback)" description="Past mock interview. Payment processed chip + star rating top-right. Recording + Feedback + Share Feedback.">
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <SessionCard
             title="Mock Interview"
@@ -2152,16 +2152,39 @@ function EvaluationCards() {
 
       {/* ── Confirmed ── */}
       <ComponentSection
-        title="Evaluation — Confirmed"
-        description="Date range (assessment due → grading due), assignment link to SpeedGrader, course template, batch, contact, student progress. Late submission badge if applicable."
+        title="Evaluation - Confirmed"
+        description="Date range (assessment due → grading due), primary CTA to open SpeedGrader, submission progress, course template, batch, contact."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={<><Chip label="Late submission" size="small" sx={{ bgcolor: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "1px solid var(--gl-status-declined-border)", fontWeight: 500, fontSize: "0.75rem" }} />{CHIP_CONFIRMED}</>} />
+          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={CHIP_CONFIRMED} />
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 0.75 }}>
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+            <Typography variant="caption" color="text.secondary">15 Mar – 22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>18 / 42 graded &middot; 42 submissions</Typography>
+          <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+            <Button variant="contained" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}>Open SpeedGrader</Button>
+            <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
+          </Stack>
+        </Card>
+      </ComponentSection>
+
+      {/* ── Scheduled (unconfirmed) ── */}
+      <ComponentSection
+        title="Evaluation - Scheduled"
+        description="Assigned to guru but not yet confirmed. Primary CTA is Confirm, secondary is I'm unavailable. No SpeedGrader link until confirmed."
+      >
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={<Chip label="Scheduled" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600, fontSize: "0.75rem" }} />} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Mar – 22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} justifyContent="flex-end">
+          <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+            <Stack direction="row" spacing={1}>
+              <Button variant="contained" size="small" startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 16 }} />}>Confirm</Button>
+              <Button variant="soft" size="small" startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 16 }} />}>I'm unavailable</Button>
+            </Stack>
             <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
           </Stack>
         </Card>
@@ -2169,7 +2192,7 @@ function EvaluationCards() {
 
       {/* ── Tentative ── */}
       <ComponentSection
-        title="Evaluation — Tentative"
+        title="Evaluation - Tentative"
         description="Assignment label is plain text (no link). No student progress. 'To be confirmed' instead of submission counts."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -2184,9 +2207,9 @@ function EvaluationCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed — Gathering feedback ── */}
+      {/* ── Completed - Gathering feedback ── */}
       <ComponentSection
-        title="Evaluation — Completed (Gathering feedback)"
+        title="Evaluation - Completed (Gathering feedback)"
         description="Grading done, no ratings yet. Payment pending + Gathering feedback chips top-right."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -2201,9 +2224,9 @@ function EvaluationCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed — with rating ── */}
+      {/* ── Completed -with rating ── */}
       <ComponentSection
-        title="Evaluation — Completed (with rating)"
+        title="Evaluation - Completed (with rating)"
         description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Feedback button."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -2233,16 +2256,39 @@ function ModerationCards() {
 
       {/* ── Confirmed ── */}
       <ComponentSection
-        title="Moderation — Confirmed"
-        description="Date range (moderation start → concluding remark), DQ link to SpeedGrader, course template, batch, contact, student response progress (posts/unread/graded with activity color). No action buttons."
+        title="Moderation - Confirmed"
+        description="Date range (moderation start → concluding remark), primary CTA to open discussion in SpeedGrader, response progress, course template, batch, contact."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={CHIP_CONFIRMED} />
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 0.75 }}>
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+            <Typography variant="caption" color="text.secondary">15 Mar – 20 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>34 posts &middot; 8 unread &middot; 12 / 34 graded</Typography>
+          <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+            <Button variant="contained" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}>Open Discussion</Button>
+            <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
+          </Stack>
+        </Card>
+      </ComponentSection>
+
+      {/* ── Scheduled (unconfirmed) ── */}
+      <ComponentSection
+        title="Moderation - Scheduled"
+        description="Assigned to guru but not yet confirmed. Primary CTA is Confirm, secondary is I'm unavailable. No SpeedGrader link until confirmed."
+      >
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={<Chip label="Scheduled" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600, fontSize: "0.75rem" }} />} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Mar – 20 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
           </Stack>
-          <Stack direction="row" spacing={1} justifyContent="flex-end">
+          <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+            <Stack direction="row" spacing={1}>
+              <Button variant="contained" size="small" startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 16 }} />}>Confirm</Button>
+              <Button variant="soft" size="small" startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 16 }} />}>I'm unavailable</Button>
+            </Stack>
             <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
           </Stack>
         </Card>
@@ -2250,7 +2296,7 @@ function ModerationCards() {
 
       {/* ── Tentative ── */}
       <ComponentSection
-        title="Moderation — Tentative"
+        title="Moderation - Tentative"
         description="DQ label is plain text (no link). No student progress. 'To be confirmed' instead of progress stats."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -2265,9 +2311,9 @@ function ModerationCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed — Gathering feedback ── */}
+      {/* ── Completed - Gathering feedback ── */}
       <ComponentSection
-        title="Moderation — Completed (Gathering feedback)"
+        title="Moderation - Completed (Gathering feedback)"
         description="Moderation done, no ratings yet. Payment pending + Gathering feedback chips top-right."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -2282,9 +2328,9 @@ function ModerationCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed — with rating ── */}
+      {/* ── Completed -with rating ── */}
       <ComponentSection
-        title="Moderation — Completed (with rating)"
+        title="Moderation - Completed (with rating)"
         description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Feedback button."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -2314,11 +2360,11 @@ function CapstoneCards() {
 
       {/* ── Confirmed ── */}
       <ComponentSection
-        title="Capstone Project — Confirmed"
-        description="Date range (start → presentation), 'Capstone — [Batch]', group, domain, next session date, contact. Progress + Group Details in dialog. No tentative state."
+        title="Capstone Project - Confirmed"
+        description="Date range (start → presentation), 'Capstone -[Batch]', group, domain, next session date, contact. Progress + Group Details in dialog. No tentative state."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Capstone — PGPDS.O.MAR26.A" chips={CHIP_CONFIRMED} />
+          <CardTitleRow title="Capstone - PGPDS.O.MAR26.A" chips={CHIP_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Jan – 20 Apr, 2026</Typography>
@@ -2329,13 +2375,13 @@ function CapstoneCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed — payment pending ── */}
+      {/* ── Completed -payment pending ── */}
       <ComponentSection
-        title="Capstone Project — Completed (Payment pending)"
+        title="Capstone Project - Completed (Payment pending)"
         description="No rating for capstones. Payment pending chip top-right. Progress button always shown."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Capstone — PGPDS.O.JUL25.A" chips={CHIP_PAYMENT_PENDING} />
+          <CardTitleRow title="Capstone - PGPDS.O.JUL25.A" chips={CHIP_PAYMENT_PENDING} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Jul – 20 Nov, 2025</Typography>
@@ -2347,13 +2393,13 @@ function CapstoneCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed — payment processed ── */}
+      {/* ── Completed -payment processed ── */}
       <ComponentSection
-        title="Capstone Project — Completed"
+        title="Capstone Project - Completed"
         description="No rating. Payment processed chip top-right. Progress always shown."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Capstone — PGPDS.O.JUL25.A" chips={CHIP_PAYMENT_PROCESSED} />
+          <CardTitleRow title="Capstone - PGPDS.O.JUL25.A" chips={CHIP_PAYMENT_PROCESSED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Jul – 20 Nov, 2025</Typography>
@@ -2379,7 +2425,7 @@ function CVReviewCards() {
 
       {/* ── Confirmed (not yet submitted) ── */}
       <ComponentSection
-        title="CV Review — Confirmed"
+        title="CV Review - Confirmed"
         description="Due date, batch, 'Due on' line. View LinkedIn, View CV, View User Comments, Submit CV Review as primary actions. No tentative state exists."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -2397,7 +2443,7 @@ function CVReviewCards() {
 
       {/* ── Confirmed (already submitted) ── */}
       <ComponentSection
-        title="CV Review — Confirmed (Already Submitted)"
+        title="CV Review - Confirmed (Already Submitted)"
         description="Submit button replaced by 'Already Submitted' text. 'Due on' line hidden once submitted."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
@@ -2414,7 +2460,7 @@ function CVReviewCards() {
 
       {/* ── Completed ── */}
       <ComponentSection
-        title="CV Review — Completed"
+        title="CV Review - Completed"
         description="No LinkedIn, no comments, no submit. 'View CV' becomes 'Reviewed CV'. Payment processed chip top-right. No rating, no feedback."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>

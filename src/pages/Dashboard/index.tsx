@@ -293,10 +293,10 @@ export default function DashboardPage() {
   const isNewOrEarly = isNewUser || isEarlyUser;
 
   const homeStatCards = isNewUser ? [
-    { label: "Avg Rating", value: "—", delta: null, positive: true, accent: "#196ae5", bg: "rgba(25,106,229,0.06)", bars: [] as number[] },
-    { label: "Avg Sessions", value: "—", delta: null, positive: true, accent: "#f59e0b", bg: "rgba(245,158,11,0.06)", bars: [] as number[] },
-    { label: "Avg Quality", value: "—", delta: null, positive: true, accent: "#9c27b0", bg: "rgba(156,39,176,0.06)", bars: [] as number[] },
-    { label: "Avg Confirm", value: "—", delta: null, positive: true, accent: "#22bb34", bg: "rgba(34,187,52,0.06)", bars: [] as number[] },
+    { label: "Avg Rating", value: "-", delta: null, positive: true, accent: "#196ae5", bg: "rgba(25,106,229,0.06)", bars: [] as number[] },
+    { label: "Avg Sessions", value: "-", delta: null, positive: true, accent: "#f59e0b", bg: "rgba(245,158,11,0.06)", bars: [] as number[] },
+    { label: "Avg Quality", value: "-", delta: null, positive: true, accent: "#9c27b0", bg: "rgba(156,39,176,0.06)", bars: [] as number[] },
+    { label: "Avg Confirm", value: "-", delta: null, positive: true, accent: "#22bb34", bg: "rgba(34,187,52,0.06)", bars: [] as number[] },
   ] : isEarlyUser ? [
     { label: "Avg Rating", value: "4.7", delta: null, positive: true, accent: "#196ae5", bg: "rgba(25,106,229,0.06)", bars: [] as number[] },
     { label: "Avg Sessions", value: "2/mo", delta: null, positive: true, accent: "#f59e0b", bg: "rgba(245,158,11,0.06)", bars: [] as number[] },
@@ -877,7 +877,7 @@ export default function DashboardPage() {
                       ) : (
                         <EmptyState
                           icon={<EventNoteOutlinedIcon />}
-                          title="Nothing on the horizon"
+                          title="No upcoming activities"
                           subtitle="Scheduled activities will appear here once they're assigned to you by the program team"
                           compact
                         />
@@ -1282,7 +1282,7 @@ export default function DashboardPage() {
                           const cardTitle = isResidency
                             ? s.title
                             : isCapstone
-                              ? `Capstone — ${s.batch}`
+                              ? `Capstone - ${s.batch}`
                               : isCVReview
                                 ? "CV Review"
                                 : isEvaluation
@@ -1559,7 +1559,7 @@ export default function DashboardPage() {
                       <Typography variant="caption" sx={{ color: s.accent, fontWeight: 700, fontSize: "0.55rem", letterSpacing: "0.06em" }}>
                         {s.label.toUpperCase()}
                       </Typography>
-                      <Typography fontWeight={700} sx={{ fontSize: "1rem", lineHeight: 1.1, mt: 0.25, ...(s.value === "—" ? { opacity: 0.3 } : {}) }}>
+                      <Typography fontWeight={700} sx={{ fontSize: "1rem", lineHeight: 1.1, mt: 0.25, ...(s.value === "-" ? { opacity: 0.3 } : {}) }}>
                         {s.value}
                       </Typography>
                       {s.delta && (

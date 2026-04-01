@@ -216,7 +216,7 @@ export default function PaymentsPage() {
   const earningsOnly = useMemo(() => chartData.filter((d) => d.amount > 0), [chartData]);
   const totalEarnings = useMemo(() => earningsOnly.reduce((a, m) => a + m.amount, 0), [earningsOnly]);
   const avgMonthly    = useMemo(() => earningsOnly.length ? Math.round(totalEarnings / earningsOnly.length) : 0, [totalEarnings, earningsOnly]);
-  const bestMonth     = useMemo(() => earningsOnly.length ? earningsOnly.reduce((a, b) => b.amount > a.amount ? b : a, earningsOnly[0]) : { label: "—", amount: 0 }, [earningsOnly]);
+  const bestMonth     = useMemo(() => earningsOnly.length ? earningsOnly.reduce((a, b) => b.amount > a.amount ? b : a, earningsOnly[0]) : { label: "-", amount: 0 }, [earningsOnly]);
   const momTrend      = useMemo(() => {
     const lastTwo = earningsOnly.slice(-2);
     return lastTwo.length === 2 ? lastTwo[1].amount - lastTwo[0].amount : 0;

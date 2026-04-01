@@ -27,7 +27,7 @@ const METRICS = [
 
 const TESTIMONIALS = [
   { quote: "One of the most structured sessions I've attended. Real-world examples made complex concepts intuitive.", name: "Priya S.", program: "PGP-DS · 26A", avatar: "P" },
-  { quote: "Truly inspiring — always goes above and beyond to ensure every learner understands thoroughly.", name: "Aarav M.", program: "AIML · 25B", avatar: "A" },
+  { quote: "Truly inspiring. Always goes above and beyond to ensure every learner understands thoroughly.", name: "Aarav M.", program: "AIML · 25B", avatar: "A" },
   { quote: "The neural networks session was phenomenal. Clear explanations, great pacing, very approachable.", name: "Neha K.", program: "PGP-DS · 25A", avatar: "N" },
   { quote: "Best mentor I've had. Every session has practical takeaways I can immediately apply at work.", name: "Rohan D.", program: "PGP-SE · 26A", avatar: "R" },
 ];

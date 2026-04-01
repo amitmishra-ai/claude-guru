@@ -277,7 +277,7 @@ export default function ProfilePage() {
   }, []);
 
   const avgRating = useMemo(() => {
-    if (!demoRatingHistory.length) return "—";
+    if (!demoRatingHistory.length) return "-";
     return (demoRatingHistory.reduce((a, r) => a + r.score, 0) / demoRatingHistory.length).toFixed(2);
   }, []);
 
@@ -944,7 +944,7 @@ export default function ProfilePage() {
 
                 {/* Hero number */}
                 <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", mb: { xs: 0.5, sm: 1 }, fontSize: { xs: "1.5rem", sm: "3rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
-                  {isNewUser ? "—" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
+                  {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
                 </Typography>
 
                 {/* Description */}
@@ -1095,7 +1095,7 @@ export default function ProfilePage() {
             Your learner testimonials will appear here after your first few sessions.
           </Typography>
           <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: "block" }}>
-            {isEarlyUser ? "You're almost there — feedback usually starts flowing after 3-4 sessions." : "Gurus typically receive their first feedback within 2 weeks."}
+            {isEarlyUser ? "You're almost there. Feedback usually starts flowing after 3-4 sessions." : "Gurus typically receive their first feedback within 2 weeks."}
           </Typography>
         </Paper>
       ) : (
@@ -1132,7 +1132,7 @@ export default function ProfilePage() {
         >
           {[
             { quote: "One of the most structured and engaging sessions I've attended. The real-world examples made complex concepts feel intuitive and easy to follow.", name: "Priya S.", info: "PGP-DS · Cohort 26A", avatar: "P" },
-            { quote: "Truly inspiring mentor — always goes above and beyond to ensure every learner understands the material. The Q&A sessions are incredibly helpful.", name: "Aarav M.", info: "PGP-AIML · Cohort 25B", avatar: "A" },
+            { quote: "Truly inspiring mentor. Always goes above and beyond to ensure every learner understands the material. The Q&A sessions are incredibly helpful.", name: "Aarav M.", info: "PGP-AIML · Cohort 25B", avatar: "A" },
             { quote: "The session on neural networks was phenomenal. Clear explanations, great pacing, and very approachable for questions even after class.", name: "Neha K.", info: "PGP-DS · Cohort 25A", avatar: "N" },
             { quote: "Hands-down the best mentor I've had in this program. Every session has practical takeaways I can immediately apply at work.", name: "Rohan D.", info: "PGP-SE · Cohort 26A", avatar: "R" },
             { quote: "Amazing depth of knowledge and an incredible ability to simplify difficult topics. Made the statistics module genuinely enjoyable.", name: "Sneha T.", info: "PGP-DS · Cohort 25B", avatar: "S" },
@@ -1211,7 +1211,7 @@ export default function ProfilePage() {
                         return (
                           <Card variant="outlined" sx={{ p: 1.25, borderRadius: "8px", boxShadow: 1 }}>
                             <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>{d.month}</Typography>
-                            <Typography variant="caption" display="block" sx={{ fontSize: "0.65rem" }}>Avg: <b>{d.avg ?? "—"}</b></Typography>
+                            <Typography variant="caption" display="block" sx={{ fontSize: "0.65rem" }}>Avg: <b>{d.avg ?? "-"}</b></Typography>
                           </Card>
                         );
                       }}
@@ -1629,7 +1629,7 @@ export default function ProfilePage() {
                           <Divider orientation="vertical" flexItem />
                           <Box>
                             <Typography variant="body1" fontWeight={600} sx={{ color: course.delta > 0 ? "success.main" : course.delta < 0 ? "error.main" : "text.secondary" }}>
-                              {course.delta > 0 ? "↗" : course.delta < 0 ? "↘" : "—"} {course.delta > 0 ? "+" : ""}{course.delta.toFixed(2)}
+                              {course.delta > 0 ? "↗" : course.delta < 0 ? "↘" : "-"} {course.delta > 0 ? "+" : ""}{course.delta.toFixed(2)}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">MoM change</Typography>
                           </Box>
@@ -1662,7 +1662,7 @@ export default function ProfilePage() {
                                     return (
                                       <Card variant="outlined" sx={{ p: 0.75, borderRadius: 1, fontSize: "0.7rem" }}>
                                         <Typography variant="caption" fontWeight={600}>{d.month}</Typography>
-                                        <Typography variant="caption" display="block">{d.rating ?? "—"}</Typography>
+                                        <Typography variant="caption" display="block">{d.rating ?? "-"}</Typography>
                                       </Card>
                                     );
                                   }}

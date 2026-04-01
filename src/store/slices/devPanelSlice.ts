@@ -17,7 +17,7 @@ export const GURU_STAGES: { value: GuruStage; label: string; description: string
   { value: "experienced", label: "Experienced", description: "Full data, all sections populated" },
   { value: "early", label: "Early (2 weeks)", description: "Has availability & upcoming sessions, no completions" },
   { value: "new", label: "New (Day 0)", description: "Just onboarded, zero data everywhere" },
-  { value: "empty", label: "Empty", description: "Zero data everywhere — tests all empty states" },
+  { value: "empty", label: "Empty", description: "Zero data everywhere, tests all empty states" },
 ];
 
 export const GURU_ROLES: GuruRole[] = [

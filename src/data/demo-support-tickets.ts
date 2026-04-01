@@ -19,8 +19,8 @@ export const demoSupportTickets: SupportTicket[] = [
     isUnread: true,
     comments: [
       { id: "c1", author: "Jyoti Mishra", authorRole: "support", content: "Dear Sharon,\n\nThank you for getting in touch with us.\n\nWe acknowledge the receipt of your request.\n\nThe ticket has been assigned to our academic team and they will be providing an update on this query within 24 to 48 hours.", timestamp: "2026-03-18T13:36:00" },
-      { id: "c2", author: "Jyoti Mishra", authorRole: "support", content: "Hi Sharon,\n\nKindly clarify if you need material for PML or for Stats? And what kind of materials?\n\nIf its for both then please raise 2 separate tickets — one for PML and other for stats so that it can be assigned to two separate TA's of each.\n\nRegards,\nProgram Office Support", timestamp: "2026-03-18T14:44:00" },
-      { id: "c3", author: "Sharon", authorRole: "student", content: "Hi Jyoti,\n\nThe material/reference I need are for the subject PML.\n\nI'm looking for additional practice material focused on the implementation aspects of statistics in PML — specifically the mathematical side such as probability and matrix-based problems etc using python.\n\nIt would be helpful to have references to resources with problems similar to Assignments 3 and 4 of PML, as well as practice for other modules like pandas that were covered in lectures but not included in assignments yet.\n\nResources could include platforms like HackerRank, websites offering practice problems, or any other suggestions the TAs might recommend. Hope this helps.", timestamp: "2026-03-18T17:58:00" },
+      { id: "c2", author: "Jyoti Mishra", authorRole: "support", content: "Hi Sharon,\n\nKindly clarify if you need material for PML or for Stats? And what kind of materials?\n\nIf its for both then please raise 2 separate tickets  - one for PML and other for stats so that it can be assigned to two separate TA's of each.\n\nRegards,\nProgram Office Support", timestamp: "2026-03-18T14:44:00" },
+      { id: "c3", author: "Sharon", authorRole: "student", content: "Hi Jyoti,\n\nThe material/reference I need are for the subject PML.\n\nI'm looking for additional practice material focused on the implementation aspects of statistics in PML  - specifically the mathematical side such as probability and matrix-based problems etc using python.\n\nIt would be helpful to have references to resources with problems similar to Assignments 3 and 4 of PML, as well as practice for other modules like pandas that were covered in lectures but not included in assignments yet.\n\nResources could include platforms like HackerRank, websites offering practice problems, or any other suggestions the TAs might recommend. Hope this helps.", timestamp: "2026-03-18T17:58:00" },
       { id: "c4", author: "Onkar Gayakwad", authorRole: "guru", content: "Hi Sharon,\n\nThank you for providing the details. Here are some resources that should help:\n\n1. For PML statistics practice: Khan Academy's statistics module and Scipy documentation\n2. For pandas: kaggle.com/learn/pandas has great exercises\n3. For probability + matrix problems: MIT OpenCourseWare 18.05\n\nLet me know if you need anything else.", timestamp: "2026-03-19T14:47:00" },
     ],
     activities: [
@@ -98,7 +98,7 @@ export const demoSupportTickets: SupportTicket[] = [
     isUnread: true,
     comments: [
       { id: "c1", author: "Snehanjan", authorRole: "guru", content: "Hi Rahul, I've tested the notebook and can confirm the issue. I'm escalating this to the tech support team for immediate resolution.", timestamp: "2026-03-21T14:20:00" },
-      { id: "c2", author: "Tech Support", authorRole: "support", content: "We've identified the issue — the notebook server for Module 5 was experiencing high load. It has been restarted and should be accessible now. Please try again and let us know.", timestamp: "2026-03-22T10:00:00" },
+      { id: "c2", author: "Tech Support", authorRole: "support", content: "We've identified the issue  - the notebook server for Module 5 was experiencing high load. It has been restarted and should be accessible now. Please try again and let us know.", timestamp: "2026-03-22T10:00:00" },
     ],
     activities: [
       { id: "a1", actor: "Rahul Verma", action: "created request", timestamp: "2026-03-21T11:30:00" },
@@ -109,7 +109,7 @@ export const demoSupportTickets: SupportTicket[] = [
   },
   {
     id: "SR-702100",
-    subject: "Doubt in Random Forest implementation — overfitting issue",
+    subject: "Doubt in Random Forest implementation  - overfitting issue",
     description: "My Random Forest model is showing 99% train accuracy but only 62% test accuracy. I've tried reducing max_depth and n_estimators but the gap remains. Could you review my approach?",
     status: "open",
     category: "Learning Material",
@@ -130,7 +130,7 @@ export const demoSupportTickets: SupportTicket[] = [
   },
   {
     id: "SR-702205",
-    subject: "Request for recorded session link — missed live class",
+    subject: "Request for recorded session link  - missed live class",
     description: "I missed the live session on 'Feature Engineering Best Practices' held on March 20. Could you share the recording link? I checked the LMS but it hasn't been uploaded yet.",
     status: "awaiting_reply",
     category: "Learning Material",
@@ -188,7 +188,7 @@ export const demoSupportTickets: SupportTicket[] = [
     isBookmarked: false,
     isUnread: false,
     comments: [
-      { id: "c1", author: "Snehanjan", authorRole: "guru", content: "Hi Arjun, great question. For the interpretability section, any of the methods you mentioned would be acceptable. I'd recommend:\n\n1. SHAP values (preferred) — gives both global and local interpretability\n2. Feature importance from the model\n3. Partial dependence plots\n\nUsing at least 2 of these would score well. LIME is optional but would be a bonus.", timestamp: "2026-03-15T16:45:00" },
+      { id: "c1", author: "Snehanjan", authorRole: "guru", content: "Hi Arjun, great question. For the interpretability section, any of the methods you mentioned would be acceptable. I'd recommend:\n\n1. SHAP values (preferred)  - gives both global and local interpretability\n2. Feature importance from the model\n3. Partial dependence plots\n\nUsing at least 2 of these would score well. LIME is optional but would be a bonus.", timestamp: "2026-03-15T16:45:00" },
       { id: "c2", author: "Arjun Nair", authorRole: "student", content: "Perfect, I'll go with SHAP + feature importance. Thanks for the quick response!", timestamp: "2026-03-16T09:30:00" },
     ],
     activities: [
@@ -235,7 +235,7 @@ export const demoSupportTickets: SupportTicket[] = [
     isBookmarked: false,
     isUnread: false,
     comments: [
-      { id: "c1", author: "Snehanjan", authorRole: "guru", content: "Hi Neha, here are some messy datasets for practice:\n\n1. Kaggle's 'Melbourne Housing' — has missing values + outliers\n2. UCI ML Repository's 'Adult Income' — mixed types + encoding needed\n3. World Bank Open Data — real-world economic indicators with gaps\n\nThese will give you good practice with imputation, outlier handling, and feature engineering.", timestamp: "2026-03-10T15:20:00" },
+      { id: "c1", author: "Snehanjan", authorRole: "guru", content: "Hi Neha, here are some messy datasets for practice:\n\n1. Kaggle's 'Melbourne Housing'  - has missing values + outliers\n2. UCI ML Repository's 'Adult Income'  - mixed types + encoding needed\n3. World Bank Open Data  - real-world economic indicators with gaps\n\nThese will give you good practice with imputation, outlier handling, and feature engineering.", timestamp: "2026-03-10T15:20:00" },
       { id: "c2", author: "Neha Gupta", authorRole: "student", content: "These are perfect! Thank you so much. Closing the ticket.", timestamp: "2026-03-11T14:00:00" },
     ],
     activities: [

@@ -213,7 +213,7 @@ export const demoMentoringCombinedCompleted: Session = {
 
 export const demoCareerConfirmed: Session = {
   id: "comp-career-conf",
-  title: "Career Guidance — Resume Review",
+  title: "Career Guidance - Resume Review",
   batch: "PGPDS Online March 26 A",
   program: "PGP-DS",
   cohort: "PGPDS Online March 26 A",
@@ -248,7 +248,7 @@ export const demoCareerScheduled: Session = {
 
 export const demoCareerCompletedGathering: Session = {
   id: "comp-career-comp-gath",
-  title: "Career Guidance — Interview Prep",
+  title: "Career Guidance - Interview Prep",
   batch: "PGPDS Online March 26 A",
   program: "PGP-DS",
   cohort: "PGPDS Online March 26 A",
@@ -278,7 +278,7 @@ export const demoCareerCompletedGathering: Session = {
 export const demoCareerCompletedWithRating: Session = {
   ...demoCareerCompletedGathering,
   id: "comp-career-comp-rated",
-  title: "Career Guidance — Portfolio Review",
+  title: "Career Guidance - Portfolio Review",
   dateYmd: "2026-02-20",
   paymentStatus: "paid",
   transactionId: "TXN-GL-C4R1",
@@ -291,7 +291,7 @@ export const demoCareerCompletedWithRating: Session = {
 
 export const demoMockConfirmed: Session = {
   id: "comp-mock-conf",
-  title: "Mock Interview — Data Science",
+  title: "Mock Interview - Data Science",
   batch: "PGPDS Online March 26 A",
   program: "PGP-DS",
   cohort: "PGPDS Online March 26 A",

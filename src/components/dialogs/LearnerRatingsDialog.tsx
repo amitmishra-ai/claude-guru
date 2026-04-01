@@ -104,7 +104,7 @@ export function LearnerRatingsDialog() {
   const summary = sessionId ? demoFeedbackSummaryBySessionId[sessionId] : null;
   const avgRating = ratings.length
     ? (ratings.reduce((a, r) => a + r.rating, 0) / ratings.length).toFixed(2)
-    : "—";
+    : "-";
 
   /* ── Benchmark metrics ── */
   const above44 = ratings.length > 0
@@ -199,7 +199,7 @@ export function LearnerRatingsDialog() {
                     <Typography variant="h5" fontWeight={800} sx={{ lineHeight: 1 }}>
                       {summary?.totalResponses ?? ratings.length}
                       <Typography component="span" variant="caption" color="text.secondary">
-                        /{summary?.totalEnrolled ?? "—"}
+                        /{summary?.totalEnrolled ?? "-"}
                       </Typography>
                     </Typography>
                     <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.62rem" }}>

@@ -377,8 +377,8 @@ export const demoSessions: Session[] = [
   },
   {
     id: "career2",
-    title: "Technical Round — Data Structures",
-    topic: "Technical Round — Data Structures",
+    title: "Technical Round  - Data Structures",
+    topic: "Technical Round  - Data Structures",
     batch: "PGP-AIML-BA-UTA-Nov25-C",
     program: "PGP-AIML",
     cohort: "PGP-AIML-BA-UTA-Nov25-C",
@@ -946,7 +946,7 @@ export const demoSessions: Session[] = [
       { id: "pm13", label: "Python Fundamentals Notebook", url: "#", type: "document" },
       { id: "pm14", label: "Starter Code Repository", url: "#", type: "link" },
       { id: "pm15", label: "Variables & Data Types Walkthrough", url: "#", type: "video" },
-      { id: "pm15b", label: "Session Slides — Control Flow", url: "#", type: "slides" },
+      { id: "pm15b", label: "Session Slides  - Control Flow", url: "#", type: "slides" },
     ],
     paymentModel: "fixed",
   },
@@ -2038,7 +2038,7 @@ export const demoPreviouslyDeclinedSessions: DeclinedSession[] = [
     start: minutes(10),
     end: minutes(12),
     declinedOnYmd: "2026-02-01",
-    declineReason: "Travel — attending a conference in Bangalore",
+    declineReason: "Travel  - attending a conference in Bangalore",
   },
   {
     id: "pd2",
@@ -2052,7 +2052,7 @@ export const demoPreviouslyDeclinedSessions: DeclinedSession[] = [
     start: minutes(18),
     end: minutes(20),
     declinedOnYmd: "2026-02-08",
-    declineReason: "Personal commitment — family event",
+    declineReason: "Personal commitment  - family event",
   },
 ];
 

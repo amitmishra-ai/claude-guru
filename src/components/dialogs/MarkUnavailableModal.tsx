@@ -60,7 +60,7 @@ export function MarkUnavailableModal() {
         dispatch(
           pushToast({
             title: "Event declined",
-            description: `${session.title} — ${reason}`,
+            description: `${session.title} - ${reason}`,
           })
         );
       }
@@ -70,7 +70,7 @@ export function MarkUnavailableModal() {
       dispatch(
         pushToast({
           title: "Marked unavailable",
-          description: `${req?.title || "Request"} — ${reason}`,
+          description: `${req?.title || "Request"}  - ${reason}`,
         })
       );
     }

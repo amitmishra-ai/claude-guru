@@ -111,7 +111,7 @@ export const demoNotifications: NotificationItem[] = [
   {
     id: "n13",
     title: "You're all set",
-    body: "Nice work — your availability and confirmations look up to date for this week.",
+    body: "Nice work  - your availability and confirmations look up to date for this week.",
     createdAtYmd: "2026-02-12",
     read: true,
   },

@@ -1139,7 +1139,7 @@ export default function OnboardingPage() {
                     component="div"
                     sx={{ fontSize: "0.78rem", fontWeight: 500 }}
                   >
-                    <strong>{guruName}</strong> — type your name to accept
+                    <strong>{guruName}</strong> - type your name to accept
                   </Typography>
                   <TextField
                     size="small"
