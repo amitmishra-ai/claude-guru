@@ -1,6 +1,25 @@
 import { minutes } from "@/lib/helpers";
 import type { Session, LearnerRating, SessionFeedbackSummary, RatingHistoryEntry, MonthlyEarning, DeclinedSession, Busy, CohortStart, CourseCatalogItem, CourseModuleData, PlannedEvent } from "@/lib/types";
 
+/** Reusable demo group member pools */
+const GROUP_MEMBERS_A = [
+  { name: "Aarav Sharma", email: "aarav.sharma@example.com" },
+  { name: "Priya Patel", email: "priya.patel@example.com" },
+  { name: "Rohan Gupta", email: "rohan.gupta@example.com" },
+  { name: "Sneha Reddy", email: "sneha.reddy@example.com" },
+  { name: "Vikram Singh", email: "vikram.singh@example.com" },
+  { name: "Ananya Iyer", email: "ananya.iyer@example.com" },
+  { name: "Karthik Nair", email: "karthik.nair@example.com" },
+];
+const GROUP_MEMBERS_B = [
+  { name: "Neha Verma", email: "neha.verma@example.com" },
+  { name: "Arjun Mehta", email: "arjun.mehta@example.com" },
+  { name: "Diya Chatterjee", email: "diya.chatterjee@example.com" },
+  { name: "Rahul Joshi", email: "rahul.joshi@example.com" },
+  { name: "Meera Krishnan", email: "meera.krishnan@example.com" },
+  { name: "Siddharth Das", email: "siddharth.das@example.com" },
+];
+
 export const demoSessions: Session[] = [
   // ── Completed sessions (before demoNow = 2026-02-16) ──
   {
@@ -11,6 +30,7 @@ export const demoSessions: Session[] = [
     program: "PGP-DS",
     cohort: "PGPDS Online January 26 A",
     group: "Group 06",
+    groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-02-12",
     start: minutes(10),
     end: minutes(12),
@@ -40,6 +60,7 @@ export const demoSessions: Session[] = [
     program: "PGP-DS",
     cohort: "PGPDS Online January 26 A",
     group: "Group 04",
+    groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-02-10",
     start: minutes(14),
     end: minutes(16),
@@ -64,6 +85,7 @@ export const demoSessions: Session[] = [
     program: "PGP-AIML",
     cohort: "AIML Online February 26 A",
     group: "Group 08",
+    groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-02-08",
     start: minutes(10),
     end: minutes(12),
@@ -89,7 +111,7 @@ export const demoSessions: Session[] = [
     batch: "AIML Online February 26 A",
     program: "PGP-AIML",
     cohort: "AIML Online February 26 A",
-    group: "Group 03",
+    group: "Group 03", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-02-05",
     start: minutes(18),
     end: minutes(21),
@@ -111,7 +133,7 @@ export const demoSessions: Session[] = [
   // ── Additional completed sessions (Oct 2025 – Feb 2026) ──
   {
     id: "ch1", title: "Intro to Machine Learning", topic: "Supervised vs Unsupervised Learning",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2025-10-04", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-A1B2C3", invoiceId: "INV-2025-1004-001", scheduledByName: "Bhargavi CS",
@@ -119,7 +141,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch2", title: "Linear Regression Deep Dive", topic: "OLS, Gradient Descent, Regularization",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2025-10-11", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-D4E5F6", invoiceId: "INV-2025-1011-001", scheduledByName: "Bhargavi CS",
@@ -127,7 +149,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch3", title: "Workshop: Data Visualization with Python", topic: "Matplotlib, Seaborn, Plotly",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2025-10-18", start: minutes(10), end: minutes(13), location: "Online",
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-G7H8I9", invoiceId: "INV-2025-1018-001", scheduledByName: "Bhargavi CS",
@@ -135,7 +157,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch4", title: "Probability for ML", topic: "Bayes Theorem, Distributions",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2025-10-25", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-J1K2L3", invoiceId: "INV-2025-1025-001", scheduledByName: "Bhargavi CS",
@@ -143,7 +165,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch5", title: "EDA with Pandas", topic: "Data Cleaning, Feature Engineering",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2025-10-30", start: minutes(18), end: minutes(20), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-M4N5O6", invoiceId: "INV-2025-1030-001", scheduledByName: "Bhargavi CS",
@@ -151,7 +173,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch6", title: "Decision Trees & Ensembles", topic: "Random Forest, Boosting",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2025-11-01", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-P7Q8R9", invoiceId: "INV-2025-1101-001", scheduledByName: "Bhargavi CS",
@@ -159,7 +181,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch7", title: "Workshop: NLP Fundamentals", topic: "Tokenization, TF-IDF, Word2Vec",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2025-11-08", start: minutes(10), end: minutes(13), location: "Online",
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-S1T2U3", invoiceId: "INV-2025-1108-001", scheduledByName: "Bhargavi CS",
@@ -167,7 +189,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch8", title: "Logistic Regression", topic: "Classification, ROC-AUC",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2025-11-12", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-V4W5X6", invoiceId: "INV-2025-1112-001", scheduledByName: "Bhargavi CS",
@@ -175,7 +197,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch9", title: "Clustering Techniques", topic: "K-Means, DBSCAN, Hierarchical",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2025-11-15", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-Y7Z8A1", invoiceId: "INV-2025-1115-001", scheduledByName: "Bhargavi CS",
@@ -183,7 +205,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch10", title: "Time Series Basics", topic: "ARIMA, Seasonality, Stationarity",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2025-11-22", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-B2C3D4", invoiceId: "INV-2025-1122-001", scheduledByName: "Bhargavi CS",
@@ -191,7 +213,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch11", title: "Dimensionality Reduction", topic: "PCA, t-SNE, UMAP",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2025-11-29", start: minutes(18), end: minutes(20), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-E5F6G7", invoiceId: "INV-2025-1129-001", scheduledByName: "Bhargavi CS",
@@ -199,7 +221,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch12", title: "Workshop: Model Deployment with Flask", topic: "REST APIs, Docker, Cloud Deploy",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2025-12-06", start: minutes(10), end: minutes(13), location: "Online",
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-H8I9J1", invoiceId: "INV-2025-1206-001", scheduledByName: "Bhargavi CS",
@@ -207,7 +229,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch13", title: "CNNs for Image Classification", topic: "Convolutions, Pooling, Transfer Learning",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2025-12-10", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-K2L3M4", invoiceId: "INV-2025-1210-001", scheduledByName: "Bhargavi CS",
@@ -215,7 +237,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch14", title: "Recommendation Systems", topic: "Collaborative & Content-based Filtering",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2025-12-13", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-N5O6P7", invoiceId: "INV-2025-1213-001", scheduledByName: "Bhargavi CS",
@@ -223,7 +245,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch15", title: "RNNs & LSTMs", topic: "Sequence Models, Text Generation",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2025-12-18", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-Q8R9S1", invoiceId: "INV-2025-1218-001", scheduledByName: "Bhargavi CS",
@@ -231,7 +253,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch16", title: "Workshop: GANs & Generative AI", topic: "Image Generation, Diffusion Models",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2025-12-22", start: minutes(10), end: minutes(13), location: "Online",
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-T2U3V4", invoiceId: "INV-2025-1222-001", scheduledByName: "Bhargavi CS",
@@ -239,7 +261,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch17", title: "SQL Window Functions", topic: "ROW_NUMBER, RANK, LEAD/LAG",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2025-12-27", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-W5X6Y7", invoiceId: "INV-2025-1227-001", scheduledByName: "Bhargavi CS",
@@ -247,7 +269,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch18", title: "A/B Testing & Experimentation", topic: "Hypothesis Testing, P-values, Power",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-01-03", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-Z8A1B2", invoiceId: "INV-2026-0103-001", scheduledByName: "Bhargavi CS",
@@ -255,7 +277,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch19", title: "Feature Selection", topic: "Mutual Info, RFE, Lasso",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-01-08", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-C3D4E5", invoiceId: "INV-2026-0108-001", scheduledByName: "Bhargavi CS",
@@ -263,7 +285,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch20", title: "XGBoost Masterclass", topic: "Hyperparameter Tuning, Feature Importance",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-01-11", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-F6G7H8", invoiceId: "INV-2026-0111-001", scheduledByName: "Bhargavi CS",
@@ -271,7 +293,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch21", title: "Workshop: End-to-End ML Pipeline", topic: "MLflow, Feature Store, CI/CD",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-01-15", start: minutes(10), end: minutes(13), location: "Online",
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-I9J1K2", invoiceId: "INV-2026-0115-001", scheduledByName: "Bhargavi CS",
@@ -279,7 +301,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch22", title: "Transformer Architecture", topic: "Attention, BERT, GPT",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 01", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-01-18", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-L3M4N5", invoiceId: "INV-2026-0118-001", scheduledByName: "Bhargavi CS",
@@ -287,7 +309,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch23", title: "Model Evaluation Strategies", topic: "Cross-validation, Bias-Variance",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-01-22", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-O6P7Q8", invoiceId: "INV-2026-0122-001", scheduledByName: "Bhargavi CS",
@@ -295,7 +317,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch24", title: "Reinforcement Learning Intro", topic: "Q-Learning, Policy Gradient",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-01-25", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-R9S1T2", invoiceId: "INV-2026-0125-001", scheduledByName: "Bhargavi CS",
@@ -303,7 +325,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch25", title: "Workshop: Computer Vision Applications", topic: "Object Detection, YOLO, Segmentation",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-01-29", start: minutes(10), end: minutes(13), location: "Online",
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "paid",
     transactionId: "TXN-GL-U3V4W5", invoiceId: "INV-2026-0129-001", scheduledByName: "Bhargavi CS",
@@ -311,7 +333,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch26", title: "Data Ethics & Bias", topic: "Fairness, Accountability, Transparency",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 06", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-02-01", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-AA1BB2", invoiceId: "INV-2026-0201-001", scheduledByName: "Bhargavi CS",
@@ -320,7 +342,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch27", title: "Graph Neural Networks", topic: "GCN, Node Embeddings, Knowledge Graphs",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 02", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-02-03", start: minutes(14), end: minutes(16), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-BB2CC3", invoiceId: "INV-2026-0203-001", scheduledByName: "Bhargavi CS",
@@ -329,7 +351,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch28", title: "MLOps Best Practices", topic: "Monitoring, Drift Detection, Retraining",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 05", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-02-06", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "paid",
     transactionId: "TXN-GL-CC3DD4", invoiceId: "INV-2026-0206-001", scheduledByName: "Bhargavi CS",
@@ -338,7 +360,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch29", title: "Workshop: LLM Fine-tuning", topic: "LoRA, PEFT, Instruction Tuning",
-    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04",
+    batch: "AIML Online Oct 25 B", program: "PGP-AIML", cohort: "AIML Online Oct 25 B", group: "Group 04", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-02-09", start: minutes(10), end: minutes(13), location: "Online",
     sessionType: "Online session", contentReady: true, paymentAmountInr: 18000, paymentStatus: "invoice_not_raised",
     scheduledByName: "Bhargavi CS", scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-02-03",
@@ -346,7 +368,7 @@ export const demoSessions: Session[] = [
   },
   {
     id: "ch30", title: "Capstone Project Review", topic: "End-to-end Project Feedback",
-    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03",
+    batch: "PGP-DS Online Oct 25 A", program: "PGP-DS", cohort: "PGP-DS Online Oct 25 A", group: "Group 03", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-02-14", start: minutes(10), end: minutes(12), location: "Online",
     sessionType: "Mentored Learning session", contentReady: true, paymentAmountInr: 12000, paymentStatus: "invoice_not_raised",
     scheduledByName: "Bhargavi CS", scheduledByEmail: "bhargavi.cs@greatlearning.in", scheduledOnYmd: "2026-02-08",
@@ -467,6 +489,7 @@ export const demoSessions: Session[] = [
     program: "PGP-AIML",
     cohort: "AIML Online March 26 A",
     group: "Group 02",
+    groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-02-08",
     endDateYmd: "2026-02-10",
     start: minutes(9),
@@ -495,7 +518,7 @@ export const demoSessions: Session[] = [
     batch: "AIML Online March 26 A",
     program: "PGP-AIML",
     cohort: "AIML Online March 26 A",
-    group: "Group 02",
+    group: "Group 02", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-03-27",
     endDateYmd: "2026-03-29",
     start: minutes(9),
@@ -525,7 +548,7 @@ export const demoSessions: Session[] = [
     batch: "AIML Online March 26 A",
     program: "PGP-AIML",
     cohort: "AIML Online March 26 A",
-    group: "Group 02",
+    group: "Group 02", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-04-02",
     endDateYmd: "2026-04-04",
     start: minutes(9),
@@ -763,7 +786,7 @@ export const demoSessions: Session[] = [
     batch: "PGPDS Online January 26 A",
     program: "PGP-DS",
     cohort: "PGPDS Online January 26 A",
-    group: "Group 06",
+    group: "Group 06", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-03-24",
     start: minutes(9, 30),
     end: minutes(11, 30),
@@ -791,7 +814,7 @@ export const demoSessions: Session[] = [
     batch: "AIML Online March 26 A",
     program: "PGP-AIML",
     cohort: "AIML Online March 26 A",
-    group: "Group 02",
+    group: "Group 02", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-03-25",
     start: minutes(10),
     end: minutes(12),
@@ -893,7 +916,7 @@ export const demoSessions: Session[] = [
     batch: "AIML Online July 25 B",
     program: "PGP-AIML",
     cohort: "AIML Online July 25 B",
-    group: "Group 04",
+    group: "Group 04", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-03-24",
     start: minutes(10),
     end: minutes(12),
@@ -926,7 +949,7 @@ export const demoSessions: Session[] = [
     batch: "PGPDS.O.MAR26.A",
     program: "PGP-DS",
     cohort: "PGPDS.O.MAR26.A",
-    group: "Group 06",
+    group: "Group 06", groupMembers: GROUP_MEMBERS_B,
     dateYmd: "2026-04-05",
     start: minutes(9, 30),
     end: minutes(11),
@@ -957,7 +980,7 @@ export const demoSessions: Session[] = [
     batch: "PGPDS.O.MAR26.A",
     program: "PGP-DS",
     cohort: "PGPDS.O.MAR26.A",
-    group: "Group 07",
+    group: "Group 07", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-03-27",
     start: minutes(18),
     end: minutes(20),
@@ -988,7 +1011,7 @@ export const demoSessions: Session[] = [
     batch: "PGPDS.O.MAR26.A",
     program: "PGP-DS",
     cohort: "PGPDS.O.MAR26.A",
-    group: "Group 07",
+    group: "Group 07", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-02-25",
     start: minutes(18),
     end: minutes(20),
@@ -1049,7 +1072,7 @@ export const demoSessions: Session[] = [
     batch: "PGPDS.O.MAR26.A",
     program: "PGP-DS",
     cohort: "PGPDS.O.MAR26.A",
-    group: "Group 07",
+    group: "Group 07", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-02-06",
     start: minutes(18),
     end: minutes(20),
@@ -1081,7 +1104,7 @@ export const demoSessions: Session[] = [
     batch: "PGPDS.O.MAR26.B",
     program: "PGP-DS",
     cohort: "PGPDS.O.MAR26.B",
-    group: "Group 03",
+    group: "Group 03", groupMembers: GROUP_MEMBERS_A,
     dateYmd: "2026-02-06",
     start: minutes(18),
     end: minutes(20),

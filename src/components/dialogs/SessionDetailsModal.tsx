@@ -494,6 +494,7 @@ export function SessionDetailsModal() {
   const nowMs = demoNow.getTime();
   const tzOffset = useAppSelector((s) => s.profile.tzOffsetMinutes);
   const [expandedCombinedBatch, setExpandedCombinedBatch] = useState<string | false>(false);
+  const [expandedGroup, setExpandedGroup] = useState(false);
 
   const nextSessionId = sortByDateTime(allSessions).find(
     (s) => dateTimeMs(s.dateYmd, s.start) >= nowMs && !sessionDeclined[s.id]
@@ -717,7 +718,7 @@ export function SessionDetailsModal() {
                       </DetailRow>
                     )}
                     {session.cohort && <DetailRow label="Batch">{session.cohort}</DetailRow>}
-                    {session.group && (
+                    {session.group && !session.groupMembers && (
                       <DetailRow label="Group">
                         <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
                           <GroupsOutlinedIcon sx={{ fontSize: 14 }} />
@@ -735,6 +736,76 @@ export function SessionDetailsModal() {
                     )}
                   </SectionCard>
                 </Box>
+
+                {/* ── Group members accordion ── */}
+                {session.group && session.groupMembers && session.groupMembers.length > 0 && (
+                  <Box sx={{ mb: 2.5 }}>
+                    <SectionHeading icon={<GroupsOutlinedIcon sx={{ fontSize: 14 }} />}>
+                      {session.group} &middot; {session.groupMembers.length} learners
+                    </SectionHeading>
+                    <Accordion
+                      disableGutters
+                      elevation={0}
+                      expanded={expandedGroup}
+                      onChange={(_, isExpanded) => setExpandedGroup(isExpanded)}
+                      sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px !important", overflow: "hidden", "&::before": { display: "none" } }}
+                    >
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
+                        sx={{ px: 1.5, minHeight: "unset", "& .MuiAccordionSummary-content": { my: 0.75 } }}
+                      >
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%", mr: 1 }}>
+                          <Box>
+                            <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>
+                              {session.group} &middot; {session.batch ?? session.cohort}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem", display: "block", lineHeight: 1.2 }}>
+                              {session.groupMembers.length} learners
+                            </Typography>
+                          </Box>
+                          <Chip
+                            label="Group"
+                            size="small"
+                            variant="outlined"
+                            sx={{ height: 18, fontSize: "0.55rem", fontWeight: 600, borderRadius: 1 }}
+                          />
+                        </Stack>
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ px: 1.5, pt: 0, pb: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
+                        <Box>
+                          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
+                            Members ({session.groupMembers.length})
+                          </Typography>
+                          <Stack
+                            spacing={0.5}
+                            sx={{
+                              maxHeight: 180,
+                              overflowY: "auto",
+                              pr: 0.5,
+                              "&::-webkit-scrollbar": { width: 2 },
+                              "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
+                              "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: "8px", "&:hover": { bgcolor: "text.disabled" } },
+                              scrollbarWidth: "thin",
+                              scrollbarColor: "var(--mui-palette-divider) transparent",
+                            }}
+                          >
+                            {session.groupMembers.map((m) => (
+                              <Stack key={m.email} direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
+                                <Avatar sx={{ width: 28, height: 28, fontSize: "0.65rem", bgcolor: "action.selected", color: "text.primary", flexShrink: 0 }}>
+                                  {m.name.charAt(0)}
+                                </Avatar>
+                                <Box sx={{ minWidth: 0 }}>
+                                  <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.2 }}>{m.name}</Typography>
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{m.email}</Typography>
+                                </Box>
+                              </Stack>
+                            ))}
+                          </Stack>
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Box>
+                )}
 
                 {/* ── Combined batches ── */}
                 {session.combinedBatches && session.combinedBatches.length > 0 && (

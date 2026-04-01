@@ -6,6 +6,16 @@
 import { minutes } from "@/lib/helpers";
 import type { Session } from "@/lib/types";
 
+const GROUP_MEMBERS = [
+  { name: "Aarav Sharma", email: "aarav.sharma@example.com" },
+  { name: "Priya Patel", email: "priya.patel@example.com" },
+  { name: "Rohan Gupta", email: "rohan.gupta@example.com" },
+  { name: "Sneha Reddy", email: "sneha.reddy@example.com" },
+  { name: "Vikram Singh", email: "vikram.singh@example.com" },
+  { name: "Ananya Iyer", email: "ananya.iyer@example.com" },
+  { name: "Karthik Nair", email: "karthik.nair@example.com" },
+];
+
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /*  MENTORED LEARNING / ONLINE SESSION                                       */
 /* ═══════════════════════════════════════════════════════════════════════════ */
@@ -18,6 +28,7 @@ export const demoMentoringConfirmed: Session = {
   program: "PGP-DS",
   cohort: "PGPDS Online March 26 A",
   group: "Group 07",
+  groupMembers: GROUP_MEMBERS,
   dateYmd: "2026-03-30",
   start: minutes(10),
   end: minutes(12),
@@ -45,6 +56,7 @@ export const demoMentoringCombinedConfirmed: Session = {
   program: "PGP-DS",
   cohort: "PGPDS Online March 26 A",
   group: "Group 07",
+  groupMembers: GROUP_MEMBERS,
   dateYmd: "2026-03-30",
   start: minutes(10),
   end: minutes(12),
@@ -130,6 +142,7 @@ export const demoMentoringCompletedGathering: Session = {
   program: "PGP-DS",
   cohort: "PGPDS Online March 26 A",
   group: "Group 06",
+  groupMembers: GROUP_MEMBERS,
   dateYmd: "2026-03-10",
   start: minutes(10),
   end: minutes(12),
@@ -182,6 +195,7 @@ export const demoMentoringCompletedWithRating: Session = {
   program: "PGP-AIML",
   cohort: "AIML Online February 26 A",
   group: "Group 03",
+  groupMembers: GROUP_MEMBERS,
   dateYmd: "2026-02-05",
   start: minutes(18),
   end: minutes(21),

@@ -43,6 +43,7 @@ export type Session = {
   program: string;
   cohort: string;
   group: string;
+  groupMembers?: { name: string; email: string }[];
   dateYmd: string;
   start: number;
   end: number;
