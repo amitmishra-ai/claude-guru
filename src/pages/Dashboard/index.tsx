@@ -18,6 +18,7 @@ import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
@@ -1038,6 +1039,9 @@ export default function DashboardPage() {
                                               <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
                                                 <MailOutlineIcon sx={{ fontSize: 13 }} />
                                                 <span>{plannedEventDetail.contactEmail}</span>
+                                                <IconButton size="small" onClick={() => navigator.clipboard.writeText(plannedEventDetail.contactEmail)} sx={{ p: 0.25, ml: 0.25 }}>
+                                                  <ContentCopyOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+                                                </IconButton>
                                               </Stack>
                                             </Typography>
                                           </Box>
@@ -1159,7 +1163,6 @@ export default function DashboardPage() {
                             ? ratings.reduce((a, r) => a + r.rating, 0) / ratings.length
                             : 0;
                           const daysSinceSession = (nowMs - new Date(s.dateYmd).getTime()) / (1000 * 60 * 60 * 24);
-                          const feedbackLabel = daysSinceSession > 30 ? "No feedback collected" : "Gathering feedback";
                           const isMockInterview = s.title.toLowerCase().includes("mock");
                           const isPaid = s.paymentStatus === "paid";
                           const hasPaymentStatus = !!s.paymentStatus;
@@ -1177,9 +1180,12 @@ export default function DashboardPage() {
                               ? <Chip label="Payment Pending" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 500, fontSize: { xs: "0.65rem", sm: "0.75rem" } }} />
                               : null;
 
-                          // Feedback chip helper
-                          const feedbackChip = (
-                            <Chip label={feedbackLabel} size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", ...(daysSinceSession > 30 ? { opacity: 0.7 } : {}) }} />
+                          // No-rating placeholder: star + "--"
+                          const noRatingPlaceholder = (
+                            <Stack direction="row" spacing={0.5} alignItems="center" className="star-rating-numeric" sx={{ flexShrink: 0 }}>
+                              <StarOutlinedIcon sx={{ fontSize: 14, color: "action.disabled" }} />
+                              <Typography variant="subtitle2" fontWeight={600} sx={{ color: "action.disabled" }}>--</Typography>
+                            </Stack>
                           );
 
                           // Star rating helpers — numeric for Online/Residency, icons-only for Evaluation/Moderation
@@ -1198,19 +1204,24 @@ export default function DashboardPage() {
                             </Stack>
                           ) : null;
 
+                          // Rating element (always present for rated types)
+                          const ratingElement = (isCapstone || isCVReview) ? null : (numericRating ?? noRatingPlaceholder);
+
                           // Build top-right per activity type
                           let topRightContent: React.ReactNode;
                           if (isCapstone || isCVReview) {
-                            // No rating — just payment chip
                             topRightContent = paymentChip;
-                          } else {
-                            // Eval/Mod/Online/Residency — payment + rating or feedback chip
+                          } else if (paymentChip) {
+                            // Payment chip + rating side by side
                             topRightContent = (
                               <Stack direction="row" spacing={0.75} alignItems="center">
                                 {paymentChip}
-                                {numericRating ?? feedbackChip}
+                                {ratingElement}
                               </Stack>
                             );
+                          } else {
+                            // No payment chip — rating will be placed inline with title
+                            topRightContent = null;
                           }
 
                           // Build actions per activity type
@@ -1310,17 +1321,22 @@ export default function DashboardPage() {
                               {/* Card header: title row + date + actions — custom for non-SessionCard types */}
                               {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
                                 <>
-                                  {/* MOBILE: chips on top line, rating pushed right */}
-                                  <Box sx={{ display: { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.75, mb: 0.75, "& > .MuiStack-root": { width: "100%", "& .star-rating-numeric": { ml: "auto" } } }}>
-                                    {topRightContent}
-                                  </Box>
-                                  {/* MOBILE: title full width */}
-                                  <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>{cardTitle}</Typography>
-                                  {/* DESKTOP: title + chips side by side */}
+                                  {/* MOBILE: chips on top line when present */}
+                                  {topRightContent && (
+                                    <Box sx={{ display: { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.75, mb: 0.75, "& > .MuiStack-root": { width: "100%", "& .star-rating-numeric": { ml: "auto" } } }}>
+                                      {topRightContent}
+                                    </Box>
+                                  )}
+                                  {/* MOBILE: title + inline rating when no chips */}
+                                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "flex", sm: "none" }, mb: 0.5 }}>
+                                    <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>{cardTitle}</Typography>
+                                    {!topRightContent && ratingElement}
+                                  </Stack>
+                                  {/* DESKTOP: title + chips/rating side by side */}
                                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5, gap: 1 }}>
                                     <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>{cardTitle}</Typography>
                                     <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
-                                      {topRightContent}
+                                      {topRightContent ?? ratingElement}
                                     </Stack>
                                   </Stack>
                                   <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
@@ -1365,6 +1381,7 @@ export default function DashboardPage() {
                                   end={s.end}
                                   onCourseClick={getOnCourseClick(s)}
                                   topRight={topRightContent}
+                                  titleRight={!topRightContent ? ratingElement : undefined}
                                   chips={undefined}
                                   actions={cardActions}
                                   onViewDetails={handleViewDetails}

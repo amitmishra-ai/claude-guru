@@ -49,6 +49,8 @@ export type SessionCardProps = {
   chips?: string[];
   /** Content in top-right corner (e.g. star rating) */
   topRight?: ReactNode;
+  /** Content rendered inline to the right of the title (e.g. star rating when no chips) */
+  titleRight?: ReactNode;
   /** Primary action buttons */
   actions?: ReactNode;
   /** Secondary action (right-aligned, e.g. "Group profile") */
@@ -105,6 +107,7 @@ export function SessionCard({
   status,
   chips,
   topRight,
+  titleRight,
   actions,
   secondaryAction,
   onViewDetails,
@@ -355,13 +358,16 @@ export function SessionCard({
               {statusChip}
             </Box>
           )}
-          <Typography
-            variant={titleVariant}
-            fontWeight={600}
-            sx={{ display: { xs: "block", sm: "none" }, fontSize: titleVariant === "h5" ? "1rem" : "0.875rem", mb: 0.5 }}
-          >
-            {titleContent}
-          </Typography>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "flex", sm: "none" }, mb: 0.5 }}>
+            <Typography
+              variant={titleVariant}
+              fontWeight={600}
+              sx={{ fontSize: titleVariant === "h5" ? "1rem" : "0.875rem", minWidth: 0 }}
+            >
+              {titleContent}
+            </Typography>
+            {titleRight}
+          </Stack>
           {/* ── DESKTOP (sm+): status chip beside title ── */}
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5 }}>
             <Typography
@@ -371,7 +377,10 @@ export function SessionCard({
             >
               {titleContent}
             </Typography>
-            {statusChip}
+            <Stack direction="row" spacing={0.75} alignItems="center">
+              {statusChip}
+              {titleRight}
+            </Stack>
           </Stack>
           {dateRow}
 

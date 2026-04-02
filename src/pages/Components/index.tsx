@@ -85,12 +85,6 @@ const chipSx = {
     fontSize: "0.75rem",
     flexShrink: 0,
   } as const,
-  noFeedback: {
-    fontWeight: 500,
-    fontSize: "0.75rem",
-    flexShrink: 0,
-    opacity: 0.7,
-  } as const,
   paymentPending: {
     bgcolor: "var(--gl-status-pending-bg)",
     color: "var(--gl-status-pending-text)",
@@ -138,7 +132,12 @@ const chipSx = {
 };
 
 const CHIP_GATHERING = <Chip label="Gathering feedback" size="small" variant="outlined" sx={chipSx.gathering} />;
-const CHIP_NO_FEEDBACK = <Chip label="No feedback collected" size="small" variant="outlined" sx={chipSx.noFeedback} />;
+const NO_FEEDBACK_RATING = (
+  <Stack direction="row" spacing={0.5} alignItems="center" className="star-rating-numeric" sx={{ flexShrink: 0 }}>
+    <StarOutlinedIcon sx={{ fontSize: 14, color: "action.disabled" }} />
+    <Typography variant="subtitle2" fontWeight={600} sx={{ color: "action.disabled" }}>--</Typography>
+  </Stack>
+);
 const CHIP_PAYMENT_PENDING = <Chip label="Payment pending" size="small" sx={chipSx.paymentPending} />;
 const CHIP_PAYMENT_PROCESSED = <Chip label="Payment processed" size="small" sx={chipSx.paymentProcessed} />;
 const CHIP_CONFIRMED = <Chip label="Confirmed" size="small" sx={chipSx.confirmed} />;
@@ -776,7 +775,12 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Contact</Typography>
                   <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }} component="div">
-                    <Stack direction="row" alignItems="center" spacing={0.5}><MailOutlineIcon sx={{ fontSize: 13 }} /><span>gurus_support@greatlearning.in</span></Stack>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <MailOutlineIcon sx={{ fontSize: 13 }} /><span>gurus_support@greatlearning.in</span>
+                      <IconButton size="small" onClick={() => navigator.clipboard.writeText("gurus_support@greatlearning.in")} sx={{ p: 0.25, ml: 0.25 }}>
+                        <ContentCopyOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+                      </IconButton>
+                    </Stack>
                   </Typography>
                 </Stack>
               </Box>
@@ -957,7 +961,12 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
                 <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Contact</Typography>
                   <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }} component="div">
-                    <Stack direction="row" alignItems="center" spacing={0.5}><MailOutlineIcon sx={{ fontSize: 13 }} /><span>gurus_support@greatlearning.in</span></Stack>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <MailOutlineIcon sx={{ fontSize: 13 }} /><span>gurus_support@greatlearning.in</span>
+                      <IconButton size="small" onClick={() => navigator.clipboard.writeText("gurus_support@greatlearning.in")} sx={{ p: 0.25, ml: 0.25 }}>
+                        <ContentCopyOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+                      </IconButton>
+                    </Stack>
                   </Typography>
                 </Stack>
               </Box>
@@ -1162,7 +1171,12 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                 <Stack direction="row" justifyContent="space-between" sx={{ py: 0.875 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>Contact</Typography>
                   <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }} component="div">
-                    <Stack direction="row" alignItems="center" spacing={0.5}><MailOutlineIcon sx={{ fontSize: 13 }} /><span>gurus_support@greatlearning.in</span></Stack>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <MailOutlineIcon sx={{ fontSize: 13 }} /><span>gurus_support@greatlearning.in</span>
+                      <IconButton size="small" onClick={() => navigator.clipboard.writeText("gurus_support@greatlearning.in")} sx={{ p: 0.25, ml: 0.25 }}>
+                        <ContentCopyOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+                      </IconButton>
+                    </Stack>
                   </Typography>
                 </Stack>
               </Box>
@@ -1282,10 +1296,15 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
                   <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-surface-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <MailOutlineIcon sx={{ fontSize: 16, color: "text.secondary" }} />
                   </Box>
-                  <Box>
-                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>
-                      gurus_support@greatlearning.in
-                    </Typography>
+                  <Box sx={{ flex: 1 }}>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8125rem", lineHeight: 1.2 }}>
+                        gurus_support@greatlearning.in
+                      </Typography>
+                      <IconButton size="small" onClick={() => navigator.clipboard.writeText("gurus_support@greatlearning.in")} sx={{ p: 0.25 }}>
+                        <ContentCopyOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+                      </IconButton>
+                    </Stack>
                     <Typography variant="caption" color="text.secondary">Contact</Typography>
                   </Box>
                 </Stack>
@@ -1630,7 +1649,7 @@ function ResidencyCards() {
             topRight={
               <Stack direction="row" spacing={0.75}>
                 {CHIP_PAYMENT_PROCESSED}
-                {CHIP_NO_FEEDBACK}
+                {NO_FEEDBACK_RATING}
               </Stack>
             }
             secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoResidencyCompletedWithRating)}>View details</Button>}
@@ -1974,7 +1993,7 @@ function OnlineSessionCards() {
             topRight={
               <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
                 {CHIP_PAYMENT_PROCESSED}
-                {CHIP_NO_FEEDBACK}
+                {NO_FEEDBACK_RATING}
               </Stack>
             }
             actions={
@@ -2236,7 +2255,7 @@ function CareerMentorOnlineSessionCards() {
             topRight={
               <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
                 {CHIP_PAYMENT_PROCESSED}
-                {CHIP_NO_FEEDBACK}
+                {NO_FEEDBACK_RATING}
               </Stack>
             }
             actions={
@@ -2920,7 +2939,7 @@ function AuditPanel() {
                 { label: "Payment pending", scope: "All activity types", color: "var(--gl-status-pending-bg)" },
                 { label: "Payment processed", scope: "All activity types", color: "var(--gl-status-confirmed-bg)" },
                 { label: "Gathering feedback", scope: "Online, Residency, Career, Eval, Mod", color: "transparent" },
-                { label: "No feedback collected", scope: "Online Sessions only", color: "transparent" },
+                { label: "Star -- (no feedback)", scope: "Online, Residency, Career", color: "transparent" },
                 { label: "To be confirmed", scope: "Online, Evaluation, Moderation", color: "var(--gl-status-pending-bg)" },
                 { label: "Already submitted", scope: "CV Review only", color: "var(--gl-status-confirmed-bg)" },
                 { label: "Scheduled", scope: "Evaluation, Moderation (inline)", color: "var(--gl-status-pending-bg)" },

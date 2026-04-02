@@ -282,7 +282,7 @@ export default function PaymentsPage() {
       </FlexBox>
 
       {/* ── Earnings overview + chart ── */}
-      <Card variant="outlined" sx={{ mb: 2 }}>
+      <Card variant="outlined" sx={{ mb: 1 }}>
         <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
           {chartLoading ? (
             <>
@@ -377,8 +377,9 @@ export default function PaymentsPage() {
       </Card>
 
       {/* ── Payment details table ── */}
-      <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Payment details</Typography>
       {isEmpty ? (
+        <>
+        <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Payment details</Typography>
         <Box sx={{ mb: 4 }}>
           <EmptyState
             icon={<SavingsOutlinedIcon />}
@@ -386,10 +387,11 @@ export default function PaymentsPage() {
             subtitle="Activity-wise payment details, transaction IDs, and invoices will appear here post completion"
           />
         </Box>
+        </>
       ) : (
       <>
-      <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-        <Box />
+      <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 0 }}>
+        <Typography variant="subtitle1" fontWeight={700}>Payment details</Typography>
         <Select
           value={paymentFilter}
           onChange={(e) => { setPaymentFilter(e.target.value as PaymentFilter); setPage(0); }}

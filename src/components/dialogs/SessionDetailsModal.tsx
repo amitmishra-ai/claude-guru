@@ -14,6 +14,7 @@ import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import SlideshowOutlinedIcon from "@mui/icons-material/SlideshowOutlined";
 import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
 import MailOutlinedIcon from "@mui/icons-material/MailOutlined";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import PollOutlinedIcon from "@mui/icons-material/PollOutlined";
@@ -669,28 +670,56 @@ export function SessionDetailsModal() {
                     </Stack>
 
                     {/* Residency day-by-day schedule */}
-                    {session.residencySchedule && session.residencySchedule.length > 0 && (
-                      <>
-                        <Divider />
-                        <Box>
-                          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: "block" }}>
-                            {session.residencySchedule.length}-day schedule
-                          </Typography>
-                          <Stack spacing={0.75}>
-                            {session.residencySchedule.map((day, idx) => (
-                              <Stack key={idx} direction="row" alignItems="center" spacing={2}>
-                                <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ minWidth: 80 }}>
-                                  {fmtDateNice(day.dateYmd)}
-                                </Typography>
-                                <Typography variant="body2" fontWeight={500}>
-                                  {fmtTime12(applyTzOffset(day.start, tzOffset))} – {fmtTime12(applyTzOffset(day.end, tzOffset))}
-                                </Typography>
-                              </Stack>
-                            ))}
-                          </Stack>
-                        </Box>
-                      </>
-                    )}
+                    {session.residencySchedule && session.residencySchedule.length > 0 && (() => {
+                      // Group schedule entries by day number based on unique dates
+                      const uniqueDates = [...new Set(session.residencySchedule.map((d) => d.dateYmd))];
+                      return (
+                        <>
+                          <Divider />
+                          <Box>
+                            <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>
+                              {uniqueDates.length}-day schedule
+                            </Typography>
+                            <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", overflow: "hidden" }}>
+                              {session.residencySchedule.map((day, idx) => {
+                                const dayNum = uniqueDates.indexOf(day.dateYmd) + 1;
+                                return (
+                                  <Stack
+                                    key={idx}
+                                    direction="row"
+                                    alignItems="center"
+                                    sx={{
+                                      px: 1.5,
+                                      py: 1,
+                                      ...(idx < session.residencySchedule!.length - 1 && { borderBottom: 1, borderColor: "divider" }),
+                                    }}
+                                  >
+                                    <Typography
+                                      variant="caption"
+                                      fontWeight={700}
+                                      sx={{
+                                        fontSize: "0.7rem",
+                                        color: "primary.main",
+                                        minWidth: 44,
+                                        lineHeight: 1.2,
+                                      }}
+                                    >
+                                      Day {dayNum}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8rem", ml: 2, minWidth: 90 }}>
+                                      {fmtDateNice(day.dateYmd)}
+                                    </Typography>
+                                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", ml: "auto", whiteSpace: "nowrap" }}>
+                                      {fmtTime12(applyTzOffset(day.start, tzOffset))} – {fmtTime12(applyTzOffset(day.end, tzOffset))}
+                                    </Typography>
+                                  </Stack>
+                                );
+                              })}
+                            </Box>
+                          </Box>
+                        </>
+                      );
+                    })()}
                   </Stack>
                 </Box>
               </Box>
@@ -704,19 +733,6 @@ export function SessionDetailsModal() {
                 <Box sx={{ mb: 2.5 }}>
                   <SectionHeading>Details</SectionHeading>
                   <SectionCard>
-                    {session.scheduledByName && (
-                      <DetailRow label="Scheduled by">
-                        <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
-                          <AccountCircleOutlinedIcon sx={{ fontSize: 14 }} />
-                          <span>{session.scheduledByName}</span>
-                        </Stack>
-                        {session.scheduledOnYmd && (
-                          <Typography variant="caption" color="text.secondary">
-                            on {fmtDateNice(session.scheduledOnYmd)}
-                          </Typography>
-                        )}
-                      </DetailRow>
-                    )}
                     {session.cohort && <DetailRow label="Batch">{session.cohort}</DetailRow>}
                     {session.group && !session.groupMembers && (
                       <DetailRow label="Group">
@@ -731,6 +747,9 @@ export function SessionDetailsModal() {
                         <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
                           <MailOutlinedIcon sx={{ fontSize: 13 }} />
                           <span>{session.scheduledByEmail}</span>
+                          <IconButton size="small" onClick={() => navigator.clipboard.writeText(session.scheduledByEmail!)} sx={{ p: 0.25, ml: 0.25 }}>
+                            <ContentCopyOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+                          </IconButton>
                         </Stack>
                       </DetailRow>
                     )}
@@ -1145,22 +1164,12 @@ export function SessionDetailsModal() {
                             </Stack>
                           </>
                         ) : (
-                          <Stack direction="row" alignItems="center" justifyContent="space-between">
-                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem" }}>
-                              {daysSince > 30 ? "No feedback collected" : "Gathering feedback"}
+                          <Stack direction="row" alignItems="center" spacing={0.75}>
+                            <StarOutlinedIcon sx={{ fontSize: 18, color: "action.disabled" }} />
+                            <Typography variant="body1" fontWeight={700} sx={{ color: "action.disabled", fontSize: "1.1rem" }}>--</Typography>
+                            <Typography variant="caption" sx={{ color: "action.disabled" }}>
+                              {daysSince > 30 ? "No feedback" : "Gathering feedback"}
                             </Typography>
-                            <Chip
-                              label={daysSince > 30 ? "Expired" : "Pending"}
-                              size="small"
-                              sx={{
-                                fontWeight: 600,
-                                fontSize: "0.65rem",
-                                height: 20,
-                                ...(daysSince > 30
-                                  ? { bgcolor: "action.hover", color: "text.disabled" }
-                                  : { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }),
-                              }}
-                            />
                           </Stack>
                         )}
                       </SectionCard>

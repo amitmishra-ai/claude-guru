@@ -2,6 +2,7 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import MailOutlinedIcon from "@mui/icons-material/MailOutlined";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
@@ -185,14 +186,6 @@ export function CompletedSessionDetailDialog() {
                 </Typography>
               </Stack>
               <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
-                {session.scheduledByName && (
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Scheduled by</Typography>
-                    <Box sx={{ textAlign: "right" }}>
-                      <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{session.scheduledByName}</Typography>
-                    </Box>
-                  </Stack>
-                )}
                 {session.cohort && (
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2} sx={{ py: 0.875 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, minWidth: 100, fontSize: "0.8125rem" }}>Batch</Typography>
@@ -222,6 +215,9 @@ export function CompletedSessionDetailDialog() {
                         <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
                           <MailOutlinedIcon sx={{ fontSize: 13 }} />
                           <span>{session.scheduledByEmail}</span>
+                          <IconButton size="small" onClick={() => navigator.clipboard.writeText(session.scheduledByEmail!)} sx={{ p: 0.25, ml: 0.25 }}>
+                            <ContentCopyOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+                          </IconButton>
                         </Stack>
                       </Typography>
                     </Box>
