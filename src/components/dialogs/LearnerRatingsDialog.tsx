@@ -163,7 +163,7 @@ export function LearnerRatingsDialog() {
         "& .MuiDrawer-paper": {
           width: { xs: "100vw", sm: 500 },
           maxWidth: "100vw",
-          bgcolor: "hsl(var(--md-surface-container))",
+          bgcolor: "background.paper",
           border: "none",
         },
       }}
@@ -192,26 +192,26 @@ export function LearnerRatingsDialog() {
         <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", p: 2, pb: 4 }}>
           {session ? (
             <Stack spacing={2}>
-              {/* ── Session + Stats ── */}
-              <Card>
-                <Typography variant="overline" color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.06em" }}>
-                  {session.sessionType}
-                </Typography>
-                <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.9rem", lineHeight: 1.3, mt: 0.25 }}>
+              {/* ── Session info ── */}
+              <Card sx={isQualitative ? { textAlign: "center" } : undefined}>
+                {!isQualitative && (
+                  <Typography variant="overline" color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.06em" }}>
+                    {session.sessionType}
+                  </Typography>
+                )}
+                <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.9rem", lineHeight: 1.3, mt: isQualitative ? 0 : 0.25 }}>
                   {session.title}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {session.program} · {session.batch}
+                  {isQualitative ? session.program : `${session.program} · ${session.batch}`}
                 </Typography>
 
+                {/* Pattern 1: feedback count + rating */}
                 {!isQualitative && (
                   <Stack direction="row" sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: "divider" }}>
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="h5" fontWeight={800} sx={{ lineHeight: 1 }}>
-                        {summary?.totalResponses ?? ratings.length}
-                        <Typography component="span" variant="caption" color="text.secondary">
-                          /{summary?.totalEnrolled ?? "-"}
-                        </Typography>
+                      <Typography variant="body1" fontWeight={700} sx={{ lineHeight: 1 }}>
+                        {summary?.totalResponses ?? ratings.length}/{summary?.totalEnrolled ?? "-"}
                       </Typography>
                       <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.62rem" }}>
                         No. of feedback
@@ -222,10 +222,7 @@ export function LearnerRatingsDialog() {
                         {[1, 2, 3, 4, 5].map((i) => (
                           <StarOutlinedIcon
                             key={i}
-                            sx={{
-                              fontSize: 16,
-                              color: i <= Math.round(Number(avgRating)) ? "var(--gl-star-color)" : "action.disabled",
-                            }}
+                            sx={{ fontSize: 16, color: i <= Math.round(Number(avgRating)) ? "var(--gl-star-color)" : "action.disabled" }}
                           />
                         ))}
                       </Stack>
@@ -235,38 +232,38 @@ export function LearnerRatingsDialog() {
                     </Box>
                   </Stack>
                 )}
+                {/* Pattern 2: stars + rating, centered */}
+                {isQualitative && qualFeedback && (
+                  <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: "divider", textAlign: "center" }}>
+                    <Stack direction="row" spacing={0.5} justifyContent="center">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <StarOutlinedIcon
+                          key={i}
+                          sx={{ fontSize: 22, color: i <= qualFeedback.rating ? "var(--gl-star-color)" : "action.disabled" }}
+                        />
+                      ))}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: "block", fontSize: "0.72rem" }}>
+                      Rating · {qualFeedback.rating}/5
+                    </Typography>
+                  </Box>
+                )}
               </Card>
 
               {/* ── Pattern 2: Qualitative feedback (Evaluation / Moderation) ── */}
               {isQualitative && qualFeedback && (
                 <>
-                  {/* Star rating — centered, icons only */}
-                  <Card sx={{ textAlign: "center", py: 3 }}>
-                    <Stack direction="row" spacing={0.75} justifyContent="center">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <StarOutlinedIcon
-                          key={i}
-                          sx={{ fontSize: 28, color: i <= qualFeedback.rating ? "var(--gl-star-color)" : "action.disabled" }}
-                        />
-                      ))}
-                    </Stack>
-                  </Card>
-
-                  {/* Positive tags — 2-column grid with grey rows */}
+                  {/* Feedback tags */}
                   {qualFeedback.positiveTags && qualFeedback.positiveTags.length > 0 && (
                     <Card>
-                      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1 }}>
+                      <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 2 }}>
+                        What went well
+                      </Typography>
+                      <Box component="ul" sx={{ m: 0, pl: 2.5, display: "flex", flexDirection: "column", gap: 1 }}>
                         {qualFeedback.positiveTags.map((tag, i) => (
-                          <Stack
-                            key={i}
-                            direction="row"
-                            spacing={1.5}
-                            alignItems="center"
-                            sx={{ bgcolor: "action.hover", borderRadius: 2, px: 2, py: 1.25 }}
-                          >
-                            <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: "success.main", flexShrink: 0 }} />
-                            <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>{tag}</Typography>
-                          </Stack>
+                          <Typography key={i} component="li" variant="body2" sx={{ fontSize: "0.8rem", lineHeight: 1.5, "::marker": { color: "success.main", content: "'✓  '" } }}>
+                            {tag}
+                          </Typography>
                         ))}
                       </Box>
                     </Card>
@@ -277,13 +274,17 @@ export function LearnerRatingsDialog() {
                       <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 2 }}>
                         Areas for improvement
                       </Typography>
-                      <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mb: qualFeedback.comments?.length ? 2 : 0 }}>
+                      <Box component="ul" sx={{ m: 0, pl: 2.5, display: "flex", flexDirection: "column", gap: 1 }}>
                         {qualFeedback.negativeTags.map((tag, i) => (
-                          <Chip key={i} label={tag} size="small" sx={{ fontSize: "0.72rem", bgcolor: "action.selected" }} />
+                          <Typography key={i} component="li" variant="body2" sx={{ fontSize: "0.8rem", lineHeight: 1.5, "::marker": { color: "text.primary" } }}>
+                            {tag}
+                          </Typography>
                         ))}
-                      </Stack>
+                      </Box>
+
+                      {/* Free-text comments */}
                       {qualFeedback.comments && qualFeedback.comments.length > 0 && (
-                        <>
+                        <Box sx={{ mt: 2.5, pt: 2, borderTop: 1, borderColor: "divider" }}>
                           <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 1.5 }}>
                             Student comments
                           </Typography>
@@ -296,7 +297,7 @@ export function LearnerRatingsDialog() {
                               </Box>
                             ))}
                           </Stack>
-                        </>
+                        </Box>
                       )}
                     </Card>
                   )}
