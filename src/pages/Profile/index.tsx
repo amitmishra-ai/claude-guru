@@ -62,7 +62,7 @@ import {
   setDraftName, setDraftMode, setDraftPrograms,
   saveProfileEdits, populateDrafts,
 } from "@/store/slices/profileSlice";
-import { formatGMTOffsetFromMinutesAhead, getTimeZoneOffsetMinutes } from "@/lib/helpers";
+import { formatGMTOffsetFromMinutesAhead, getTimeZoneOffsetMinutes, getLocaleFromTimezone } from "@/lib/helpers";
 import { demoRatingHistory } from "@/data/demo-sessions";
 
 const borderRotate = keyframes`
@@ -131,6 +131,7 @@ export default function ProfilePage() {
   const guruPrograms  = useAppSelector((s) => s.profile.guruPrograms);
   const timeZoneMode  = useAppSelector((s) => s.profile.timeZoneMode);
   const manualTimeZone= useAppSelector((s) => s.profile.manualTimeZone);
+  const userLocale = getLocaleFromTimezone(timeZoneMode === "manual" ? manualTimeZone : Intl.DateTimeFormat().resolvedOptions().timeZone);
   const openProfileEdit = useAppSelector((s) => s.ui.openProfileEdit);
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
   const isEmpty = guruStage === "empty";
@@ -158,7 +159,7 @@ export default function ProfilePage() {
     for (let i = 0; i < 6; i++) {
       const d = new Date(base.getFullYear(), base.getMonth() - i, 1);
       const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const label = d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      const label = d.toLocaleDateString(userLocale, { month: "long", year: "numeric" });
       months.push({ value: val, label: i === 0 ? `${label} (Current)` : label });
     }
     return months;
@@ -265,7 +266,7 @@ export default function ProfilePage() {
     const byMonth: Record<string, number[]> = {};
     demoRatingHistory.forEach((r) => {
       const d = new Date(r.dateYmd);
-      const lbl = `${d.toLocaleString("en-US", { month: "short" })} ${String(d.getFullYear()).slice(2)}`;
+      const lbl = `${d.toLocaleString(userLocale, { month: "short" })} ${String(d.getFullYear()).slice(2)}`;
       (byMonth[lbl] ??= []).push(r.score);
     });
     return MONTHS.map((m) => ({

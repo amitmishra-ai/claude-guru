@@ -64,6 +64,7 @@ import {
   dateTimeMs,
   fmtDateNice,
   isSessionCompleted,
+  getLocaleFromTimezone,
 } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions, demoPlannedEvents } from "@/data/demo-sessions";
@@ -176,6 +177,9 @@ export default function DashboardPage() {
   const patterns = useAppSelector((s) => s.availability.patterns);
   const requests = useAppSelector((s) => s.requests.items);
   const guruName = useAppSelector((s) => s.profile.guruName);
+  const timeZoneMode = useAppSelector((s) => s.profile.timeZoneMode);
+  const manualTimeZone = useAppSelector((s) => s.profile.manualTimeZone);
+  const userLocale = getLocaleFromTimezone(timeZoneMode === "manual" ? manualTimeZone : Intl.DateTimeFormat().resolvedOptions().timeZone);
   const polls = useAppSelector((s) => s.polls.items);
   const _supportTickets = useAppSelector((s) => s.support.tickets);
   const supportTickets = isEmpty ? [] : _supportTickets;
@@ -1145,7 +1149,7 @@ export default function DashboardPage() {
                           const sessionMonth = s.dateYmd.slice(0, 7); // "YYYY-MM"
                           const prevMonth = idx > 0 ? filteredCompletedSessions[idx - 1].dateYmd.slice(0, 7) : null;
                           const showMonthDivider = sessionMonth !== prevMonth;
-                          const monthLabel = new Date(s.dateYmd + "T00:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" });
+                          const monthLabel = new Date(s.dateYmd + "T00:00:00").toLocaleDateString(userLocale, { month: "long", year: "numeric" });
                           const ratings = demoLearnerRatingsBySessionId[s.id];
                           const hasRatings = ratings && ratings.length > 0;
                           const avg = hasRatings

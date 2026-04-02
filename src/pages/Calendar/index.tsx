@@ -65,6 +65,7 @@ import {
   toYmd,
   getTimeZoneOffsetMinutes,
   formatGMTOffsetFromMinutesAhead,
+  getLocaleFromTimezone,
 } from "@/lib/helpers";
 import { DOW, DOW_LONG, demoNow } from "@/lib/constants";
 import type { NA, RequestSlot, Session } from "@/lib/types";
@@ -131,8 +132,8 @@ const GRID_ROW_PX = 42;
 const DEFAULT_SCROLL_HOUR = 8;
 
 /** Format a Date as "Feb 16" */
-function fmtShortDate(d: Date) {
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function fmtShortDate(d: Date, locale?: string) {
+  return d.toLocaleDateString(locale ?? undefined, { month: "short", day: "numeric" });
 }
 
 /** Format minutes as "8 AM" or "8:30 AM" */
@@ -217,6 +218,7 @@ export default function CalendarPage() {
   const timeZoneMode = useAppSelector((s) => s.profile.timeZoneMode);
   const manualTimeZone = useAppSelector((s) => s.profile.manualTimeZone);
   const effectiveTz = timeZoneMode === "manual" ? manualTimeZone : Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const userLocale = getLocaleFromTimezone(effectiveTz);
   const patterns = useAppSelector((s) => s.availability.patterns);
   const oneOffAvail = useAppSelector((s) => s.availability.oneOffAvail);
   const unavailable = useAppSelector((s) => s.availability.unavailable);
@@ -413,10 +415,10 @@ export default function CalendarPage() {
           </Button>
           <Typography sx={{ fontSize: { xs: "0.82rem", sm: "0.95rem" }, fontWeight: 600, whiteSpace: "nowrap" }}>
             {calendarViewMode === "month"
-              ? monthLabel(anchorDate)
+              ? monthLabel(anchorDate, userLocale)
               : calendarViewMode === "day"
-                ? anchorDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-                : weekLabel(anchorDate)}
+                ? anchorDate.toLocaleDateString(userLocale, { weekday: "short", month: "short", day: "numeric" })
+                : weekLabel(anchorDate, userLocale)}
           </Typography>
           <Button variant="text" size="small" aria-label="Next" sx={{ minWidth: 0, height: 32, width: 32, p: 0, color: "text.secondary", borderRadius: "50%", "&:hover": { bgcolor: "action.hover" } }} onClick={navNext}>
             <ChevronRightIcon sx={{ fontSize: 22 }} />

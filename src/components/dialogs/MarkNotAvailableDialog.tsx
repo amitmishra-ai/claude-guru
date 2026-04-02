@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -13,6 +13,8 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Chip from "@mui/material/Chip";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -31,7 +33,7 @@ import { declineSession } from "@/store/slices/sessionsSlice";
 import { respondToRequest } from "@/store/slices/requestsSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import { TIME_START, TIME_END, timeOptions12 } from "@/lib/constants";
-import { parseHHMM, fmtTime12, toYmd, addDays, hhmmFromMinutes } from "@/lib/helpers";
+import { parseHHMM, fmtTime12, toYmd, addDays, hhmmFromMinutes, getLocaleFromTimezone } from "@/lib/helpers";
 import type { NA } from "@/lib/types";
 
 /**
@@ -113,6 +115,18 @@ export function MarkNotAvailableDialog() {
 
   const [autoDecline, setAutoDecline] = useState(true);
   const [step, setStep] = useState<1 | 2>(1);
+  const [duration, setDuration] = useState<"full" | "first-half" | "second-half">("full");
+  const startDateRef = useRef<HTMLInputElement>(null);
+  const endDateRef = useRef<HTMLInputElement>(null);
+  const timeZoneMode = useAppSelector((s) => s.profile.timeZoneMode);
+  const manualTimeZone = useAppSelector((s) => s.profile.manualTimeZone);
+  const userLocale = getLocaleFromTimezone(timeZoneMode === "manual" ? manualTimeZone : Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+  // Sync duration → time values
+  useEffect(() => {
+    dispatch(setNaStart(duration === "second-half" ? "13:00" : "00:00"));
+    dispatch(setNaEnd(duration === "first-half" ? "13:00" : "23:59"));
+  }, [duration, dispatch]);
 
   /* ── Pre-fill when editing existing leave ───────────────────────── */
   useEffect(() => {
@@ -305,46 +319,59 @@ export function MarkNotAvailableDialog() {
 
             {/* Date range */}
             <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
-              <TextField
-                label="Start date"
-                type="date"
-                value={naStartDate}
-                onChange={(e) => dispatch(setNaStartDate(e.target.value))}
-                size="small"
-                fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
-                sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}
-              />
-              <TextField
-                label="End date"
-                type="date"
-                value={naEndDate}
-                onChange={(e) => dispatch(setNaEndDate(e.target.value))}
-                size="small"
-                fullWidth
-                slotProps={{ inputLabel: { shrink: true } }}
-                sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}
-              />
+              <Box sx={{ position: "relative" }}>
+                <TextField
+                  label="Start date"
+                  value={naStartDate ? new Date(`${naStartDate}T00:00:00`).toLocaleDateString(userLocale, { day: "2-digit", month: "short", year: "numeric" }) : ""}
+                  size="small"
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true }, input: { readOnly: true, sx: { cursor: "pointer" } } }}
+                  onClick={() => startDateRef.current?.showPicker()}
+                  sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}
+                />
+                <input
+                  ref={startDateRef}
+                  type="date"
+                  value={naStartDate}
+                  onChange={(e) => dispatch(setNaStartDate(e.target.value))}
+                  style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                />
+              </Box>
+              <Box sx={{ position: "relative" }}>
+                <TextField
+                  label="End date"
+                  value={naEndDate ? new Date(`${naEndDate}T00:00:00`).toLocaleDateString(userLocale, { day: "2-digit", month: "short", year: "numeric" }) : ""}
+                  size="small"
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true }, input: { readOnly: true, sx: { cursor: "pointer" } } }}
+                  onClick={() => endDateRef.current?.showPicker()}
+                  sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}
+                />
+                <input
+                  ref={endDateRef}
+                  type="date"
+                  value={naEndDate}
+                  onChange={(e) => dispatch(setNaEndDate(e.target.value))}
+                  style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
+                />
+              </Box>
             </Box>
 
-            {/* Time range */}
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
-              <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
-                <InputLabel>Start time</InputLabel>
-                <Select label="Start time" value={naStart} onChange={(e) => dispatch(setNaStart(e.target.value))} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                  {timeOptions12.map((opt) => (
-                    <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 36, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
-                <InputLabel>End time</InputLabel>
-                <Select label="End time" value={naEnd} onChange={(e) => dispatch(setNaEnd(e.target.value))} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                  {timeOptions12.map((opt) => (
-                    <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+            {/* Duration */}
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", mb: 0.5, display: "block" }}>Duration</Typography>
+              <ToggleButtonGroup
+                value={duration}
+                exclusive
+                onChange={(_, v) => { if (v) setDuration(v); }}
+                size="small"
+                fullWidth
+                sx={{ "& .MuiToggleButton-root": { fontSize: "0.68rem", py: 0.5, textTransform: "none" } }}
+              >
+                <ToggleButton value="full">Full day</ToggleButton>
+                <ToggleButton value="first-half">First half</ToggleButton>
+                <ToggleButton value="second-half">Second half</ToggleButton>
+              </ToggleButtonGroup>
             </Box>
 
             {naStartDate && naEndDate && !isValid && (

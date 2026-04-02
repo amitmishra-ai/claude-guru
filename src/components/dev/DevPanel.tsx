@@ -23,8 +23,10 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
 import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
 import Button from "@mui/material/Button";
+import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { resetAvailability } from "@/store/slices/availabilitySlice";
+import { setOpenLearnerRatings, setLearnerRatingsSessionId } from "@/store/slices/uiSlice";
 import {
   toggleDevPanel,
   setDevPanelOpen,
@@ -159,60 +161,32 @@ export function DevPanel() {
           </Stack>
         </Box>
 
-        <Box sx={{ px: 2.5, pb: 1 }}>
+        <Box sx={{ px: 2.5, pb: 1.5 }}>
           <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.5 }}>
             <PersonOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
             <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>
               User Stage
             </Typography>
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
-            Simulate different user lifecycle stages.
-          </Typography>
+          <FormControl fullWidth size="small">
+            <InputLabel sx={{ fontSize: "0.75rem" }}>Stage</InputLabel>
+            <Select
+              label="Stage"
+              value={guruStage}
+              onChange={(e) => dispatch(setGuruStage(e.target.value as GuruStage))}
+              sx={{ fontSize: "0.8rem" }}
+            >
+              {GURU_STAGES.map((stage) => (
+                <MenuItem key={stage.value} value={stage.value} sx={{ fontSize: "0.8rem" }}>
+                  <Box>
+                    <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8rem" }}>{stage.label}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>{stage.description}</Typography>
+                  </Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
-
-        <List dense sx={{ px: 1, py: 0, mb: 1.5 }}>
-          {GURU_STAGES.map((stage) => {
-            const isSelected = stage.value === guruStage;
-            return (
-              <ListItemButton
-                key={stage.value}
-                selected={isSelected}
-                onClick={() => dispatch(setGuruStage(stage.value))}
-                sx={{
-                  borderRadius: "8px",
-                  mx: 0.5,
-                  mb: 0.5,
-                  py: 0.75,
-                  ...(isSelected && {
-                    bgcolor: "hsl(var(--md-primary-container) / 0.15)",
-                    "&.Mui-selected:hover": {
-                      bgcolor: "hsl(var(--md-primary-container) / 0.2)",
-                    },
-                  }),
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 32 }}>
-                  {isSelected ? (
-                    <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: "primary.main" }} />
-                  ) : (
-                    <Box sx={{ width: 18, height: 18, borderRadius: "50%", border: 1.5, borderColor: "divider" }} />
-                  )}
-                </ListItemIcon>
-                <ListItemText
-                  primary={stage.label}
-                  secondary={stage.description}
-                  primaryTypographyProps={{
-                    variant: "body2",
-                    fontWeight: isSelected ? 600 : 400,
-                    color: isSelected ? "primary.main" : "text.primary",
-                  }}
-                  secondaryTypographyProps={{ variant: "caption" }}
-                />
-              </ListItemButton>
-            );
-          })}
-        </List>
 
         <Divider sx={{ my: 1.5, mx: 2.5 }} />
 
@@ -234,6 +208,46 @@ export function DevPanel() {
               secondaryTypographyProps={{ variant: "caption" }}
             />
           </ListItemButton>
+        </List>
+
+        <Divider sx={{ my: 1.5, mx: 2.5 }} />
+
+        {/* Feedback quick-launch */}
+        <Box sx={{ px: 2.5, pb: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+            <StarOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+            <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Feedback Preview
+            </Typography>
+          </Stack>
+        </Box>
+        <List dense sx={{ px: 1, py: 0, mb: 1.5 }}>
+          {[
+            { id: "s0", label: "Online Session", desc: "Charts + comments" },
+            { id: "res1", label: "Residency", desc: "Charts + comments" },
+            { id: "eval1", label: "Evaluation (4★)", desc: "Tags + comments" },
+            { id: "mod1", label: "Moderation (5★)", desc: "Positive tags" },
+          ].map((item) => (
+            <ListItemButton
+              key={item.id}
+              sx={{ borderRadius: "8px", mx: 0.5, mb: 0.5, py: 0.5 }}
+              onClick={() => {
+                dispatch(setLearnerRatingsSessionId(item.id));
+                dispatch(setOpenLearnerRatings(true));
+                dispatch(setDevPanelOpen(false));
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 28 }}>
+                <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary={item.label}
+                secondary={item.desc}
+                primaryTypographyProps={{ variant: "body2", fontWeight: 500, fontSize: "0.78rem" }}
+                secondaryTypographyProps={{ variant: "caption", fontSize: "0.65rem" }}
+              />
+            </ListItemButton>
+          ))}
         </List>
 
         <Divider sx={{ my: 1.5, mx: 2.5 }} />

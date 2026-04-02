@@ -248,6 +248,13 @@ export type RatingHistoryEntry = {
   feedback?: string;
 };
 
+export type QualitativeFeedback = {
+  rating: number;
+  positiveTags?: string[];
+  negativeTags?: string[];
+  comments?: string[];
+};
+
 export type MonthlyEarning = {
   key: string;
   label: string;

@@ -1,5 +1,5 @@
 import { minutes } from "@/lib/helpers";
-import type { Session, LearnerRating, SessionFeedbackSummary, RatingHistoryEntry, MonthlyEarning, DeclinedSession, Busy, CohortStart, CourseCatalogItem, CourseModuleData, PlannedEvent } from "@/lib/types";
+import type { Session, LearnerRating, SessionFeedbackSummary, RatingHistoryEntry, MonthlyEarning, DeclinedSession, Busy, CohortStart, CourseCatalogItem, CourseModuleData, PlannedEvent, QualitativeFeedback } from "@/lib/types";
 
 /** Reusable demo group member pools */
 const GROUP_MEMBERS_A = [
@@ -2016,6 +2016,36 @@ export const demoFeedbackSummaryBySessionId: Record<string, SessionFeedbackSumma
       { label: "Reading and course material", fiveStar: 7, fourStar: 4, threeAndBelow: 1 },
       { label: "Clearing doubts and interaction", fiveStar: 8, fourStar: 3, threeAndBelow: 1 },
     ],
+  },
+};
+
+export const demoQualitativeFeedbackBySessionId: Record<string, QualitativeFeedback> = {
+  eval1: {
+    rating: 4,
+    negativeTags: ["Grading rubric could be clearer", "Feedback turnaround was slow", "Expected more detailed comments on submissions"],
+    comments: [
+      "The rubric didn't match what was taught in class.",
+      "I had to wait over a week for my grade.",
+      "Would appreciate more specific feedback on where I lost marks.",
+      "Overall fair grading, but the criteria felt subjective.",
+    ],
+  },
+  mod1: {
+    rating: 5,
+    positiveTags: ["Timely responses", "Engaging discussions", "Great moderation", "Fair grading", "Encouraged participation"],
+  },
+  "eval-done": {
+    rating: 3,
+    negativeTags: ["Inconsistent grading", "Late feedback", "Rubric not shared upfront"],
+    comments: [
+      "Different students got different grading standards.",
+      "Feedback was received after the next assignment was already due.",
+      "We never saw the rubric before submitting.",
+    ],
+  },
+  "mod-done": {
+    rating: 5,
+    positiveTags: ["Excellent facilitation", "Thoughtful concluding remarks", "Active participation encouraged", "Prompt grading"],
   },
 };
 

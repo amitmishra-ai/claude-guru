@@ -102,7 +102,7 @@ export function CompletedSessionDetailDialog() {
         </Box>
 
         {/* ── Scrollable content ── */}
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", scrollbarGutter: "stable" }}>
 
           {/* Hero */}
           <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>

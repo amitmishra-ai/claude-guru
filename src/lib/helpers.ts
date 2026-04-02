@@ -127,29 +127,60 @@ export function getTimeZoneOffsetMinutes(timeZone: string, date = new Date()) {
   return Math.round((asUTC - utcMs) / 60000);
 }
 
+// ─── Timezone → Locale ──────────────────────────────────────────────────────
+
+const TZ_LOCALE: Record<string, string> = {
+  "Asia/Kolkata": "en-IN", "Asia/Calcutta": "en-IN", "Asia/Mumbai": "en-IN",
+  "Asia/Chennai": "en-IN", "Asia/Delhi": "en-IN",
+  "America/New_York": "en-US", "America/Chicago": "en-US",
+  "America/Denver": "en-US", "America/Los_Angeles": "en-US",
+  "America/Phoenix": "en-US", "America/Anchorage": "en-US",
+  "Pacific/Honolulu": "en-US",
+  "Europe/London": "en-GB", "Europe/Dublin": "en-GB",
+  "Europe/Berlin": "de-DE", "Europe/Paris": "fr-FR",
+  "Europe/Madrid": "es-ES", "Europe/Rome": "it-IT",
+  "Europe/Amsterdam": "nl-NL", "Europe/Zurich": "de-CH",
+  "Australia/Sydney": "en-AU", "Australia/Melbourne": "en-AU",
+  "Australia/Perth": "en-AU", "Australia/Brisbane": "en-AU",
+  "Asia/Singapore": "en-SG", "Asia/Hong_Kong": "en-HK",
+  "Asia/Tokyo": "ja-JP", "Asia/Seoul": "ko-KR",
+  "Asia/Shanghai": "zh-CN", "Asia/Dubai": "en-AE",
+  "Asia/Riyadh": "ar-SA",
+  "America/Toronto": "en-CA", "America/Vancouver": "en-CA",
+  "America/Sao_Paulo": "pt-BR", "America/Mexico_City": "es-MX",
+  "Africa/Johannesburg": "en-ZA", "Africa/Lagos": "en-NG",
+  "Pacific/Auckland": "en-NZ",
+};
+
+export function getLocaleFromTimezone(tz: string): string {
+  return TZ_LOCALE[tz] ?? "en-US";
+}
+
 // ─── Display Formatters ─────────────────────────────────────────────────────
 
-export function fmtDateNice(ymd: string) {
+export function fmtDateNice(ymd: string, locale?: string) {
   const d = new Date(`${ymd}T00:00:00`);
-  const dow = d.toLocaleDateString(undefined, { weekday: "short" });
-  const md = d.toLocaleDateString(undefined, { month: "short", day: "2-digit" });
+  const loc = locale ?? undefined;
+  const dow = d.toLocaleDateString(loc, { weekday: "short" });
+  const md = d.toLocaleDateString(loc, { month: "short", day: "2-digit" });
   return `${dow}, ${md}`;
 }
 
-export function monthLabel(d: Date) {
-  return d.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+export function monthLabel(d: Date, locale?: string) {
+  return d.toLocaleDateString(locale ?? undefined, { month: "long", year: "numeric" });
 }
 
-export function weekLabel(d: Date) {
+export function weekLabel(d: Date, locale?: string) {
+  const loc = locale ?? undefined;
   const start = startOfWeekMonday(d);
   const end = addDays(start, 6);
   const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
   if (sameMonth) {
-    const month = start.toLocaleDateString(undefined, { month: "short" });
+    const month = start.toLocaleDateString(loc, { month: "short" });
     return `${month} ${start.getDate()}–${end.getDate()}, ${end.getFullYear()}`;
   }
-  const startPart = start.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  const endPart = end.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const startPart = start.toLocaleDateString(loc, { month: "short", day: "numeric" });
+  const endPart = end.toLocaleDateString(loc, { month: "short", day: "numeric", year: "numeric" });
   return `${startPart}–${endPart}`;
 }
 

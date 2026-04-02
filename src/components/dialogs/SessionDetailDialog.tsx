@@ -65,7 +65,7 @@ export function SessionDetailDialog() {
           Event details &amp; confirmation
         </DialogTitle>
 
-        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", p: 0 }}>
+        <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", scrollbarGutter: "stable", p: 0 }}>
           <Box sx={{ px: 3, pt: 2.5, pb: 2, display: "flex", flexDirection: "column", gap: 2 }}>
             <Box
               sx={{

@@ -576,7 +576,7 @@ export function SessionDetailsModal() {
         </Box>
 
         {/* ── Scrollable content ── */}
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", scrollbarGutter: "stable" }}>
           {session ? (
             <>
               {/* ═══ HERO: Title + Schedule at-a-glance ═══ */}
