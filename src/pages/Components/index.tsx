@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -7,6 +7,13 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import RemoveCircleOutlineOutlinedIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import MuiTooltip from "@mui/material/Tooltip";
 import Drawer from "@mui/material/Drawer";
 import TextField from "@mui/material/TextField";
 import Avatar from "@mui/material/Avatar";
@@ -1605,6 +1612,83 @@ function ResidencyCards() {
           />
         </Card>
       </ComponentSection>
+
+      {/* ── Completed - No feedback ── */}
+      <ComponentSection
+        title="Residency - Completed (No feedback)"
+        description="Residency older than 30 days, no learner ratings received. Payment processed + No feedback collected chips."
+      >
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <SessionCard
+            title="Program Overview (All)"
+            sessionType="Residency"
+            batch="AIML Online March 26 A"
+            dateYmd="2026-01-10"
+            endDateYmd="2026-01-12"
+            start={minutes(9)}
+            end={minutes(17)}
+            topRight={
+              <Stack direction="row" spacing={0.75}>
+                {CHIP_PAYMENT_PROCESSED}
+                {CHIP_NO_FEEDBACK}
+              </Stack>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoResidencyCompletedWithRating)}>View details</Button>}
+            onCourseClick={() => {}}
+          />
+        </Card>
+      </ComponentSection>
+
+      {/* ── Combined - Completed ── */}
+      <ComponentSection
+        title="Residency - Combined (Completed)"
+        description="Combined residency splits into separate cards per batch when completed. Each batch has its own rating."
+      >
+        <CombinedCompletedGroup>
+          {/* Batch A card */}
+          <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+            <SessionCard
+              title="AI in Practice Workshop"
+              sessionType="Residency"
+              batch="AIML Online March 26 A"
+              dateYmd="2026-02-10"
+              endDateYmd="2026-02-12"
+              start={minutes(9)}
+              end={minutes(17)}
+              topRight={
+                <Stack direction="row" spacing={0.75}>
+                  {CHIP_PAYMENT_PROCESSED}
+                  <StarRatingNumeric rating={4.4} />
+                </Stack>
+              }
+              actions={<Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>}
+              secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoResidencyCompletedWithRating)}>View details</Button>}
+              onCourseClick={() => {}}
+            />
+          </Card>
+          {/* Batch B card */}
+          <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+            <SessionCard
+              title="AI in Practice Workshop"
+              sessionType="Residency"
+              batch="AIML Online March 26 B"
+              dateYmd="2026-02-10"
+              endDateYmd="2026-02-12"
+              start={minutes(9)}
+              end={minutes(17)}
+              topRight={
+                <Stack direction="row" spacing={0.75}>
+                  {CHIP_PAYMENT_PROCESSED}
+                  <StarRatingNumeric rating={3.9} />
+                </Stack>
+              }
+              actions={<Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>}
+              secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoResidencyCompletedWithRating)}>View details</Button>}
+              onCourseClick={() => {}}
+            />
+          </Card>
+        </CombinedCompletedGroup>
+      </ComponentSection>
     </>
   );
 }
@@ -2138,6 +2222,30 @@ function CareerMentorOnlineSessionCards() {
           />
         </Card>
       </ComponentSection>
+
+      {/* 7. Career - Completed (No feedback) */}
+      <ComponentSection title="Career - Completed (No feedback)" description="Career session older than 30 days, no learner ratings received. Payment processed + No feedback collected chips. Recording on card.">
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <SessionCard
+            title="Career Mentoring"
+            sessionType="Career mentoring session"
+            batch="PGP-AIML-BA-UTA-Nov25-C"
+            dateYmd="2026-01-08"
+            start={minutes(14)}
+            end={minutes(15)}
+            topRight={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                {CHIP_PAYMENT_PROCESSED}
+                {CHIP_NO_FEEDBACK}
+              </Stack>
+            }
+            actions={
+              <Button variant="soft" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 14 }} />}>Recording</Button>
+            }
+            secondaryAction={<Button variant="text" size="small" onClick={() => openCompleted(demoCareerCompletedWithRating)}>View details</Button>}
+          />
+        </Card>
+      </ComponentSection>
     </>
   );
 }
@@ -2176,7 +2284,7 @@ function EvaluationCards() {
         description="Assigned to guru but not yet confirmed. Primary CTA is Confirm, secondary is I'm unavailable. No SpeedGrader link until confirmed."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={<Chip label="Scheduled" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600, fontSize: "0.75rem" }} />} />
+          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={CHIP_SCHEDULED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Mar – 22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2208,40 +2316,6 @@ function EvaluationCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed - Gathering feedback ── */}
-      <ComponentSection
-        title="Evaluation - Completed (Gathering feedback)"
-        description="Grading done, no ratings yet. Payment pending + Gathering feedback chips top-right."
-      >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={<>{CHIP_PAYMENT_PENDING}{CHIP_GATHERING}</>} />
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
-          </Stack>
-          <Stack direction="row" justifyContent="flex-end">
-            <Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>
-          </Stack>
-        </Card>
-      </ComponentSection>
-
-      {/* ── Completed -with rating ── */}
-      <ComponentSection
-        title="Evaluation - Completed (with rating)"
-        description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Feedback button."
-      >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={<>{CHIP_PAYMENT_PROCESSED}<StarRatingNumeric rating={4.0} /></>} />
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">1 Mar – 8 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-            <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>
-            <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
-          </Stack>
-        </Card>
-      </ComponentSection>
     </>
   );
 }
@@ -2280,7 +2354,7 @@ function ModerationCards() {
         description="Assigned to guru but not yet confirmed. Primary CTA is Confirm, secondary is I'm unavailable. No SpeedGrader link until confirmed."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={<Chip label="Scheduled" size="small" sx={{ bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)", fontWeight: 600, fontSize: "0.75rem" }} />} />
+          <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={CHIP_SCHEDULED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Mar – 20 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
@@ -2312,40 +2386,6 @@ function ModerationCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed - Gathering feedback ── */}
-      <ComponentSection
-        title="Moderation - Completed (Gathering feedback)"
-        description="Moderation done, no ratings yet. Payment pending + Gathering feedback chips top-right."
-      >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={<>{CHIP_PAYMENT_PENDING}{CHIP_GATHERING}</>} />
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">8 Mar – 15 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
-          </Stack>
-          <Stack direction="row" justifyContent="flex-end">
-            <Button variant="text" size="small" onClick={() => setDetailOpen("gathering")}>View details</Button>
-          </Stack>
-        </Card>
-      </ComponentSection>
-
-      {/* ── Completed -with rating ── */}
-      <ComponentSection
-        title="Moderation - Completed (with rating)"
-        description="Star icons only (no numeric score). Payment processed chip + star rating top-right. Feedback button."
-      >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-          <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={<>{CHIP_PAYMENT_PROCESSED}<StarRatingNumeric rating={4.5} /></>} />
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-            <Typography variant="caption" color="text.secondary">25 Feb – 5 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
-          </Stack>
-          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-            <Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>
-            <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
-          </Stack>
-        </Card>
-      </ComponentSection>
     </>
   );
 }
@@ -2359,10 +2399,31 @@ function CapstoneCards() {
     <>
       <CapstoneDetailDialog open={detailOpen !== null} onClose={() => setDetailOpen(null)} variant={detailOpen ?? "confirmed"} />
 
+      {/* ── Scheduled ── */}
+      <ComponentSection
+        title="Capstone Project - Scheduled"
+        description="Assigned to guru but not yet confirmed. Guru must confirm to participate. Confirm / I'm unavailable actions."
+      >
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="Capstone - PGPDS.O.MAR26.A" chips={CHIP_SCHEDULED} />
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+            <Typography variant="caption" color="text.secondary">15 Jan – 20 Apr, 2026</Typography>
+          </Stack>
+          <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+            <Stack direction="row" spacing={1}>
+              <Button variant="contained" size="small" startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 16 }} />}>Confirm</Button>
+              <Button variant="soft" size="small" startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 16 }} />}>I&apos;m unavailable</Button>
+            </Stack>
+            <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
+          </Stack>
+        </Card>
+      </ComponentSection>
+
       {/* ── Confirmed ── */}
       <ComponentSection
         title="Capstone Project - Confirmed"
-        description="Date range (start → presentation), 'Capstone -[Batch]', group, domain, next session date, contact. Progress + Group Details in dialog. No tentative state."
+        description="Date range (start → presentation), 'Capstone -[Batch]', group, domain, next session date, contact. Progress + Group Details in dialog."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <CardTitleRow title="Capstone - PGPDS.O.MAR26.A" chips={CHIP_CONFIRMED} />
@@ -2424,10 +2485,31 @@ function CVReviewCards() {
     <>
       <CVReviewDetailDialog open={detailOpen !== null} onClose={() => setDetailOpen(null)} variant={detailOpen ?? "confirmed"} />
 
+      {/* ── Scheduled ── */}
+      <ComponentSection
+        title="CV Review - Scheduled"
+        description="Assigned to guru but not yet confirmed. Guru must confirm to accept the CV review task. Confirm / I'm unavailable actions."
+      >
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="CV Review" chips={CHIP_SCHEDULED} />
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+            <Typography variant="caption" color="text.secondary">22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
+          </Stack>
+          <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+            <Stack direction="row" spacing={1}>
+              <Button variant="contained" size="small" startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 16 }} />}>Confirm</Button>
+              <Button variant="soft" size="small" startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 16 }} />}>I&apos;m unavailable</Button>
+            </Stack>
+            <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
+          </Stack>
+        </Card>
+      </ComponentSection>
+
       {/* ── Confirmed (not yet submitted) ── */}
       <ComponentSection
         title="CV Review - Confirmed"
-        description="Due date, batch, 'Due on' line. View LinkedIn, View CV, View User Comments, Submit CV Review as primary actions. No tentative state exists."
+        description="Due date, batch, 'Due on' line. View LinkedIn, View CV, View User Comments, Submit CV Review as primary actions."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <CardTitleRow title="CV Review" chips={CHIP_CONFIRMED} />
@@ -2459,10 +2541,28 @@ function CVReviewCards() {
         </Card>
       </ComponentSection>
 
-      {/* ── Completed ── */}
+      {/* ── Completed - Payment Pending ── */}
       <ComponentSection
-        title="CV Review - Completed"
-        description="No LinkedIn, no comments, no submit. 'View CV' becomes 'Reviewed CV'. Payment processed chip top-right. No rating, no feedback."
+        title="CV Review - Completed (Payment pending)"
+        description="Review submitted, payment not yet processed. Payment pending chip top-right. Reviewed CV button shown."
+      >
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <CardTitleRow title="CV Review" chips={CHIP_PAYMENT_PENDING} />
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+            <Typography variant="caption" color="text.secondary">5 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
+          </Stack>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
+            <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}>Reviewed CV</Button>
+            <Button variant="text" size="small" onClick={() => setDetailOpen("completed")}>View details</Button>
+          </Stack>
+        </Card>
+      </ComponentSection>
+
+      {/* ── Completed - Payment Processed ── */}
+      <ComponentSection
+        title="CV Review - Completed (Payment processed)"
+        description="Review done, payment processed. Payment processed chip top-right. No rating, no feedback."
       >
         <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
           <CardTitleRow title="CV Review" chips={CHIP_PAYMENT_PROCESSED} />
@@ -2514,35 +2614,382 @@ const ROLE_SECTIONS: Record<GuruRole, { label: string; render: () => React.React
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
+   AUDIT DATA
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const ACTIVITY_TYPES = ["Online Session", "Residency", "Career / Mock", "CV Review", "Evaluation", "Moderation", "Capstone"] as const;
+type ActivityType = typeof ACTIVITY_TYPES[number];
+
+const CARD_STATES = [
+  "Confirmed",
+  "Combined - Confirmed",
+  "Scheduled",
+  "Combined - Scheduled",
+  "Tentative",
+  "Completed - Payment Pending",
+  "Completed - Payment Processed",
+  "Completed - Gathering Feedback",
+  "Completed - Recording Processing",
+  "Completed - No Feedback",
+  "Completed - With Rating",
+  "Combined - Completed",
+  "Confirmed - Already Submitted",
+] as const;
+
+type CellStatus = "present" | "missing-by-design" | "potential-gap";
+
+const COVERAGE: Record<string, Record<ActivityType, CellStatus>> = {
+  "Confirmed":                              { "Online Session": "present", Residency: "present", "Career / Mock": "present", "CV Review": "present", Evaluation: "present", Moderation: "present", Capstone: "present" },
+  "Combined - Confirmed":                   { "Online Session": "present", Residency: "present", "Career / Mock": "missing-by-design", "CV Review": "missing-by-design", Evaluation: "missing-by-design", Moderation: "missing-by-design", Capstone: "missing-by-design" },
+  "Scheduled":                              { "Online Session": "present", Residency: "present", "Career / Mock": "present", "CV Review": "present", Evaluation: "present", Moderation: "present", Capstone: "present" },
+  "Combined - Scheduled":                   { "Online Session": "present", Residency: "present", "Career / Mock": "missing-by-design", "CV Review": "missing-by-design", Evaluation: "missing-by-design", Moderation: "missing-by-design", Capstone: "missing-by-design" },
+  "Tentative":                              { "Online Session": "present", Residency: "missing-by-design", "Career / Mock": "missing-by-design", "CV Review": "missing-by-design", Evaluation: "present", Moderation: "present", Capstone: "missing-by-design" },
+  "Completed - Payment Pending":            { "Online Session": "present", Residency: "present", "Career / Mock": "present", "CV Review": "present", Evaluation: "present", Moderation: "present", Capstone: "present" },
+  "Completed - Payment Processed":           { "Online Session": "present", Residency: "present", "Career / Mock": "present", "CV Review": "present", Evaluation: "present", Moderation: "present", Capstone: "present" },
+  "Completed - Gathering Feedback":         { "Online Session": "present", Residency: "present", "Career / Mock": "present", "CV Review": "missing-by-design", Evaluation: "missing-by-design", Moderation: "missing-by-design", Capstone: "missing-by-design" },
+  "Completed - Recording Processing":       { "Online Session": "present", Residency: "missing-by-design", "Career / Mock": "missing-by-design", "CV Review": "missing-by-design", Evaluation: "missing-by-design", Moderation: "missing-by-design", Capstone: "missing-by-design" },
+  "Completed - No Feedback":                { "Online Session": "present", Residency: "present", "Career / Mock": "present", "CV Review": "missing-by-design", Evaluation: "missing-by-design", Moderation: "missing-by-design", Capstone: "missing-by-design" },
+  "Completed - With Rating":                { "Online Session": "present", Residency: "present", "Career / Mock": "present", "CV Review": "missing-by-design", Evaluation: "missing-by-design", Moderation: "missing-by-design", Capstone: "missing-by-design" },
+  "Combined - Completed":                   { "Online Session": "present", Residency: "present", "Career / Mock": "missing-by-design", "CV Review": "missing-by-design", Evaluation: "missing-by-design", Moderation: "missing-by-design", Capstone: "missing-by-design" },
+  "Confirmed - Already Submitted":          { "Online Session": "missing-by-design", Residency: "missing-by-design", "Career / Mock": "missing-by-design", "CV Review": "present", Evaluation: "missing-by-design", Moderation: "missing-by-design", Capstone: "missing-by-design" },
+};
+
+const ROLE_ACTIVITIES: Record<GuruRole, { activities: ActivityType[]; note?: string }> = {
+  Teacher:          { activities: ["Online Session", "Residency"] },
+  "Course Mentor":  { activities: ["Online Session", "Residency"], note: "Same as Teacher (different order)" },
+  "Career Mentor":  { activities: ["Career / Mock"] },
+  "CV Review Mentor": { activities: ["CV Review"] },
+  Evaluator:        { activities: ["Evaluation"] },
+  Moderator:        { activities: ["Moderation"] },
+  "Project Mentor": { activities: ["Capstone"] },
+  "Industry Expert":{ activities: ["Online Session"], note: "Subset of Teacher (no Residency)" },
+};
+
+const DUPLICATES: { roles: string; shared: string; diff: string }[] = [
+  { roles: "Teacher & Course Mentor", shared: "OnlineSessionCards + ResidencyCards", diff: "Render order only" },
+  { roles: "Teacher & Industry Expert", shared: "OnlineSessionCards", diff: "Industry Expert has no Residency" },
+  { roles: "Online & Career (Mock)", shared: "Mock Interview card", diff: "Online shows secondary facilitator badge; Career shows primary" },
+];
+
+const ACTIVITY_DETAILS: Record<ActivityType, { usedBy: string; totalStates: number; hasRating: boolean; hasCombined: boolean; hasTentative: boolean; hasRecording: boolean; uniqueFeature?: string }> = {
+  "Online Session": { usedBy: "Teacher, Course Mentor, Industry Expert", totalStates: 11, hasRating: true, hasCombined: true, hasTentative: true, hasRecording: true },
+  Residency:        { usedBy: "Teacher, Course Mentor", totalStates: 8, hasRating: true, hasCombined: true, hasTentative: false, hasRecording: false, uniqueFeature: "Location, multi-day schedule" },
+  "Career / Mock":  { usedBy: "Career Mentor", totalStates: 7, hasRating: true, hasCombined: false, hasTentative: false, hasRecording: true, uniqueFeature: "Share Feedback (Mock), Learner context in drawer" },
+  "CV Review":      { usedBy: "CV Review Mentor", totalStates: 5, hasRating: false, hasCombined: false, hasTentative: false, hasRecording: false, uniqueFeature: "Submit flow, Already Submitted state" },
+  Evaluation:       { usedBy: "Evaluator", totalStates: 3, hasRating: false, hasCombined: false, hasTentative: true, hasRecording: false, uniqueFeature: "SpeedGrader, submission progress" },
+  Moderation:       { usedBy: "Moderator", totalStates: 3, hasRating: false, hasCombined: false, hasTentative: true, hasRecording: false, uniqueFeature: "Discussion progress (posts, unread, graded)" },
+  Capstone:         { usedBy: "Project Mentor", totalStates: 4, hasRating: false, hasCombined: false, hasTentative: false, hasRecording: false, uniqueFeature: "Long duration, Progress button, no rating" },
+};
+
+/* ── Audit Panel Component ── */
+
+function CoverageCell({ status }: { status: CellStatus }) {
+  if (status === "present") return <CheckCircleOutlinedIcon sx={{ fontSize: 16, color: "success.main" }} />;
+  if (status === "potential-gap") return <MuiTooltip title="Potential gap" arrow><WarningAmberOutlinedIcon sx={{ fontSize: 16, color: "warning.main" }} /></MuiTooltip>;
+  return <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: 14, color: "text.disabled", opacity: 0.4 }} />;
+}
+
+function AuditPanel() {
+  const [auditTab, setAuditTab] = useState(0);
+
+  const gapCount = useMemo(() => {
+    let count = 0;
+    CARD_STATES.forEach((state) => {
+      ACTIVITY_TYPES.forEach((act) => {
+        if (COVERAGE[state][act] === "potential-gap") count++;
+      });
+    });
+    return count;
+  }, []);
+
+  return (
+    <Stack spacing={3} sx={{ maxWidth: 1100 }}>
+      {/* Tab bar */}
+      <Tabs
+        value={auditTab}
+        onChange={(_, v) => setAuditTab(v)}
+        sx={{ minHeight: 36, "& .MuiTab-root": { minHeight: 36, textTransform: "none", fontWeight: 600, fontSize: "0.8rem" } }}
+      >
+        <Tab label="Coverage Matrix" />
+        <Tab label="Role Overview" />
+        <Tab label="Activity Details" />
+        <Tab label="Duplicates" />
+      </Tabs>
+
+      {/* ── Tab 0: Coverage Matrix ── */}
+      {auditTab === 0 && (
+        <Card variant="outlined" sx={{ overflow: "auto" }}>
+          {/* Legend */}
+          <Stack direction="row" spacing={2.5} sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: "divider", bgcolor: "action.hover" }}>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <CheckCircleOutlinedIcon sx={{ fontSize: 14, color: "success.main" }} />
+              <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>Implemented</Typography>
+            </Stack>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <WarningAmberOutlinedIcon sx={{ fontSize: 14, color: "warning.main" }} />
+              <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>Potential gap ({gapCount})</Typography>
+            </Stack>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: 14, color: "text.disabled", opacity: 0.4 }} />
+              <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>N/A by design</Typography>
+            </Stack>
+          </Stack>
+          <Box sx={{ overflowX: "auto" }}>
+            <Box component="table" sx={{ width: "100%", borderCollapse: "collapse", minWidth: 700, "& th, & td": { px: 1.5, py: 1, fontSize: "0.7rem", borderBottom: 1, borderColor: "divider", whiteSpace: "nowrap" }, "& th": { fontWeight: 700, color: "text.secondary", textAlign: "left", bgcolor: "action.hover", position: "sticky", top: 0 }, "& td": { textAlign: "center" }, "& td:first-of-type": { textAlign: "left", fontWeight: 500, color: "text.primary", minWidth: 200 } }}>
+              <thead>
+                <tr>
+                  <th>Card State</th>
+                  {ACTIVITY_TYPES.map((a) => <th key={a} style={{ textAlign: "center" }}>{a}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {CARD_STATES.map((state) => (
+                  <tr key={state}>
+                    <td>{state}</td>
+                    {ACTIVITY_TYPES.map((act) => (
+                      <td key={act}><CoverageCell status={COVERAGE[state][act]} /></td>
+                    ))}
+                  </tr>
+                ))}
+                {/* Totals row */}
+                <tr>
+                  <td style={{ fontWeight: 700 }}>Total</td>
+                  {ACTIVITY_TYPES.map((act) => {
+                    const count = CARD_STATES.filter((s) => COVERAGE[s][act] === "present").length;
+                    return <td key={act}><Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.75rem" }}>{count}</Typography></td>;
+                  })}
+                </tr>
+              </tbody>
+            </Box>
+          </Box>
+        </Card>
+      )}
+
+      {/* ── Tab 1: Role Overview ── */}
+      {auditTab === 1 && (
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }, gap: 1.5 }}>
+          {(Object.entries(ROLE_ACTIVITIES) as [GuruRole, typeof ROLE_ACTIVITIES[GuruRole]][]).map(([role, info]) => {
+            const totalStates = info.activities.reduce((sum, a) => sum + ACTIVITY_DETAILS[a].totalStates, 0);
+            const gaps = info.activities.reduce((sum, a) => {
+              return sum + CARD_STATES.filter((s) => COVERAGE[s][a] === "potential-gap").length;
+            }, 0);
+            return (
+              <Card key={role} variant="outlined" sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box>
+                  <Typography variant="subtitle2" fontWeight={700}>{role}</Typography>
+                  {info.note && <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.65rem" }}>{info.note}</Typography>}
+                </Box>
+                {/* Activity chips */}
+                <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
+                  {info.activities.map((a) => (
+                    <Chip key={a} label={a} size="small" sx={{ fontSize: "0.65rem", height: 22, fontWeight: 600, bgcolor: "action.selected" }} />
+                  ))}
+                </Stack>
+                {/* Stats row */}
+                <Stack direction="row" spacing={2} sx={{ mt: "auto" }}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem" }}>Card States</Typography>
+                    <Typography variant="body2" fontWeight={700}>{totalStates}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem" }}>Activities</Typography>
+                    <Typography variant="body2" fontWeight={700}>{info.activities.length}</Typography>
+                  </Box>
+                  {gaps > 0 && (
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem" }}>Gaps</Typography>
+                      <Typography variant="body2" fontWeight={700} sx={{ color: "warning.main" }}>{gaps}</Typography>
+                    </Box>
+                  )}
+                </Stack>
+                {/* Feature flags */}
+                <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
+                  {info.activities.some((a) => ACTIVITY_DETAILS[a].hasRating) && <Chip label="Rating" size="small" variant="outlined" sx={{ fontSize: "0.6rem", height: 18, "& .MuiChip-label": { px: 0.75 } }} />}
+                  {info.activities.some((a) => ACTIVITY_DETAILS[a].hasCombined) && <Chip label="Combined" size="small" variant="outlined" sx={{ fontSize: "0.6rem", height: 18, "& .MuiChip-label": { px: 0.75 } }} />}
+                  {info.activities.some((a) => ACTIVITY_DETAILS[a].hasTentative) && <Chip label="Tentative" size="small" variant="outlined" sx={{ fontSize: "0.6rem", height: 18, "& .MuiChip-label": { px: 0.75 } }} />}
+                  {info.activities.some((a) => ACTIVITY_DETAILS[a].hasRecording) && <Chip label="Recording" size="small" variant="outlined" sx={{ fontSize: "0.6rem", height: 18, "& .MuiChip-label": { px: 0.75 } }} />}
+                  {!info.activities.some((a) => ACTIVITY_DETAILS[a].hasRating) && <Chip label="No Rating" size="small" sx={{ fontSize: "0.6rem", height: 18, bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", "& .MuiChip-label": { px: 0.75 } }} />}
+                </Stack>
+              </Card>
+            );
+          })}
+        </Box>
+      )}
+
+      {/* ── Tab 2: Activity Details ── */}
+      {auditTab === 2 && (
+        <Stack spacing={1.5}>
+          {ACTIVITY_TYPES.map((act) => {
+            const d = ACTIVITY_DETAILS[act];
+            const states = CARD_STATES.filter((s) => COVERAGE[s][act] === "present");
+            const gaps = CARD_STATES.filter((s) => COVERAGE[s][act] === "potential-gap");
+            return (
+              <Card key={act} variant="outlined" sx={{ p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
+                  <Box>
+                    <Typography variant="subtitle2" fontWeight={700}>{act}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>Used by: {d.usedBy}</Typography>
+                  </Box>
+                  <Chip label={`${d.totalStates} states`} size="small" sx={{ fontWeight: 700, fontSize: "0.7rem" }} />
+                </Stack>
+
+                {/* Feature row */}
+                <Stack direction="row" spacing={0.5} sx={{ mb: 1.5, flexWrap: "wrap", gap: 0.5 }}>
+                  {d.hasRating && <Chip label="Has Rating" size="small" sx={{ height: 20, fontSize: "0.6rem", bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" }} />}
+                  {d.hasCombined && <Chip label="Combined Sessions" size="small" sx={{ height: 20, fontSize: "0.6rem", bgcolor: "var(--gl-accent-primary-bg)", color: "var(--gl-accent-primary)" }} />}
+                  {d.hasTentative && <Chip label="Tentative State" size="small" sx={{ height: 20, fontSize: "0.6rem", bgcolor: "var(--gl-accent-purple-bg)", color: "var(--gl-accent-violet)" }} />}
+                  {d.hasRecording && <Chip label="Recording" size="small" sx={{ height: 20, fontSize: "0.6rem", bgcolor: "var(--gl-accent-amber-bg)", color: "var(--gl-accent-amber)" }} />}
+                  {!d.hasRating && <Chip label="Never Rated" size="small" sx={{ height: 20, fontSize: "0.6rem", bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)" }} />}
+                  {d.uniqueFeature && <Chip label={d.uniqueFeature} size="small" variant="outlined" sx={{ height: 20, fontSize: "0.6rem" }} />}
+                </Stack>
+
+                {/* Implemented states */}
+                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ fontSize: "0.65rem", mb: 0.5, display: "block" }}>Implemented States</Typography>
+                <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5, mb: gaps.length ? 1.5 : 0 }}>
+                  {states.map((s) => (
+                    <Chip key={s} icon={<CheckCircleOutlinedIcon sx={{ fontSize: "12px !important" }} />} label={s} size="small" sx={{ height: 22, fontSize: "0.65rem", bgcolor: "hsl(var(--md-primary) / 0.06)", "& .MuiChip-icon": { color: "success.main" } }} />
+                  ))}
+                </Stack>
+
+                {/* Potential gaps */}
+                {gaps.length > 0 && (
+                  <>
+                    <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.65rem", mb: 0.5, display: "block", color: "warning.main" }}>Potential Gaps</Typography>
+                    <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
+                      {gaps.map((s) => (
+                        <Chip key={s} icon={<WarningAmberOutlinedIcon sx={{ fontSize: "12px !important" }} />} label={s} size="small" sx={{ height: 22, fontSize: "0.65rem", bgcolor: "hsl(var(--md-warning) / 0.08)", "& .MuiChip-icon": { color: "warning.main" } }} />
+                      ))}
+                    </Stack>
+                  </>
+                )}
+              </Card>
+            );
+          })}
+        </Stack>
+      )}
+
+      {/* ── Tab 3: Duplicates ── */}
+      {auditTab === 3 && (
+        <Stack spacing={1.5}>
+          {/* Duplicate roles */}
+          <Card variant="outlined" sx={{ p: 2 }}>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
+              <ContentCopyOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+              <Typography variant="subtitle2" fontWeight={700}>Duplicate Role Rendering</Typography>
+            </Stack>
+            <Stack spacing={1.5} divider={<Divider />}>
+              {DUPLICATES.map((d, i) => (
+                <Box key={i}>
+                  <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem" }}>{d.roles}</Typography>
+                  <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
+                    <Chip label={`Shared: ${d.shared}`} size="small" sx={{ fontSize: "0.65rem", height: 22, bgcolor: "var(--gl-accent-primary-bg)" }} />
+                    <Chip label={`Diff: ${d.diff}`} size="small" variant="outlined" sx={{ fontSize: "0.65rem", height: 22 }} />
+                  </Stack>
+                </Box>
+              ))}
+            </Stack>
+          </Card>
+
+          {/* Shared components */}
+          <Card variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>Shared UI Components</Typography>
+            <Box component="table" sx={{ width: "100%", borderCollapse: "collapse", "& th, & td": { px: 1.5, py: 0.75, fontSize: "0.7rem", borderBottom: 1, borderColor: "divider", textAlign: "left" }, "& th": { fontWeight: 700, color: "text.secondary", bgcolor: "action.hover" } }}>
+              <thead>
+                <tr><th>Component</th><th>Used By</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                {[
+                  { comp: "SessionCard", used: "Online, Residency, Career/Mock", note: "Title, type chip, batch, date, time, actions" },
+                  { comp: "CardTitleRow", used: "Evaluation, Moderation, Capstone, CV Review", note: "Simpler: title + chips row" },
+                  { comp: "StarRatingNumeric", used: "All rated types (5)", note: "Numeric rating with star icon" },
+                  { comp: "PlannedEventCard", used: "Online Sessions only", note: "Tentative / planned events" },
+                  { comp: "CombinedCompletedGroup", used: "Online Sessions only", note: "Split completed cards grouping" },
+                ].map((r) => (
+                  <tr key={r.comp}><td style={{ fontWeight: 600 }}>{r.comp}</td><td>{r.used}</td><td style={{ color: "var(--md-on-surface-variant, #666)" }}>{r.note}</td></tr>
+                ))}
+              </tbody>
+            </Box>
+          </Card>
+
+          {/* Shared chips */}
+          <Card variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>Shared Chip Constants</Typography>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 1 }}>
+              {[
+                { label: "Confirmed", scope: "All activity types", color: "var(--gl-status-confirmed-bg)" },
+                { label: "Payment pending", scope: "All activity types", color: "var(--gl-status-pending-bg)" },
+                { label: "Payment processed", scope: "All activity types", color: "var(--gl-status-confirmed-bg)" },
+                { label: "Gathering feedback", scope: "Online, Residency, Career, Eval, Mod", color: "transparent" },
+                { label: "No feedback collected", scope: "Online Sessions only", color: "transparent" },
+                { label: "To be confirmed", scope: "Online, Evaluation, Moderation", color: "var(--gl-status-pending-bg)" },
+                { label: "Already submitted", scope: "CV Review only", color: "var(--gl-status-confirmed-bg)" },
+                { label: "Scheduled", scope: "Evaluation, Moderation (inline)", color: "var(--gl-status-pending-bg)" },
+              ].map((c) => (
+                <Stack key={c.label} direction="row" spacing={1} alignItems="center" sx={{ py: 0.5, px: 1, borderRadius: 1, border: 1, borderColor: "divider" }}>
+                  <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: c.color, border: c.color === "transparent" ? "1.5px solid" : "none", borderColor: "text.disabled", flexShrink: 0 }} />
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem", display: "block" }}>{c.label}</Typography>
+                    <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem" }}>{c.scope}</Typography>
+                  </Box>
+                </Stack>
+              ))}
+            </Box>
+          </Card>
+        </Stack>
+      )}
+    </Stack>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    PAGE COMPONENT
    ══════════════════════════════════════════════════════════════════════════ */
 
 export default function ComponentsPage() {
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
   const sections = ROLE_SECTIONS[selectedRole];
+  const [pageTab, setPageTab] = useState(0);
 
   return (
-    <Stack spacing={3} sx={{ maxWidth: 800 }}>
+    <Stack spacing={3} sx={{ maxWidth: pageTab === 1 ? 1100 : 800 }}>
       <Box>
         <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 0.25 }}>
           <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1.125rem", md: "1.25rem" } }}>
             Components
           </Typography>
-          <Chip label={selectedRole} size="small" sx={{ fontWeight: 600 }} />
+          {pageTab === 0 && <Chip label={selectedRole} size="small" sx={{ fontWeight: 600 }} />}
         </Stack>
         <Typography variant="body2" color="text.secondary">
-          Session card variants for the <strong>{selectedRole}</strong> persona. Switch roles in the Dev Panel to see other activity types.
+          {pageTab === 0
+            ? <>Session card variants for the <strong>{selectedRole}</strong> persona. Switch roles in the Dev Panel to see other activity types.</>
+            : "Visual audit of all card states, roles, and coverage across activity types."
+          }
         </Typography>
       </Box>
 
-      {sections.map((section) => (
-        <Card key={section.label} sx={{ p: 2.5 }}>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>{section.label}</Typography>
-          <Stack spacing={3} divider={<Divider />}>
-            {section.render()}
-          </Stack>
-        </Card>
-      ))}
+      <Tabs
+        value={pageTab}
+        onChange={(_, v) => setPageTab(v)}
+        sx={{ minHeight: 36, mb: -1, "& .MuiTab-root": { minHeight: 36, textTransform: "none", fontWeight: 600, fontSize: "0.85rem" } }}
+      >
+        <Tab label="Card Demos" />
+        <Tab label="Audit Overview" />
+      </Tabs>
+
+      {pageTab === 0 ? (
+        <>
+          {sections.map((section) => (
+            <Card key={section.label} sx={{ p: 2.5 }}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>{section.label}</Typography>
+              <Stack spacing={3} divider={<Divider />}>
+                {section.render()}
+              </Stack>
+            </Card>
+          ))}
+        </>
+      ) : (
+        <AuditPanel />
+      )}
     </Stack>
   );
 }
