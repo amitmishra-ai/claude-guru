@@ -421,7 +421,7 @@ function SidebarPanel({
           sx={{
             width: 120,
             height: 150,
-            borderRadius: 1,
+            borderRadius: "12px",
             bgcolor: "rgba(255,255,255,0.1)",
             backdropFilter: "blur(8px)",
             border: "1px solid rgba(255,255,255,0.15)",
@@ -602,11 +602,11 @@ function CoCContent({ theme }: { theme: Theme }) {
       {/* Intro */}
       <Box
         sx={{
-          borderRadius: 1,
+          borderRadius: "12px",
           border: 1,
           borderColor: "divider",
           bgcolor: "action.hover",
-          p: { xs: 2, sm: 2.5 },
+          p: 2,
           mb: { xs: 3, sm: 3.5 },
         }}
       >
@@ -686,11 +686,11 @@ function IPContent({
       {/* Intro */}
       <Box
         sx={{
-          borderRadius: 1,
+          borderRadius: "12px",
           border: 1,
           borderColor: "divider",
           bgcolor: "action.hover",
-          p: { xs: 2, sm: 2.5 },
+          p: 2,
           mb: { xs: 3, sm: 3.5 },
         }}
       >
@@ -773,11 +773,11 @@ function IPContent({
       <Box
         sx={{
           mt: 4,
-          borderRadius: 1,
+          borderRadius: "12px",
           border: 1,
           borderColor: alpha(theme.palette.warning.main, 0.3),
           bgcolor: alpha(theme.palette.warning.main, 0.04),
-          p: { xs: 2, sm: 2.5 },
+          p: 2,
         }}
       >
         <Typography
@@ -1040,7 +1040,7 @@ export default function OnboardingPage() {
               gap: 0.5,
               px: 2,
               py: 0.75,
-              borderRadius: 1,
+              borderRadius: "12px",
               bgcolor: "background.paper",
               backdropFilter: "blur(12px)",
               border: 1,

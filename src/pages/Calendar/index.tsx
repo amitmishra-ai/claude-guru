@@ -474,9 +474,9 @@ export default function CalendarPage() {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 2.5,
+            gap: 2,
             py: 10,
-            borderRadius: 1,
+            borderRadius: "12px",
             border: '2px dashed',
             borderColor: 'divider',
             bgcolor: 'action.hover',
@@ -705,7 +705,7 @@ export default function CalendarPage() {
               flexDirection: 'column',
               border: 1,
               borderColor: 'divider',
-              borderRadius: 1,
+              borderRadius: "12px",
               bgcolor: 'background.paper',
               overflow: 'hidden',
               boxShadow: 'none',
@@ -1353,7 +1353,7 @@ export default function CalendarPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {hasUserConfiguredAvailability && calendarViewMode === "month" && (
         <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-          <Card variant="outlined" sx={{ p: { xs: 1, md: 2 }, overflow: 'hidden', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', borderRadius: 1, bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
+          <Card variant="outlined" sx={{ p: { xs: 1, md: 2 }, overflow: 'hidden', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', borderRadius: "16px", bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
             {/* §9.1 Sunday-first visual month grid — but we use Monday-first to match week view DOW header */}
             <Box
               sx={{
@@ -1570,7 +1570,7 @@ export default function CalendarPage() {
               sx={{
                 py: 1.25,
                 px: 1.5,
-                borderRadius: 1,
+                borderRadius: "12px",
                 border: "1px solid",
                 borderColor: "divider",
                 bgcolor: "background.paper",

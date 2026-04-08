@@ -210,7 +210,7 @@ export function CourseDetailDialog() {
         </Box>
       ) : (
         /* Desktop: thumbnail + title + close */
-        <Box sx={{ px: 3, pt: 2.5, pb: 2 }}>
+        <Box sx={{ px: 3, pt: 3, pb: 2 }}>
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
             <CoursePatternThumb color={course.color ?? "#6366f1"} pattern={course.pattern ?? 0} size={80} borderRadius={10} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -247,7 +247,7 @@ export function CourseDetailDialog() {
   );
 
   const bodyContent = (
-    <Box sx={{ p: { xs: 2, sm: 2.5 }, display: "flex", flexDirection: "column", gap: 1.5 }}>
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
       {sections.length === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: "center" }}>No modules available yet.</Typography>
       ) : (

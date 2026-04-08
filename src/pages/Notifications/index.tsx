@@ -92,7 +92,7 @@ export default function NotificationsPage() {
             <Button
               variant="text"
               size="small"
-              sx={{ flexShrink: 0, borderRadius: "12px", fontSize: "0.75rem" }}
+              sx={{ flexShrink: 0, borderRadius: "4px", fontSize: "0.75rem" }}
               onClick={() => {
                 dispatch(markRead(n.id));
                 executeCtaAction(n.ctaAction!, navigate, dispatch);
@@ -115,7 +115,7 @@ export default function NotificationsPage() {
             variant="text"
             size="small"
             startIcon={<DoneAllOutlinedIcon sx={{ fontSize: 14 }} />}
-            sx={{ borderRadius: "12px", fontSize: "0.75rem", flexShrink: 0 }}
+            sx={{ borderRadius: "4px", fontSize: "0.75rem", flexShrink: 0 }}
             onClick={() => dispatch(markAllRead())}
           >
             Mark all read

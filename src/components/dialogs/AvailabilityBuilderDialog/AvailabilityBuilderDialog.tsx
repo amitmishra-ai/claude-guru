@@ -284,7 +284,7 @@ const AvailabilityBuilderDialog = () => {
       PaperProps={{
         sx: {
           width: isMobile ? "100%" : 420,
-          borderRadius: isMobile ? 0 : "8px",
+          borderRadius: isMobile ? 0 : "16px",
           maxHeight: isMobile ? "100%" : "90vh",
           display: "flex",
           flexDirection: "column",
@@ -320,7 +320,7 @@ const AvailabilityBuilderDialog = () => {
         className="themed-scrollbar"
         sx={{
           px: { xs: 2, sm: 3 },
-          pt: { xs: 2, sm: 2.5 },
+          pt: 2,
           pb: 2,
           flex: 1,
           overflowY: "auto",

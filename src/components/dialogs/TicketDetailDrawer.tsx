@@ -90,7 +90,7 @@ export function TicketDetailDrawer() {
       {ticket && (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
           {/* Header */}
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2.5, py: 1.5, borderBottom: 1, borderColor: "divider" }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: "divider" }}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <IconButton size="small" onClick={handleClose}>
                 <ArrowBackIcon sx={{ fontSize: 18 }} />
@@ -111,7 +111,7 @@ export function TicketDetailDrawer() {
           </Stack>
 
           {/* Scrollable content */}
-          <Box sx={{ flex: 1, overflow: "auto", px: 2.5, py: 2, "&::-webkit-scrollbar": { width: 4 }, "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: 2 } }}>
+          <Box sx={{ flex: 1, overflow: "auto", px: 2, py: 2, "&::-webkit-scrollbar": { width: 4 }, "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: 2 } }}>
             {/* Student info */}
             <Paper variant="outlined" sx={{ p: 1.5, mb: 2, borderRadius: "8px" }}>
               <Stack direction="row" alignItems="center" spacing={1.5}>

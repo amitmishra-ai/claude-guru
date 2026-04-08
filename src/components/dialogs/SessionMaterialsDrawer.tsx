@@ -90,14 +90,14 @@ export function SessionMaterialsDrawer() {
         </Box>
 
         {/* ── Content ── */}
-        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 2.5 }}>
+        <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", px: 3, py: 3 }}>
           {session ? (
             <Stack spacing={3}>
               {/* Session context */}
               <Box
                 sx={{
                   p: 2,
-                  borderRadius: 1,
+                  borderRadius: "12px",
                   border: 1,
                   borderColor: "divider",
                   bgcolor: "hsl(var(--md-surface-container) / 0.3)",

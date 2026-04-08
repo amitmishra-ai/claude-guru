@@ -57,7 +57,7 @@ export function ToastViewport() {
             aria-live="polite"
             sx={{
               pointerEvents: "auto",
-              borderRadius: "12px",
+              borderRadius: "16px",
               border: 1,
               borderColor: t.variant === "destructive" ? "var(--gl-status-declined-border)" : "divider",
               backgroundColor: t.variant === "destructive" ? "var(--gl-status-declined-bg)" : "hsl(var(--md-surface))",

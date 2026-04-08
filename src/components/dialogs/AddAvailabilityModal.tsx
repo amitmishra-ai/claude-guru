@@ -76,7 +76,7 @@ export function AddAvailabilityModal() {
       <DialogTitle>Add availability</DialogTitle>
 
       <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           <Box sx={{ border: 1, borderColor: 'divider', bgcolor: 'action.hover', p: 1.5 }}>
             <Typography variant="body2" color="text.secondary">
               Add a one-off time slot when you are available for sessions.

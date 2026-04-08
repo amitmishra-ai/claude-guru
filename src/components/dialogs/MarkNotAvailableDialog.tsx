@@ -289,10 +289,10 @@ export function MarkNotAvailableDialog() {
       open={open}
       onClose={handleClose}
       maxWidth={false}
-      PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 }, borderRadius: 1, overflow: "hidden" } }}
+      PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 }, overflow: "hidden" } }}
     >
       {/* ── Header ── */}
-      <Box sx={{ px: 2.5, pt: 2, pb: 1.25, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <Box sx={{ px: 2, pt: 2, pb: 1.25, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.9rem" }}>
           {editingLeaveGroupId ? "Edit leave" : step === 2 ? "Conflicts found" : "Mark leave"}
         </Typography>
@@ -310,7 +310,7 @@ export function MarkNotAvailableDialog() {
         />
       </Box>
 
-      <DialogContent sx={{ px: 2.5, pt: 0.5, pb: 1.5 }}>
+      <DialogContent sx={{ px: 2, pt: 0.5, pb: 1.5 }}>
         {step === 1 && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
@@ -476,7 +476,7 @@ export function MarkNotAvailableDialog() {
       </DialogContent>
 
       {/* ── Footer ── */}
-      <Box sx={{ px: 2.5, pb: 2, pt: 0.5, display: "flex", justifyContent: "flex-end", gap: 1 }}>
+      <Box sx={{ px: 2, pb: 2, pt: 0.5, display: "flex", justifyContent: "flex-end", gap: 1 }}>
         <Button variant="text" color="inherit" size="small" onClick={step === 2 ? () => setStep(1) : handleClose} sx={{ fontSize: "0.75rem" }}>
           {step === 2 ? "Back" : "Cancel"}
         </Button>

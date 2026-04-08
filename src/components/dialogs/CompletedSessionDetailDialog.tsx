@@ -74,7 +74,7 @@ export function CompletedSessionDetailDialog() {
             borderBottom: 1,
             borderColor: "divider",
             bgcolor: "background.paper",
-            px: 2.5,
+            px: 2,
             py: 1.5,
             display: "flex",
             alignItems: "center",
@@ -106,7 +106,7 @@ export function CompletedSessionDetailDialog() {
         <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", scrollbarGutter: "stable" }}>
 
           {/* Hero */}
-          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+          <Box sx={{ px: 2, pt: 2, pb: 2 }}>
             {/* Breadcrumb */}
             <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
               {[session.batch || session.program, session.sessionType].filter(Boolean).join(" · ")}
@@ -178,7 +178,7 @@ export function CompletedSessionDetailDialog() {
           <Divider />
 
           {/* Details section */}
-          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+          <Stack spacing={0} sx={{ px: 2, py: 2 }}>
             <Box sx={{ mb: 2.5 }}>
               <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
@@ -279,7 +279,7 @@ export function CompletedSessionDetailDialog() {
             borderTop: 1,
             borderColor: "divider",
             bgcolor: "background.paper",
-            px: 2.5,
+            px: 2,
             py: 1.5,
             display: "flex",
             justifyContent: "flex-start",

@@ -338,7 +338,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
     <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw", boxShadow: "-4px 0 24px rgba(0,0,0,0.06)", borderLeft: "1px solid", borderColor: "divider" } }}>
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         {/* ── Sticky header ── */}
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
             <Chip label="To be confirmed" size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }} />
@@ -349,7 +349,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
         {/* ── Scrollable content ── */}
         <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
           {/* ═══ HERO ═══ */}
-          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+          <Box sx={{ px: 2, pt: 2, pb: 2 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
               {sessionType}
             </Typography>
@@ -385,7 +385,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
           <Divider />
 
           {/* ═══ DETAIL SECTIONS ═══ */}
-          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+          <Stack spacing={0} sx={{ px: 2, py: 2 }}>
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
               <Box sx={{ borderRadius: "8px", border: 1, borderColor: "divider", bgcolor: "hsl(var(--md-surface))", p: 2 }}>
@@ -409,7 +409,7 @@ function PlannedEventDetailDialog({ open, onClose, sessionType, title, batch, pr
         </Box>
 
         {/* ── Sticky footer ── */}
-        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
           <Button variant="text" color="inherit" size="small" onClick={onClose}>Close</Button>
         </Box>
       </Box>
@@ -691,7 +691,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
     <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw", boxShadow: "-4px 0 24px rgba(0,0,0,0.06)", borderLeft: "1px solid", borderColor: "divider" } }}>
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         {/* ── Sticky header ── */}
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
             <Chip label={statusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...statusSx }} />
@@ -702,7 +702,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
         {/* ── Scrollable content ── */}
         <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
           {/* ═══ HERO ═══ */}
-          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+          <Box sx={{ px: 2, pt: 2, pb: 2 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
               PGP-AIML · Evaluation
             </Typography>
@@ -751,7 +751,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
           <Divider />
 
           {/* ═══ DETAIL SECTIONS ═══ */}
-          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+          <Stack spacing={0} sx={{ px: 2, py: 2 }}>
             {/* ── Details ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
@@ -855,7 +855,7 @@ function EvaluationDetailDialog({ open, onClose, variant }: { open: boolean; onC
         </Box>
 
         {/* ── Sticky footer ── */}
-        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
           <Button variant="text" color="inherit" size="small" onClick={onClose}>Close</Button>
         </Box>
       </Box>
@@ -883,7 +883,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
     <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw", boxShadow: "-4px 0 24px rgba(0,0,0,0.06)", borderLeft: "1px solid", borderColor: "divider" } }}>
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         {/* ── Sticky header ── */}
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
             <Chip label={statusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...statusSx }} />
@@ -894,7 +894,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
         {/* ── Scrollable content ── */}
         <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
           {/* ═══ HERO ═══ */}
-          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+          <Box sx={{ px: 2, pt: 2, pb: 2 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
               PGP-AIML · Moderation
             </Typography>
@@ -937,7 +937,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
           <Divider />
 
           {/* ═══ DETAIL SECTIONS ═══ */}
-          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+          <Stack spacing={0} sx={{ px: 2, py: 2 }}>
             {/* ── Details ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Details</Typography>
@@ -1046,7 +1046,7 @@ function ModerationDetailDialog({ open, onClose, variant }: { open: boolean; onC
         </Box>
 
         {/* ── Sticky footer ── */}
-        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
           <Button variant="text" color="inherit" size="small" onClick={onClose}>Close</Button>
         </Box>
       </Box>
@@ -1074,7 +1074,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
     <Drawer anchor="right" open={open} onClose={onClose} sx={{ "& .MuiDrawer-paper": { width: { xs: "100vw", sm: 480 }, maxWidth: "100vw", boxShadow: "-4px 0 24px rgba(0,0,0,0.06)", borderLeft: "1px solid", borderColor: "divider" } }}>
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         {/* ── Sticky header ── */}
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
             <Chip label={statusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...statusSx }} />
@@ -1085,7 +1085,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
         {/* ── Scrollable content ── */}
         <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
           {/* ═══ HERO ═══ */}
-          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+          <Box sx={{ px: 2, pt: 2, pb: 2 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
               PGP-DS · Capstone
             </Typography>
@@ -1132,7 +1132,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
           <Divider />
 
           {/* ═══ DETAIL SECTIONS ═══ */}
-          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+          <Stack spacing={0} sx={{ px: 2, py: 2 }}>
             {/* ── Milestones ── */}
             <Box sx={{ mb: 2.5 }}>
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em", mb: 1, display: "block" }}>Milestones</Typography>
@@ -1210,7 +1210,7 @@ function CapstoneDetailDialog({ open, onClose, variant }: { open: boolean; onClo
         </Box>
 
         {/* ── Sticky footer ── */}
-        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexShrink: 0 }}>
           <Button variant="soft" size="small" startIcon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />}>Progress</Button>
           {isConfirmed && (
             <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Group Details (LMS)</Button>
@@ -1243,7 +1243,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
     >
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         {/* ── Sticky header ── */}
-        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
             <Chip label={statusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...statusSx }} />
@@ -1254,7 +1254,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
         {/* ── Scrollable content ── */}
         <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
           {/* ═══ HERO: Breadcrumb + Title ═══ */}
-          <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+          <Box sx={{ px: 2, pt: 2, pb: 2 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
               CV Review
             </Typography>
@@ -1315,7 +1315,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
           <Divider />
 
           {/* ═══ DETAIL SECTIONS ═══ */}
-          <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+          <Stack spacing={0} sx={{ px: 2, py: 2 }}>
 
             {/* ── Student Info (confirmed only) ── */}
             {isConfirmed && (
@@ -1402,7 +1402,7 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
         </Box>
 
         {/* ── Sticky footer ── */}
-        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2.5, py: 1.5, display: "flex", justifyContent: isConfirmed && !isSubmitted ? "space-between" : "flex-end", gap: 1, flexShrink: 0 }}>
+        <Box sx={{ position: "sticky", bottom: 0, zIndex: 10, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 2, py: 1.5, display: "flex", justifyContent: isConfirmed && !isSubmitted ? "space-between" : "flex-end", gap: 1, flexShrink: 0 }}>
           {isConfirmed && !isSubmitted && (
             <Button variant="contained" size="small">Submit CV Review</Button>
           )}
@@ -2998,7 +2998,7 @@ export default function ComponentsPage() {
       {pageTab === 0 ? (
         <>
           {sections.map((section) => (
-            <Card key={section.label} sx={{ p: 2.5 }}>
+            <Card key={section.label} sx={{ p: 2 }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>{section.label}</Typography>
               <Stack spacing={3} divider={<Divider />}>
                 {section.render()}

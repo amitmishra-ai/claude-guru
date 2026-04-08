@@ -553,7 +553,7 @@ export function SessionDetailsModal() {
             borderBottom: 1,
             borderColor: "divider",
             bgcolor: "background.paper",
-            px: 2.5,
+            px: 2,
             py: 1.5,
             display: "flex",
             alignItems: "center",
@@ -581,7 +581,7 @@ export function SessionDetailsModal() {
           {session ? (
             <>
               {/* ═══ HERO: Title + Schedule at-a-glance ═══ */}
-              <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+              <Box sx={{ px: 2, pt: 2, pb: 2 }}>
                 {/* Session type */}
                 <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
                   {session.sessionType}
@@ -727,7 +727,7 @@ export function SessionDetailsModal() {
               <Divider />
 
               {/* ═══ DETAIL SECTIONS ═══ */}
-              <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+              <Stack spacing={0} sx={{ px: 2, py: 2 }}>
 
                 {/* ── Details ── */}
                 <Box sx={{ mb: 2.5 }}>
@@ -786,7 +786,7 @@ export function SessionDetailsModal() {
                             label="Group"
                             size="small"
                             variant="outlined"
-                            sx={{ height: 18, fontSize: "0.55rem", fontWeight: 600, borderRadius: 1 }}
+                            sx={{ height: 18, fontSize: "0.55rem", fontWeight: 600, borderRadius: "4px" }}
                           />
                         </Stack>
                       </AccordionSummary>
@@ -861,7 +861,7 @@ export function SessionDetailsModal() {
                                 label={cb.audienceType === "Individual" ? "Individual" : cb.audienceType === "Batch" ? "Whole batch" : "Group"}
                                 size="small"
                                 variant="outlined"
-                                sx={{ height: 18, fontSize: "0.55rem", fontWeight: 600, borderRadius: 1 }}
+                                sx={{ height: 18, fontSize: "0.55rem", fontWeight: 600, borderRadius: "4px" }}
                               />
                             </Stack>
                           </AccordionSummary>
@@ -1259,7 +1259,7 @@ export function SessionDetailsModal() {
               </Stack>
             </>
           ) : (
-            <Box sx={{ px: 2.5, py: 4, textAlign: "center" }}>
+            <Box sx={{ px: 2, py: 4, textAlign: "center" }}>
               <Typography variant="body2" color="text.secondary">No event selected.</Typography>
             </Box>
           )}
@@ -1274,7 +1274,7 @@ export function SessionDetailsModal() {
             borderTop: 1,
             borderColor: "divider",
             bgcolor: "background.paper",
-            px: 2.5,
+            px: 2,
             py: 1.5,
             display: "flex",
             justifyContent: "space-between",

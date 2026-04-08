@@ -100,7 +100,7 @@ function MappedSessionsOverflow({
         onClick={(e) => e.stopPropagation()}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}
-        PaperProps={{ sx: { mt: 0.5, borderRadius: "12px", minWidth: 280, boxShadow: 4 } }}
+        PaperProps={{ sx: { mt: 0.5, borderRadius: "16px", minWidth: 280, boxShadow: 4 } }}
       >
         <Box sx={{ py: 0.5 }}>
           <Typography variant="caption" sx={{ px: 2, py: 1, display: "block", color: "text.secondary", fontWeight: 600 }}>
@@ -118,7 +118,7 @@ function MappedSessionsOverflow({
         onClick={(e) => e.stopPropagation()}
         sx={{
           "& .MuiDrawer-paper": {
-            borderRadius: "12px 12px 0 0",
+            borderRadius: "16px 16px 0 0",
             maxHeight: "70vh",
             pb: "env(safe-area-inset-bottom)",
           },
@@ -193,7 +193,7 @@ function CourseCard({
           }),
         }}
       >
-        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, display: "flex", flexDirection: "column", flex: 1 }}>
+        <CardContent sx={{ p: 2, display: "flex", flexDirection: "column", flex: 1 }}>
 
           {/* Thumbnail row: pattern left, chips right */}
           <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, mb: { xs: 1, sm: 1.5 } }}>
@@ -277,7 +277,7 @@ function CourseCardSkeleton() {
   return (
     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
       <Card variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-        <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", flex: 1 }}>
+        <CardContent sx={{ p: 2, display: "flex", flexDirection: "column", flex: 1 }}>
           {/* Tags row */}
           <Box sx={{ display: "flex", gap: 0.75, mb: 1.25 }}>
             <Skeleton variant="rounded" width={48} height={22} sx={{ borderRadius: 1 }} />
@@ -464,8 +464,8 @@ export default function CoursesPage() {
         {loading && (
           <Stack spacing={2.5}>
             {[0, 1].map((section) => (
-              <Card key={section} variant="outlined" sx={{ borderRadius: 1, overflow: "hidden" }}>
-                <Box sx={{ px: 2.5, py: 2 }}>
+              <Card key={section} variant="outlined" sx={{ borderRadius: "16px", overflow: "hidden" }}>
+                <Box sx={{ px: 2, py: 2 }}>
                   <Stack direction="row" alignItems="center" spacing={1.5}>
                     <Skeleton variant="circular" width={20} height={20} />
                     <Skeleton variant="text" width={280} height={24} />
@@ -473,7 +473,7 @@ export default function CoursesPage() {
                     <Skeleton variant="rounded" width={28} height={22} sx={{ borderRadius: 1 }} />
                   </Stack>
                 </Box>
-                <Box sx={{ px: 2.5, pb: 2.5 }}>
+                <Box sx={{ px: 2, pb: 2 }}>
                   <Grid container spacing={2}>
                     {Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)}
                   </Grid>
@@ -515,7 +515,7 @@ export default function CoursesPage() {
           >
             <AccordionSummary
               expandIcon={<ExpandMoreIcon sx={{ fontSize: 20 }} />}
-              sx={{ px: { xs: 2, sm: 2.5 }, py: 1.25, "& .MuiAccordionSummary-content": { my: 1, alignItems: "center", gap: 1.25 } }}
+              sx={{ px: 2, py: 1.25, "& .MuiAccordionSummary-content": { my: 1, alignItems: "center", gap: 1.25 } }}
             >
               <Box sx={{ p: 0.75, borderRadius: "8px", bgcolor: "primary.main", display: "flex", flexShrink: 0 }}>
                 <SchoolOutlinedIcon sx={{ fontSize: 16, color: "primary.contrastText" }} />
@@ -525,7 +525,7 @@ export default function CoursesPage() {
               </Box>
               <Chip label={teachCatalog.length} size="small" sx={{ fontWeight: 700, fontSize: "0.75rem", height: 24, mr: 0.5 }} />
             </AccordionSummary>
-            <AccordionDetails sx={{ px: { xs: 2, sm: 2.5 }, pb: 3, pt: 0.5 }}>
+            <AccordionDetails sx={{ px: 2, pb: 3, pt: 0.5 }}>
               {/* Current */}
               {teachCurrent.length > 0 && (
                 <Box sx={{ mb: teachPast.length > 0 ? 3 : 0 }}>
@@ -582,7 +582,7 @@ export default function CoursesPage() {
           >
             <AccordionSummary
               expandIcon={<ExpandMoreIcon sx={{ fontSize: 20 }} />}
-              sx={{ px: { xs: 2, sm: 2.5 }, py: 1.25, "& .MuiAccordionSummary-content": { my: 1, alignItems: "center", gap: 1.25 } }}
+              sx={{ px: 2, py: 1.25, "& .MuiAccordionSummary-content": { my: 1, alignItems: "center", gap: 1.25 } }}
             >
               <Box sx={{ p: 0.75, borderRadius: "8px", bgcolor: "secondary.main", display: "flex", flexShrink: 0 }}>
                 <MenuBookOutlinedIcon sx={{ fontSize: 16, color: "secondary.contrastText" }} />
@@ -592,7 +592,7 @@ export default function CoursesPage() {
               </Box>
               <Chip label={learnCatalog.length} size="small" sx={{ fontWeight: 700, fontSize: "0.75rem", height: 24, mr: 0.5, alignSelf: "flex-start", mt: 0.5 }} />
             </AccordionSummary>
-            <AccordionDetails sx={{ px: { xs: 2, sm: 2.5 }, pb: 3, pt: 0.5 }}>
+            <AccordionDetails sx={{ px: 2, pb: 3, pt: 0.5 }}>
               <Box sx={{ mb: 2, px: 1.5, py: 1, borderRadius: "8px", bgcolor: "rgba(25,118,210,0.08)" }}>
                 <Typography variant="caption" fontWeight={600} sx={{ color: "primary.main", lineHeight: 1.4 }}>
                   Enrolled in a GL program as a student? Switch to the Learner Dashboard from the menu to access those courses.

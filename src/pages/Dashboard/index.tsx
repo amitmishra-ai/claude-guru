@@ -132,7 +132,7 @@ function TaskCard({
   return (
     <Card
       variant="outlined"
-      sx={{ p: { xs: 2, sm: 2.5 }, height: "100%", transition: "border-color 0.2s", "&:hover": { borderColor: "primary.main" } }}
+      sx={{ p: 2, height: "100%", transition: "border-color 0.2s", "&:hover": { borderColor: "primary.main" } }}
     >
       <Stack spacing={1.5}>
         <Box>
@@ -325,7 +325,7 @@ export default function DashboardPage() {
           {/* Left column skeleton */}
           <Grid size={{ xs: 12, md: 8 }}>
             {/* Up next skeleton */}
-            <Card sx={{ p: 2, mb: 2 }}>
+            <Card sx={{ p: 2, mb: 2, borderRadius: "16px" }}>
               <Skeleton variant="text" width={80} height={20} sx={{ mb: 1.5 }} />
               {[0, 1].map((i) => (
                 <Card key={i} variant="outlined" sx={{ p: 2, mb: 1.5 }}>
@@ -341,7 +341,7 @@ export default function DashboardPage() {
             </Card>
 
             {/* Activities card skeleton */}
-            <Card sx={{ p: 2 }}>
+            <Card sx={{ p: 2, borderRadius: "16px" }}>
               <Skeleton variant="text" width={90} height={22} sx={{ mb: 1.5 }} />
               {/* Tabs skeleton */}
               <Stack direction="row" spacing={3} sx={{ mb: 2, borderBottom: 1, borderColor: "divider", pb: 1 }}>
@@ -376,12 +376,12 @@ export default function DashboardPage() {
           {/* Right column skeleton */}
           <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: "none", md: "block" } }}>
             {/* Tasks skeleton */}
-            <Card sx={{ p: 2, mb: 2 }}>
+            <Card sx={{ p: 2, mb: 2, borderRadius: "16px" }}>
               <Skeleton variant="text" width={50} height={20} sx={{ mb: 1.5 }} />
               <Stack spacing={1.5}>
                 {/* Task card skeletons */}
                 {[0, 1].map((i) => (
-                  <Card key={i} variant="outlined" sx={{ px: 2.5, py: 1.5 }}>
+                  <Card key={i} variant="outlined" sx={{ px: 2, py: 1.5 }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                       <Box>
                         <Skeleton variant="text" width={140} height={18} />
@@ -392,7 +392,7 @@ export default function DashboardPage() {
                   </Card>
                 ))}
                 {/* Availability card skeleton */}
-                <Card variant="outlined" sx={{ px: 2.5, py: 1.5 }}>
+                <Card variant="outlined" sx={{ px: 2, py: 1.5 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Box>
                       <Skeleton variant="text" width={150} height={18} />
@@ -402,7 +402,7 @@ export default function DashboardPage() {
                   </Stack>
                 </Card>
                 {/* Support tickets skeleton */}
-                <Card variant="outlined" sx={{ px: 2.5, py: 1.5 }}>
+                <Card variant="outlined" sx={{ px: 2, py: 1.5 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Box>
                       <Skeleton variant="text" width={120} height={18} />
@@ -415,14 +415,14 @@ export default function DashboardPage() {
             </Card>
 
             {/* Performance skeleton */}
-            <Card sx={{ p: 2 }}>
+            <Card sx={{ p: 2, borderRadius: "16px" }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
                 <Skeleton variant="text" width={120} height={20} />
                 <Skeleton variant="text" width={70} height={16} />
               </Stack>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
                 {[0, 1, 2, 3].map((i) => (
-                  <Box key={i} sx={{ p: 1.25, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+                  <Box key={i} sx={{ p: 1.25, border: "1px solid", borderColor: "divider", borderRadius: "12px" }}>
                     <Skeleton variant="text" width={60} height={10} />
                     <Skeleton variant="text" width={40} height={20} sx={{ mt: 0.25 }} />
                     <Skeleton variant="rectangular" width="100%" height={18} sx={{ mt: 0.5, borderRadius: 1 }} />
@@ -451,9 +451,9 @@ export default function DashboardPage() {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: { xs: 2, md: 2.5 },
+            gap: 2,
             py: { xs: 6, md: 12 },
-            borderRadius: 1,
+            borderRadius: "12px",
             border: '2px dashed',
             borderColor: 'divider',
             bgcolor: 'action.hover',
@@ -500,7 +500,7 @@ export default function DashboardPage() {
           <Stack sx={{ ...(isEmpty && { flex: 1 }) }}>
             {/* Mobile tasks (horizontal scroll) */}
             <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 1.5 }}>
-              <Card sx={{ p: 2 }}>
+              <Card sx={{ p: 2, borderRadius: "16px" }}>
                 <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Tasks</Typography>
                 <Box
                   sx={{
@@ -573,9 +573,9 @@ export default function DashboardPage() {
             </Box>
 
             {/* ── Big container for entire left section ── */}
-            <Card sx={{ p: { xs: 2, sm: 2 }, ...(isEmpty && { flex: { xs: 1, sm: "unset" }, display: "flex", flexDirection: "column" }) }}>
+            <Card sx={{ p: { xs: 2, sm: 2 }, borderRadius: "16px", ...(isEmpty && { flex: { xs: 1, sm: "unset" }, display: "flex", flexDirection: "column" }) }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: { xs: 1, sm: 1.5 }, fontSize: { xs: "0.875rem", sm: "1rem" } }}>Activities</Typography>
-              <Stack spacing={{ xs: 2, md: 2.5 }} sx={{ ...(isEmpty && { flex: 1 }) }}>
+              <Stack spacing={2} sx={{ ...(isEmpty && { flex: 1 }) }}>
                 {/* Next Activities — hidden when no today sessions */}
                 {todaySessions.length > 0 && (
                 <Box>
@@ -607,7 +607,7 @@ export default function DashboardPage() {
                                   height: 20,
                                   fontSize: 10,
                                   fontWeight: 600,
-                                  borderRadius: 1,
+                                  borderRadius: "4px",
                                   bgcolor: "var(--gl-status-declined-bg)",
                                   color: "var(--gl-status-declined-text)",
                                 }}
@@ -929,7 +929,7 @@ export default function DashboardPage() {
                                     borderBottom: 1,
                                     borderColor: "divider",
                                     bgcolor: "background.paper",
-                                    px: 2.5,
+                                    px: 2,
                                     py: 1.5,
                                     display: "flex",
                                     alignItems: "center",
@@ -949,7 +949,7 @@ export default function DashboardPage() {
                                 {/* Scrollable content — matches SessionDetailsModal layout */}
                                 <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
                                   {/* Hero: Title + Schedule */}
-                                  <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+                                  <Box sx={{ px: 2, pt: 2, pb: 2 }}>
                                     {/* Breadcrumb */}
                                     <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ letterSpacing: "0.02em", mb: 0.5, display: "block" }}>
                                       {[plannedEventDetail.batch, plannedEventDetail.sessionType].filter(Boolean).join(" · ")}
@@ -1007,7 +1007,7 @@ export default function DashboardPage() {
                                   <Divider />
 
                                   {/* ═══ DETAIL SECTIONS — same pattern as SessionDetailsModal ═══ */}
-                                  <Stack spacing={0} sx={{ px: 2.5, py: 2 }}>
+                                  <Stack spacing={0} sx={{ px: 2, py: 2 }}>
                                     <Box sx={{ mb: 2.5 }}>
                                       {/* SectionHeading */}
                                       <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
@@ -1481,7 +1481,7 @@ export default function DashboardPage() {
 
         {/* Right column: Tasks sidebar (desktop only) */}
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' }, alignSelf: 'flex-start', position: 'sticky', top: 24 }}>
-            <Card sx={{ p: 2, mb: 2 }}>
+            <Card sx={{ p: 2, mb: 2, borderRadius: "16px" }}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Tasks</Typography>
               <Stack spacing={2}>
                 {/* Priority-sorted desktop tasks — same logic as mobile */}
@@ -1502,7 +1502,7 @@ export default function DashboardPage() {
                     )});
                   } else {
                     dt.push({ p: 3, k: "avail-summary", n: (
-                      <Card variant="outlined" sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => dispatch(setOpenAvailability(true))}>
+                      <Card variant="outlined" sx={{ px: 2, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => dispatch(setOpenAvailability(true))}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center">
                           <Box>
                             <Typography variant="subtitle2" fontWeight={600}>Availability summary</Typography>
@@ -1516,7 +1516,7 @@ export default function DashboardPage() {
 
                   if (openTicketCount > 0) {
                     dt.push({ p: hasUserConfiguredAvailability ? 2 : 3, k: "support", n: (
-                      <Card variant="outlined" sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => navigate("/support")}>
+                      <Card variant="outlined" sx={{ px: 2, py: 1.5, cursor: "pointer", "&:hover": { borderColor: "primary.main" }, transition: "border-color 0.2s" }} onClick={() => navigate("/support")}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center">
                           <Box>
                             <Typography variant="subtitle2" fontWeight={600}>Support tickets</Typography>
@@ -1540,7 +1540,7 @@ export default function DashboardPage() {
             </Card>
 
           {/* Performance stats 2×2 grid */}
-          <Card sx={{ p: 2 }}>
+          <Card sx={{ p: 2, borderRadius: "16px" }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
             <Typography variant="subtitle2" fontWeight={600}>Your Performance</Typography>
             <Button variant="text" size="small" sx={{ textTransform: "none", fontSize: "0.75rem" }} onClick={() => navigate("/profile")}>

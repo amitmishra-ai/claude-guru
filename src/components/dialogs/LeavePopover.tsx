@@ -88,7 +88,7 @@ export function LeavePopover({
           sx: {
             minWidth: 280,
             maxWidth: 340,
-            borderRadius: 1,
+            borderRadius: "16px",
             boxShadow: "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
             border: "1px solid",
             borderColor: "divider",
@@ -97,14 +97,14 @@ export function LeavePopover({
         },
       }}
     >
-      <Box sx={{ p: 2.5 }}>
+      <Box sx={{ p: 2 }}>
         {/* Header */}
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
           <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.9rem" }}>
             {na.reason || "Leave"}
           </Typography>
           {isMultiDay && (
-            <Typography variant="caption" sx={{ fontSize: "0.68rem", fontWeight: 600, color: "text.disabled", bgcolor: "action.hover", px: 1, py: 0.25, borderRadius: 1 }}>
+            <Typography variant="caption" sx={{ fontSize: "0.68rem", fontWeight: 600, color: "text.disabled", bgcolor: "action.hover", px: 1, py: 0.25, borderRadius: "4px" }}>
               {groupBlocks.length} days
             </Typography>
           )}

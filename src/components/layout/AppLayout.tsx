@@ -114,7 +114,7 @@ export function AppLayout() {
           }),
         }}
       >
-        <Box sx={{ mx: "auto", maxWidth: "72rem", display: "flex", flexDirection: "column", gap: 2.5 }}>
+        <Box sx={{ mx: "auto", maxWidth: "72rem", display: "flex", flexDirection: "column", gap: 3 }}>
           <Outlet />
         </Box>
       </Box>

@@ -43,8 +43,8 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
   const visibleTestimonials = TESTIMONIALS.slice(tPage * perPage, tPage * perPage + perPage);
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 1, borderColor: "divider", overflow: "hidden", mb: 4 }}>
-      <Box sx={{ px: 3, pt: 2.5, pb: 2 }}>
+    <Card variant="outlined" sx={{ borderRadius: "12px", borderColor: "divider", overflow: "hidden", mb: 4 }}>
+      <Box sx={{ px: 3, pt: 3, pb: 2 }}>
         {/* ── Hero + Metrics in one row ────────────────────────────────── */}
         <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} alignItems={{ md: "center" }}>
           {/* Left: appreciation */}
@@ -116,7 +116,7 @@ export default function MentorImpactCard({ guruName }: { guruName: string }) {
           {/* Two testimonial cards */}
           <Stack direction="row" spacing={2} sx={{ flex: 1, minWidth: 0 }}>
             {visibleTestimonials.map((t) => (
-              <Card key={t.name} variant="outlined" sx={{ flex: 1, px: 3, py: 2.5, borderRadius: 1, borderColor: "divider", display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <Card key={t.name} variant="outlined" sx={{ flex: 1, px: 3, py: 3, borderRadius: "12px", borderColor: "divider", display: "flex", flexDirection: "column", minWidth: 0 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", mb: 2 }}>
                   &ldquo;{t.quote}&rdquo;
                 </Typography>

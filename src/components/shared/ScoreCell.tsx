@@ -38,7 +38,7 @@ export function ScoreCell({ value }: { value: number | null }) {
         sx={{
           bgcolor: `var(--gl-score-${tier}-bg)`,
           color: `var(--gl-score-${tier}-text)`,
-          borderRadius: 1,
+          borderRadius: "4px",
           px: 0.75,
           py: 0.25,
           fontSize: 11,

@@ -244,11 +244,11 @@ function buildTheme(mode: "light" | "dark") {
         ],
       },
 
-      /* Chip — 4px inner radius */
+      /* Chip — 4px radius (smallest level) */
       MuiChip: {
         styleOverrides: {
           root: {
-            borderRadius: 8,
+            borderRadius: 4,
             fontWeight: 500,
           },
         },
@@ -266,13 +266,13 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* CardContent — fix MUI's last-child extra bottom padding */
+      /* CardContent — 16px padding, fix MUI's last-child extra bottom padding */
       MuiCardContent: {
         styleOverrides: {
           root: {
-            padding: 20,
+            padding: 16,
             "&:last-child": {
-              paddingBottom: 20,
+              paddingBottom: 16,
             },
           },
         },
@@ -288,10 +288,10 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* Dialog — 16px radius (replaces className="rounded-2xl" on every dialog) */
+      /* Dialog — 16px radius (outermost container level) */
       MuiDialog: {
         styleOverrides: {
-          paper: { borderRadius: 12 },
+          paper: { borderRadius: 16 },
         },
       },
 
@@ -301,7 +301,7 @@ function buildTheme(mode: "light" | "dark") {
           root: {
             fontWeight: 700,
             fontSize: "1.125rem",
-            padding: "20px 24px 12px",
+            padding: "24px 24px 12px",
           },
         },
       },
@@ -319,17 +319,17 @@ function buildTheme(mode: "light" | "dark") {
       MuiDialogActions: {
         styleOverrides: {
           root: {
-            padding: "12px 24px 20px",
+            padding: "12px 24px 24px",
             gap: 8,
           },
         },
       },
 
-      /* Popover — consistent shadow + border + radius */
+      /* Popover — 16px radius (outermost container level) */
       MuiPopover: {
         styleOverrides: {
           paper: {
-            borderRadius: 12,
+            borderRadius: 16,
             boxShadow:
               "0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
             border: "1px solid",

@@ -110,11 +110,11 @@ function TicketCard({ ticket, onSelect, onToggleBookmark }: { ticket: SupportTic
 
       {/* Row 4: Chips */}
       <Stack direction="row" spacing={0.75} sx={{ mt: 1 }}>
-        <Chip label={ticket.category} size="small" variant="outlined" sx={{ height: 22, fontSize: { xs: "0.6rem", sm: "0.65rem" }, borderRadius: 1 }} />
+        <Chip label={ticket.category} size="small" variant="outlined" sx={{ height: 22, fontSize: { xs: "0.6rem", sm: "0.65rem" }, borderRadius: "4px" }} />
         <Chip
           label={STATUS_LABELS[ticket.status]}
           size="small"
-          sx={{ height: 22, fontSize: { xs: "0.6rem", sm: "0.65rem" }, borderRadius: 1, bgcolor: statusStyle.bg, color: statusStyle.color, fontWeight: 600 }}
+          sx={{ height: 22, fontSize: { xs: "0.6rem", sm: "0.65rem" }, borderRadius: "4px", bgcolor: statusStyle.bg, color: statusStyle.color, fontWeight: 600 }}
         />
       </Stack>
     </Card>
@@ -228,11 +228,11 @@ export default function SupportPage() {
               </InputAdornment>
             ),
           }}
-          sx={{ width: { xs: "100%", sm: 240 }, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+          sx={{ width: { xs: "100%", sm: 240 }, "& .MuiOutlinedInput-root": { borderRadius: "8px" } }}
         />
       </Stack>
 
-      <Card sx={{ p: { xs: 1.5, sm: 2 } }}>
+      <Card sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: "16px" }}>
       {/* Tabs — scrollable on mobile */}
       <Tabs
         value={activeTab}

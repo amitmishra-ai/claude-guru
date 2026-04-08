@@ -282,7 +282,7 @@ export default function PaymentsPage() {
       </FlexBox>
 
       {/* ── Earnings overview + chart ── */}
-      <Card variant="outlined" sx={{ mb: 1 }}>
+      <Card variant="outlined" sx={{ mb: 1, borderRadius: "16px" }}>
         <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
           {chartLoading ? (
             <>
@@ -405,7 +405,7 @@ export default function PaymentsPage() {
         </Select>
       </FlexBox>
 
-      <Card variant="outlined" sx={{ mb: 4 }}>
+      <Card variant="outlined" sx={{ mb: 4, borderRadius: "16px" }}>
         <TableContainer>
           <Table size="small">
             <TableHead>
@@ -486,7 +486,7 @@ export default function PaymentsPage() {
                     <Chip
                       label={p.type}
                       size="small"
-                      sx={{ height: 20, fontSize: 10, borderRadius: 1 }}
+                      sx={{ height: 20, fontSize: 10, borderRadius: "4px" }}
                     />
                   </TableCell>
                   <TableCell sx={{ fontSize: 12 }}>{p.dur}</TableCell>
@@ -498,7 +498,7 @@ export default function PaymentsPage() {
                       sx={{
                         height: 20,
                         fontSize: 10,
-                        borderRadius: 1,
+                        borderRadius: "4px",
                         fontWeight: 500,
                         ...(p.status === "Completed"
                           ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)" }

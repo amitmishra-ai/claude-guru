@@ -33,10 +33,10 @@ function Card({ children, sx }: { children: React.ReactNode; sx?: SxProps<Theme>
     <Box
       sx={{
         bgcolor: "background.paper",
-        borderRadius: 1,
+        borderRadius: "12px",
         border: "1px solid",
         borderColor: "divider",
-        p: 2.5,
+        p: 2,
         ...sx,
       }}
     >
@@ -175,7 +175,7 @@ export function LearnerRatingsDialog() {
             position: "sticky", top: 0, zIndex: 10,
             bgcolor: "background.paper",
             borderBottom: 1, borderColor: "divider",
-            px: 2.5, py: 1.5,
+            px: 2, py: 1.5,
           }}
         >
           <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -462,7 +462,7 @@ export function LearnerRatingsDialog() {
                         onClick={() => setFilter(t.key)}
                         sx={{
                           fontWeight: 600, fontSize: "0.68rem", cursor: "pointer",
-                          borderRadius: 1, height: 28,
+                          borderRadius: "4px", height: 28,
                           bgcolor: active ? t.c : "transparent",
                           color: active ? "common.white" : "text.secondary",
                           border: "1.5px solid",

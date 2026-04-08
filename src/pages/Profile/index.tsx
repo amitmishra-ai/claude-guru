@@ -407,8 +407,8 @@ export default function ProfilePage() {
         </FlexBox>
 
         {/* Identity card skeleton */}
-        <Card variant="outlined" sx={{ mb: 4 }}>
-          <CardContent sx={{ px: 3, py: 2.5 }}>
+        <Card variant="outlined" sx={{ mb: 4, borderRadius: "16px" }}>
+          <CardContent sx={{ px: 3, py: 2 }}>
             <Stack spacing={1.5}>
               <Skeleton variant="text" width={180} height={28} />
               <Skeleton variant="text" width={240} height={18} />
@@ -427,7 +427,7 @@ export default function ProfilePage() {
         {/* Stat cards skeleton - 4 cards */}
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
           {[0, 1, 2, 3].map((i) => (
-            <Card key={i} elevation={0} sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider", p: 2.5 }}>
+            <Card key={i} elevation={0} sx={{ borderRadius: "12px", border: "1px solid", borderColor: "divider", p: 2 }}>
               <Skeleton variant="text" width={80} height={14} sx={{ mb: 1.5 }} />
               <Skeleton variant="text" width={100} height={40} sx={{ mb: 1 }} />
               <Skeleton variant="text" width="90%" height={14} />
@@ -458,16 +458,16 @@ export default function ProfilePage() {
         </Box>
 
         {/* Rating chart skeleton */}
-        <Card variant="outlined" sx={{ mb: 3 }}>
-          <CardContent sx={{ p: 2.5 }}>
+        <Card variant="outlined" sx={{ mb: 3, borderRadius: "16px" }}>
+          <CardContent sx={{ p: 2 }}>
             <Skeleton variant="text" width={200} height={24} sx={{ mb: 2 }} />
             <Skeleton variant="rectangular" width="100%" height={200} sx={{ borderRadius: 1 }} />
           </CardContent>
         </Card>
 
         {/* Course performance skeleton */}
-        <Card variant="outlined" sx={{ mb: 3 }}>
-          <CardContent sx={{ p: 2.5 }}>
+        <Card variant="outlined" sx={{ mb: 3, borderRadius: "16px" }}>
+          <CardContent sx={{ p: 2 }}>
             <Skeleton variant="text" width={180} height={24} sx={{ mb: 2 }} />
             {[0, 1, 2, 3, 4].map((i) => (
               <Stack key={i} direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.25 }}>
@@ -496,7 +496,7 @@ export default function ProfilePage() {
           variant="soft"
           size="small"
           startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
-          sx={{ borderRadius: 1, flexShrink: 0, mt: 0.5 }}
+          sx={{ borderRadius: "8px", flexShrink: 0, mt: 0.5 }}
           onClick={() => { dispatch(populateDrafts()); dispatch(setOpenProfileEdit(true)); }}
         >
           Edit profile
@@ -504,8 +504,8 @@ export default function ProfilePage() {
       </FlexBox>
 
       {/* ── Identity card ────────────────────────────────────────────────── */}
-      <Card variant="outlined">
-        <CardContent sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 2.5 } }}>
+      <Card variant="outlined" sx={{ borderRadius: "16px" }}>
+        <CardContent sx={{ px: { xs: 2, sm: 3 }, py: 2 }}>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, auto)" }, gap: { xs: 1.5, sm: 4 } }}>
             <Box>
               <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>Name</Typography>
@@ -541,7 +541,7 @@ export default function ProfilePage() {
           <ThemeProvider theme={lightTheme}>
           <Card
             elevation={0}
-            sx={{ borderRadius: 1, bgcolor: shareTheme.bg, position: "relative", overflow: "hidden", transition: "background-color 0.4s ease" }}
+            sx={{ borderRadius: "12px", bgcolor: shareTheme.bg, position: "relative", overflow: "hidden", transition: "background-color 0.4s ease" }}
           >
             <Box sx={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: shareTheme.circles[0], opacity: 0.3 }} />
             <Box sx={{ p: 3, position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
@@ -603,9 +603,9 @@ export default function ProfilePage() {
 
         return (
         <>
-        <Card variant="outlined" sx={{ borderRadius: "12px" }}>
+        <Card variant="outlined" sx={{ borderRadius: "16px" }}>
           {/* ── Header row: full width ─────────────────────────────────── */}
-          <Box sx={{ px: { xs: 2, sm: 2.5 }, pt: { xs: 1.5, sm: 2 }, pb: 0 }}>
+          <Box sx={{ px: 2, pt: 2, pb: 0 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.9rem", sm: "0.95rem" } }}>Share your impact</Typography>
               {/* Desktop: standard Select | Mobile: button that opens bottom sheet */}
@@ -670,11 +670,11 @@ export default function ProfilePage() {
 
           {/* ── Content grid: thumbnail | stats + actions ──────────────── */}
           <Box sx={{
-            px: { xs: 2, sm: 2.5 },
-            py: { xs: 1.5, sm: 2 },
+            px: 2,
+            py: 2,
             display: "grid",
             gridTemplateColumns: { xs: "1fr", sm: "200px 1fr" },
-            gap: { xs: 1.5, sm: 2.5 },
+            gap: 2,
             alignItems: "start",
           }}>
             {/* Thumbnail — pixel-perfect scaled card */}
@@ -720,7 +720,7 @@ export default function ProfilePage() {
                   fullWidth
                   variant="contained"
                   startIcon={<DownloadOutlinedIcon sx={{ fontSize: 18 }} />}
-                  sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.8rem", py: 1 }}
+                  sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.8rem", py: 1 }}
                 >
                   Download stats card
                 </Button>
@@ -730,7 +730,7 @@ export default function ProfilePage() {
                     variant="soft"
                     size="small"
                     startIcon={<LinkedInIcon sx={{ fontSize: 16 }} />}
-                    sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
+                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
                   >
                     LinkedIn
                   </Button>
@@ -738,7 +738,7 @@ export default function ProfilePage() {
                     variant="soft"
                     size="small"
                     startIcon={<XIcon sx={{ fontSize: 14 }} />}
-                    sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
+                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
                   >
                     X
                   </Button>
@@ -746,7 +746,7 @@ export default function ProfilePage() {
                     variant="soft"
                     size="small"
                     startIcon={<FacebookIcon sx={{ fontSize: 16 }} />}
-                    sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
+                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
                   >
                     Facebook
                   </Button>
@@ -756,7 +756,7 @@ export default function ProfilePage() {
 
             {/* ── Desktop: Stats + actions column ────────────────────── */}
             {!isMobile && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               {/* Stats section */}
               <Box>
                 <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.75 }}>Your month at a glance</Typography>
@@ -804,7 +804,7 @@ export default function ProfilePage() {
           fullScreen={isMobile}
           maxWidth="sm"
           fullWidth
-          PaperProps={{ sx: { borderRadius: isMobile ? 0 : 1, ...(!isMobile && { maxWidth: 560 }) } }}
+          PaperProps={{ sx: { borderRadius: isMobile ? 0 : "16px", ...(!isMobile && { maxWidth: 560 }) } }}
         >
           <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 3 }, pb: 0 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -820,7 +820,7 @@ export default function ProfilePage() {
             </Stack>
           </Box>
 
-          <DialogContent sx={{ px: { xs: 2, sm: 3 }, pt: 2.5, display: "flex", flexDirection: "column", alignItems: { xs: "center", sm: "stretch" } }}>
+          <DialogContent sx={{ px: { xs: 2, sm: 3 }, pt: 2, display: "flex", flexDirection: "column", alignItems: { xs: "center", sm: "stretch" } }}>
             {/* Month selector */}
             <Select
               size="small"
@@ -921,7 +921,7 @@ export default function ProfilePage() {
               elevation={0}
               onClick={() => { if (!isNewOrEarly) setReportModal(card.label); }}
               sx={{
-                borderRadius: 1,
+                borderRadius: "12px",
                 bgcolor: card.bg,
                 border: "1px solid",
                 borderColor: "divider",
@@ -933,7 +933,7 @@ export default function ProfilePage() {
                 transition: "border-color 0.2s",
               }}
             >
-              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, flex: 1, display: "flex", flexDirection: "column" }}>
+              <CardContent sx={{ p: 2, flex: 1, display: "flex", flexDirection: "column" }}>
                 {/* Label */}
                 <Typography
                   variant="caption"
@@ -1072,7 +1072,7 @@ export default function ProfilePage() {
                 <Box sx={{ display: { xs: "none", sm: "block" } }}>
                   <Divider />
                   <Box
-                    sx={{ px: 2.5, py: 1.5, cursor: "pointer", "&:hover": { bgcolor: "action.hover" }, transition: "background-color 0.15s" }}
+                    sx={{ px: 2, py: 1.5, cursor: "pointer", "&:hover": { bgcolor: "action.hover" }, transition: "background-color 0.15s" }}
                     onClick={(e) => { e.stopPropagation(); setReportModal(card.label); }}
                   >
                     <FlexBox sx={{ justifyContent: "space-between", alignItems: "center" }}>
@@ -1147,11 +1147,11 @@ export default function ProfilePage() {
                 maxWidth: 320,
                 flexShrink: 0,
                 scrollSnapAlign: "start",
-                borderRadius: 1,
+                borderRadius: "12px",
                 borderColor: "divider",
               }}
             >
-              <CardContent sx={{ p: 2.5, display: "flex", flexDirection: "column", height: "100%", "&:last-child": { pb: 2.5 } }}>
+              <CardContent sx={{ p: 2, display: "flex", flexDirection: "column", height: "100%", "&:last-child": { pb: 2 } }}>
                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "normal", lineHeight: 1.6, flex: 1, mb: 2 }}>
                   &ldquo;{t.quote}&rdquo;
                 </Typography>
@@ -1177,7 +1177,7 @@ export default function ProfilePage() {
 
       {/* Rating trend chart */}
       <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent sx={{ p: 2.5 }}>
+        <CardContent sx={{ p: 2 }}>
           <Typography variant="subtitle1" fontWeight={600} sx={{  fontSize: { xs: "0.875rem", sm: "1rem" } }}>Rating trend (last 6 months)</Typography>
 
           {isNewOrEarly ? (
@@ -1259,7 +1259,7 @@ export default function ProfilePage() {
 
       {/* Course performance — horizontal bars */}
       <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent sx={{ p: 2.5 }}>
+        <CardContent sx={{ p: 2 }}>
           <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
             <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>Course performance</Typography>
             {!isNewOrEarly && (
@@ -1366,7 +1366,7 @@ export default function ProfilePage() {
 
       {/* Monthly matrix — compact heatmap */}
       <Card variant="outlined" sx={{ mb: 4 }}>
-        <CardContent sx={{ p: 2.5 }}>
+        <CardContent sx={{ p: 2 }}>
           <Typography variant="subtitle1" fontWeight={600} sx={{  fontSize: { xs: "0.875rem", sm: "1rem" } }}>Monthly matrix</Typography>
           <TableContainer>
             <Table size="small" sx={{ tableLayout: "auto" }}>
@@ -1548,12 +1548,12 @@ export default function ProfilePage() {
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button variant="soft" sx={{ borderRadius: 1 }} onClick={() => dispatch(setOpenProfileEdit(false))}>
+          <Button variant="soft" sx={{ borderRadius: "8px" }} onClick={() => dispatch(setOpenProfileEdit(false))}>
             Cancel
           </Button>
           <Button
             variant="contained"
-            sx={{ borderRadius: 1 }}
+            sx={{ borderRadius: "8px" }}
             onClick={() => { dispatch(saveProfileEdits()); dispatch(setOpenProfileEdit(false)); }}
           >
             Save
@@ -1567,9 +1567,9 @@ export default function ProfilePage() {
         onClose={() => setShowCourseReport(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 1 } }}
+        PaperProps={{ sx: { borderRadius: "16px" } }}
       >
-        <Box sx={{ px: 3, pt: 2.5, pb: 0 }}>
+        <Box sx={{ px: 3, pt: 3, pb: 0 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Box>
               <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}>Course Performance</Typography>
@@ -1607,7 +1607,7 @@ export default function ProfilePage() {
           </Box>
         </Box>
 
-        <DialogContent sx={{ px: 3, pt: 2.5 }}>
+        <DialogContent sx={{ px: 3, pt: 3 }}>
           {/* Per-course detail cards */}
           <Stack spacing={2}>
             {demoCoursePerf.map((course) => {
@@ -1617,7 +1617,7 @@ export default function ProfilePage() {
                 : [];
               return (
                 <Card key={course.name} variant="outlined" sx={{ borderRadius: 2 }}>
-                  <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+                  <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
                     <Stack direction={{ xs: "column", md: "row" }} spacing={3} alignItems={{ md: "center" }}>
                       {/* Left: course info */}
                       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -1661,7 +1661,7 @@ export default function ProfilePage() {
                                     if (!active || !payload?.length) return null;
                                     const d = payload[0].payload;
                                     return (
-                                      <Card variant="outlined" sx={{ p: 0.75, borderRadius: 1, fontSize: "0.7rem" }}>
+                                      <Card variant="outlined" sx={{ p: 0.75, borderRadius: "8px", fontSize: "0.7rem" }}>
                                         <Typography variant="caption" fontWeight={600}>{d.month}</Typography>
                                         <Typography variant="caption" display="block">{d.rating ?? "-"}</Typography>
                                       </Card>
@@ -1706,9 +1706,9 @@ export default function ProfilePage() {
             onClose={() => setReportModal(null)}
             maxWidth="sm"
             fullWidth
-            PaperProps={{ sx: { borderRadius: 1 } }}
+            PaperProps={{ sx: { borderRadius: "16px" } }}
           >
-            <Box sx={{ px: 3, pt: 2.5, pb: 0 }}>
+            <Box sx={{ px: 3, pt: 3, pb: 0 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                 <Box>
                   <Typography variant="caption" fontWeight={700} sx={{ letterSpacing: "0.08em", color: activeCard.accent, fontSize: "0.65rem" }}>
@@ -1757,7 +1757,7 @@ export default function ProfilePage() {
                             if (!active || !payload?.length) return null;
                             const d = payload[0].payload;
                             return (
-                              <Card variant="outlined" sx={{ p: 1, borderRadius: 1, fontSize: "0.75rem" }}>
+                              <Card variant="outlined" sx={{ p: 1, borderRadius: "8px", fontSize: "0.75rem" }}>
                                 <Typography variant="caption" fontWeight={600}>{d.month}</Typography>
                                 <Typography variant="caption" display="block">{d[activeCard.chartKey]}</Typography>
                               </Card>

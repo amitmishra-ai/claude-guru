@@ -506,7 +506,7 @@ export function Sidebar() {
           paper: {
             sx: {
               minWidth: 240,
-              borderRadius: 1,
+              borderRadius: "4px",
               boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
               mt: -1,
             },
