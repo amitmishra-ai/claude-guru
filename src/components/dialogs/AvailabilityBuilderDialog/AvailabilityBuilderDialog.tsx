@@ -284,7 +284,7 @@ const AvailabilityBuilderDialog = () => {
       PaperProps={{
         sx: {
           width: isMobile ? "100%" : 420,
-          borderRadius: isMobile ? 0 : 3,
+          borderRadius: isMobile ? 0 : "8px",
           maxHeight: isMobile ? "100%" : "90vh",
           display: "flex",
           flexDirection: "column",
