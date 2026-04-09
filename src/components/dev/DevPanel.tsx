@@ -217,7 +217,7 @@ export function DevPanel() {
           <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
             <StarOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
             <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Feedback Preview
+              Feedback
             </Typography>
           </Stack>
         </Box>
