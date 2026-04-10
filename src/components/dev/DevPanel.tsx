@@ -31,12 +31,14 @@ import {
   toggleDevPanel,
   setDevPanelOpen,
   setSelectedRole,
+  toggleRole,
   setGuruStage,
   GURU_ROLES,
   GURU_STAGES,
   type GuruRole,
   type GuruStage,
 } from "@/store/slices/devPanelSlice";
+import { ROLE_TO_CATEGORY } from "@/lib/role-config";
 
 const DRAWER_WIDTH = 320;
 
@@ -45,6 +47,7 @@ export function DevPanel() {
   const navigate = useNavigate();
   const isOpen = useAppSelector((s) => s.devPanel.isOpen);
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
+  const selectedRoles = useAppSelector((s) => s.devPanel.selectedRoles);
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
 
   // Cmd/Ctrl + K shortcut
@@ -147,6 +150,42 @@ export function DevPanel() {
               ))}
             </Select>
           </FormControl>
+        </Box>
+
+        {/* Multi-Role Selector (Profile) */}
+        <Box sx={{ px: 2.5, pt: 1.5, pb: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 0.75 }}>
+            <PersonOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+            <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.6rem" }}>
+              Active Guru Roles (Profile)
+            </Typography>
+          </Stack>
+          <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem", display: "block", mb: 1 }}>
+            Controls which rating categories appear on Profile
+          </Typography>
+          <Stack direction="row" flexWrap="wrap" gap={0.75}>
+            {GURU_ROLES.map((role) => {
+              const isSelected = selectedRoles.includes(role);
+              const category = ROLE_TO_CATEGORY[role];
+              return (
+                <Chip
+                  key={role}
+                  label={role}
+                  size="small"
+                  color={isSelected ? "primary" : "default"}
+                  variant={isSelected ? "filled" : "outlined"}
+                  onClick={() => dispatch(toggleRole(role))}
+                  sx={{
+                    fontSize: "0.65rem",
+                    height: 24,
+                    cursor: "pointer",
+                    "& .MuiChip-label": { px: 1 },
+                  }}
+                  title={`Category: ${category}`}
+                />
+              );
+            })}
+          </Stack>
         </Box>
 
         <Divider sx={{ my: 1.5, mx: 2.5 }} />

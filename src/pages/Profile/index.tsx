@@ -35,8 +35,11 @@ import DialogActions from "@mui/material/DialogActions";
 import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import ListItemText from "@mui/material/ListItemText";
 import Select from "@mui/material/Select";
+import CheckIcon from "@mui/icons-material/Check";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -63,7 +66,11 @@ import {
   saveProfileEdits, populateDrafts,
 } from "@/store/slices/profileSlice";
 import { formatGMTOffsetFromMinutesAhead, getTimeZoneOffsetMinutes, getLocaleFromTimezone } from "@/lib/helpers";
-import { demoRatingHistory } from "@/data/demo-sessions";
+import { demoRatingHistory, demoRoleCategoryRatings, demoRoleMonthlyShareData, demoRoleTillDateShareData, demoRoleStatCards, demoRoleCoursePerf, demoRoleMatrix, demoRoleRatingHistory } from "@/data/demo-sessions";
+import type { ShareMonthDatum } from "@/data/demo-sessions";
+import { getCategoriesForRoles, ROLE_TO_CATEGORY } from "@/lib/role-config";
+import type { GuruRoleCategory } from "@/lib/role-config";
+import { clearRoleSwitching } from "@/store/slices/devPanelSlice";
 
 const borderRotate = keyframes`
   0% { transform: rotate(0deg); }
@@ -83,8 +90,8 @@ const demoContracts = [
   { program: "Deloitte", role: "Teacher", start: "20-12-2024", end: "31-12-2024", active: false },
 ];
 
-// ── Demo data for course performance ──────────────────────────────────────────
-const demoCoursePerf = [
+// ── Demo data for course performance (default fallback) ──────────────────────
+const defaultCoursePerf = [
   { name: "Deep Learning Fundamentals", rating: 4.8, delta: +0.15 },
   { name: "NLP Advanced Topics",        rating: 4.7, delta: +0.08 },
   { name: "Reinforcement Learning",     rating: 4.7, delta: -0.03 },
@@ -95,16 +102,16 @@ const demoCoursePerf = [
   { name: "Statistics for ML",          rating: 4.2, delta: -0.08 },
 ];
 
-// ── Demo data for monthly matrix ──────────────────────────────────────────────
-const MONTHS = ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"];
-const demoMatrix = [
-  { course: "Deep Learning Fundamentals", scores: [4.7, 4.8, 4.6, 4.9, 4.8, 4.8] },
-  { course: "NLP Advanced Topics",        scores: [4.5, 4.6, 4.7, 4.7, 4.8, 4.7] },
-  { course: "Reinforcement Learning",     scores: [4.6, 4.7, 4.6, 4.7, 4.7, 4.6] },
-  { course: "Data Engineering Essentials",scores: [4.6, 4.5, 4.4, 4.5, 4.5, 4.5] },
-  { course: "Product Management",         scores: [4.3, 4.3, null, 4.4, 4.3, 4.4] },
-  { course: "Computer Vision",            scores: [null, null, 4.2, 4.3, 4.3, 4.3] },
-  { course: "Statistics for ML",          scores: [4.3, 4.3, 4.2, 4.2, 4.2, 4.2] },
+// ── Demo data for monthly matrix (default fallback) ──────────────────────────
+const MONTHS = ["May 25", "Jun 25", "Jul 25", "Aug 25", "Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26", "Mar 26", "Apr 26"];
+const defaultMatrix = [
+  { course: "Deep Learning Fundamentals", scores: [4.5, 4.6, null, 4.7, 4.7, 4.8, 4.6, 4.9, 4.8, 4.8, 4.9, null] },
+  { course: "NLP Advanced Topics",        scores: [null, 4.4, 4.5, null, 4.5, 4.6, 4.7, 4.7, 4.8, 4.7, 4.8, 4.7] },
+  { course: "Reinforcement Learning",     scores: [4.5, null, 4.5, 4.6, 4.6, 4.7, 4.6, 4.7, 4.7, 4.6, 4.7, 4.7] },
+  { course: "Data Engineering Essentials", scores: [4.4, 4.5, 4.5, null, 4.6, 4.5, 4.4, 4.5, 4.5, 4.5, 4.6, 4.5] },
+  { course: "Product Management",         scores: [null, null, 4.2, 4.3, 4.3, 4.3, null, 4.4, 4.3, 4.4, 4.4, null] },
+  { course: "Computer Vision",            scores: [null, null, null, null, null, null, 4.2, 4.3, 4.3, 4.3, 4.3, 4.4] },
+  { course: "Statistics for ML",          scores: [4.2, 4.2, null, 4.3, 4.3, 4.3, 4.2, 4.2, 4.2, 4.2, 4.3, 4.2] },
 ];
 
 function DeltaLabel({ value }: { value: number }) {
@@ -134,10 +141,35 @@ export default function ProfilePage() {
   const userLocale = getLocaleFromTimezone(timeZoneMode === "manual" ? manualTimeZone : Intl.DateTimeFormat().resolvedOptions().timeZone);
   const openProfileEdit = useAppSelector((s) => s.ui.openProfileEdit);
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+  const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
+  const selectedRoles = useAppSelector((s) => s.devPanel.selectedRoles);
+  const isRoleSwitching = useAppSelector((s) => s.devPanel.isRoleSwitching);
   const isEmpty = guruStage === "empty";
   const isNewUser = guruStage === "new" || isEmpty;
   const isEarlyUser = guruStage === "early";
   const isNewOrEarly = isNewUser || isEarlyUser;
+
+  // Role switch animation — show skeleton briefly
+  const [roleLoading, setRoleLoading] = useState(false);
+  useEffect(() => {
+    if (isRoleSwitching) {
+      setRoleLoading(true);
+      const t = setTimeout(() => { setRoleLoading(false); dispatch(clearRoleSwitching()); }, 500);
+      return () => clearTimeout(t);
+    }
+  }, [isRoleSwitching, dispatch]);
+
+  // Active role categories for multi-role rating display
+  const activeCategories = useMemo(() => getCategoriesForRoles(selectedRoles), [selectedRoles]);
+
+  // Role-aware course performance & matrix
+  const demoCoursePerf = useMemo(() => demoRoleCoursePerf[selectedRole] ?? defaultCoursePerf, [selectedRole]);
+  const demoMatrix = useMemo(() => demoRoleMatrix[selectedRole] ?? defaultMatrix, [selectedRole]);
+
+  // Performance section label adapts for non-teaching roles
+  const isEvalOrMod = selectedRole === "Evaluator" || selectedRole === "Moderator";
+  const coursePerfLabel = isEvalOrMod ? "Session Performance" : "Course Performance";
+
   const draftName     = useAppSelector((s) => s.profile.draftName);
   const draftMode     = useAppSelector((s) => s.profile.draftMode);
   const draftPrograms = useAppSelector((s) => s.profile.draftPrograms);
@@ -147,12 +179,15 @@ export default function ProfilePage() {
   const [showCourseReport, setShowCourseReport] = useState(false);
   const testimonialRef = useRef<HTMLDivElement>(null);
   const [shareMonth, setShareMonth] = useState("2026-03");
+  const [shareAllTime, setShareAllTime] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [monthSheetOpen, setMonthSheetOpen] = useState(false);
+  const [monthMenuAnchor, setMonthMenuAnchor] = useState<null | HTMLElement>(null);
+  const [dialogMonthMenuAnchor, setDialogMonthMenuAnchor] = useState<null | HTMLElement>(null);
   const shareContainerRef = useRef<HTMLDivElement>(null);
   const [shareScale, setShareScale] = useState(1);
 
-  // Generate last 6 months for the share card dropdown
+  // Generate last 6 months for the share card month dropdown
   const shareMonthOptions = useMemo(() => {
     const base = new Date("2026-03-24");
     const months: { value: string; label: string }[] = [];
@@ -236,22 +271,37 @@ export default function ProfilePage() {
       stats: [{ bg: "#6ee7b7", color: "#064e3b" }, { bg: "#34d399", color: "common.white" }, { bg: "#a7f3d0", color: "#064e3b" }, { bg: "#d1fae5", color: "#065f46" }, { bg: "#ecfdf5", color: "#065f46" }],
       headingColor: "#059669", taglineColor: "#059669", spotlightColor: "#059669", nameColor: "#064e3b", subtitleColor: "#6ee7b7",
     },
+    "till-date": {
+      bg: "#1e293b", circles: ["#334155", "#475569", "#64748b"],
+      chipBg: "#fbbf24", chipColor: "#1e293b",
+      stats: [{ bg: "#334155", color: "#f8fafc" }, { bg: "#475569", color: "#f8fafc" }, { bg: "#334155", color: "#f8fafc" }, { bg: "#475569", color: "#f8fafc" }, { bg: "#334155", color: "#f8fafc" }],
+      headingColor: "#94a3b8", taglineColor: "#94a3b8", spotlightColor: "#fbbf24", nameColor: "#f8fafc", subtitleColor: "#94a3b8",
+      pattern: "radial-gradient(circle 2px at 15% 20%, rgba(251,191,36,0.06) 0%, transparent 50%), radial-gradient(circle 2px at 75% 60%, rgba(251,191,36,0.06) 0%, transparent 50%)",
+    },
   };
 
-  // Mock monthly data for the share card
-  const shareMonthData = useMemo(() => {
-    const dataByMonth: Record<string, { sessions: string; hours: string; learners: string; rating: string; rated4Plus: string; monthLabel: string }> = {
-      "2026-03": { sessions: "7", hours: "14", learners: "168", rating: "4.7", rated4Plus: "6", monthLabel: "MAR 2026" },
-      "2026-02": { sessions: "6", hours: "12", learners: "142", rating: "4.5", rated4Plus: "5", monthLabel: "FEB 2026" },
-      "2026-01": { sessions: "8", hours: "16", learners: "195", rating: "4.6", rated4Plus: "7", monthLabel: "JAN 2026" },
-      "2025-12": { sessions: "5", hours: "10", learners: "120", rating: "4.4", rated4Plus: "4", monthLabel: "DEC 2025" },
-      "2025-11": { sessions: "6", hours: "12", learners: "155", rating: "4.5", rated4Plus: "5", monthLabel: "NOV 2025" },
-      "2025-10": { sessions: "4", hours: "8", learners: "98", rating: "4.3", rated4Plus: "3", monthLabel: "OCT 2025" },
-    };
-    return dataByMonth[shareMonth] ?? dataByMonth["2026-03"];
-  }, [shareMonth]);
+  // Role-aware monthly data for the share card
+  const roleMonthlyData = useMemo(
+    () => demoRoleMonthlyShareData[selectedRole] ?? demoRoleMonthlyShareData.Teacher,
+    [selectedRole],
+  );
 
-  const shareTheme = MONTH_THEMES[shareMonth] ?? MONTH_THEMES["2026-03"];
+  // All-time cumulative data for the share card
+  const shareTillDateData = useMemo((): ShareMonthDatum => {
+    const tillDate = demoRoleTillDateShareData[selectedRole] ?? demoRoleTillDateShareData.Teacher;
+    return { ...tillDate, monthLabel: "ALL TIME" };
+  }, [selectedRole]);
+
+  // Active share data — "All Time" toggle takes precedence over month selector
+  const isTillDate = shareAllTime;
+  const activeShareData = useMemo((): ShareMonthDatum => {
+    if (shareAllTime) return shareTillDateData;
+    return roleMonthlyData[shareMonth] ?? roleMonthlyData["2026-03"];
+  }, [shareMonth, shareAllTime, roleMonthlyData, shareTillDateData]);
+
+  const shareTheme = shareAllTime
+    ? MONTH_THEMES["till-date"] ?? MONTH_THEMES["2026-03"]
+    : MONTH_THEMES[shareMonth] ?? MONTH_THEMES["2026-03"];
 
   const tzLabel = useMemo(() => {
     const tz = timeZoneMode === "auto"
@@ -261,10 +311,16 @@ export default function ProfilePage() {
     return `${tz} (${formatGMTOffsetFromMinutesAhead(offset)})`;
   }, [timeZoneMode, manualTimeZone]);
 
+  // Role-aware rating history
+  const roleRatingHistory = useMemo(
+    () => demoRoleRatingHistory[selectedRole] ?? demoRatingHistory,
+    [selectedRole],
+  );
+
   // Build monthly rating chart data grouped by month label
   const ratingChartData = useMemo(() => {
     const byMonth: Record<string, number[]> = {};
-    demoRatingHistory.forEach((r) => {
+    roleRatingHistory.forEach((r) => {
       const d = new Date(r.dateYmd);
       const lbl = `${d.toLocaleString(userLocale, { month: "short" })} ${String(d.getFullYear()).slice(2)}`;
       (byMonth[lbl] ??= []).push(r.score);
@@ -275,123 +331,116 @@ export default function ProfilePage() {
         ? +(byMonth[m].reduce((a, b) => a + b, 0) / byMonth[m].length).toFixed(2)
         : null,
     }));
-  }, []);
+  }, [roleRatingHistory]);
 
   const avgRating = useMemo(() => {
-    if (!demoRatingHistory.length) return "-";
-    return (demoRatingHistory.reduce((a, r) => a + r.score, 0) / demoRatingHistory.length).toFixed(2);
-  }, []);
+    if (!roleRatingHistory.length) return "-";
+    return (roleRatingHistory.reduce((a, r) => a + r.score, 0) / roleRatingHistory.length).toFixed(2);
+  }, [roleRatingHistory]);
 
-  // KPI stat cards config for Performance
-  const statCards = [
+  // Role-aware category rating data for AVG RATING card
+  const categoryRatings = useMemo(
+    () => activeCategories.map((cat) => ({ category: cat, ...demoRoleCategoryRatings[cat] })),
+    [activeCategories],
+  );
+
+  // Weighted average across active categories for hero value
+  const weightedAvgRating = useMemo(() => {
+    if (!categoryRatings.length) return "-";
+    return (categoryRatings.reduce((s, c) => s + c.overall, 0) / categoryRatings.length).toFixed(2);
+  }, [categoryRatings]);
+
+  // KPI stat cards config for Performance — role-aware
+  const roleData = demoRoleStatCards[selectedRole];
+  const statCards = useMemo(() => [
     {
       label: "AVG RATING",
-      value: "4.65",
-      description: "Consistent high ratings across all programs and cohorts.",
-      delta: "+0.12",
+      value: weightedAvgRating,
+      numericValue: parseFloat(weightedAvgRating as string) || 0,
+      description: roleData.description,
+      delta: roleData.avgRatingDelta,
       deltaLabel: "vs last month",
       deltaPositive: true,
-      bars: [45, 52, 98, 88, 37, 61],
+      bars: roleData.avgRatingBars,
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
       bg: "var(--gl-accent-primary-bg)",
       accent: "var(--gl-accent-primary)",
       reportTitle: "Average Rating Report",
-      reportSummary: "Your average rating across all programs over the last 6 months.",
-      chartData: [
-        { month: "Sep 25", value: 4.52 }, { month: "Oct 25", value: 4.58 }, { month: "Nov 25", value: 4.71 },
-        { month: "Dec 25", value: 4.65 }, { month: "Jan 26", value: 4.68 }, { month: "Feb 26", value: 4.74 },
-      ],
+      reportSummary: `Your average rating as ${selectedRole} over the last 6 months.`,
+      chartData: categoryRatings.length === 1
+        ? categoryRatings[0].trend
+        : roleData.avgRatingBars.map((v, i) => ({ month: ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"][i], value: v })),
       chartKey: "value",
-      breakdown: [
-        { name: "Deep Learning Fundamentals", value: "4.8" },
-        { name: "NLP Advanced Topics", value: "4.7" },
-        { name: "Reinforcement Learning", value: "4.7" },
-        { name: "MLOps", value: "4.6" },
-        { name: "Data Engineering Essentials", value: "4.5" },
-      ],
+      breakdown: categoryRatings.length === 1
+        ? categoryRatings[0].breakdown
+        : categoryRatings.map((c) => ({ name: c.category, value: c.overall.toFixed(2) })),
+      categoryRatings,
+      peerValue: roleData.peerAvgRating, peerLabel: roleData.peerAvgRating.toFixed(2), lowerIsBetter: false,
     },
     {
       label: "AVG SESSIONS / MONTH",
-      value: "6",
-      description: "Average sessions delivered per month across all programs.",
-      delta: "+2",
+      value: roleData.avgSessions,
+      numericValue: parseFloat(roleData.avgSessions),
+      description: `Average sessions delivered per month as ${selectedRole}.`,
+      delta: roleData.avgSessionsDelta,
       deltaLabel: "vs last month",
       deltaPositive: true,
-      bars: [5, 5, 6, 6, 8, 7],
+      bars: roleData.avgSessionsBars,
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
       bg: "var(--gl-accent-amber-bg)",
       accent: "var(--gl-accent-amber)",
       reportTitle: "Sessions per Month Report",
-      reportSummary: "Monthly breakdown of sessions delivered across all programs.",
-      chartData: [
-        { month: "Sep 25", value: 5 }, { month: "Oct 25", value: 5 }, { month: "Nov 25", value: 6 },
-        { month: "Dec 25", value: 6 }, { month: "Jan 26", value: 8 }, { month: "Feb 26", value: 7 },
-      ],
+      reportSummary: `Monthly breakdown of sessions delivered as ${selectedRole}.`,
+      chartData: roleData.avgSessionsBars.map((v, i) => ({ month: ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"][i], value: v })),
       chartKey: "value",
-      breakdown: [
-        { name: "PGP-DS", value: "18 sessions" },
-        { name: "PGP-AIML", value: "14 sessions" },
-        { name: "PGP-SE", value: "5 sessions" },
-        { name: "Core Programs", value: "3 sessions" },
-        { name: "Workshops", value: "2 sessions" },
-      ],
+      breakdown: roleData.sessionsBreakdown,
+      peerValue: roleData.peerAvgSessions, peerLabel: String(roleData.peerAvgSessions), lowerIsBetter: false,
     },
     {
       label: "AVG SESSION QUALITY",
-      value: "96.8%",
+      value: roleData.avgQuality,
+      numericValue: parseFloat(roleData.avgQuality),
       description: "Sessions rated 4.0 or above.",
-      delta: "+0.5%",
+      delta: roleData.avgQualityDelta,
       deltaLabel: "vs last month",
       deltaPositive: true,
-      bars: [95.2, 96.0, 96.8, 97.1, 97.5, 98.0],
+      bars: roleData.avgQualityBars,
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
       bg: "var(--gl-accent-purple-bg)",
       accent: "var(--gl-accent-purple)",
       reportTitle: "Session Quality Report",
       reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
-      chartData: [
-        { month: "Sep 25", value: 95.2 }, { month: "Oct 25", value: 96.0 }, { month: "Nov 25", value: 96.8 },
-        { month: "Dec 25", value: 97.1 }, { month: "Jan 26", value: 97.5 }, { month: "Feb 26", value: 98.0 },
-      ],
+      chartData: roleData.avgQualityBars.map((v, i) => ({ month: ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"][i], value: v })),
       chartKey: "value",
-      breakdown: [
-        { name: "4.0+ threshold", value: "98% (Target: > 98%)" },
-        { name: "4.4+ threshold", value: "90% (Target: > 90%)" },
-      ],
+      breakdown: roleData.qualityBreakdown,
       primaryBenchmark: "Target: > 98%",
-      secondaryValue: "90%",
+      secondaryValue: roleData.avgQualitySecondary,
       secondaryLabel: "Rated 4.4+",
       secondaryBenchmark: "Target: > 90%",
+      peerValue: roleData.peerAvgQuality, peerLabel: `${roleData.peerAvgQuality}%`, lowerIsBetter: false,
     },
     {
       label: "AVG CONFIRM TIME",
-      value: "7.2h",
+      value: roleData.avgConfirmTime,
+      numericValue: parseFloat(roleData.avgConfirmTime),
       description: "How fast you confirm assigned sessions. Lower is better.",
-      delta: "-1.3h",
+      delta: roleData.avgConfirmDelta,
       deltaLabel: "vs last quarter",
       deltaPositive: true,
-      bars: [12, 9, 7, 6, 5, 4.2],
+      bars: roleData.avgConfirmBars,
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
       bg: "var(--gl-accent-success-bg)",
       accent: "var(--gl-accent-success)",
       reportTitle: "Confirmation Time Report",
       reportSummary: "Average hours taken to confirm scheduled sessions each month. Lower is better.",
-      chartData: [
-        { month: "Sep 25", value: 12 }, { month: "Oct 25", value: 9 }, { month: "Nov 25", value: 7 },
-        { month: "Dec 25", value: 6 }, { month: "Jan 26", value: 5 }, { month: "Feb 26", value: 4.2 },
-      ],
+      chartData: roleData.avgConfirmBars.map((v, i) => ({ month: ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"][i], value: v })),
       chartKey: "value",
-      breakdown: [
-        { name: "PGP-DS", value: "3.8h" },
-        { name: "PGP-AIML", value: "4.5h" },
-        { name: "PGP-SE", value: "5.1h" },
-        { name: "Core Programs", value: "3.2h" },
-        { name: "Workshops", value: "4.8h" },
-      ],
+      breakdown: roleData.confirmBreakdown,
+      peerValue: roleData.peerAvgConfirmTime, peerLabel: `${roleData.peerAvgConfirmTime}h`, lowerIsBetter: true,
     },
-  ];
+  ], [selectedRole, weightedAvgRating, categoryRatings, roleData]);
 
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <>
         {/* Header skeleton */}
@@ -546,40 +595,40 @@ export default function ProfilePage() {
             <Box sx={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", bgcolor: shareTheme.circles[0], opacity: 0.3 }} />
             <Box sx={{ p: 3, position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-                <Box component="img" src="/gl-logo-navy.svg" alt="Great Learning" sx={{ height: 20 }} />
-                <Typography sx={{ color: shareTheme.headingColor, fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.05em" }}>{shareMonthData.monthLabel}</Typography>
+                <Box component="img" src={isTillDate ? "/gl-logo-white.svg" : "/gl-logo-navy.svg"} alt="Great Learning" sx={{ height: 20 }} />
+                <Typography sx={{ color: shareTheme.headingColor, fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.05em" }}>{activeShareData.monthLabel}</Typography>
               </Stack>
               <Typography sx={{ color: shareTheme.headingColor, letterSpacing: "0.1em", fontWeight: 700, fontSize: "0.45rem", mb: 0.15 }}>GURU SPOTLIGHT</Typography>
               <Typography sx={{ color: shareTheme.nameColor, fontWeight: 800, fontSize: "1.3rem", lineHeight: 1.1 }}>{guruName}</Typography>
               <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.65rem", mb: 1.5 }}>Machine Learning · Data Science</Typography>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, flex: 1, minHeight: 0, mb: 1.5 }}>
                 <Stack spacing={1}>
-                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <Box>
-                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.sessions}</Typography>
-                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.7rem", fontWeight: 400, mt: 0.5, lineHeight: 1.43 }}>Sessions delivered this month</Typography>
+                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.sessions}</Typography>
+                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.7rem", fontWeight: 400, mt: 0.5, lineHeight: 1.43 }}>{isTillDate ? "Total sessions delivered" : "Sessions delivered this month"}</Typography>
                     </Box>
-                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label="Top 10% Gurus" size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }} />
+                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label="Top 10% Gurus" size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: isTillDate ? "rgba(255,255,255,0.5)" : "rgba(33,33,33,0.3)", color: isTillDate ? "#fff" : "inherit", "& .MuiChip-icon": { ml: 0.5, color: isTillDate ? "#fff" : "inherit" } }} />
                   </Box>
-                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <Box>
-                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.hours} Hrs</Typography>
-                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Taught this month</Typography>
+                      <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.hours} Hrs</Typography>
+                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>{isTillDate ? "Total hours taught" : "Taught this month"}</Typography>
                     </Box>
-                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label="Top 10% Gurus" size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: "rgba(33,33,33,0.3)", "& .MuiChip-icon": { ml: 0.5 } }} />
+                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label="Top 10% Gurus" size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: isTillDate ? "rgba(255,255,255,0.5)" : "rgba(33,33,33,0.3)", color: isTillDate ? "#fff" : "inherit", "& .MuiChip-icon": { ml: 0.5, color: isTillDate ? "#fff" : "inherit" } }} />
                   </Box>
                 </Stack>
                 <Stack spacing={1}>
-                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
-                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.learners}</Typography>
-                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Learners taught</Typography>
+                  <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
+                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.learners}</Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>{isTillDate ? "Learners impacted" : "Learners taught"}</Typography>
                   </Box>
-                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
-                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.rating}/5</Typography>
-                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Avg ratings this month</Typography>
+                  <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
+                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.rating}/5</Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>{isTillDate ? "Overall avg rating" : "Avg ratings this month"}</Typography>
                   </Box>
-                  <Box sx={{ flex: 1, bgcolor: "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
-                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`}</Typography>
+                  <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
+                    <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.rated4Plus === activeShareData.sessions ? "100%" : `${Math.round((+activeShareData.rated4Plus / +activeShareData.sessions) * 100)}%`}</Typography>
                     <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Sessions rated 4+</Typography>
                   </Box>
                 </Stack>
@@ -588,7 +637,7 @@ export default function ProfilePage() {
                 <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.55rem", fontWeight: 600 }}>Empowering careers, one lesson at a time.</Typography>
                 <Stack direction="row" alignItems="center" spacing={0.15}>
                   {[1, 2, 3, 4, 5].map((i) => <StarIcon key={i} sx={{ fontSize: 12, color: "var(--gl-star-color)" }} />)}
-                  <Typography sx={{ color: shareTheme.nameColor, fontWeight: 700, fontSize: "0.65rem", ml: 0.25 }}>{shareMonthData.rating}</Typography>
+                  <Typography sx={{ color: shareTheme.nameColor, fontWeight: 700, fontSize: "0.65rem", ml: 0.25 }}>{activeShareData.rating}</Typography>
                 </Stack>
               </Stack>
             </Box>
@@ -608,31 +657,62 @@ export default function ProfilePage() {
           <Box sx={{ px: 2, pt: 2, pb: 0 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.9rem", sm: "0.95rem" } }}>Share your impact</Typography>
-              {/* Desktop: standard Select | Mobile: button that opens bottom sheet */}
-              {isMobile ? (
+              {/* Two independent buttons: [All Time]  [March 2026 ▾] */}
+              <Stack direction="row" alignItems="center" spacing={0.75}>
+                {/* All Time button */}
                 <Button
                   size="small"
-                  variant="text"
-                  onClick={() => setMonthSheetOpen(true)}
-                  sx={{ fontSize: "0.8rem", fontWeight: 600, color: "primary.main", textTransform: "none", px: 0.5, minWidth: 0 }}
+                  variant={shareAllTime ? "contained" : "outlined"}
+                  onClick={() => setShareAllTime(true)}
+                  sx={{
+                    borderRadius: "8px", textTransform: "none",
+                    fontWeight: 600, fontSize: "0.75rem",
+                    px: 1.5, py: 0.4, minWidth: 0,
+                    ...(!shareAllTime && { borderColor: "divider", color: "text.secondary" }),
+                  }}
                 >
-                  {shareMonthOptions.find((m) => m.value === shareMonth)?.label ?? shareMonth}
-                  <ChevronRightIcon sx={{ fontSize: 16, ml: 0.25, transform: "rotate(90deg)" }} />
+                  All Time
                 </Button>
-              ) : (
-                <Select
+                {/* Month button — opens menu/sheet */}
+                <Button
                   size="small"
-                  variant="standard"
-                  disableUnderline
-                  value={shareMonth}
-                  onChange={(e) => setShareMonth(e.target.value as string)}
-                  sx={{ fontSize: "0.8rem", fontWeight: 600, color: "primary.main", "& .MuiSelect-select": { py: 0.25, pr: "20px !important" }, "& .MuiSvgIcon-root": { color: "primary.main", fontSize: 18 } }}
+                  variant={!shareAllTime ? "contained" : "outlined"}
+                  onClick={(e) => {
+                    if (isMobile) { setShareAllTime(false); setMonthSheetOpen(true); }
+                    else setMonthMenuAnchor(e.currentTarget);
+                  }}
+                  endIcon={<ChevronRightIcon sx={{ fontSize: "14px !important", transform: "rotate(90deg)", ml: -0.5 }} />}
+                  sx={{
+                    borderRadius: "8px", textTransform: "none",
+                    fontWeight: 600, fontSize: "0.75rem",
+                    px: 1.5, py: 0.4, minWidth: 0,
+                    ...(!shareAllTime ? {} : { borderColor: "divider", color: "text.secondary" }),
+                  }}
+                >
+                  {shareMonthOptions.find((m) => m.value === shareMonth)?.label?.replace(" (Current)", "") ?? "Month"}
+                </Button>
+                {/* Desktop month menu */}
+                <Menu
+                  anchorEl={monthMenuAnchor}
+                  open={Boolean(monthMenuAnchor)}
+                  onClose={() => setMonthMenuAnchor(null)}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  transformOrigin={{ vertical: "top", horizontal: "right" }}
+                  slotProps={{ paper: { sx: { borderRadius: "10px", mt: 0.5, minWidth: 200 } } }}
                 >
                   {shareMonthOptions.map((m) => (
-                    <MenuItem key={m.value} value={m.value} sx={{ fontSize: "0.8rem" }}>{m.label}</MenuItem>
+                    <MenuItem
+                      key={m.value}
+                      selected={!shareAllTime && m.value === shareMonth}
+                      onClick={() => { setShareMonth(m.value); setShareAllTime(false); setMonthMenuAnchor(null); }}
+                      sx={{ fontSize: "0.8rem", py: 1, display: "flex", justifyContent: "space-between" }}
+                    >
+                      <ListItemText primaryTypographyProps={{ fontSize: "0.8rem" }}>{m.label}</ListItemText>
+                      {!shareAllTime && m.value === shareMonth && <CheckIcon sx={{ fontSize: 16, ml: 1.5, color: "primary.main" }} />}
+                    </MenuItem>
                   ))}
-                </Select>
-              )}
+                </Menu>
+              </Stack>
             </Stack>
           </Box>
 
@@ -650,17 +730,17 @@ export default function ProfilePage() {
                 <Box
                   key={m.value}
                   component="button"
-                  onClick={() => { setShareMonth(m.value); setMonthSheetOpen(false); }}
+                  onClick={() => { setShareMonth(m.value); setShareAllTime(false); setMonthSheetOpen(false); }}
                   sx={{
                     display: "flex", alignItems: "center", width: "100%",
                     px: 2, py: 1.5, border: "none",
-                    bgcolor: m.value === shareMonth ? "primary.50" : "transparent",
+                    bgcolor: !isTillDate && m.value === shareMonth ? "primary.50" : "transparent",
                     cursor: "pointer", fontFamily: "inherit",
-                    "&:hover": { bgcolor: m.value === shareMonth ? "primary.100" : "action.hover" },
+                    "&:hover": { bgcolor: !isTillDate && m.value === shareMonth ? "primary.100" : "action.hover" },
                     "&:active": { bgcolor: "action.selected" },
                   }}
                 >
-                  <Typography variant="body2" sx={{ fontWeight: m.value === shareMonth ? 700 : 400, color: m.value === shareMonth ? "primary.main" : "text.primary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: !isTillDate && m.value === shareMonth ? 700 : 400, color: !isTillDate && m.value === shareMonth ? "primary.main" : "text.primary" }}>
                     {m.label}
                   </Typography>
                 </Box>
@@ -759,14 +839,14 @@ export default function ProfilePage() {
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               {/* Stats section */}
               <Box>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.75 }}>Your month at a glance</Typography>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.75 }}>{isTillDate ? "Your all-time impact" : "Your month at a glance"}</Typography>
                 <Box sx={{ display: "flex", gap: 0 }}>
                 {[
-                  { value: shareMonthData.sessions, label: "Sessions" },
-                  { value: `${shareMonthData.hours}h`, label: "Hours" },
-                  { value: shareMonthData.learners, label: "Learners" },
-                  { value: `${shareMonthData.rating}`, label: "Rating" },
-                  { value: shareMonthData.rated4Plus === shareMonthData.sessions ? "100%" : `${Math.round((+shareMonthData.rated4Plus / +shareMonthData.sessions) * 100)}%`, label: "4+ rated" },
+                  { value: activeShareData.sessions, label: "Sessions" },
+                  { value: `${activeShareData.hours}h`, label: "Hours" },
+                  { value: activeShareData.learners, label: "Learners" },
+                  { value: `${activeShareData.rating}`, label: "Rating" },
+                  { value: activeShareData.rated4Plus === activeShareData.sessions ? "100%" : `${Math.round((+activeShareData.rated4Plus / +activeShareData.sessions) * 100)}%`, label: "4+ rated" },
                 ].map((s, i, arr) => (
                   <Box key={s.label} sx={{ textAlign: "center", flex: 1, px: 0.5, ...(i < arr.length - 1 && { borderRight: "1px solid", borderColor: "divider" }) }}>
                     <Typography sx={{ fontWeight: 700, fontSize: "1rem", color: "text.primary", lineHeight: 1.2, letterSpacing: "-0.01em" }}>{s.value}</Typography>
@@ -821,19 +901,56 @@ export default function ProfilePage() {
           </Box>
 
           <DialogContent sx={{ px: { xs: 2, sm: 3 }, pt: 2, display: "flex", flexDirection: "column", alignItems: { xs: "center", sm: "stretch" } }}>
-            {/* Month selector */}
-            <Select
-              size="small"
-              variant="standard"
-              disableUnderline
-              value={shareMonth}
-              onChange={(e) => setShareMonth(e.target.value as string)}
-              sx={{ fontSize: "0.9rem", fontWeight: 600, color: "primary.main", mb: 1.5, alignSelf: "flex-start", "& .MuiSelect-select": { py: 0.5 }, "& .MuiSvgIcon-root": { color: "primary.main" } }}
-            >
-              {shareMonthOptions.map((m) => (
-                <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>
-              ))}
-            </Select>
+            {/* Two independent buttons: [All Time]  [Month ▾] */}
+            <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.5 }}>
+              <Button
+                size="small"
+                variant={shareAllTime ? "contained" : "outlined"}
+                onClick={() => setShareAllTime(true)}
+                sx={{
+                  borderRadius: "8px", textTransform: "none",
+                  fontWeight: 600, fontSize: "0.8rem",
+                  px: 1.5, py: 0.4, minWidth: 0,
+                  ...(!shareAllTime && { borderColor: "divider", color: "text.secondary" }),
+                }}
+              >
+                All Time
+              </Button>
+              <Button
+                size="small"
+                variant={!shareAllTime ? "contained" : "outlined"}
+                onClick={(e) => setDialogMonthMenuAnchor(e.currentTarget)}
+                endIcon={<ChevronRightIcon sx={{ fontSize: "14px !important", transform: "rotate(90deg)", ml: -0.5 }} />}
+                sx={{
+                  borderRadius: "8px", textTransform: "none",
+                  fontWeight: 600, fontSize: "0.8rem",
+                  px: 1.5, py: 0.4, minWidth: 0,
+                  ...(!shareAllTime ? {} : { borderColor: "divider", color: "text.secondary" }),
+                }}
+              >
+                {shareMonthOptions.find((m) => m.value === shareMonth)?.label?.replace(" (Current)", "") ?? "Month"}
+              </Button>
+              <Menu
+                anchorEl={dialogMonthMenuAnchor}
+                open={Boolean(dialogMonthMenuAnchor)}
+                onClose={() => setDialogMonthMenuAnchor(null)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                slotProps={{ paper: { sx: { borderRadius: "10px", mt: 0.5, minWidth: 200 } } }}
+              >
+                {shareMonthOptions.map((m) => (
+                  <MenuItem
+                    key={m.value}
+                    selected={!shareAllTime && m.value === shareMonth}
+                    onClick={() => { setShareMonth(m.value); setShareAllTime(false); setDialogMonthMenuAnchor(null); }}
+                    sx={{ fontSize: "0.8rem", py: 1, display: "flex", justifyContent: "space-between" }}
+                  >
+                    <ListItemText primaryTypographyProps={{ fontSize: "0.8rem" }}>{m.label}</ListItemText>
+                    {!shareAllTime && m.value === shareMonth && <CheckIcon sx={{ fontSize: 16, ml: 1.5, color: "primary.main" }} />}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Stack>
 
             {/* Preview card — 340px on mobile via transform scale, zoom on desktop */}
             {isMobile ? (
@@ -888,7 +1005,7 @@ export default function ProfilePage() {
               ? "Your stats will build as you complete sessions. Here's what you'll track:"
               : isEarlyUser
                 ? "You're just getting started. Stats will become richer as you complete more sessions."
-                : "Understand trends quickly and drill into course-level patterns."}
+                : isEvalOrMod ? "Understand trends quickly and drill into session-level patterns." : "Understand trends quickly and drill into course-level patterns."}
           </Typography>
         </Box>
       </FlexBox>
@@ -938,33 +1055,79 @@ export default function ProfilePage() {
                 <Typography
                   variant="caption"
                   fontWeight={700}
-                  sx={{ letterSpacing: "0.08em", color: card.accent, fontSize: { xs: "0.55rem", sm: "0.65rem" }, mb: { xs: 1, sm: 1.5 } }}
+                  sx={{ letterSpacing: "0.08em", color: card.accent, fontSize: { xs: "0.55rem", sm: "0.65rem" }, mb: { xs: 1, sm: 2 } }}
                 >
                   {card.label}
                 </Typography>
 
                 {/* Hero number */}
-                <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", mb: { xs: 0.5, sm: 1 }, fontSize: { xs: "1.5rem", sm: "3rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
+                <Typography variant="h4" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", mb: { xs: 0.5, sm: 1.5 }, fontSize: { xs: "1.35rem", sm: "2.25rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
                   {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
                 </Typography>
 
+                {/* Multi-category rating breakdown (AVG RATING card only) */}
+                {card.label === "AVG RATING" && !isNewOrEarly && (card as any).categoryRatings?.length > 1 && (
+                  <Box sx={{ mb: 1, display: { xs: "none", sm: "block" } }}>
+                    {((card as any).categoryRatings as { category: GuruRoleCategory; overall: number; delta: number }[]).map((cr) => (
+                      <Stack key={cr.category} direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 0.25 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", fontWeight: 500 }}>
+                          {cr.category === "Evaluation & Moderation" ? "Eval & Mod" : cr.category}
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing={0.5}>
+                          <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.7rem" }}>
+                            {cr.overall.toFixed(2)}
+                          </Typography>
+                          <Typography variant="caption" sx={{ fontSize: "0.55rem", color: "success.main", fontWeight: 600 }}>
+                            ↗ +{cr.delta.toFixed(2)}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    ))}
+                  </Box>
+                )}
+
                 {/* Description */}
-                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: { xs: "none", sm: "block" } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5, mb: 1.5, display: { xs: "none", sm: "block" } }}>
                   {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
                 </Typography>
 
-                {/* Delta + benchmark — desktop only */}
+                {/* Delta + peer benchmark — desktop only */}
                 <Box sx={{ display: { xs: "none", sm: "block" } }}>
                   {!isNewOrEarly && card.delta && (
-                    <Box sx={{ mb: card.primaryBenchmark ? 0.5 : 1.5 }}>
-                      <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600 }}>
+                    <Box sx={{ mb: 1 }}>
+                      <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.dark" : "error.main", fontWeight: 600 }}>
                         {card.deltaPositive ? "↗" : "↘"} {card.delta}
                       </Typography>
-                      <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5, fontSize: "0.65rem" }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5, fontSize: "0.65rem" }}>
                         {card.deltaLabel}
                       </Typography>
                     </Box>
                   )}
+
+                  {/* Peer benchmark */}
+                  {!isNewOrEarly && card.peerValue != null && (() => {
+                    const you = card.numericValue;
+                    const peer = card.peerValue;
+                    const isAhead = card.lowerIsBetter ? you < peer : you > peer;
+                    const isEqual = Math.abs(you - peer) < 0.01;
+                    const diff = Math.abs(you - peer);
+                    const diffStr = card.label === "AVG SESSION QUALITY" ? `${diff.toFixed(1)}%` : card.label === "AVG CONFIRM TIME" ? `${diff.toFixed(1)}h` : diff.toFixed(2);
+                    const sentiment = isEqual
+                      ? "You're on par"
+                      : card.lowerIsBetter
+                        ? (isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`)
+                        : (isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`);
+                    const sentimentColor = isEqual ? "text.secondary" : isAhead ? "success.dark" : "warning.dark";
+                    return (
+                      <Typography variant="caption" sx={{ fontSize: "0.75rem", color: "text.secondary", mb: card.primaryBenchmark ? 0.75 : 2, display: "block", lineHeight: 1.3 }}>
+                        Peer avg {card.peerLabel}
+                        <Typography component="span" sx={{ fontSize: "0.75rem", fontWeight: 600, color: sentimentColor, ml: 0.5 }}>
+                          · {sentiment}
+                        </Typography>
+                      </Typography>
+                    );
+                  })()}
+
                   {!isNewOrEarly && card.primaryBenchmark && (
                     <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem", mb: 0.5 }}>
                       {card.primaryBenchmark}
@@ -1261,7 +1424,7 @@ export default function ProfilePage() {
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent sx={{ p: 2 }}>
           <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>Course performance</Typography>
+            <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>{coursePerfLabel}</Typography>
             {!isNewOrEarly && (
               <Button size="small" variant="text" sx={{ fontSize: 12, textTransform: "none", p: 0, color: "text.secondary" }} onClick={() => setShowCourseReport(true)}>
                 View full
@@ -1367,16 +1530,16 @@ export default function ProfilePage() {
       {/* Monthly matrix — compact heatmap */}
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent sx={{ p: 2 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{  fontSize: { xs: "0.875rem", sm: "1rem" } }}>Monthly matrix</Typography>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>Monthly Rating Trends</Typography>
           <TableContainer>
             <Table size="small" sx={{ tableLayout: "auto" }}>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, borderBottom: "1px solid", borderColor: "divider", pl: 0, px: { xs: 0.5, sm: 1 } }}>
+                  <TableCell sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, borderBottom: "1px solid", borderColor: "divider", pl: 0, px: { xs: 0.5, sm: 1 }, position: "sticky", left: 0, bgcolor: "background.paper", zIndex: 1 }}>
                     Course
                   </TableCell>
                   {MONTHS.map((m) => (
-                    <TableCell key={m} sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, textAlign: "center", borderBottom: "1px solid", borderColor: "divider", px: { xs: 0.5, sm: 1 } }}>
+                    <TableCell key={m} sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, textAlign: "center", borderBottom: "1px solid", borderColor: "divider", px: { xs: 0.5, sm: 1 }, whiteSpace: "nowrap" }}>
                       {m}
                     </TableCell>
                   ))}
@@ -1390,7 +1553,7 @@ export default function ProfilePage() {
                     : demoMatrix
                 ).map((row) => (
                   <TableRow key={row.course} sx={{ "&:last-child td": { border: 0 } }}>
-                    <TableCell sx={{ fontSize: { xs: 10, sm: 11 }, color: isNewOrEarly ? "text.disabled" : "text.secondary", pl: 0, whiteSpace: "nowrap", px: { xs: 0.5, sm: 1 } }}>
+                    <TableCell sx={{ fontSize: { xs: 10, sm: 11 }, color: isNewOrEarly ? "text.disabled" : "text.secondary", pl: 0, whiteSpace: "nowrap", px: { xs: 0.5, sm: 1 }, position: "sticky", left: 0, bgcolor: "background.paper", zIndex: 1 }}>
                       {row.course}
                     </TableCell>
                     {row.scores.map((s, i) => (
@@ -1572,7 +1735,7 @@ export default function ProfilePage() {
         <Box sx={{ px: 3, pt: 3, pb: 0 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Box>
-              <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}>Course Performance</Typography>
+              <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}>{coursePerfLabel}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 Detailed ratings across all courses with monthly trends and learner feedback volume.
               </Typography>
@@ -1594,13 +1757,13 @@ export default function ProfilePage() {
             </Box>
             <Box>
               <Typography variant="caption" color="text.secondary">Biggest gain</Typography>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "success.main", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: "success.dark", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                 +{Math.max(...demoCoursePerf.map((c) => c.delta)).toFixed(2)}
               </Typography>
             </Box>
             <Box>
               <Typography variant="caption" color="text.secondary">Needs attention</Typography>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "error.main", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: "warning.dark", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                 {demoCoursePerf.filter((c) => c.delta < 0).length} courses
               </Typography>
             </Box>
@@ -1629,8 +1792,8 @@ export default function ProfilePage() {
                           </Box>
                           <Divider orientation="vertical" flexItem />
                           <Box>
-                            <Typography variant="body1" fontWeight={600} sx={{ color: course.delta > 0 ? "success.main" : course.delta < 0 ? "error.main" : "text.secondary" }}>
-                              {course.delta > 0 ? "↗" : course.delta < 0 ? "↘" : "-"} {course.delta > 0 ? "+" : ""}{course.delta.toFixed(2)}
+                            <Typography variant="body1" fontWeight={600} sx={{ color: course.delta > 0 ? "success.dark" : course.delta < 0 ? "warning.dark" : "text.secondary" }}>
+                              {course.delta > 0 ? "↗" : course.delta < 0 ? "↘" : "—"} {course.delta > 0 ? "+" : ""}{course.delta.toFixed(2)}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">MoM change</Typography>
                           </Box>
@@ -1638,7 +1801,7 @@ export default function ProfilePage() {
                           <Box>
                             {/* Rating bar */}
                             <Box sx={{ width: 120, bgcolor: "action.hover", borderRadius: 1, height: 8, overflow: "hidden" }}>
-                              <Box sx={{ height: "100%", bgcolor: course.delta >= 0 ? "success.main" : "error.main", borderRadius: 1, width: `${((course.rating - 1) / 4) * 100}%`, opacity: 0.7 }} />
+                              <Box sx={{ height: "100%", bgcolor: course.delta >= 0 ? "success.main" : "warning.main", borderRadius: 1, width: `${((course.rating - 1) / 4) * 100}%`, opacity: 0.7 }} />
                             </Box>
                             <Typography variant="caption" color="text.secondary">out of 5.0</Typography>
                           </Box>
@@ -1647,15 +1810,15 @@ export default function ProfilePage() {
 
                       {/* Right: sparkline */}
                       {chartData.length > 0 && (
-                        <Box sx={{ width: 200, flexShrink: 0 }}>
+                        <Box sx={{ width: { xs: "100%", md: 240 }, flexShrink: 0 }}>
                           <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", mb: 0.5, display: "block" }}>
-                            6-month trend
+                            12-month trend
                           </Typography>
                           <Box sx={{ height: 60 }}>
                             <ResponsiveContainer>
                               <LineChart data={chartData} margin={{ top: 2, right: 4, left: -24, bottom: 0 }}>
-                                <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface-variant))" }} axisLine={false} tickLine={false} />
-                                <YAxis domain={[4, 5]} tick={false} axisLine={false} tickLine={false} />
+                                <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface-variant))" }} axisLine={false} tickLine={false} interval={1} />
+                                <YAxis domain={["dataMin - 0.2", "dataMax + 0.1"]} tick={false} axisLine={false} tickLine={false} />
                                 <Tooltip
                                   content={({ active, payload }) => {
                                     if (!active || !payload?.length) return null;
@@ -1663,7 +1826,7 @@ export default function ProfilePage() {
                                     return (
                                       <Card variant="outlined" sx={{ p: 0.75, borderRadius: "8px", fontSize: "0.7rem" }}>
                                         <Typography variant="caption" fontWeight={600}>{d.month}</Typography>
-                                        <Typography variant="caption" display="block">{d.rating ?? "-"}</Typography>
+                                        <Typography variant="caption" display="block">{d.rating != null ? d.rating.toFixed(1) : "—"}</Typography>
                                       </Card>
                                     );
                                   }}
@@ -1671,9 +1834,9 @@ export default function ProfilePage() {
                                 <Line
                                   type="monotone"
                                   dataKey="rating"
-                                  stroke={course.delta >= 0 ? "var(--gl-accent-success)" : "var(--gl-status-declined-text)"}
+                                  stroke={course.delta >= 0 ? "var(--gl-accent-primary)" : "var(--gl-status-declined-text)"}
                                   strokeWidth={1.5}
-                                  dot={{ r: 2.5, fill: "hsl(var(--md-surface))", stroke: course.delta >= 0 ? "var(--gl-accent-success)" : "var(--gl-status-declined-text)", strokeWidth: 1.5 }}
+                                  dot={{ r: 2.5, fill: "hsl(var(--md-surface))", stroke: course.delta >= 0 ? "var(--gl-accent-primary)" : "var(--gl-status-declined-text)", strokeWidth: 1.5 }}
                                   connectNulls
                                 />
                               </LineChart>
@@ -1778,9 +1941,52 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
 
+              {/* Per-category breakdown for AVG RATING with multi-roles */}
+              {activeCard.label === "AVG RATING" && (activeCard as any).categoryRatings?.length > 1 && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
+                    Rating by Role Category
+                  </Typography>
+                  {((activeCard as any).categoryRatings as { category: GuruRoleCategory; overall: number; delta: number; trend: { month: string; value: number }[]; breakdown: { name: string; value: string }[] }[]).map((cr, idx) => (
+                    <Card key={cr.category} variant="outlined" sx={{ borderRadius: "8px", mb: idx < ((activeCard as any).categoryRatings as any[]).length - 1 ? 2 : 0 }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.85rem" }}>
+                            {cr.category}
+                          </Typography>
+                          <Stack direction="row" alignItems="baseline" spacing={0.75}>
+                            <Typography variant="h6" fontWeight={700}>{cr.overall.toFixed(2)}</Typography>
+                            <Typography variant="caption" sx={{ color: "success.main", fontWeight: 600 }}>
+                              ↗ +{cr.delta.toFixed(2)}
+                            </Typography>
+                          </Stack>
+                        </Stack>
+                        <Box sx={{ width: "100%", height: 120 }}>
+                          <ResponsiveContainer>
+                            <LineChart data={cr.trend} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
+                              <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                              <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} domain={["dataMin - 0.1", "dataMax + 0.05"]} />
+                              <Line type="monotone" dataKey="value" stroke={activeCard.accent} strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </Box>
+                        <Divider sx={{ my: 1 }} />
+                        {cr.breakdown.map((b) => (
+                          <Stack key={b.name} direction="row" justifyContent="space-between" sx={{ py: 0.25 }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{b.name}</Typography>
+                            <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>{b.value}</Typography>
+                          </Stack>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              )}
+
               {/* Breakdown table */}
               <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: "block" }}>
-                Breakdown
+                {(activeCard as any).categoryRatings?.length > 1 ? "Overall Breakdown" : "Breakdown"}
               </Typography>
               <TableContainer>
                 <Table size="small">
