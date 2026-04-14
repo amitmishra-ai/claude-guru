@@ -3200,3 +3200,543 @@ export const demoPlannedEvents: PlannedEvent[] = [
     status: "to_be_confirmed",
   },
 ];
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ROLE-SPECIFIC MOCK DATA
+   ══════════════════════════════════════════════════════════════════════════ */
+
+import type { GuruRole } from "@/store/slices/devPanelSlice";
+import type { GuruRoleCategory } from "@/lib/role-config";
+
+/* ── Per-category rating data (for AVG RATING card multi-role breakdown) ── */
+
+export const demoRoleCategoryRatings: Record<
+  GuruRoleCategory,
+  {
+    overall: number;
+    delta: number;
+    trend: { month: string; value: number }[];
+    breakdown: { name: string; value: string }[];
+  }
+> = {
+  Teaching: {
+    overall: 4.76,
+    delta: 0.10,
+    trend: [
+      { month: "Sep 25", value: 4.62 }, { month: "Oct 25", value: 4.68 },
+      { month: "Nov 25", value: 4.71 }, { month: "Dec 25", value: 4.74 },
+      { month: "Jan 26", value: 4.66 }, { month: "Feb 26", value: 4.76 },
+    ],
+    breakdown: [
+      { name: "Deep Learning Fundamentals", value: "4.9" },
+      { name: "NLP Advanced Topics", value: "4.8" },
+      { name: "Reinforcement Learning", value: "4.7" },
+      { name: "MLOps", value: "4.7" },
+      { name: "Data Engineering Essentials", value: "4.6" },
+    ],
+  },
+  Mentoring: {
+    overall: 4.84,
+    delta: 0.08,
+    trend: [
+      { month: "Sep 25", value: 4.72 }, { month: "Oct 25", value: 4.75 },
+      { month: "Nov 25", value: 4.78 }, { month: "Dec 25", value: 4.80 },
+      { month: "Jan 26", value: 4.76 }, { month: "Feb 26", value: 4.84 },
+    ],
+    breakdown: [
+      { name: "PGP-DS Mentoring", value: "4.9" },
+      { name: "PGP-AIML Mentoring", value: "4.8" },
+      { name: "Career Guidance Sessions", value: "4.8" },
+      { name: "Capstone Projects", value: "4.8" },
+      { name: "CV Review Sessions", value: "4.7" },
+    ],
+  },
+  "Evaluation & Moderation": {
+    overall: 4.98,
+    delta: 0.05,
+    trend: [
+      { month: "Sep 25", value: 4.88 }, { month: "Oct 25", value: 4.90 },
+      { month: "Nov 25", value: 4.92 }, { month: "Dec 25", value: 4.94 },
+      { month: "Jan 26", value: 4.93 }, { month: "Feb 26", value: 4.98 },
+    ],
+    breakdown: [
+      { name: "Assignment Evaluations", value: "5.0" },
+      { name: "Project Evaluations", value: "4.9" },
+      { name: "Discussion Moderation", value: "4.9" },
+      { name: "Peer Review Moderation", value: "4.9" },
+    ],
+  },
+};
+
+/* ── Share month data type ───────────────────────────────────────────────── */
+
+export type ShareMonthDatum = {
+  sessions: string;
+  hours: string;
+  learners: string;
+  rating: string;
+  rated4Plus: string;
+  monthLabel: string;
+};
+
+/* ── Per-role monthly share data ─────────────────────────────────────────── */
+
+const teacherMonthly: Record<string, ShareMonthDatum> = {
+  "2026-03": { sessions: "7", hours: "14", learners: "168", rating: "4.7", rated4Plus: "6", monthLabel: "MAR 2026" },
+  "2026-02": { sessions: "6", hours: "12", learners: "142", rating: "4.5", rated4Plus: "5", monthLabel: "FEB 2026" },
+  "2026-01": { sessions: "8", hours: "16", learners: "195", rating: "4.6", rated4Plus: "7", monthLabel: "JAN 2026" },
+  "2025-12": { sessions: "5", hours: "10", learners: "120", rating: "4.4", rated4Plus: "4", monthLabel: "DEC 2025" },
+  "2025-11": { sessions: "6", hours: "12", learners: "155", rating: "4.5", rated4Plus: "5", monthLabel: "NOV 2025" },
+  "2025-10": { sessions: "4", hours: "8", learners: "98", rating: "4.3", rated4Plus: "3", monthLabel: "OCT 2025" },
+};
+
+const courseMentorMonthly: Record<string, ShareMonthDatum> = {
+  "2026-03": { sessions: "12", hours: "18", learners: "84", rating: "4.8", rated4Plus: "11", monthLabel: "MAR 2026" },
+  "2026-02": { sessions: "10", hours: "15", learners: "72", rating: "4.7", rated4Plus: "9", monthLabel: "FEB 2026" },
+  "2026-01": { sessions: "11", hours: "16", learners: "78", rating: "4.8", rated4Plus: "10", monthLabel: "JAN 2026" },
+  "2025-12": { sessions: "9", hours: "14", learners: "65", rating: "4.6", rated4Plus: "8", monthLabel: "DEC 2025" },
+  "2025-11": { sessions: "10", hours: "15", learners: "70", rating: "4.7", rated4Plus: "9", monthLabel: "NOV 2025" },
+  "2025-10": { sessions: "8", hours: "12", learners: "58", rating: "4.5", rated4Plus: "7", monthLabel: "OCT 2025" },
+};
+
+const careerMentorMonthly: Record<string, ShareMonthDatum> = {
+  "2026-03": { sessions: "18", hours: "9", learners: "18", rating: "4.9", rated4Plus: "18", monthLabel: "MAR 2026" },
+  "2026-02": { sessions: "15", hours: "8", learners: "15", rating: "4.8", rated4Plus: "14", monthLabel: "FEB 2026" },
+  "2026-01": { sessions: "16", hours: "8", learners: "16", rating: "4.9", rated4Plus: "16", monthLabel: "JAN 2026" },
+  "2025-12": { sessions: "12", hours: "6", learners: "12", rating: "4.7", rated4Plus: "11", monthLabel: "DEC 2025" },
+  "2025-11": { sessions: "14", hours: "7", learners: "14", rating: "4.8", rated4Plus: "13", monthLabel: "NOV 2025" },
+  "2025-10": { sessions: "10", hours: "5", learners: "10", rating: "4.6", rated4Plus: "9", monthLabel: "OCT 2025" },
+};
+
+const cvReviewMentorMonthly: Record<string, ShareMonthDatum> = {
+  "2026-03": { sessions: "22", hours: "11", learners: "22", rating: "4.7", rated4Plus: "20", monthLabel: "MAR 2026" },
+  "2026-02": { sessions: "18", hours: "9", learners: "18", rating: "4.6", rated4Plus: "16", monthLabel: "FEB 2026" },
+  "2026-01": { sessions: "20", hours: "10", learners: "20", rating: "4.7", rated4Plus: "18", monthLabel: "JAN 2026" },
+  "2025-12": { sessions: "15", hours: "8", learners: "15", rating: "4.5", rated4Plus: "13", monthLabel: "DEC 2025" },
+  "2025-11": { sessions: "17", hours: "9", learners: "17", rating: "4.6", rated4Plus: "15", monthLabel: "NOV 2025" },
+  "2025-10": { sessions: "13", hours: "7", learners: "13", rating: "4.4", rated4Plus: "11", monthLabel: "OCT 2025" },
+};
+
+const evaluatorMonthly: Record<string, ShareMonthDatum> = {
+  "2026-03": { sessions: "30", hours: "20", learners: "120", rating: "5.0", rated4Plus: "30", monthLabel: "MAR 2026" },
+  "2026-02": { sessions: "25", hours: "17", learners: "100", rating: "4.9", rated4Plus: "24", monthLabel: "FEB 2026" },
+  "2026-01": { sessions: "28", hours: "19", learners: "112", rating: "5.0", rated4Plus: "28", monthLabel: "JAN 2026" },
+  "2025-12": { sessions: "20", hours: "13", learners: "80", rating: "4.9", rated4Plus: "19", monthLabel: "DEC 2025" },
+  "2025-11": { sessions: "24", hours: "16", learners: "96", rating: "4.9", rated4Plus: "23", monthLabel: "NOV 2025" },
+  "2025-10": { sessions: "18", hours: "12", learners: "72", rating: "4.8", rated4Plus: "17", monthLabel: "OCT 2025" },
+};
+
+const moderatorMonthly: Record<string, ShareMonthDatum> = {
+  "2026-03": { sessions: "15", hours: "8", learners: "90", rating: "4.9", rated4Plus: "15", monthLabel: "MAR 2026" },
+  "2026-02": { sessions: "12", hours: "6", learners: "72", rating: "4.8", rated4Plus: "11", monthLabel: "FEB 2026" },
+  "2026-01": { sessions: "14", hours: "7", learners: "84", rating: "4.9", rated4Plus: "14", monthLabel: "JAN 2026" },
+  "2025-12": { sessions: "10", hours: "5", learners: "60", rating: "4.8", rated4Plus: "10", monthLabel: "DEC 2025" },
+  "2025-11": { sessions: "11", hours: "6", learners: "66", rating: "4.8", rated4Plus: "10", monthLabel: "NOV 2025" },
+  "2025-10": { sessions: "9", hours: "5", learners: "54", rating: "4.7", rated4Plus: "8", monthLabel: "OCT 2025" },
+};
+
+const projectMentorMonthly: Record<string, ShareMonthDatum> = {
+  "2026-03": { sessions: "8", hours: "12", learners: "32", rating: "4.8", rated4Plus: "8", monthLabel: "MAR 2026" },
+  "2026-02": { sessions: "6", hours: "9", learners: "24", rating: "4.7", rated4Plus: "5", monthLabel: "FEB 2026" },
+  "2026-01": { sessions: "7", hours: "11", learners: "28", rating: "4.8", rated4Plus: "7", monthLabel: "JAN 2026" },
+  "2025-12": { sessions: "5", hours: "8", learners: "20", rating: "4.6", rated4Plus: "4", monthLabel: "DEC 2025" },
+  "2025-11": { sessions: "6", hours: "9", learners: "24", rating: "4.7", rated4Plus: "5", monthLabel: "NOV 2025" },
+  "2025-10": { sessions: "4", hours: "6", learners: "16", rating: "4.5", rated4Plus: "3", monthLabel: "OCT 2025" },
+};
+
+const industryExpertMonthly: Record<string, ShareMonthDatum> = {
+  "2026-03": { sessions: "3", hours: "6", learners: "240", rating: "4.8", rated4Plus: "3", monthLabel: "MAR 2026" },
+  "2026-02": { sessions: "2", hours: "4", learners: "160", rating: "4.7", rated4Plus: "2", monthLabel: "FEB 2026" },
+  "2026-01": { sessions: "3", hours: "6", learners: "220", rating: "4.9", rated4Plus: "3", monthLabel: "JAN 2026" },
+  "2025-12": { sessions: "2", hours: "4", learners: "150", rating: "4.6", rated4Plus: "2", monthLabel: "DEC 2025" },
+  "2025-11": { sessions: "2", hours: "4", learners: "170", rating: "4.7", rated4Plus: "2", monthLabel: "NOV 2025" },
+  "2025-10": { sessions: "1", hours: "2", learners: "80", rating: "4.5", rated4Plus: "1", monthLabel: "OCT 2025" },
+};
+
+export const demoRoleMonthlyShareData: Record<GuruRole, Record<string, ShareMonthDatum>> = {
+  Teacher: teacherMonthly,
+  "Course Mentor": courseMentorMonthly,
+  "Career Mentor": careerMentorMonthly,
+  "CV Review Mentor": cvReviewMentorMonthly,
+  Evaluator: evaluatorMonthly,
+  Moderator: moderatorMonthly,
+  "Project Mentor": projectMentorMonthly,
+  "Industry Expert": industryExpertMonthly,
+};
+
+/* ── Per-role till-date (cumulative) share data ──────────────────────────── */
+
+export const demoRoleTillDateShareData: Record<
+  GuruRole,
+  { sessions: string; hours: string; learners: string; rating: string; rated4Plus: string }
+> = {
+  Teacher:          { sessions: "488", hours: "637", learners: "2483", rating: "4.76", rated4Plus: "462" },
+  "Course Mentor":  { sessions: "334", hours: "501", learners: "1890", rating: "4.84", rated4Plus: "318" },
+  "Career Mentor":  { sessions: "561", hours: "281", learners: "561",  rating: "4.88", rated4Plus: "540" },
+  "CV Review Mentor": { sessions: "420", hours: "210", learners: "420", rating: "4.72", rated4Plus: "388" },
+  Evaluator:        { sessions: "269", hours: "180", learners: "1076", rating: "4.98", rated4Plus: "266" },
+  Moderator:        { sessions: "210", hours: "105", learners: "1260", rating: "4.92", rated4Plus: "204" },
+  "Project Mentor": { sessions: "120", hours: "180", learners: "480",  rating: "4.78", rated4Plus: "112" },
+  "Industry Expert":{ sessions: "70",  hours: "140", learners: "5610", rating: "4.82", rated4Plus: "67" },
+};
+
+/* ── Per-role KPI stat card overrides ────────────────────────────────────── */
+
+export type RoleStatCardData = {
+  avgRating: string;
+  avgRatingDelta: string;
+  avgRatingBars: number[];
+  avgSessions: string;
+  avgSessionsDelta: string;
+  avgSessionsBars: number[];
+  avgQuality: string;
+  avgQualityDelta: string;
+  avgQualityBars: number[];
+  avgQualitySecondary: string;
+  /** Raw average time to confirm (kept for the modal's supporting stat) */
+  avgConfirmTime: string;
+  avgConfirmDelta: string;
+  avgConfirmBars: number[];
+  /** On-time confirmation rate — % of sessions confirmed within 24 hours of being
+   *  assigned. This is the metric shown on the card surface so all four cards share
+   *  "higher is better" semantics. */
+  onTimeConfirmRate: string;
+  onTimeConfirmDelta: string;
+  onTimeConfirmBars: number[];
+  onTimeConfirmBreakdown: { name: string; value: string }[];
+  description: string;
+  sessionsBreakdown: { name: string; value: string }[];
+  qualityBreakdown: { name: string; value: string }[];
+  confirmBreakdown: { name: string; value: string }[];
+  /** Monthly unique learners impacted — used by the LEARNERS IMPACTED card on
+   *  the Evaluation & Moderation variant of the Performance KPI row. Populated
+   *  for every role for completeness (in case the card is reused later for
+   *  Teaching/Mentoring), but only rendered for Evaluator / Moderator today. */
+  learnersImpactedPerMonth: string;
+  learnersImpactedDelta: string;
+  learnersImpactedBars: number[];
+  learnersImpactedBreakdown: { name: string; value: string }[];
+  /** Peer benchmark values — what the average guru scores */
+  peerAvgRating: number;
+  peerAvgSessions: number;
+  peerAvgQuality: number;
+  peerAvgConfirmTime: number;
+  /** Peer % confirmed within 24 hours */
+  peerOnTimeConfirmRate: number;
+  /** Peer monthly unique learners impacted */
+  peerLearnersImpactedPerMonth: number;
+};
+
+export const demoRoleStatCards: Record<GuruRole, RoleStatCardData> = {
+  Teacher: {
+    avgRating: "4.76", avgRatingDelta: "+0.10", avgRatingBars: [4.62, 4.68, 4.71, 4.74, 4.66, 4.76],
+    avgSessions: "6", avgSessionsDelta: "+2", avgSessionsBars: [4, 5, 6, 5, 8, 7],
+    avgQuality: "96.8%", avgQualityDelta: "+0.5%", avgQualityBars: [95.2, 96.0, 96.8, 97.1, 97.5, 98.0], avgQualitySecondary: "90%",
+    avgConfirmTime: "7.2h", avgConfirmDelta: "-1.3h", avgConfirmBars: [12, 9, 7, 6, 5, 4.2],
+    onTimeConfirmRate: "88%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [70, 76, 80, 83, 85, 88],
+    onTimeConfirmBreakdown: [{ name: "PGP-DS", value: "92%" }, { name: "PGP-AIML", value: "88%" }, { name: "PGP-SE", value: "84%" }],
+    learnersImpactedPerMonth: "340", learnersImpactedDelta: "+22", learnersImpactedBars: [240, 260, 280, 300, 320, 340],
+    learnersImpactedBreakdown: [{ name: "PGP-DS", value: "162" }, { name: "PGP-AIML", value: "118" }, { name: "PGP-SE", value: "60" }],
+    description: "Teaching performance across all programs and cohorts.",
+    sessionsBreakdown: [{ name: "PGP-DS", value: "18 sessions" }, { name: "PGP-AIML", value: "14 sessions" }, { name: "PGP-SE", value: "5 sessions" }],
+    qualityBreakdown: [{ name: "4.0+ threshold", value: "98% (Target: > 98%)" }, { name: "4.4+ threshold", value: "90% (Target: > 90%)" }],
+    confirmBreakdown: [{ name: "PGP-DS", value: "3.8h" }, { name: "PGP-AIML", value: "4.5h" }, { name: "PGP-SE", value: "5.1h" }],
+    peerAvgRating: 4.82, peerAvgSessions: 8, peerAvgQuality: 94.2, peerAvgConfirmTime: 5.5, peerOnTimeConfirmRate: 80, peerLearnersImpactedPerMonth: 290,
+  },
+  "Course Mentor": {
+    avgRating: "4.84", avgRatingDelta: "+0.08", avgRatingBars: [4.72, 4.75, 4.78, 4.80, 4.76, 4.84],
+    avgSessions: "10", avgSessionsDelta: "+1", avgSessionsBars: [8, 10, 10, 9, 11, 12],
+    avgQuality: "97.5%", avgQualityDelta: "+0.8%", avgQualityBars: [95.8, 96.2, 97.0, 97.2, 97.0, 97.5], avgQualitySecondary: "92%",
+    avgConfirmTime: "5.4h", avgConfirmDelta: "-0.8h", avgConfirmBars: [8, 7, 6.5, 6, 5.8, 5.4],
+    onTimeConfirmRate: "92%", onTimeConfirmDelta: "+4%", onTimeConfirmBars: [80, 84, 86, 88, 90, 92],
+    onTimeConfirmBreakdown: [{ name: "PGP-DS", value: "95%" }, { name: "PGP-AIML", value: "92%" }, { name: "PGP-DSBA", value: "88%" }],
+    learnersImpactedPerMonth: "280", learnersImpactedDelta: "+18", learnersImpactedBars: [200, 220, 240, 250, 265, 280],
+    learnersImpactedBreakdown: [{ name: "PGP-DS", value: "138" }, { name: "PGP-AIML", value: "92" }, { name: "PGP-DSBA", value: "50" }],
+    description: "Mentoring performance across all programs and learner cohorts.",
+    sessionsBreakdown: [{ name: "PGP-DS", value: "28 sessions" }, { name: "PGP-AIML", value: "22 sessions" }, { name: "PGP-DSBA", value: "10 sessions" }],
+    qualityBreakdown: [{ name: "4.0+ threshold", value: "97.5%" }, { name: "4.4+ threshold", value: "92%" }],
+    confirmBreakdown: [{ name: "PGP-DS", value: "4.2h" }, { name: "PGP-AIML", value: "5.1h" }, { name: "PGP-DSBA", value: "6.8h" }],
+    peerAvgRating: 4.91, peerAvgSessions: 8, peerAvgQuality: 95.0, peerAvgConfirmTime: 4.0, peerOnTimeConfirmRate: 88, peerLearnersImpactedPerMonth: 240,
+  },
+  "Career Mentor": {
+    avgRating: "4.88", avgRatingDelta: "+0.12", avgRatingBars: [4.74, 4.78, 4.80, 4.82, 4.76, 4.88],
+    avgSessions: "15", avgSessionsDelta: "+3", avgSessionsBars: [10, 14, 14, 12, 16, 18],
+    avgQuality: "98.2%", avgQualityDelta: "+0.6%", avgQualityBars: [96.5, 97.0, 97.5, 97.8, 97.6, 98.2], avgQualitySecondary: "95%",
+    avgConfirmTime: "3.8h", avgConfirmDelta: "-0.5h", avgConfirmBars: [5.5, 5.0, 4.5, 4.2, 4.0, 3.8],
+    onTimeConfirmRate: "96%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [85, 88, 91, 93, 94, 96],
+    onTimeConfirmBreakdown: [{ name: "Career 1:1", value: "98%" }, { name: "Schedule a Call", value: "94%" }],
+    learnersImpactedPerMonth: "180", learnersImpactedDelta: "+12", learnersImpactedBars: [125, 138, 150, 160, 168, 180],
+    learnersImpactedBreakdown: [{ name: "Career 1:1", value: "108" }, { name: "Schedule a Call", value: "72" }],
+    description: "Career mentoring across all 1:1 and group sessions.",
+    sessionsBreakdown: [{ name: "Career 1:1", value: "52 sessions" }, { name: "Schedule a Call", value: "33 sessions" }],
+    qualityBreakdown: [{ name: "4.0+ threshold", value: "98.2%" }, { name: "4.4+ threshold", value: "95%" }],
+    confirmBreakdown: [{ name: "Career 1:1", value: "3.2h" }, { name: "Schedule a Call", value: "4.4h" }],
+    peerAvgRating: 4.60, peerAvgSessions: 11, peerAvgQuality: 95.8, peerAvgConfirmTime: 5.0, peerOnTimeConfirmRate: 90, peerLearnersImpactedPerMonth: 155,
+  },
+  "CV Review Mentor": {
+    avgRating: "4.72", avgRatingDelta: "+0.06", avgRatingBars: [4.60, 4.64, 4.66, 4.68, 4.66, 4.72],
+    avgSessions: "18", avgSessionsDelta: "+4", avgSessionsBars: [13, 17, 17, 15, 20, 22],
+    avgQuality: "95.4%", avgQualityDelta: "+0.4%", avgQualityBars: [93.8, 94.2, 94.8, 95.0, 95.0, 95.4], avgQualitySecondary: "88%",
+    avgConfirmTime: "4.2h", avgConfirmDelta: "-0.6h", avgConfirmBars: [6.5, 6.0, 5.5, 5.0, 4.8, 4.2],
+    onTimeConfirmRate: "95%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [84, 87, 89, 91, 93, 95],
+    onTimeConfirmBreakdown: [{ name: "PGP-DS", value: "96%" }, { name: "PGP-AIML", value: "94%" }],
+    learnersImpactedPerMonth: "220", learnersImpactedDelta: "+16", learnersImpactedBars: [155, 170, 185, 195, 208, 220],
+    learnersImpactedBreakdown: [{ name: "PGP-DS", value: "98" }, { name: "PGP-AIML", value: "82" }, { name: "PGP-SE", value: "40" }],
+    description: "CV review performance across all review sessions.",
+    sessionsBreakdown: [{ name: "PGP-DS CV Reviews", value: "45 sessions" }, { name: "PGP-AIML CV Reviews", value: "38 sessions" }, { name: "PGP-SE CV Reviews", value: "22 sessions" }],
+    qualityBreakdown: [{ name: "4.0+ threshold", value: "95.4%" }, { name: "4.4+ threshold", value: "88%" }],
+    confirmBreakdown: [{ name: "PGP-DS", value: "3.5h" }, { name: "PGP-AIML", value: "4.0h" }],
+    peerAvgRating: 4.48, peerAvgSessions: 14, peerAvgQuality: 93.5, peerAvgConfirmTime: 5.8, peerOnTimeConfirmRate: 88, peerLearnersImpactedPerMonth: 190,
+  },
+  Evaluator: {
+    avgRating: "4.98", avgRatingDelta: "+0.05", avgRatingBars: [4.88, 4.90, 4.92, 4.94, 4.93, 4.98],
+    avgSessions: "25", avgSessionsDelta: "+5", avgSessionsBars: [18, 24, 24, 20, 28, 30],
+    avgQuality: "99.2%", avgQualityDelta: "+0.2%", avgQualityBars: [98.2, 98.5, 98.8, 99.0, 98.8, 99.2], avgQualitySecondary: "97%",
+    avgConfirmTime: "6.1h", avgConfirmDelta: "-1.0h", avgConfirmBars: [9, 8, 7.5, 7, 6.5, 6.1],
+    onTimeConfirmRate: "91%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [78, 82, 85, 87, 89, 91],
+    onTimeConfirmBreakdown: [{ name: "Assignments", value: "93%" }, { name: "Projects", value: "88%" }],
+    learnersImpactedPerMonth: "320", learnersImpactedDelta: "+24", learnersImpactedBars: [220, 245, 265, 285, 305, 320],
+    learnersImpactedBreakdown: [{ name: "Assignment Evaluations", value: "210" }, { name: "Project Evaluations", value: "110" }],
+    description: "Evaluation performance across assignments and projects.",
+    sessionsBreakdown: [{ name: "Assignment Evaluations", value: "95 evaluations" }, { name: "Project Evaluations", value: "50 evaluations" }],
+    qualityBreakdown: [{ name: "4.0+ threshold", value: "99.2%" }, { name: "4.4+ threshold", value: "97%" }],
+    confirmBreakdown: [{ name: "Assignments", value: "5.2h" }, { name: "Projects", value: "7.0h" }],
+    peerAvgRating: 4.68, peerAvgSessions: 20, peerAvgQuality: 96.5, peerAvgConfirmTime: 8.0, peerOnTimeConfirmRate: 85, peerLearnersImpactedPerMonth: 270,
+  },
+  Moderator: {
+    avgRating: "4.92", avgRatingDelta: "+0.07", avgRatingBars: [4.82, 4.84, 4.86, 4.88, 4.85, 4.92],
+    avgSessions: "12", avgSessionsDelta: "+3", avgSessionsBars: [9, 11, 11, 10, 14, 15],
+    avgQuality: "98.5%", avgQualityDelta: "+0.3%", avgQualityBars: [97.0, 97.5, 97.8, 98.0, 98.2, 98.5], avgQualitySecondary: "96%",
+    avgConfirmTime: "5.8h", avgConfirmDelta: "-0.7h", avgConfirmBars: [8.5, 7.5, 7.0, 6.5, 6.2, 5.8],
+    onTimeConfirmRate: "92%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [80, 84, 86, 88, 90, 92],
+    onTimeConfirmBreakdown: [{ name: "Discussion Forums", value: "94%" }, { name: "Peer Reviews", value: "90%" }],
+    learnersImpactedPerMonth: "210", learnersImpactedDelta: "+15", learnersImpactedBars: [148, 162, 175, 188, 200, 210],
+    learnersImpactedBreakdown: [{ name: "Discussion Forums", value: "138" }, { name: "Peer Reviews", value: "72" }],
+    description: "Discussion moderation quality and response metrics.",
+    sessionsBreakdown: [{ name: "Discussion Forums", value: "42 moderations" }, { name: "Peer Reviews", value: "29 moderations" }],
+    qualityBreakdown: [{ name: "4.0+ threshold", value: "98.5%" }, { name: "4.4+ threshold", value: "96%" }],
+    confirmBreakdown: [{ name: "Discussion Forums", value: "5.0h" }, { name: "Peer Reviews", value: "6.6h" }],
+    peerAvgRating: 4.55, peerAvgSessions: 9, peerAvgQuality: 95.8, peerAvgConfirmTime: 7.5, peerOnTimeConfirmRate: 86, peerLearnersImpactedPerMonth: 175,
+  },
+  "Project Mentor": {
+    avgRating: "4.78", avgRatingDelta: "+0.09", avgRatingBars: [4.65, 4.68, 4.70, 4.72, 4.69, 4.78],
+    avgSessions: "6", avgSessionsDelta: "+2", avgSessionsBars: [4, 6, 6, 5, 7, 8],
+    avgQuality: "96.2%", avgQualityDelta: "+0.6%", avgQualityBars: [94.0, 94.8, 95.2, 95.5, 95.6, 96.2], avgQualitySecondary: "89%",
+    avgConfirmTime: "8.5h", avgConfirmDelta: "-1.5h", avgConfirmBars: [14, 12, 10, 9, 9, 8.5],
+    onTimeConfirmRate: "87%", onTimeConfirmDelta: "+7%", onTimeConfirmBars: [70, 75, 79, 82, 84, 87],
+    onTimeConfirmBreakdown: [{ name: "PGP-DS", value: "90%" }, { name: "PGP-AIML", value: "86%" }, { name: "PGP-SE", value: "84%" }],
+    learnersImpactedPerMonth: "150", learnersImpactedDelta: "+10", learnersImpactedBars: [105, 115, 125, 132, 142, 150],
+    learnersImpactedBreakdown: [{ name: "PGP-DS Capstones", value: "70" }, { name: "PGP-AIML Capstones", value: "50" }, { name: "PGP-SE Capstones", value: "30" }],
+    description: "Capstone project mentoring performance and learner guidance.",
+    sessionsBreakdown: [{ name: "PGP-DS Capstones", value: "18 sessions" }, { name: "PGP-AIML Capstones", value: "12 sessions" }, { name: "PGP-SE Capstones", value: "6 sessions" }],
+    qualityBreakdown: [{ name: "4.0+ threshold", value: "96.2%" }, { name: "4.4+ threshold", value: "89%" }],
+    confirmBreakdown: [{ name: "PGP-DS", value: "7.0h" }, { name: "PGP-AIML", value: "8.8h" }, { name: "PGP-SE", value: "9.7h" }],
+    peerAvgRating: 4.42, peerAvgSessions: 5, peerAvgQuality: 93.0, peerAvgConfirmTime: 10.5, peerOnTimeConfirmRate: 78, peerLearnersImpactedPerMonth: 130,
+  },
+  "Industry Expert": {
+    avgRating: "4.82", avgRatingDelta: "+0.14", avgRatingBars: [4.58, 4.65, 4.70, 4.74, 4.68, 4.82],
+    avgSessions: "2", avgSessionsDelta: "+1", avgSessionsBars: [1, 2, 2, 2, 3, 3],
+    avgQuality: "97.8%", avgQualityDelta: "+1.0%", avgQualityBars: [94.5, 95.5, 96.0, 96.8, 96.8, 97.8], avgQualitySecondary: "93%",
+    avgConfirmTime: "12.5h", avgConfirmDelta: "-2.0h", avgConfirmBars: [20, 18, 16, 14, 14, 12.5],
+    onTimeConfirmRate: "78%", onTimeConfirmDelta: "+8%", onTimeConfirmBars: [55, 62, 68, 72, 75, 78],
+    onTimeConfirmBreakdown: [{ name: "Industry Sessions", value: "82%" }, { name: "Guest Lectures", value: "74%" }],
+    learnersImpactedPerMonth: "110", learnersImpactedDelta: "+9", learnersImpactedBars: [70, 80, 88, 95, 102, 110],
+    learnersImpactedBreakdown: [{ name: "Industry Sessions", value: "68" }, { name: "Guest Lectures", value: "42" }],
+    description: "Industry sessions and guest lecture performance.",
+    sessionsBreakdown: [{ name: "Industry Sessions", value: "8 sessions" }, { name: "Guest Lectures", value: "5 sessions" }],
+    qualityBreakdown: [{ name: "4.0+ threshold", value: "97.8%" }, { name: "4.4+ threshold", value: "93%" }],
+    confirmBreakdown: [{ name: "Industry Sessions", value: "10.5h" }, { name: "Guest Lectures", value: "14.5h" }],
+    peerAvgRating: 4.40, peerAvgSessions: 2, peerAvgQuality: 94.0, peerAvgConfirmTime: 15.0, peerOnTimeConfirmRate: 65, peerLearnersImpactedPerMonth: 95,
+  },
+};
+
+/* ── Per-role course performance ──────────────────────────────────────────── */
+
+export const demoRoleCoursePerf: Record<GuruRole, { name: string; rating: number; delta: number }[]> = {
+  Teacher: [
+    { name: "Deep Learning Fundamentals", rating: 4.8, delta: +0.15 },
+    { name: "NLP Advanced Topics", rating: 4.7, delta: +0.08 },
+    { name: "Reinforcement Learning", rating: 4.7, delta: -0.03 },
+    { name: "MLOps", rating: 4.6, delta: +0.21 },
+    { name: "Data Engineering Essentials", rating: 4.5, delta: -0.12 },
+    { name: "Statistics for ML", rating: 4.2, delta: -0.08 },
+  ],
+  "Course Mentor": [
+    { name: "PGP-DS Mentoring", rating: 4.9, delta: +0.10 },
+    { name: "PGP-AIML Mentoring", rating: 4.8, delta: +0.05 },
+    { name: "PGP-DSBA Mentoring", rating: 4.8, delta: +0.12 },
+    { name: "PGP-SE Mentoring", rating: 4.7, delta: -0.02 },
+    { name: "Core Programs", rating: 4.6, delta: +0.08 },
+  ],
+  "Career Mentor": [
+    { name: "Career 1:1 Sessions", rating: 4.9, delta: +0.12 },
+    { name: "Mock Interviews", rating: 4.9, delta: +0.15 },
+    { name: "Resume Strategy", rating: 4.8, delta: +0.08 },
+    { name: "Schedule a Call", rating: 4.7, delta: -0.05 },
+  ],
+  "CV Review Mentor": [
+    { name: "PGP-DS CV Reviews", rating: 4.8, delta: +0.10 },
+    { name: "PGP-AIML CV Reviews", rating: 4.7, delta: +0.06 },
+    { name: "PGP-SE CV Reviews", rating: 4.6, delta: -0.04 },
+    { name: "General CV Reviews", rating: 4.5, delta: +0.03 },
+  ],
+  Evaluator: [
+    { name: "Assignment Evaluations", rating: 5.0, delta: +0.02 },
+    { name: "Project Evaluations", rating: 4.9, delta: +0.08 },
+    { name: "Quiz Assessments", rating: 4.9, delta: +0.05 },
+    { name: "Final Exams", rating: 4.8, delta: +0.10 },
+  ],
+  Moderator: [
+    { name: "Discussion Moderation", rating: 4.9, delta: +0.06 },
+    { name: "Peer Review Moderation", rating: 4.9, delta: +0.08 },
+    { name: "Forum Q&A", rating: 4.8, delta: +0.04 },
+    { name: "Debate Sessions", rating: 4.7, delta: +0.10 },
+  ],
+  "Project Mentor": [
+    { name: "Capstone DS Projects", rating: 4.8, delta: +0.12 },
+    { name: "Capstone AIML Projects", rating: 4.8, delta: +0.08 },
+    { name: "Capstone SE Projects", rating: 4.7, delta: -0.03 },
+    { name: "Mini Projects", rating: 4.6, delta: +0.05 },
+  ],
+  "Industry Expert": [
+    { name: "AI in Healthcare Talk", rating: 4.9, delta: +0.18 },
+    { name: "MLOps at Scale Panel", rating: 4.8, delta: +0.12 },
+    { name: "Data Strategy Keynote", rating: 4.7, delta: +0.10 },
+  ],
+};
+
+/* ── Per-role monthly matrix ─────────────────────────────────────────────── */
+
+export const demoRoleMatrix: Record<GuruRole, { course: string; scores: (number | null)[] }[]> = {
+  // 12 months: May 25 → Apr 26
+  Teacher: [
+    { course: "Deep Learning Fundamentals", scores: [4.5, 4.6, null, 4.7, 4.7, 4.8, 4.6, 4.9, 4.8, 4.8, 4.9, null] },
+    { course: "NLP Advanced Topics",        scores: [null, 4.4, 4.5, null, 4.5, 4.6, 4.7, 4.7, 4.8, 4.7, 4.8, 4.7] },
+    { course: "Reinforcement Learning",     scores: [4.5, null, 4.5, 4.6, 4.6, 4.7, 4.6, 4.7, 4.7, 4.6, 4.7, 4.7] },
+    { course: "MLOps",                      scores: [null, null, 4.2, 4.3, 4.3, 4.4, 4.5, 4.6, 4.6, 4.6, 4.7, 4.6] },
+    { course: "Data Engineering Essentials", scores: [4.4, 4.5, 4.5, null, 4.6, 4.5, 4.4, 4.5, 4.5, 4.5, 4.6, 4.5] },
+    { course: "Statistics for ML",          scores: [4.2, 4.2, null, 4.3, 4.3, 4.3, 4.2, 4.2, 4.2, 4.2, 4.3, 4.2] },
+  ],
+  "Course Mentor": [
+    { course: "PGP-DS Mentoring",    scores: [4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.9, 4.9, 4.9, 4.9, 4.9, null] },
+    { course: "PGP-AIML Mentoring",  scores: [4.5, 4.6, null, 4.7, 4.7, 4.7, 4.8, 4.8, 4.8, 4.8, 4.8, 4.9] },
+    { course: "PGP-DSBA Mentoring",  scores: [null, null, 4.5, 4.6, 4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.8, 4.8] },
+    { course: "PGP-SE Mentoring",    scores: [4.4, 4.4, 4.5, null, 4.5, 4.6, 4.6, 4.7, 4.7, 4.7, 4.7, 4.7] },
+    { course: "Core Programs",       scores: [4.3, null, 4.4, 4.4, 4.4, 4.5, 4.5, 4.6, 4.6, 4.6, 4.6, 4.7] },
+  ],
+  "Career Mentor": [
+    { course: "Career 1:1 Sessions", scores: [4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.9, 4.9, 4.9, 4.9, 4.9, null] },
+    { course: "Mock Interviews",     scores: [null, 4.6, 4.7, 4.7, 4.7, 4.8, 4.8, 4.9, 4.9, 4.9, 4.9, 4.9] },
+    { course: "Resume Strategy",     scores: [4.5, null, 4.6, 4.6, 4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.8, 4.8] },
+    { course: "Schedule a Call",     scores: [4.4, 4.4, null, 4.5, 4.5, 4.6, 4.6, 4.7, 4.7, 4.7, 4.7, 4.7] },
+  ],
+  "CV Review Mentor": [
+    { course: "PGP-DS CV Reviews",   scores: [4.4, 4.5, 4.5, 4.6, 4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.8, null] },
+    { course: "PGP-AIML CV Reviews", scores: [null, 4.4, 4.4, 4.5, 4.5, 4.6, 4.6, 4.7, 4.7, 4.7, 4.7, 4.8] },
+    { course: "PGP-SE CV Reviews",   scores: [4.3, null, 4.3, 4.4, 4.4, 4.5, 4.5, 4.6, 4.6, 4.6, 4.6, 4.6] },
+    { course: "General CV Reviews",  scores: [4.2, 4.3, null, 4.3, 4.3, 4.4, 4.4, 4.5, 4.5, 4.5, 4.5, 4.5] },
+  ],
+  Evaluator: [
+    { course: "Assignment Evaluations", scores: [4.7, 4.8, 4.8, 4.9, 4.9, 4.9, 5.0, 5.0, 5.0, 5.0, 5.0, null] },
+    { course: "Project Evaluations",    scores: [4.6, 4.7, null, 4.8, 4.8, 4.8, 4.9, 4.9, 4.9, 4.9, 4.9, 5.0] },
+    { course: "Quiz Assessments",       scores: [null, 4.6, 4.7, 4.7, 4.8, 4.8, 4.9, 4.9, 4.9, 4.9, 4.9, 4.9] },
+    { course: "Final Exams",            scores: [4.5, null, 4.6, 4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.8, 4.8, 4.9] },
+  ],
+  Moderator: [
+    { course: "Discussion Moderation",  scores: [4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.9, 4.9, 4.9, 4.9, 4.9, null] },
+    { course: "Peer Review Moderation", scores: [null, 4.6, 4.7, 4.7, 4.7, 4.8, 4.8, 4.9, 4.9, 4.9, 4.9, 4.9] },
+    { course: "Forum Q&A",             scores: [4.4, 4.5, null, 4.6, 4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.8, 4.8] },
+    { course: "Debate Sessions",        scores: [4.3, null, 4.4, 4.5, 4.5, 4.6, 4.6, 4.7, 4.7, 4.7, 4.7, 4.8] },
+  ],
+  "Project Mentor": [
+    { course: "Capstone DS Projects",   scores: [4.4, 4.5, null, 4.6, 4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.8, null] },
+    { course: "Capstone AIML Projects", scores: [null, 4.5, 4.5, 4.6, 4.6, 4.7, 4.7, 4.8, 4.8, 4.8, 4.8, 4.8] },
+    { course: "Capstone SE Projects",   scores: [4.3, null, 4.4, 4.5, 4.5, 4.6, 4.6, 4.7, 4.7, 4.7, 4.7, 4.7] },
+    { course: "Mini Projects",          scores: [4.2, 4.3, 4.3, null, 4.4, 4.5, 4.5, 4.6, 4.6, 4.6, 4.6, 4.7] },
+  ],
+  "Industry Expert": [
+    { course: "AI in Healthcare Talk",  scores: [null, null, null, null, null, null, 4.8, null, 4.9, 4.9, 4.9, null] },
+    { course: "MLOps at Scale Panel",   scores: [null, null, 4.6, null, 4.7, null, null, 4.8, null, 4.8, null, 4.9] },
+    { course: "Data Strategy Keynote",  scores: [null, null, null, 4.5, null, 4.6, null, null, 4.7, null, 4.7, null] },
+  ],
+};
+
+/* ── Per-role rating history ─────────────────────────────────────────────── */
+
+export const demoRoleRatingHistory: Record<GuruRole, RatingHistoryEntry[]> = {
+  Teacher: [
+    { id: "t1", title: "Deep Learning Fundamentals", group: "Group 02", dateYmd: "2026-03-25", score: 4.80, feedback: "Excellent depth of content" },
+    { id: "t2", title: "NLP Advanced Topics", group: "Group 06", dateYmd: "2026-03-04", score: 4.70 },
+    { id: "t3", title: "Reinforcement Learning", group: "Group 04", dateYmd: "2026-02-25", score: 4.65 },
+    { id: "t4", title: "MLOps", group: "Group 03", dateYmd: "2026-02-10", score: 4.60 },
+    { id: "t5", title: "Deep Learning Fundamentals", group: "Group 01", dateYmd: "2026-01-20", score: 4.75 },
+    { id: "t6", title: "Statistics for ML", group: "Group 05", dateYmd: "2026-01-08", score: 4.50 },
+    { id: "t7", title: "Data Engineering Essentials", group: "Group 02", dateYmd: "2025-12-15", score: 4.55 },
+    { id: "t8", title: "NLP Advanced Topics", group: "Group 03", dateYmd: "2025-11-20", score: 4.68 },
+    { id: "t9", title: "Deep Learning Fundamentals", group: "Group 04", dateYmd: "2025-10-10", score: 4.62 },
+  ],
+  "Course Mentor": [
+    { id: "cm1", title: "PGP-DS Mentoring", group: "Cohort 26A", dateYmd: "2026-03-22", score: 4.90 },
+    { id: "cm2", title: "PGP-AIML Mentoring", group: "Cohort 25B", dateYmd: "2026-03-10", score: 4.85 },
+    { id: "cm3", title: "PGP-DSBA Mentoring", group: "Cohort 26A", dateYmd: "2026-02-18", score: 4.80 },
+    { id: "cm4", title: "PGP-SE Mentoring", group: "Cohort 25A", dateYmd: "2026-02-05", score: 4.75 },
+    { id: "cm5", title: "PGP-DS Mentoring", group: "Cohort 25B", dateYmd: "2026-01-15", score: 4.82 },
+    { id: "cm6", title: "PGP-AIML Mentoring", group: "Cohort 25A", dateYmd: "2025-12-10", score: 4.78 },
+    { id: "cm7", title: "Core Programs", group: "Cohort 25B", dateYmd: "2025-11-12", score: 4.70 },
+    { id: "cm8", title: "PGP-DS Mentoring", group: "Cohort 25A", dateYmd: "2025-10-20", score: 4.72 },
+  ],
+  "Career Mentor": [
+    { id: "crm1", title: "Career 1:1 Session", group: "Individual", dateYmd: "2026-03-20", score: 4.95 },
+    { id: "crm2", title: "Mock Interview", group: "Individual", dateYmd: "2026-03-08", score: 4.90 },
+    { id: "crm3", title: "Career 1:1 Session", group: "Individual", dateYmd: "2026-02-22", score: 4.85 },
+    { id: "crm4", title: "Resume Strategy", group: "Group", dateYmd: "2026-02-10", score: 4.80 },
+    { id: "crm5", title: "Schedule a Call", group: "Individual", dateYmd: "2026-01-18", score: 4.88 },
+    { id: "crm6", title: "Career 1:1 Session", group: "Individual", dateYmd: "2025-12-05", score: 4.78 },
+    { id: "crm7", title: "Mock Interview", group: "Individual", dateYmd: "2025-11-15", score: 4.82 },
+    { id: "crm8", title: "Career 1:1 Session", group: "Individual", dateYmd: "2025-10-08", score: 4.74 },
+  ],
+  "CV Review Mentor": [
+    { id: "cv1", title: "PGP-DS CV Review", group: "Individual", dateYmd: "2026-03-18", score: 4.80 },
+    { id: "cv2", title: "PGP-AIML CV Review", group: "Individual", dateYmd: "2026-03-05", score: 4.75 },
+    { id: "cv3", title: "PGP-SE CV Review", group: "Individual", dateYmd: "2026-02-20", score: 4.70 },
+    { id: "cv4", title: "General CV Review", group: "Individual", dateYmd: "2026-02-08", score: 4.65 },
+    { id: "cv5", title: "PGP-DS CV Review", group: "Individual", dateYmd: "2026-01-22", score: 4.72 },
+    { id: "cv6", title: "PGP-AIML CV Review", group: "Individual", dateYmd: "2025-12-12", score: 4.62 },
+    { id: "cv7", title: "PGP-DS CV Review", group: "Individual", dateYmd: "2025-11-18", score: 4.60 },
+  ],
+  Evaluator: [
+    { id: "ev1", title: "Assignment Evaluations", group: "PGP-DS", dateYmd: "2026-03-24", score: 5.0 },
+    { id: "ev2", title: "Project Evaluations", group: "PGP-AIML", dateYmd: "2026-03-12", score: 4.95 },
+    { id: "ev3", title: "Quiz Assessments", group: "PGP-DS", dateYmd: "2026-02-28", score: 4.92 },
+    { id: "ev4", title: "Final Exams", group: "PGP-AIML", dateYmd: "2026-02-15", score: 4.88 },
+    { id: "ev5", title: "Assignment Evaluations", group: "PGP-SE", dateYmd: "2026-01-25", score: 4.94 },
+    { id: "ev6", title: "Project Evaluations", group: "PGP-DS", dateYmd: "2025-12-18", score: 4.90 },
+    { id: "ev7", title: "Assignment Evaluations", group: "PGP-AIML", dateYmd: "2025-11-22", score: 4.88 },
+    { id: "ev8", title: "Quiz Assessments", group: "PGP-SE", dateYmd: "2025-10-15", score: 4.85 },
+  ],
+  Moderator: [
+    { id: "mod1", title: "Discussion Moderation", group: "PGP-DS", dateYmd: "2026-03-21", score: 4.95 },
+    { id: "mod2", title: "Peer Review Moderation", group: "PGP-AIML", dateYmd: "2026-03-08", score: 4.90 },
+    { id: "mod3", title: "Forum Q&A", group: "PGP-DS", dateYmd: "2026-02-22", score: 4.88 },
+    { id: "mod4", title: "Debate Sessions", group: "PGP-AIML", dateYmd: "2026-02-10", score: 4.85 },
+    { id: "mod5", title: "Discussion Moderation", group: "PGP-SE", dateYmd: "2026-01-20", score: 4.90 },
+    { id: "mod6", title: "Peer Review Moderation", group: "PGP-DS", dateYmd: "2025-12-15", score: 4.82 },
+    { id: "mod7", title: "Forum Q&A", group: "PGP-AIML", dateYmd: "2025-11-10", score: 4.80 },
+  ],
+  "Project Mentor": [
+    { id: "pm1", title: "Capstone DS Projects", group: "PGP-DS", dateYmd: "2026-03-20", score: 4.85 },
+    { id: "pm2", title: "Capstone AIML Projects", group: "PGP-AIML", dateYmd: "2026-03-05", score: 4.80 },
+    { id: "pm3", title: "Capstone SE Projects", group: "PGP-SE", dateYmd: "2026-02-18", score: 4.72 },
+    { id: "pm4", title: "Mini Projects", group: "PGP-DS", dateYmd: "2026-02-05", score: 4.68 },
+    { id: "pm5", title: "Capstone DS Projects", group: "PGP-DS", dateYmd: "2026-01-15", score: 4.75 },
+    { id: "pm6", title: "Capstone AIML Projects", group: "PGP-AIML", dateYmd: "2025-12-08", score: 4.70 },
+    { id: "pm7", title: "Mini Projects", group: "PGP-SE", dateYmd: "2025-11-18", score: 4.65 },
+  ],
+  "Industry Expert": [
+    { id: "ie1", title: "AI in Healthcare Talk", group: "Webinar", dateYmd: "2026-03-15", score: 4.92 },
+    { id: "ie2", title: "MLOps at Scale Panel", group: "Webinar", dateYmd: "2026-02-20", score: 4.85 },
+    { id: "ie3", title: "Data Strategy Keynote", group: "Webinar", dateYmd: "2026-01-10", score: 4.78 },
+    { id: "ie4", title: "AI in Healthcare Talk", group: "Webinar", dateYmd: "2025-12-05", score: 4.72 },
+    { id: "ie5", title: "MLOps at Scale Panel", group: "Webinar", dateYmd: "2025-10-25", score: 4.65 },
+  ],
+};

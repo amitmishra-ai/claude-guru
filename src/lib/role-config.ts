@@ -1,6 +1,42 @@
 import type { GuruRole } from "@/store/slices/devPanelSlice";
 import type { SessionType } from "@/lib/types";
 
+/* ── Role Category Mapping ───────────────────────────────────────────────── */
+
+export type GuruRoleCategory = "Teaching" | "Mentoring" | "Evaluation & Moderation";
+
+export const ROLE_TO_CATEGORY: Record<GuruRole, GuruRoleCategory> = {
+  Teacher: "Teaching",
+  "Industry Expert": "Teaching",
+  "Course Mentor": "Mentoring",
+  "Career Mentor": "Mentoring",
+  "CV Review Mentor": "Mentoring",
+  "Project Mentor": "Mentoring",
+  Evaluator: "Evaluation & Moderation",
+  Moderator: "Evaluation & Moderation",
+};
+
+export const ALL_CATEGORIES: GuruRoleCategory[] = [
+  "Teaching",
+  "Mentoring",
+  "Evaluation & Moderation",
+];
+
+export function getCategoriesForRoles(roles: GuruRole[]): GuruRoleCategory[] {
+  const seen = new Set<GuruRoleCategory>();
+  const result: GuruRoleCategory[] = [];
+  for (const r of roles) {
+    const cat = ROLE_TO_CATEGORY[r];
+    if (!seen.has(cat)) {
+      seen.add(cat);
+      result.push(cat);
+    }
+  }
+  return result;
+}
+
+/* ── Role → Session Types ────────────────────────────────────────────────── */
+
 /**
  * Maps each Guru role to the session types visible for that role.
  * "all" means the role sees every session type.
