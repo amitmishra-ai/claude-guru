@@ -211,7 +211,33 @@ export default function ProfilePage() {
   const [reportModal, setReportModal] = useState<string | null>(null);
   const [showCourseReport, setShowCourseReport] = useState(false);
   const testimonialRef = useRef<HTMLDivElement>(null);
-  const kpiScrollRef = useRef<HTMLDivElement>(null);
+
+  // Operational tab items — splits "Evaluation & Moderation" into separate
+  // Evaluation / Moderation tabs when both roles are selected, so each gets
+  // its own stats. Teaching and Mentoring stay as single category tabs.
+  const tabItems = useMemo(() => {
+    const items: { key: string; label: string; dataRole: GuruRole; isEvalMod: boolean }[] = [];
+    for (const cat of activeCategories) {
+      if (cat === "Evaluation & Moderation") {
+        const hasEvaluator = selectedRoles.includes("Evaluator");
+        const hasModerator = selectedRoles.includes("Moderator");
+        if (hasEvaluator) items.push({ key: "Evaluation", label: "Evaluation", dataRole: "Evaluator", isEvalMod: true });
+        if (hasModerator) items.push({ key: "Moderation", label: "Moderation", dataRole: "Moderator", isEvalMod: true });
+      } else {
+        const firstRole = selectedRoles.find((r) => ROLE_TO_CATEGORY[r] === cat) ?? selectedRole;
+        items.push({ key: cat, label: cat, dataRole: firstRole, isEvalMod: false });
+      }
+    }
+    return items;
+  }, [activeCategories, selectedRoles, selectedRole]);
+
+  const [activeTab, setActiveTab] = useState(tabItems[0]?.key ?? "");
+  // Sync activeTab when tab items change (role chip toggle)
+  useEffect(() => {
+    if (!tabItems.some((t) => t.key === activeTab)) {
+      setActiveTab(tabItems[0]?.key ?? "");
+    }
+  }, [tabItems, activeTab]);
   const [shareMonth, setShareMonth] = useState("2026-03");
   const [shareAllTime, setShareAllTime] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -384,75 +410,73 @@ export default function ProfilePage() {
     return (categoryRatings.reduce((s, c) => s + c.overall, 0) / categoryRatings.length).toFixed(2);
   }, [categoryRatings]);
 
-  // KPI stat cards config for Performance — role-aware. The 4 cards differ
-  // depending on the active role's category:
-  //   - Teaching / Mentoring → AVG RATING, AVG SESSIONS / MONTH, AVG SESSION QUALITY,
-  //     ON-TIME CONFIRMS (the "session-based" set).
-  //   - Evaluation & Moderation → AVG RATING, EVALUATIONS / MONTH, ON-TIME EVALUATIONS,
-  //     LEARNERS IMPACTED (the "assignment-based" set; mirrors the live dashboard's
-  //     Engagement Count + Learners Impacted tiles for this category).
-  // The first card (AVG RATING) is identical in both sets; only cards 2-4 swap.
-  //
-  // Branching is driven by `selectedRoles` (the dev panel's "Active Guru Roles"
-  // chips), not `selectedRole` (the dropdown), because the chips are what the
-  // user toggles to change context on the Profile page. When all currently-active
-  // roles fall in the Evaluation & Moderation category, switch to set B and source
-  // data from the first Eval/Mod role in the chip list. Otherwise fall back to
-  // the dropdown-controlled `selectedRole` for both card set and data.
-  // Determine which card sets to show and which data sources to use.
-  // - Pure Teaching/Mentoring → set A only, data from selectedRole.
-  // - Pure Eval/Mod → set B only, data from first Eval/Mod role.
-  // - Mixed (e.g. Teacher + Evaluator) → union of A+B, each set sourced
-  //   from its own category's first role. Produces up to 7 unique cards.
-  const hasSessionRoles = activeCategories.some((c) => c === "Teaching" || c === "Mentoring");
-  const hasEvalModRoles = activeCategories.includes("Evaluation & Moderation");
-  const isMixed = hasSessionRoles && hasEvalModRoles;
-  const isPureEvalMod = !hasSessionRoles && hasEvalModRoles;
-
-  const sessionDataRole: GuruRole = selectedRoles.find(
-    (r) => ROLE_TO_CATEGORY[r] === "Teaching" || ROLE_TO_CATEGORY[r] === "Mentoring",
-  ) ?? selectedRole;
-  const evalDataRole: GuruRole = selectedRoles.find(
-    (r) => ROLE_TO_CATEGORY[r] === "Evaluation & Moderation",
-  ) ?? selectedRole;
-
-  const dataRole: GuruRole = isPureEvalMod ? evalDataRole : sessionDataRole;
-  const roleData = demoRoleStatCards[dataRole];
-  const evalRoleData = demoRoleStatCards[evalDataRole];
-  const isEvalModCategory = isPureEvalMod;
+  // ══ ZONE 1: Rating cards (one per active category, always visible) ══════
   const monthLabels = ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"];
-  const statCards = useMemo(() => {
-    const sharedRatingCard = {
-      label: "AVG RATING",
-      value: weightedAvgRating,
-      numericValue: parseFloat(weightedAvgRating as string) || 0,
-      description: roleData.description,
-      delta: roleData.avgRatingDelta,
+  const ratingCards = useMemo(() =>
+    categoryRatings.map((cr) => ({
+      label: categoryDisplayLabel(cr.category).toUpperCase(),
+      value: cr.overall.toFixed(2),
+      numericValue: cr.overall,
+      description: `Average ${categoryDisplayLabel(cr.category).toLowerCase()} rating across all feedback received.`,
+      delta: `+${cr.delta.toFixed(2)}`,
       deltaLabel: "vs last month",
-      deltaPositive: true,
-      bars: roleData.avgRatingBars,
+      deltaPositive: cr.delta >= 0,
+      bars: cr.trend.map((t: { month: string; value: number }) => t.value),
       barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
       bg: "var(--gl-accent-primary-bg)",
       accent: "var(--gl-accent-primary)",
-      reportTitle: "Average Rating Report",
-      reportSummary: `Your average rating as ${selectedRole} over the last 6 months.`,
-      chartData: categoryRatings.length === 1
-        ? categoryRatings[0].trend
-        : roleData.avgRatingBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+      reportTitle: `${categoryDisplayLabel(cr.category)} Rating Report`,
+      reportSummary: `Your average ${categoryDisplayLabel(cr.category).toLowerCase()} rating over the last 6 months.`,
+      chartData: cr.trend,
       chartKey: "value",
-      breakdown: categoryRatings.length === 1
-        ? categoryRatings[0].breakdown
-        : categoryRatings.map((c) => ({ name: c.category, value: c.overall.toFixed(2) })),
-      categoryRatings,
-      peerValue: roleData.peerAvgRating, peerLabel: roleData.peerAvgRating.toFixed(2), lowerIsBetter: false,
-    };
+      breakdown: cr.breakdown,
+      peerValue: demoRoleStatCards[selectedRole].peerAvgRating,
+      peerLabel: demoRoleStatCards[selectedRole].peerAvgRating.toFixed(2),
+      lowerIsBetter: false,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  [categoryRatings, selectedRole]);
 
-    // ── Helper: build set B's 3 eval/mod cards from a given data source ──
-    // Uses info (sky blue), violet, teal — distinct from set A's amber/purple/green
-    // so when both sets render in mixed mode all 7 cards look unique.
-    const buildEvalCards = (rd: typeof roleData, role: GuruRole) => {
-      const wN = role === "Moderator" ? "moderations" : "evaluations";
-      const wNs = role === "Moderator" ? "moderation" : "evaluation";
+  // ══ HERO: On-time confirmation rate (universal, always visible) ═════════
+  // This metric is shared across all roles — pulled out of the tabbed section
+  // so it doesn't repeat per tab. Uses the dropdown-controlled selectedRole.
+  const heroRd = demoRoleStatCards[selectedRole];
+  const onTimeHeroCard = useMemo(() => ({
+    label: "ON-TIME CONFIRMS",
+    value: heroRd.onTimeConfirmRate,
+    numericValue: parseFloat(heroRd.onTimeConfirmRate),
+    description: "Work you confirmed within 24 hours of being assigned.",
+    delta: heroRd.onTimeConfirmDelta,
+    deltaLabel: "vs last quarter",
+    deltaPositive: true,
+    bars: heroRd.onTimeConfirmBars,
+    barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+    bg: "var(--gl-accent-success-bg)",
+    accent: "var(--gl-accent-success)",
+    reportTitle: "On-time Confirmation Report",
+    reportSummary: "Share of work you confirmed within 24 hours of being assigned. Higher is better.",
+    chartData: heroRd.onTimeConfirmBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
+    chartKey: "value",
+    breakdown: heroRd.onTimeConfirmBreakdown,
+    peerValue: heroRd.peerOnTimeConfirmRate,
+    peerLabel: `${heroRd.peerOnTimeConfirmRate}%`,
+    lowerIsBetter: false,
+    supportingStat: { label: "Average time to confirm", value: heroRd.avgConfirmTime },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [selectedRole, heroRd]);
+
+  // ══ ZONE 2: Operational cards (2, tab-switched) ════════════════════════
+  // Driven by `tabItems` — Evaluation and Moderation are separate tabs.
+  const operationalCards = useMemo(() => {
+    const currentTab = tabItems.find((t) => t.key === activeTab) ?? tabItems[0];
+    if (!currentTab) return [];
+    const tabRole = currentTab.dataRole;
+    const rd = demoRoleStatCards[tabRole];
+    const isEvalMod = currentTab.isEvalMod;
+
+    if (isEvalMod) {
+      const wN = tabRole === "Moderator" ? "moderations" : "evaluations";
+      const wNs = tabRole === "Moderator" ? "moderation" : "evaluation";
       return [
         {
           label: `${wN.toUpperCase()} / MONTH`,
@@ -462,8 +486,8 @@ export default function ProfilePage() {
           bars: rd.avgSessionsBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
           bg: "var(--gl-accent-info-bg)", accent: "var(--gl-accent-info)",
           reportTitle: `${wN.charAt(0).toUpperCase() + wN.slice(1)} per Month Report`,
-          reportSummary: `Monthly breakdown of ${wN} delivered as ${role}.`,
-          chartData: rd.avgSessionsBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          reportSummary: `Monthly breakdown of ${wN} delivered as ${tabRole}.`,
+          chartData: rd.avgSessionsBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
           chartKey: "value", breakdown: rd.sessionsBreakdown,
           peerValue: rd.peerAvgSessions, peerLabel: String(rd.peerAvgSessions), lowerIsBetter: false,
         },
@@ -476,220 +500,50 @@ export default function ProfilePage() {
           bg: "var(--gl-accent-violet-bg)", accent: "var(--gl-accent-violet)",
           reportTitle: `On-time ${wNs.charAt(0).toUpperCase() + wNs.slice(1)} Report`,
           reportSummary: `Share of assignments you ${wNs === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned. Higher is better.`,
-          chartData: rd.onTimeConfirmBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartData: rd.onTimeConfirmBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
           chartKey: "value", breakdown: rd.onTimeConfirmBreakdown,
           peerValue: rd.peerOnTimeConfirmRate, peerLabel: `${rd.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
           supportingStat: { label: `Average time to ${wNs === "moderation" ? "moderate" : "evaluate"}`, value: rd.avgConfirmTime },
         },
-        {
-          label: "LEARNERS IMPACTED",
-          value: rd.learnersImpactedPerMonth, numericValue: parseFloat(rd.learnersImpactedPerMonth),
-          description: `Unique learners whose ${wN === "moderations" ? "discussions" : "assignments"} you ${wNs === "moderation" ? "moderated" : "evaluated"} per month.`,
-          delta: rd.learnersImpactedDelta, deltaLabel: "vs last month", deltaPositive: true,
-          bars: rd.learnersImpactedBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-          bg: "var(--gl-accent-teal-bg)", accent: "var(--gl-accent-teal)",
-          reportTitle: "Learners Impacted Report",
-          reportSummary: `Monthly count of unique learners whose work you ${wNs === "moderation" ? "moderated" : "evaluated"}.`,
-          chartData: rd.learnersImpactedBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-          chartKey: "value", breakdown: rd.learnersImpactedBreakdown,
-          peerValue: rd.peerLearnersImpactedPerMonth, peerLabel: String(rd.peerLearnersImpactedPerMonth), lowerIsBetter: false,
-        },
-      ] as const;
-    };
-
-    // ── Mixed mode: union of set A (session-based) + set B (eval-based) ──
-    if (isMixed) {
-      const sessionRd = demoRoleStatCards[sessionDataRole];
-      return [
-        sharedRatingCard,
-        // Set A cards (using session-based role's data)
-        {
-          label: "AVG SESSIONS / MONTH",
-          value: sessionRd.avgSessions, numericValue: parseFloat(sessionRd.avgSessions),
-          description: `Average sessions delivered per month as ${sessionDataRole}.`,
-          delta: sessionRd.avgSessionsDelta, deltaLabel: "vs last month", deltaPositive: true,
-          bars: sessionRd.avgSessionsBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-          bg: "var(--gl-accent-amber-bg)", accent: "var(--gl-accent-amber)",
-          reportTitle: "Sessions per Month Report",
-          reportSummary: `Monthly breakdown of sessions delivered as ${sessionDataRole}.`,
-          chartData: sessionRd.avgSessionsBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-          chartKey: "value", breakdown: sessionRd.sessionsBreakdown,
-          peerValue: sessionRd.peerAvgSessions, peerLabel: String(sessionRd.peerAvgSessions), lowerIsBetter: false,
-        },
-        {
-          label: "AVG SESSION QUALITY",
-          value: sessionRd.avgQuality, numericValue: parseFloat(sessionRd.avgQuality),
-          description: "Sessions rated 4.0 or above.",
-          delta: sessionRd.avgQualityDelta, deltaLabel: "vs last month", deltaPositive: true,
-          bars: sessionRd.avgQualityBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-          bg: "var(--gl-accent-purple-bg)", accent: "var(--gl-accent-purple)",
-          reportTitle: "Session Quality Report",
-          reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
-          chartData: sessionRd.avgQualityBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-          chartKey: "value", breakdown: sessionRd.qualityBreakdown,
-          primaryBenchmark: "Target: > 98%", secondaryValue: sessionRd.avgQualitySecondary,
-          secondaryLabel: "Rated 4.4+", secondaryBenchmark: "Target: > 90%",
-          peerValue: sessionRd.peerAvgQuality, peerLabel: `${sessionRd.peerAvgQuality}%`, lowerIsBetter: false,
-        },
-        {
-          label: "ON-TIME CONFIRMS",
-          value: sessionRd.onTimeConfirmRate, numericValue: parseFloat(sessionRd.onTimeConfirmRate),
-          description: "Sessions you confirmed within 24 hours of being assigned.",
-          delta: sessionRd.onTimeConfirmDelta, deltaLabel: "vs last quarter", deltaPositive: true,
-          bars: sessionRd.onTimeConfirmBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-          bg: "var(--gl-accent-success-bg)", accent: "var(--gl-accent-success)",
-          reportTitle: "On-time Confirmation Report",
-          reportSummary: "Share of sessions you confirmed within 24 hours of being assigned. Higher is better.",
-          chartData: sessionRd.onTimeConfirmBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-          chartKey: "value", breakdown: sessionRd.onTimeConfirmBreakdown,
-          peerValue: sessionRd.peerOnTimeConfirmRate, peerLabel: `${sessionRd.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
-          supportingStat: { label: "Average time to confirm", value: sessionRd.avgConfirmTime },
-        },
-        // Set B cards (using eval/mod role's data)
-        ...buildEvalCards(evalRoleData, evalDataRole),
       ];
     }
 
-    if (isEvalModCategory) {
-      // Eval/Mod-specific cards. "Sessions" → "evaluations/moderations" and
-      // "session quality" is dropped (doesn't map to assignment-based work).
-      const workNoun = dataRole === "Moderator" ? "moderations" : "evaluations";
-      const workNounSingular = dataRole === "Moderator" ? "moderation" : "evaluation";
-      return [
-        sharedRatingCard,
-        {
-          label: `${workNoun.toUpperCase()} / MONTH`,
-          value: roleData.avgSessions,
-          numericValue: parseFloat(roleData.avgSessions),
-          description: `${workNoun.charAt(0).toUpperCase() + workNoun.slice(1)} delivered per month across your assignments.`,
-          delta: roleData.avgSessionsDelta,
-          deltaLabel: "vs last month",
-          deltaPositive: true,
-          bars: roleData.avgSessionsBars,
-          barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-          bg: "var(--gl-accent-amber-bg)",
-          accent: "var(--gl-accent-amber)",
-          reportTitle: `${workNoun.charAt(0).toUpperCase() + workNoun.slice(1)} per Month Report`,
-          reportSummary: `Monthly breakdown of ${workNoun} delivered as ${selectedRole}.`,
-          chartData: roleData.avgSessionsBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-          chartKey: "value",
-          breakdown: roleData.sessionsBreakdown,
-          peerValue: roleData.peerAvgSessions, peerLabel: String(roleData.peerAvgSessions), lowerIsBetter: false,
-        },
-        {
-          label: `ON-TIME ${workNoun.toUpperCase()}`,
-          value: roleData.onTimeConfirmRate,
-          numericValue: parseFloat(roleData.onTimeConfirmRate),
-          description: `Assignments you ${workNounSingular === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned.`,
-          delta: roleData.onTimeConfirmDelta,
-          deltaLabel: "vs last quarter",
-          deltaPositive: true,
-          bars: roleData.onTimeConfirmBars,
-          barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-          bg: "var(--gl-accent-success-bg)",
-          accent: "var(--gl-accent-success)",
-          reportTitle: `On-time ${workNounSingular.charAt(0).toUpperCase() + workNounSingular.slice(1)} Report`,
-          reportSummary: `Share of assignments you ${workNounSingular === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned. Higher is better.`,
-          chartData: roleData.onTimeConfirmBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-          chartKey: "value",
-          breakdown: roleData.onTimeConfirmBreakdown,
-          peerValue: roleData.peerOnTimeConfirmRate, peerLabel: `${roleData.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
-          supportingStat: { label: `Average time to ${workNounSingular === "moderation" ? "moderate" : "evaluate"}`, value: roleData.avgConfirmTime },
-        },
-        {
-          label: "LEARNERS IMPACTED",
-          value: roleData.learnersImpactedPerMonth,
-          numericValue: parseFloat(roleData.learnersImpactedPerMonth),
-          description: `Unique learners whose ${workNoun === "moderations" ? "discussions" : "assignments"} you ${workNounSingular === "moderation" ? "moderated" : "evaluated"} per month.`,
-          delta: roleData.learnersImpactedDelta,
-          deltaLabel: "vs last month",
-          deltaPositive: true,
-          bars: roleData.learnersImpactedBars,
-          barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-          bg: "var(--gl-accent-purple-bg)",
-          accent: "var(--gl-accent-purple)",
-          reportTitle: "Learners Impacted Report",
-          reportSummary: `Monthly count of unique learners whose work you ${workNounSingular === "moderation" ? "moderated" : "evaluated"}.`,
-          chartData: roleData.learnersImpactedBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-          chartKey: "value",
-          breakdown: roleData.learnersImpactedBreakdown,
-          peerValue: roleData.peerLearnersImpactedPerMonth, peerLabel: String(roleData.peerLearnersImpactedPerMonth), lowerIsBetter: false,
-        },
-      ];
-    }
-
-    // Default — Teaching / Mentoring card set (today's 4 cards).
+    // Teaching / Mentoring — 2 session-based cards (on-time removed)
     return [
-      sharedRatingCard,
       {
         label: "AVG SESSIONS / MONTH",
-        value: roleData.avgSessions,
-        numericValue: parseFloat(roleData.avgSessions),
-        description: `Average sessions delivered per month as ${selectedRole}.`,
-        delta: roleData.avgSessionsDelta,
-        deltaLabel: "vs last month",
-        deltaPositive: true,
-        bars: roleData.avgSessionsBars,
-        barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-        bg: "var(--gl-accent-amber-bg)",
-        accent: "var(--gl-accent-amber)",
+        value: rd.avgSessions, numericValue: parseFloat(rd.avgSessions),
+        description: `Average sessions delivered per month as ${tabRole}.`,
+        delta: rd.avgSessionsDelta, deltaLabel: "vs last month", deltaPositive: true,
+        bars: rd.avgSessionsBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+        bg: "var(--gl-accent-amber-bg)", accent: "var(--gl-accent-amber)",
         reportTitle: "Sessions per Month Report",
-        reportSummary: `Monthly breakdown of sessions delivered as ${selectedRole}.`,
-        chartData: roleData.avgSessionsBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-        chartKey: "value",
-        breakdown: roleData.sessionsBreakdown,
-        peerValue: roleData.peerAvgSessions, peerLabel: String(roleData.peerAvgSessions), lowerIsBetter: false,
+        reportSummary: `Monthly breakdown of sessions delivered as ${tabRole}.`,
+        chartData: rd.avgSessionsBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
+        chartKey: "value", breakdown: rd.sessionsBreakdown,
+        peerValue: rd.peerAvgSessions, peerLabel: String(rd.peerAvgSessions), lowerIsBetter: false,
       },
       {
         label: "AVG SESSION QUALITY",
-        value: roleData.avgQuality,
-        numericValue: parseFloat(roleData.avgQuality),
+        value: rd.avgQuality, numericValue: parseFloat(rd.avgQuality),
         description: "Sessions rated 4.0 or above.",
-        delta: roleData.avgQualityDelta,
-        deltaLabel: "vs last month",
-        deltaPositive: true,
-        bars: roleData.avgQualityBars,
-        barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-        bg: "var(--gl-accent-purple-bg)",
-        accent: "var(--gl-accent-purple)",
+        delta: rd.avgQualityDelta, deltaLabel: "vs last month", deltaPositive: true,
+        bars: rd.avgQualityBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+        bg: "var(--gl-accent-purple-bg)", accent: "var(--gl-accent-purple)",
         reportTitle: "Session Quality Report",
         reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
-        chartData: roleData.avgQualityBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-        chartKey: "value",
-        breakdown: roleData.qualityBreakdown,
-        primaryBenchmark: "Target: > 98%",
-        secondaryValue: roleData.avgQualitySecondary,
-        secondaryLabel: "Rated 4.4+",
-        secondaryBenchmark: "Target: > 90%",
-        peerValue: roleData.peerAvgQuality, peerLabel: `${roleData.peerAvgQuality}%`, lowerIsBetter: false,
-      },
-      {
-        // Reframed from "AVG CONFIRM TIME" (lower-is-better hours) to "ON-TIME CONFIRMS"
-        // (higher-is-better %), so all four KPI cards share the same semantic direction.
-        // Raw average time is preserved on the data object and surfaced inside the drawer
-        // as a supporting stat ("Avg time to confirm: 5.4h").
-        label: "ON-TIME CONFIRMS",
-        value: roleData.onTimeConfirmRate,
-        numericValue: parseFloat(roleData.onTimeConfirmRate),
-        description: "Sessions you confirmed within 24 hours of being assigned.",
-        delta: roleData.onTimeConfirmDelta,
-        deltaLabel: "vs last quarter",
-        deltaPositive: true,
-        bars: roleData.onTimeConfirmBars,
-        barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-        bg: "var(--gl-accent-success-bg)",
-        accent: "var(--gl-accent-success)",
-        reportTitle: "On-time Confirmation Report",
-        reportSummary: "Share of sessions you confirmed within 24 hours of being assigned. Higher is better.",
-        chartData: roleData.onTimeConfirmBars.map((v, i) => ({ month: monthLabels[i], value: v })),
-        chartKey: "value",
-        breakdown: roleData.onTimeConfirmBreakdown,
-        peerValue: roleData.peerOnTimeConfirmRate, peerLabel: `${roleData.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
-        supportingStat: { label: "Average time to confirm", value: roleData.avgConfirmTime },
+        chartData: rd.avgQualityBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
+        chartKey: "value", breakdown: rd.qualityBreakdown,
+        primaryBenchmark: "Target: > 98%", secondaryValue: rd.avgQualitySecondary,
+        secondaryLabel: "Rated 4.4+", secondaryBenchmark: "Target: > 90%",
+        peerValue: rd.peerAvgQuality, peerLabel: `${rd.peerAvgQuality}%`, lowerIsBetter: false,
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRole, selectedRoles, weightedAvgRating, categoryRatings, roleData, evalRoleData, isEvalModCategory, isMixed, dataRole, sessionDataRole, evalDataRole]);
+  }, [activeTab, tabItems, selectedRoles, selectedRole]);
+
+  // Combined for the drawer (which card was clicked — could be hero, rating, or operational)
+  const statCards = [onTimeHeroCard, ...ratingCards, ...operationalCards];
 
   if (loading || roleLoading) {
     return (
@@ -1261,57 +1115,52 @@ export default function ProfilePage() {
         </Box>
       </FlexBox>
 
-      {/* KPI stat cards — bento box grid layout */}
-      <Box sx={{ mb: 3 }}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "repeat(2, 1fr)",
-              sm: "repeat(2, 1fr)",
-              md: "repeat(4, 1fr)",
-            },
-            gap: 2,
-            pt: 0.5,
-            pb: 1.5,
-          }}
-        >
-        {statCards.map((card) => {
+      {/* ══ KPI Card Renderer (shared by Zone 1 & Zone 2) ════════════════════
+           Extracted as an IIFE-scoped function so both grids reuse the same
+           card rendering without duplicating 250+ lines of JSX. */}
+      {(() => {
+        const zeroMessages: Record<string, string> = {
+          "AVG RATING": "Complete your first session to see your rating",
+          "TEACHING": "Complete your first teaching session to see your rating",
+          "MENTORING": "Complete your first mentoring session to see your rating",
+          "EVALUATION": "Complete your first evaluation to see your rating",
+          "MODERATION": "Complete your first moderation to see your rating",
+          "EVALUATION & MODERATION": "Complete your first assignment to see your rating",
+          "AVG SESSIONS / MONTH": "Sessions will appear here as you teach",
+          "AVG SESSION QUALITY": "Quality score unlocks after your first rating",
+          "ON-TIME CONFIRMS": "Confirm your first session to start tracking",
+          "EVALUATIONS / MONTH": "Evaluations will appear here as you complete assignments",
+          "MODERATIONS / MONTH": "Moderations will appear here as you respond to discussions",
+          "ON-TIME EVALUATIONS": "Complete your first evaluation to start tracking",
+          "ON-TIME MODERATIONS": "Respond to your first discussion to start tracking",
+          "LEARNERS IMPACTED": "Learners count appears as you evaluate assignments",
+        };
+        const earlyValues: Record<string, string> = {
+          "AVG RATING": "4.7", "TEACHING": "4.7", "MENTORING": "4.7",
+          "EVALUATION": "4.8", "MODERATION": "4.8", "EVALUATION & MODERATION": "4.8",
+          "AVG SESSIONS / MONTH": "2", "AVG SESSION QUALITY": "100%", "ON-TIME CONFIRMS": "100%",
+          "EVALUATIONS / MONTH": "5", "MODERATIONS / MONTH": "3",
+          "ON-TIME EVALUATIONS": "100%", "ON-TIME MODERATIONS": "100%", "LEARNERS IMPACTED": "12",
+        };
+        const earlyDescriptions: Record<string, string> = {
+          "AVG RATING": "Based on 2 sessions so far. Keep going!",
+          "TEACHING": "Based on your first teaching sessions. Keep going!",
+          "MENTORING": "Based on your first mentoring sessions. Keep going!",
+          "EVALUATION": "Based on your first evaluations. Keep going!",
+          "MODERATION": "Based on your first moderations. Keep going!",
+          "EVALUATION & MODERATION": "Based on your first assignments. Keep going!",
+          "AVG SESSIONS / MONTH": "You've completed 2 sessions in your first weeks.",
+          "AVG SESSION QUALITY": "All sessions rated 4.0+ so far. Great start!",
+          "ON-TIME CONFIRMS": "On-time confirmation rate appears as you confirm sessions.",
+          "EVALUATIONS / MONTH": "You've completed a few evaluations in your first weeks.",
+          "MODERATIONS / MONTH": "You've responded to a few discussions in your first weeks.",
+          "ON-TIME EVALUATIONS": "On-time evaluation rate appears as you complete more.",
+          "ON-TIME MODERATIONS": "On-time moderation rate appears as you respond to more discussions.",
+          "LEARNERS IMPACTED": "Learner count grows with every evaluation you complete.",
+        };
+
+        const renderCard = (card: typeof statCards[number]) => {
           const maxBar = Math.max(...card.bars);
-          const zeroMessages: Record<string, string> = {
-            "AVG RATING": "Complete your first session to see your rating",
-            "AVG SESSIONS / MONTH": "Sessions will appear here as you teach",
-            "AVG SESSION QUALITY": "Quality score unlocks after your first rating",
-            "ON-TIME CONFIRMS": "Confirm your first session to start tracking",
-            // Eval/Mod card-set fallbacks
-            "EVALUATIONS / MONTH": "Evaluations will appear here as you complete assignments",
-            "MODERATIONS / MONTH": "Moderations will appear here as you respond to discussions",
-            "ON-TIME EVALUATIONS": "Complete your first evaluation to start tracking",
-            "ON-TIME MODERATIONS": "Respond to your first discussion to start tracking",
-            "LEARNERS IMPACTED": "Learners count appears as you evaluate assignments",
-          };
-          const earlyValues: Record<string, string> = {
-            "AVG RATING": "4.7",
-            "AVG SESSIONS / MONTH": "2",
-            "AVG SESSION QUALITY": "100%",
-            "ON-TIME CONFIRMS": "100%",
-            "EVALUATIONS / MONTH": "5",
-            "MODERATIONS / MONTH": "3",
-            "ON-TIME EVALUATIONS": "100%",
-            "ON-TIME MODERATIONS": "100%",
-            "LEARNERS IMPACTED": "12",
-          };
-          const earlyDescriptions: Record<string, string> = {
-            "AVG RATING": "Based on 2 sessions so far. Keep going!",
-            "AVG SESSIONS / MONTH": "You've completed 2 sessions in your first weeks.",
-            "AVG SESSION QUALITY": "All sessions rated 4.0+ so far. Great start!",
-            "ON-TIME CONFIRMS": "On-time confirmation rate appears as you confirm sessions.",
-            "EVALUATIONS / MONTH": "You've completed a few evaluations in your first weeks.",
-            "MODERATIONS / MONTH": "You've responded to a few discussions in your first weeks.",
-            "ON-TIME EVALUATIONS": "On-time evaluation rate appears as you complete more.",
-            "ON-TIME MODERATIONS": "On-time moderation rate appears as you respond to more discussions.",
-            "LEARNERS IMPACTED": "Learner count grows with every evaluation you complete.",
-          };
           return (
             <Card
               key={card.label}
@@ -1327,9 +1176,6 @@ export default function ProfilePage() {
                 overflow: "hidden",
                 cursor: isNewOrEarly ? "default" : "pointer",
                 transition: "border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
-                // Interactive affordance — only when the card is actually clickable.
-                // Lifts 2px on hover, casts a soft shadow tinted with the card's own
-                // accent so each card's hover feels native to its color.
                 ...(isNewOrEarly ? {} : {
                   "&:hover": {
                     borderColor: `color-mix(in srgb, ${card.accent} 55%, transparent)`,
@@ -1344,17 +1190,9 @@ export default function ProfilePage() {
               }}
             >
               <CardContent sx={{ p: { xs: 1.25, sm: 1.5 }, flex: 1, display: "flex", flexDirection: "column" }}>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{ mb: { xs: 0.75, sm: 1 } }}
-                >
-                  <Typography
-                    variant="caption"
-                    fontWeight={700}
-                    sx={{ letterSpacing: "0.08em", color: card.accent, fontSize: { xs: "0.55rem", sm: "0.65rem" } }}
-                  >
+                {/* Label + pill CTA */}
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: { xs: 0.75, sm: 1 } }}>
+                  <Typography variant="caption" fontWeight={700} sx={{ letterSpacing: "0.08em", color: card.accent, fontSize: { xs: "0.55rem", sm: "0.65rem" } }}>
                     {card.label}
                   </Typography>
                   {!isNewOrEarly && (
@@ -1365,27 +1203,13 @@ export default function ProfilePage() {
                         onClick={(e) => { e.stopPropagation(); setReportModal(card.label); }}
                         disableRipple
                         sx={{
-                          // Pill shape — wider than tall. No border.
-                          width: 30,
-                          height: 20,
-                          borderRadius: "999px",
-                          p: 0,
-                          // Theme from the card's own accent. The pill sits on the card's
-                          // light tinted bg, so we use the accent at ~16% (rest state) and
-                          // ~26% (hover) to step up contrast progressively.
+                          width: 30, height: 20, borderRadius: "999px", p: 0,
                           bgcolor: `color-mix(in srgb, ${card.accent} 16%, transparent)`,
                           color: card.accent,
                           transition: "background-color 0.18s ease, transform 0.18s ease",
-                          "& .arrow": {
-                            transition: "transform 0.18s ease",
-                          },
-                          "&:hover": {
-                            bgcolor: `color-mix(in srgb, ${card.accent} 26%, transparent)`,
-                            "& .arrow": { transform: "translateX(2px)" },
-                          },
-                          "&:active": {
-                            transform: "scale(0.96)",
-                          },
+                          "& .arrow": { transition: "transform 0.18s ease" },
+                          "&:hover": { bgcolor: `color-mix(in srgb, ${card.accent} 26%, transparent)`, "& .arrow": { transform: "translateX(2px)" } },
+                          "&:active": { transform: "scale(0.96)" },
                         }}
                       >
                         <ArrowForwardIcon className="arrow" sx={{ fontSize: 12 }} />
@@ -1394,18 +1218,13 @@ export default function ProfilePage() {
                   )}
                 </Stack>
 
-                {/* Hero number + inline delta (proximity: change sits next to the value it changed) */}
+                {/* Hero + inline delta */}
                 <Stack direction="row" alignItems="baseline" spacing={0.75} sx={{ mb: { xs: 0.5, sm: 1 }, flexWrap: "wrap" }}>
                   <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", fontSize: { xs: "1.15rem", sm: "1.4rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
                     {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
                   </Typography>
                   {!isNewOrEarly && card.delta && (
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      spacing={0.5}
-                      sx={{ display: { xs: "none", sm: "inline-flex" }, lineHeight: 1 }}
-                    >
+                    <Stack direction="row" alignItems="center" spacing={0.5} sx={{ display: { xs: "none", sm: "inline-flex" }, lineHeight: 1 }}>
                       {card.deltaPositive
                         ? <TrendingUpIcon sx={{ fontSize: 14, color: "success.main", display: "block" }} />
                         : <TrendingDownIcon sx={{ fontSize: 14, color: "error.main", display: "block" }} />}
@@ -1419,85 +1238,47 @@ export default function ProfilePage() {
                   )}
                 </Stack>
 
-                {/* Per-role category breakdown moved into the "See detailed report"
-                    modal (Rating by Role Category section) to reduce card density. */}
-
                 {/* Description */}
                 <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: { xs: "none", sm: "-webkit-box" }, WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontSize: "0.68rem" }}>
                   {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
                 </Typography>
 
-                {/* Peer benchmark — desktop only (delta moved next to hero above) */}
+                {/* Peer benchmark — desktop only */}
                 <Box sx={{ display: { xs: "none", sm: "block" } }}>
-
-                  {/* Peer benchmark */}
                   {!isNewOrEarly && card.peerValue != null && (() => {
                     const you = card.numericValue;
                     const peer = card.peerValue;
                     const isAhead = card.lowerIsBetter ? you < peer : you > peer;
                     const isEqual = Math.abs(you - peer) < 0.01;
                     const diff = Math.abs(you - peer);
-                    // Per-label number formatting for the "X ahead / Y to go" string.
-                    // Percent labels: ON-TIME CONFIRMS / EVALUATIONS / MODERATIONS, AVG SESSION QUALITY.
-                    // Hour labels: AVG CONFIRM TIME (legacy).
-                    // Integer labels: EVALUATIONS / MONTH, MODERATIONS / MONTH, LEARNERS IMPACTED, AVG SESSIONS / MONTH.
-                    // Default: 2-dp decimal (used by AVG RATING).
-                    const labelIsPercent = card.label === "AVG SESSION QUALITY"
-                      || card.label === "ON-TIME CONFIRMS"
-                      || card.label === "ON-TIME EVALUATIONS"
-                      || card.label === "ON-TIME MODERATIONS";
-                    const labelIsHours = card.label === "AVG CONFIRM TIME";
-                    const labelIsInteger = card.label === "AVG SESSIONS / MONTH"
-                      || card.label === "EVALUATIONS / MONTH"
-                      || card.label === "MODERATIONS / MONTH"
-                      || card.label === "LEARNERS IMPACTED";
-                    const diffStr = labelIsPercent
-                      ? `${diff.toFixed(1)}%`
-                      : labelIsHours
-                        ? `${diff.toFixed(1)}h`
-                        : labelIsInteger
-                          ? Math.round(diff).toString()
-                          : diff.toFixed(2);
-                    const sentiment = isEqual
-                      ? "You're on par"
-                      : card.lowerIsBetter
-                        ? (isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`)
-                        : (isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`);
+                    const labelIsPercent = card.label.startsWith("ON-TIME") || card.label === "AVG SESSION QUALITY";
+                    const labelIsInteger = card.label.includes("/ MONTH") || card.label === "LEARNERS IMPACTED";
+                    const diffStr = labelIsPercent ? `${diff.toFixed(1)}%` : labelIsInteger ? Math.round(diff).toString() : diff.toFixed(2);
+                    const sentiment = isEqual ? "You're on par" : isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`;
                     const sentimentColor = isEqual ? "text.secondary" : isAhead ? "success.main" : "warning.dark";
                     return (
                       <Typography variant="caption" sx={{ fontSize: "0.75rem", color: "text.secondary", display: "block", lineHeight: 1.4 }}>
                         Peer avg {card.peerLabel}
-                        <Typography component="span" sx={{ fontSize: "0.75rem", fontWeight: 600, color: sentimentColor, ml: 0.5 }}>
-                          · {sentiment}
-                        </Typography>
+                        <Typography component="span" sx={{ fontSize: "0.75rem", fontWeight: 600, color: sentimentColor, ml: 0.5 }}>· {sentiment}</Typography>
                       </Typography>
                     );
                   })()}
-
-                  {/* Quality thresholds moved into the "See detailed report" modal
-                      to keep the card focused on hero + delta + peer comparison. */}
                 </Box>
 
-                {/* Mini line chart (SVG sparkline with tooltips).
-                    NOTE: The outer Box provides the breathing-room gap above the chart
-                    (pt + mt: auto). The inner Box is the SVG-sized positioning context
-                    for the hover-target dots — keeping the padding out of this inner box
-                    is what makes dots align with the line. */}
+                {/* Sparkline */}
                 <Box sx={{ mt: "auto", pt: { xs: 1.5, sm: 2 }, mb: 0.25 }}>
                   {isNewOrEarly ? (
                     <svg width="100%" height={32} viewBox="0 0 140 32" preserveAspectRatio="none" style={{ display: "block" }}>
                       <line x1="0" y1="16" x2="140" y2="16" stroke={card.accent} strokeWidth={1} strokeDasharray="4 4" opacity={0.25} />
                     </svg>
                   ) : (() => {
-                    const h = 32;
-                    const w = 140;
+                    const h = 32, w = 140;
                     const minVal = Math.min(...card.bars);
                     const range = maxBar - minVal || 1;
-                    const coords = card.bars.map((v, i) => ({
+                    const coords = card.bars.map((v: number, i: number) => ({
                       x: (i / (card.bars.length - 1)) * w,
                       y: h - ((v - minVal) / range) * (h - 4) - 2,
-                      val: v,
-                      label: card.barLabels[i],
+                      val: v, label: card.barLabels[i],
                     }));
                     const polyPoints = coords.map((c) => `${c.x},${c.y}`).join(" ");
                     const areaPoints = `0,${h} ${polyPoints} ${w},${h}`;
@@ -1507,39 +1288,10 @@ export default function ProfilePage() {
                           <polygon points={areaPoints} fill={card.accent} opacity={0.1} />
                           <polyline points={polyPoints} fill="none" stroke={card.accent} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.7} />
                         </svg>
-                        {/* Tooltip hover targets */}
                         {coords.map((c, i) => (
-                          <MuiTooltip
-                            key={i}
-                            title={`${c.label}: ${c.val}`}
-                            placement="top"
-                            arrow
-                            slotProps={{ tooltip: { sx: { fontSize: "0.7rem", py: 0.25, px: 1 } } }}
-                          >
-                            <Box
-                              sx={{
-                                position: "absolute",
-                                left: `${(c.x / w) * 100}%`,
-                                top: `${(c.y / h) * 100}%`,
-                                transform: "translate(-50%, -50%)",
-                                width: 12,
-                                height: 12,
-                                borderRadius: "50%",
-                                cursor: "pointer",
-                                "&:hover .spark-dot": { opacity: 1 },
-                              }}
-                            >
-                              <Box
-                                className="spark-dot"
-                                sx={{
-                                  width: 6, height: 6, borderRadius: "50%",
-                                  bgcolor: card.accent,
-                                  position: "absolute", top: "50%", left: "50%",
-                                  transform: "translate(-50%, -50%)",
-                                  opacity: i === card.bars.length - 1 ? 1 : 0.4,
-                                  transition: "opacity 0.15s ease",
-                                }}
-                              />
+                          <MuiTooltip key={i} title={`${c.label}: ${c.val}`} placement="top" arrow slotProps={{ tooltip: { sx: { fontSize: "0.7rem", py: 0.25, px: 1 } } }}>
+                            <Box sx={{ position: "absolute", left: `${(c.x / w) * 100}%`, top: `${(c.y / h) * 100}%`, transform: "translate(-50%, -50%)", width: 12, height: 12, borderRadius: "50%", cursor: "pointer", "&:hover .spark-dot": { opacity: 1 } }}>
+                              <Box className="spark-dot" sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: card.accent, position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: i === card.bars.length - 1 ? 1 : 0.4, transition: "opacity 0.15s ease" }} />
                             </Box>
                           </MuiTooltip>
                         ))}
@@ -1547,23 +1299,65 @@ export default function ProfilePage() {
                     );
                   })()}
                 </Box>
-                {/* Line labels */}
                 {!isNewOrEarly && (
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                    {card.barLabels.map((lbl, i) => (
-                      <Typography key={i} variant="caption" color="text.disabled" sx={{ fontSize: "0.55rem" }}>
-                        {lbl}
-                      </Typography>
+                    {card.barLabels.map((lbl: string, i: number) => (
+                      <Typography key={i} variant="caption" color="text.disabled" sx={{ fontSize: "0.55rem" }}>{lbl}</Typography>
                     ))}
                   </Box>
                 )}
-
               </CardContent>
             </Card>
           );
-        })}
-      </Box>
-      </Box>
+        };
+
+        // Merge rating cards + on-time card into one row
+        const topRowCards = [...ratingCards, onTimeHeroCard];
+
+        return (
+          <>
+            {/* ══ ZONE 1: Ratings & health at a glance ═══════════════════════
+                Per-category ratings + universal ON-TIME CONFIRMS in one row.
+                4-column grid on desktop; auto-fit on fewer cards. */}
+            <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.12em", mb: 0, display: "block" }}>
+              Ratings & Health
+            </Typography>
+            <Box sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: `repeat(${Math.min(topRowCards.length, 4)}, 1fr)` },
+              gap: 2, mb: 5, pb: 0.5,
+            }}>
+              {topRowCards.map(renderCard)}
+            </Box>
+
+            {/* ══ ZONE 2: Operational metrics (tabbed, 2 cards per tab) ══════ */}
+            <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.12em", mb: 0, mt: 0, display: "block" }}>
+              Operational
+            </Typography>
+            {tabItems.length > 1 && (
+              <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                {tabItems.map((tab) => (
+                  <Chip
+                    key={tab.key}
+                    label={tab.label}
+                    variant={activeTab === tab.key ? "filled" : "outlined"}
+                    color={activeTab === tab.key ? "primary" : "default"}
+                    onClick={() => setActiveTab(tab.key)}
+                    sx={{ height: 32, fontWeight: 600, fontSize: "0.75rem" }}
+                  />
+                ))}
+              </Stack>
+            )}
+            <Box sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(2, 1fr)" },
+              gap: 2, mb: 3, pb: 1,
+            }}>
+              {operationalCards.map(renderCard)}
+            </Box>
+          </>
+        );
+      })()}
 
       {/* ── Engagement Stats — 3-column row ──────────────────────────── */}
       {!isNewOrEarly && (
@@ -2426,48 +2220,9 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
 
-              {/* Per-category breakdown for AVG RATING with multi-roles */}
-              {activeCard.label === "AVG RATING" && (activeCard as any).categoryRatings?.length > 1 && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
-                    Rating by Role Category
-                  </Typography>
-                  {((activeCard as any).categoryRatings as { category: GuruRoleCategory; overall: number; delta: number; trend: { month: string; value: number }[]; breakdown: { name: string; value: string }[] }[]).map((cr, idx) => (
-                    <Card key={cr.category} variant="outlined" sx={{ borderRadius: "8px", mb: idx < ((activeCard as any).categoryRatings as any[]).length - 1 ? 2 : 0 }}>
-                      <CardContent sx={{ p: 2 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                          <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.85rem" }}>
-                            {categoryDisplayLabel(cr.category)}
-                          </Typography>
-                          <Stack direction="row" alignItems="baseline" spacing={0.75}>
-                            <Typography variant="h6" fontWeight={700}>{cr.overall.toFixed(2)}</Typography>
-                            <Typography variant="caption" sx={{ color: "success.main", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.25 }}>
-                              <TrendingUpIcon sx={{ fontSize: 12 }} /> +{cr.delta.toFixed(2)}
-                            </Typography>
-                          </Stack>
-                        </Stack>
-                        <Box sx={{ width: "100%", height: 120 }}>
-                          <ResponsiveContainer>
-                            <LineChart data={cr.trend} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
-                              <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                              <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} domain={["dataMin - 0.1", "dataMax + 0.05"]} />
-                              <Line type="monotone" dataKey="value" stroke={activeCard.accent} strokeWidth={2} dot={{ r: 3 }} connectNulls />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </Box>
-                        <Divider sx={{ my: 1 }} />
-                        {cr.breakdown.map((b) => (
-                          <Stack key={b.name} direction="row" justifyContent="space-between" sx={{ py: 0.25 }}>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{b.name}</Typography>
-                            <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.7rem" }}>{b.value}</Typography>
-                          </Stack>
-                        ))}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Box>
-              )}
+              {/* Per-category breakdown removed — each category now gets its own
+                  rating card on the card surface, so the drill-through drawer shows
+                  one category's trend + breakdown directly. */}
 
               {/* Quality thresholds (moved from the card surface) — two parallel rows
                   so the user can see at a glance what share of sessions hit each rating
@@ -2557,7 +2312,7 @@ export default function ProfilePage() {
 
               {/* Breakdown table */}
               <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: "block" }}>
-                {(activeCard as any).categoryRatings?.length > 1 ? "Overall Breakdown" : "Breakdown"}
+                Breakdown
               </Typography>
               <TableContainer>
                 <Table size="small">
