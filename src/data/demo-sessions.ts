@@ -3393,18 +3393,38 @@ export type RoleStatCardData = {
   avgQualityDelta: string;
   avgQualityBars: number[];
   avgQualitySecondary: string;
+  /** Raw average time to confirm (kept for the modal's supporting stat) */
   avgConfirmTime: string;
   avgConfirmDelta: string;
   avgConfirmBars: number[];
+  /** On-time confirmation rate — % of sessions confirmed within 24 hours of being
+   *  assigned. This is the metric shown on the card surface so all four cards share
+   *  "higher is better" semantics. */
+  onTimeConfirmRate: string;
+  onTimeConfirmDelta: string;
+  onTimeConfirmBars: number[];
+  onTimeConfirmBreakdown: { name: string; value: string }[];
   description: string;
   sessionsBreakdown: { name: string; value: string }[];
   qualityBreakdown: { name: string; value: string }[];
   confirmBreakdown: { name: string; value: string }[];
+  /** Monthly unique learners impacted — used by the LEARNERS IMPACTED card on
+   *  the Evaluation & Moderation variant of the Performance KPI row. Populated
+   *  for every role for completeness (in case the card is reused later for
+   *  Teaching/Mentoring), but only rendered for Evaluator / Moderator today. */
+  learnersImpactedPerMonth: string;
+  learnersImpactedDelta: string;
+  learnersImpactedBars: number[];
+  learnersImpactedBreakdown: { name: string; value: string }[];
   /** Peer benchmark values — what the average guru scores */
   peerAvgRating: number;
   peerAvgSessions: number;
   peerAvgQuality: number;
   peerAvgConfirmTime: number;
+  /** Peer % confirmed within 24 hours */
+  peerOnTimeConfirmRate: number;
+  /** Peer monthly unique learners impacted */
+  peerLearnersImpactedPerMonth: number;
 };
 
 export const demoRoleStatCards: Record<GuruRole, RoleStatCardData> = {
@@ -3413,88 +3433,120 @@ export const demoRoleStatCards: Record<GuruRole, RoleStatCardData> = {
     avgSessions: "6", avgSessionsDelta: "+2", avgSessionsBars: [4, 5, 6, 5, 8, 7],
     avgQuality: "96.8%", avgQualityDelta: "+0.5%", avgQualityBars: [95.2, 96.0, 96.8, 97.1, 97.5, 98.0], avgQualitySecondary: "90%",
     avgConfirmTime: "7.2h", avgConfirmDelta: "-1.3h", avgConfirmBars: [12, 9, 7, 6, 5, 4.2],
+    onTimeConfirmRate: "88%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [70, 76, 80, 83, 85, 88],
+    onTimeConfirmBreakdown: [{ name: "PGP-DS", value: "92%" }, { name: "PGP-AIML", value: "88%" }, { name: "PGP-SE", value: "84%" }],
+    learnersImpactedPerMonth: "340", learnersImpactedDelta: "+22", learnersImpactedBars: [240, 260, 280, 300, 320, 340],
+    learnersImpactedBreakdown: [{ name: "PGP-DS", value: "162" }, { name: "PGP-AIML", value: "118" }, { name: "PGP-SE", value: "60" }],
     description: "Teaching performance across all programs and cohorts.",
     sessionsBreakdown: [{ name: "PGP-DS", value: "18 sessions" }, { name: "PGP-AIML", value: "14 sessions" }, { name: "PGP-SE", value: "5 sessions" }],
     qualityBreakdown: [{ name: "4.0+ threshold", value: "98% (Target: > 98%)" }, { name: "4.4+ threshold", value: "90% (Target: > 90%)" }],
     confirmBreakdown: [{ name: "PGP-DS", value: "3.8h" }, { name: "PGP-AIML", value: "4.5h" }, { name: "PGP-SE", value: "5.1h" }],
-    peerAvgRating: 4.82, peerAvgSessions: 8, peerAvgQuality: 94.2, peerAvgConfirmTime: 5.5,
+    peerAvgRating: 4.82, peerAvgSessions: 8, peerAvgQuality: 94.2, peerAvgConfirmTime: 5.5, peerOnTimeConfirmRate: 80, peerLearnersImpactedPerMonth: 290,
   },
   "Course Mentor": {
     avgRating: "4.84", avgRatingDelta: "+0.08", avgRatingBars: [4.72, 4.75, 4.78, 4.80, 4.76, 4.84],
     avgSessions: "10", avgSessionsDelta: "+1", avgSessionsBars: [8, 10, 10, 9, 11, 12],
     avgQuality: "97.5%", avgQualityDelta: "+0.8%", avgQualityBars: [95.8, 96.2, 97.0, 97.2, 97.0, 97.5], avgQualitySecondary: "92%",
     avgConfirmTime: "5.4h", avgConfirmDelta: "-0.8h", avgConfirmBars: [8, 7, 6.5, 6, 5.8, 5.4],
+    onTimeConfirmRate: "92%", onTimeConfirmDelta: "+4%", onTimeConfirmBars: [80, 84, 86, 88, 90, 92],
+    onTimeConfirmBreakdown: [{ name: "PGP-DS", value: "95%" }, { name: "PGP-AIML", value: "92%" }, { name: "PGP-DSBA", value: "88%" }],
+    learnersImpactedPerMonth: "280", learnersImpactedDelta: "+18", learnersImpactedBars: [200, 220, 240, 250, 265, 280],
+    learnersImpactedBreakdown: [{ name: "PGP-DS", value: "138" }, { name: "PGP-AIML", value: "92" }, { name: "PGP-DSBA", value: "50" }],
     description: "Mentoring performance across all programs and learner cohorts.",
     sessionsBreakdown: [{ name: "PGP-DS", value: "28 sessions" }, { name: "PGP-AIML", value: "22 sessions" }, { name: "PGP-DSBA", value: "10 sessions" }],
     qualityBreakdown: [{ name: "4.0+ threshold", value: "97.5%" }, { name: "4.4+ threshold", value: "92%" }],
     confirmBreakdown: [{ name: "PGP-DS", value: "4.2h" }, { name: "PGP-AIML", value: "5.1h" }, { name: "PGP-DSBA", value: "6.8h" }],
-    peerAvgRating: 4.91, peerAvgSessions: 8, peerAvgQuality: 95.0, peerAvgConfirmTime: 4.0,
+    peerAvgRating: 4.91, peerAvgSessions: 8, peerAvgQuality: 95.0, peerAvgConfirmTime: 4.0, peerOnTimeConfirmRate: 88, peerLearnersImpactedPerMonth: 240,
   },
   "Career Mentor": {
     avgRating: "4.88", avgRatingDelta: "+0.12", avgRatingBars: [4.74, 4.78, 4.80, 4.82, 4.76, 4.88],
     avgSessions: "15", avgSessionsDelta: "+3", avgSessionsBars: [10, 14, 14, 12, 16, 18],
     avgQuality: "98.2%", avgQualityDelta: "+0.6%", avgQualityBars: [96.5, 97.0, 97.5, 97.8, 97.6, 98.2], avgQualitySecondary: "95%",
     avgConfirmTime: "3.8h", avgConfirmDelta: "-0.5h", avgConfirmBars: [5.5, 5.0, 4.5, 4.2, 4.0, 3.8],
+    onTimeConfirmRate: "96%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [85, 88, 91, 93, 94, 96],
+    onTimeConfirmBreakdown: [{ name: "Career 1:1", value: "98%" }, { name: "Schedule a Call", value: "94%" }],
+    learnersImpactedPerMonth: "180", learnersImpactedDelta: "+12", learnersImpactedBars: [125, 138, 150, 160, 168, 180],
+    learnersImpactedBreakdown: [{ name: "Career 1:1", value: "108" }, { name: "Schedule a Call", value: "72" }],
     description: "Career mentoring across all 1:1 and group sessions.",
     sessionsBreakdown: [{ name: "Career 1:1", value: "52 sessions" }, { name: "Schedule a Call", value: "33 sessions" }],
     qualityBreakdown: [{ name: "4.0+ threshold", value: "98.2%" }, { name: "4.4+ threshold", value: "95%" }],
     confirmBreakdown: [{ name: "Career 1:1", value: "3.2h" }, { name: "Schedule a Call", value: "4.4h" }],
-    peerAvgRating: 4.60, peerAvgSessions: 11, peerAvgQuality: 95.8, peerAvgConfirmTime: 5.0,
+    peerAvgRating: 4.60, peerAvgSessions: 11, peerAvgQuality: 95.8, peerAvgConfirmTime: 5.0, peerOnTimeConfirmRate: 90, peerLearnersImpactedPerMonth: 155,
   },
   "CV Review Mentor": {
     avgRating: "4.72", avgRatingDelta: "+0.06", avgRatingBars: [4.60, 4.64, 4.66, 4.68, 4.66, 4.72],
     avgSessions: "18", avgSessionsDelta: "+4", avgSessionsBars: [13, 17, 17, 15, 20, 22],
     avgQuality: "95.4%", avgQualityDelta: "+0.4%", avgQualityBars: [93.8, 94.2, 94.8, 95.0, 95.0, 95.4], avgQualitySecondary: "88%",
     avgConfirmTime: "4.2h", avgConfirmDelta: "-0.6h", avgConfirmBars: [6.5, 6.0, 5.5, 5.0, 4.8, 4.2],
+    onTimeConfirmRate: "95%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [84, 87, 89, 91, 93, 95],
+    onTimeConfirmBreakdown: [{ name: "PGP-DS", value: "96%" }, { name: "PGP-AIML", value: "94%" }],
+    learnersImpactedPerMonth: "220", learnersImpactedDelta: "+16", learnersImpactedBars: [155, 170, 185, 195, 208, 220],
+    learnersImpactedBreakdown: [{ name: "PGP-DS", value: "98" }, { name: "PGP-AIML", value: "82" }, { name: "PGP-SE", value: "40" }],
     description: "CV review performance across all review sessions.",
     sessionsBreakdown: [{ name: "PGP-DS CV Reviews", value: "45 sessions" }, { name: "PGP-AIML CV Reviews", value: "38 sessions" }, { name: "PGP-SE CV Reviews", value: "22 sessions" }],
     qualityBreakdown: [{ name: "4.0+ threshold", value: "95.4%" }, { name: "4.4+ threshold", value: "88%" }],
     confirmBreakdown: [{ name: "PGP-DS", value: "3.5h" }, { name: "PGP-AIML", value: "4.0h" }],
-    peerAvgRating: 4.48, peerAvgSessions: 14, peerAvgQuality: 93.5, peerAvgConfirmTime: 5.8,
+    peerAvgRating: 4.48, peerAvgSessions: 14, peerAvgQuality: 93.5, peerAvgConfirmTime: 5.8, peerOnTimeConfirmRate: 88, peerLearnersImpactedPerMonth: 190,
   },
   Evaluator: {
     avgRating: "4.98", avgRatingDelta: "+0.05", avgRatingBars: [4.88, 4.90, 4.92, 4.94, 4.93, 4.98],
     avgSessions: "25", avgSessionsDelta: "+5", avgSessionsBars: [18, 24, 24, 20, 28, 30],
     avgQuality: "99.2%", avgQualityDelta: "+0.2%", avgQualityBars: [98.2, 98.5, 98.8, 99.0, 98.8, 99.2], avgQualitySecondary: "97%",
     avgConfirmTime: "6.1h", avgConfirmDelta: "-1.0h", avgConfirmBars: [9, 8, 7.5, 7, 6.5, 6.1],
+    onTimeConfirmRate: "91%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [78, 82, 85, 87, 89, 91],
+    onTimeConfirmBreakdown: [{ name: "Assignments", value: "93%" }, { name: "Projects", value: "88%" }],
+    learnersImpactedPerMonth: "320", learnersImpactedDelta: "+24", learnersImpactedBars: [220, 245, 265, 285, 305, 320],
+    learnersImpactedBreakdown: [{ name: "Assignment Evaluations", value: "210" }, { name: "Project Evaluations", value: "110" }],
     description: "Evaluation performance across assignments and projects.",
-    sessionsBreakdown: [{ name: "Assignment Evaluations", value: "95 sessions" }, { name: "Project Evaluations", value: "50 sessions" }],
+    sessionsBreakdown: [{ name: "Assignment Evaluations", value: "95 evaluations" }, { name: "Project Evaluations", value: "50 evaluations" }],
     qualityBreakdown: [{ name: "4.0+ threshold", value: "99.2%" }, { name: "4.4+ threshold", value: "97%" }],
     confirmBreakdown: [{ name: "Assignments", value: "5.2h" }, { name: "Projects", value: "7.0h" }],
-    peerAvgRating: 4.68, peerAvgSessions: 20, peerAvgQuality: 96.5, peerAvgConfirmTime: 8.0,
+    peerAvgRating: 4.68, peerAvgSessions: 20, peerAvgQuality: 96.5, peerAvgConfirmTime: 8.0, peerOnTimeConfirmRate: 85, peerLearnersImpactedPerMonth: 270,
   },
   Moderator: {
     avgRating: "4.92", avgRatingDelta: "+0.07", avgRatingBars: [4.82, 4.84, 4.86, 4.88, 4.85, 4.92],
     avgSessions: "12", avgSessionsDelta: "+3", avgSessionsBars: [9, 11, 11, 10, 14, 15],
     avgQuality: "98.5%", avgQualityDelta: "+0.3%", avgQualityBars: [97.0, 97.5, 97.8, 98.0, 98.2, 98.5], avgQualitySecondary: "96%",
     avgConfirmTime: "5.8h", avgConfirmDelta: "-0.7h", avgConfirmBars: [8.5, 7.5, 7.0, 6.5, 6.2, 5.8],
+    onTimeConfirmRate: "92%", onTimeConfirmDelta: "+5%", onTimeConfirmBars: [80, 84, 86, 88, 90, 92],
+    onTimeConfirmBreakdown: [{ name: "Discussion Forums", value: "94%" }, { name: "Peer Reviews", value: "90%" }],
+    learnersImpactedPerMonth: "210", learnersImpactedDelta: "+15", learnersImpactedBars: [148, 162, 175, 188, 200, 210],
+    learnersImpactedBreakdown: [{ name: "Discussion Forums", value: "138" }, { name: "Peer Reviews", value: "72" }],
     description: "Discussion moderation quality and response metrics.",
-    sessionsBreakdown: [{ name: "Discussion Forums", value: "42 sessions" }, { name: "Peer Reviews", value: "29 sessions" }],
+    sessionsBreakdown: [{ name: "Discussion Forums", value: "42 moderations" }, { name: "Peer Reviews", value: "29 moderations" }],
     qualityBreakdown: [{ name: "4.0+ threshold", value: "98.5%" }, { name: "4.4+ threshold", value: "96%" }],
     confirmBreakdown: [{ name: "Discussion Forums", value: "5.0h" }, { name: "Peer Reviews", value: "6.6h" }],
-    peerAvgRating: 4.55, peerAvgSessions: 9, peerAvgQuality: 95.8, peerAvgConfirmTime: 7.5,
+    peerAvgRating: 4.55, peerAvgSessions: 9, peerAvgQuality: 95.8, peerAvgConfirmTime: 7.5, peerOnTimeConfirmRate: 86, peerLearnersImpactedPerMonth: 175,
   },
   "Project Mentor": {
     avgRating: "4.78", avgRatingDelta: "+0.09", avgRatingBars: [4.65, 4.68, 4.70, 4.72, 4.69, 4.78],
     avgSessions: "6", avgSessionsDelta: "+2", avgSessionsBars: [4, 6, 6, 5, 7, 8],
     avgQuality: "96.2%", avgQualityDelta: "+0.6%", avgQualityBars: [94.0, 94.8, 95.2, 95.5, 95.6, 96.2], avgQualitySecondary: "89%",
     avgConfirmTime: "8.5h", avgConfirmDelta: "-1.5h", avgConfirmBars: [14, 12, 10, 9, 9, 8.5],
+    onTimeConfirmRate: "87%", onTimeConfirmDelta: "+7%", onTimeConfirmBars: [70, 75, 79, 82, 84, 87],
+    onTimeConfirmBreakdown: [{ name: "PGP-DS", value: "90%" }, { name: "PGP-AIML", value: "86%" }, { name: "PGP-SE", value: "84%" }],
+    learnersImpactedPerMonth: "150", learnersImpactedDelta: "+10", learnersImpactedBars: [105, 115, 125, 132, 142, 150],
+    learnersImpactedBreakdown: [{ name: "PGP-DS Capstones", value: "70" }, { name: "PGP-AIML Capstones", value: "50" }, { name: "PGP-SE Capstones", value: "30" }],
     description: "Capstone project mentoring performance and learner guidance.",
     sessionsBreakdown: [{ name: "PGP-DS Capstones", value: "18 sessions" }, { name: "PGP-AIML Capstones", value: "12 sessions" }, { name: "PGP-SE Capstones", value: "6 sessions" }],
     qualityBreakdown: [{ name: "4.0+ threshold", value: "96.2%" }, { name: "4.4+ threshold", value: "89%" }],
     confirmBreakdown: [{ name: "PGP-DS", value: "7.0h" }, { name: "PGP-AIML", value: "8.8h" }, { name: "PGP-SE", value: "9.7h" }],
-    peerAvgRating: 4.42, peerAvgSessions: 5, peerAvgQuality: 93.0, peerAvgConfirmTime: 10.5,
+    peerAvgRating: 4.42, peerAvgSessions: 5, peerAvgQuality: 93.0, peerAvgConfirmTime: 10.5, peerOnTimeConfirmRate: 78, peerLearnersImpactedPerMonth: 130,
   },
   "Industry Expert": {
     avgRating: "4.82", avgRatingDelta: "+0.14", avgRatingBars: [4.58, 4.65, 4.70, 4.74, 4.68, 4.82],
     avgSessions: "2", avgSessionsDelta: "+1", avgSessionsBars: [1, 2, 2, 2, 3, 3],
     avgQuality: "97.8%", avgQualityDelta: "+1.0%", avgQualityBars: [94.5, 95.5, 96.0, 96.8, 96.8, 97.8], avgQualitySecondary: "93%",
     avgConfirmTime: "12.5h", avgConfirmDelta: "-2.0h", avgConfirmBars: [20, 18, 16, 14, 14, 12.5],
+    onTimeConfirmRate: "78%", onTimeConfirmDelta: "+8%", onTimeConfirmBars: [55, 62, 68, 72, 75, 78],
+    onTimeConfirmBreakdown: [{ name: "Industry Sessions", value: "82%" }, { name: "Guest Lectures", value: "74%" }],
+    learnersImpactedPerMonth: "110", learnersImpactedDelta: "+9", learnersImpactedBars: [70, 80, 88, 95, 102, 110],
+    learnersImpactedBreakdown: [{ name: "Industry Sessions", value: "68" }, { name: "Guest Lectures", value: "42" }],
     description: "Industry sessions and guest lecture performance.",
     sessionsBreakdown: [{ name: "Industry Sessions", value: "8 sessions" }, { name: "Guest Lectures", value: "5 sessions" }],
     qualityBreakdown: [{ name: "4.0+ threshold", value: "97.8%" }, { name: "4.4+ threshold", value: "93%" }],
     confirmBreakdown: [{ name: "Industry Sessions", value: "10.5h" }, { name: "Guest Lectures", value: "14.5h" }],
-    peerAvgRating: 4.40, peerAvgSessions: 2, peerAvgQuality: 94.0, peerAvgConfirmTime: 15.0,
+    peerAvgRating: 4.40, peerAvgSessions: 2, peerAvgQuality: 94.0, peerAvgConfirmTime: 15.0, peerOnTimeConfirmRate: 65, peerLearnersImpactedPerMonth: 95,
   },
 };
 

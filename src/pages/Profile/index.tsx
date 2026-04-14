@@ -16,6 +16,9 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import IosShareOutlinedIcon from "@mui/icons-material/IosShareOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -70,6 +73,7 @@ import { demoRatingHistory, demoRoleCategoryRatings, demoRoleMonthlyShareData, d
 import type { ShareMonthDatum } from "@/data/demo-sessions";
 import { getCategoriesForRoles, ROLE_TO_CATEGORY } from "@/lib/role-config";
 import type { GuruRoleCategory } from "@/lib/role-config";
+import type { GuruRole } from "@/store/slices/devPanelSlice";
 import { clearRoleSwitching } from "@/store/slices/devPanelSlice";
 
 const borderRotate = keyframes`
@@ -118,8 +122,8 @@ function DeltaLabel({ value }: { value: number }) {
   if (value === 0) return <Typography sx={{ fontSize: 11, color: "text.secondary" }}>0.00</Typography>;
   const color = value > 0 ? "success.main" : "error.main";
   return (
-    <Typography sx={{ fontSize: 11, color, fontWeight: 500 }}>
-      {value > 0 ? "↗" : "↘"} {value > 0 ? "+" : ""}{value.toFixed(2)}
+    <Typography sx={{ fontSize: 11, color, fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 0.25 }}>
+      {value > 0 ? <TrendingUpIcon sx={{ fontSize: 11 }} /> : <TrendingDownIcon sx={{ fontSize: 11 }} />} {value > 0 ? "+" : ""}{value.toFixed(2)}
     </Typography>
   );
 }
@@ -161,6 +165,19 @@ export default function ProfilePage() {
 
   // Active role categories for multi-role rating display
   const activeCategories = useMemo(() => getCategoriesForRoles(selectedRoles), [selectedRoles]);
+
+  // Display label for a role category — expands the "Evaluation & Moderation"
+  // bucket to the specific role(s) the user actually has, to avoid the ambiguous
+  // "Eval & Mod" abbreviation.
+  const categoryDisplayLabel = (category: GuruRoleCategory): string => {
+    if (category !== "Evaluation & Moderation") return category;
+    const hasEvaluator = selectedRoles.includes("Evaluator");
+    const hasModerator = selectedRoles.includes("Moderator");
+    if (hasEvaluator && hasModerator) return "Evaluation & Moderation";
+    if (hasEvaluator) return "Evaluation";
+    if (hasModerator) return "Moderation";
+    return "Evaluation & Moderation";
+  };
 
   // Role-aware course performance & matrix
   const demoCoursePerf = useMemo(() => demoRoleCoursePerf[selectedRole] ?? defaultCoursePerf, [selectedRole]);
@@ -350,10 +367,30 @@ export default function ProfilePage() {
     return (categoryRatings.reduce((s, c) => s + c.overall, 0) / categoryRatings.length).toFixed(2);
   }, [categoryRatings]);
 
-  // KPI stat cards config for Performance — role-aware
-  const roleData = demoRoleStatCards[selectedRole];
-  const statCards = useMemo(() => [
-    {
+  // KPI stat cards config for Performance — role-aware. The 4 cards differ
+  // depending on the active role's category:
+  //   - Teaching / Mentoring → AVG RATING, AVG SESSIONS / MONTH, AVG SESSION QUALITY,
+  //     ON-TIME CONFIRMS (the "session-based" set).
+  //   - Evaluation & Moderation → AVG RATING, EVALUATIONS / MONTH, ON-TIME EVALUATIONS,
+  //     LEARNERS IMPACTED (the "assignment-based" set; mirrors the live dashboard's
+  //     Engagement Count + Learners Impacted tiles for this category).
+  // The first card (AVG RATING) is identical in both sets; only cards 2-4 swap.
+  //
+  // Branching is driven by `selectedRoles` (the dev panel's "Active Guru Roles"
+  // chips), not `selectedRole` (the dropdown), because the chips are what the
+  // user toggles to change context on the Profile page. When all currently-active
+  // roles fall in the Evaluation & Moderation category, switch to set B and source
+  // data from the first Eval/Mod role in the chip list. Otherwise fall back to
+  // the dropdown-controlled `selectedRole` for both card set and data.
+  const isPureEvalMod = activeCategories.length === 1 && activeCategories[0] === "Evaluation & Moderation";
+  const dataRole: GuruRole = isPureEvalMod
+    ? (selectedRoles.find((r) => ROLE_TO_CATEGORY[r] === "Evaluation & Moderation") ?? selectedRole)
+    : selectedRole;
+  const roleData = demoRoleStatCards[dataRole];
+  const isEvalModCategory = isPureEvalMod;
+  const monthLabels = ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"];
+  const statCards = useMemo(() => {
+    const sharedRatingCard = {
       label: "AVG RATING",
       value: weightedAvgRating,
       numericValue: parseFloat(weightedAvgRating as string) || 0,
@@ -369,76 +406,155 @@ export default function ProfilePage() {
       reportSummary: `Your average rating as ${selectedRole} over the last 6 months.`,
       chartData: categoryRatings.length === 1
         ? categoryRatings[0].trend
-        : roleData.avgRatingBars.map((v, i) => ({ month: ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"][i], value: v })),
+        : roleData.avgRatingBars.map((v, i) => ({ month: monthLabels[i], value: v })),
       chartKey: "value",
       breakdown: categoryRatings.length === 1
         ? categoryRatings[0].breakdown
         : categoryRatings.map((c) => ({ name: c.category, value: c.overall.toFixed(2) })),
       categoryRatings,
       peerValue: roleData.peerAvgRating, peerLabel: roleData.peerAvgRating.toFixed(2), lowerIsBetter: false,
-    },
-    {
-      label: "AVG SESSIONS / MONTH",
-      value: roleData.avgSessions,
-      numericValue: parseFloat(roleData.avgSessions),
-      description: `Average sessions delivered per month as ${selectedRole}.`,
-      delta: roleData.avgSessionsDelta,
-      deltaLabel: "vs last month",
-      deltaPositive: true,
-      bars: roleData.avgSessionsBars,
-      barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-      bg: "var(--gl-accent-amber-bg)",
-      accent: "var(--gl-accent-amber)",
-      reportTitle: "Sessions per Month Report",
-      reportSummary: `Monthly breakdown of sessions delivered as ${selectedRole}.`,
-      chartData: roleData.avgSessionsBars.map((v, i) => ({ month: ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"][i], value: v })),
-      chartKey: "value",
-      breakdown: roleData.sessionsBreakdown,
-      peerValue: roleData.peerAvgSessions, peerLabel: String(roleData.peerAvgSessions), lowerIsBetter: false,
-    },
-    {
-      label: "AVG SESSION QUALITY",
-      value: roleData.avgQuality,
-      numericValue: parseFloat(roleData.avgQuality),
-      description: "Sessions rated 4.0 or above.",
-      delta: roleData.avgQualityDelta,
-      deltaLabel: "vs last month",
-      deltaPositive: true,
-      bars: roleData.avgQualityBars,
-      barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-      bg: "var(--gl-accent-purple-bg)",
-      accent: "var(--gl-accent-purple)",
-      reportTitle: "Session Quality Report",
-      reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
-      chartData: roleData.avgQualityBars.map((v, i) => ({ month: ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"][i], value: v })),
-      chartKey: "value",
-      breakdown: roleData.qualityBreakdown,
-      primaryBenchmark: "Target: > 98%",
-      secondaryValue: roleData.avgQualitySecondary,
-      secondaryLabel: "Rated 4.4+",
-      secondaryBenchmark: "Target: > 90%",
-      peerValue: roleData.peerAvgQuality, peerLabel: `${roleData.peerAvgQuality}%`, lowerIsBetter: false,
-    },
-    {
-      label: "AVG CONFIRM TIME",
-      value: roleData.avgConfirmTime,
-      numericValue: parseFloat(roleData.avgConfirmTime),
-      description: "How fast you confirm assigned sessions. Lower is better.",
-      delta: roleData.avgConfirmDelta,
-      deltaLabel: "vs last quarter",
-      deltaPositive: true,
-      bars: roleData.avgConfirmBars,
-      barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-      bg: "var(--gl-accent-success-bg)",
-      accent: "var(--gl-accent-success)",
-      reportTitle: "Confirmation Time Report",
-      reportSummary: "Average hours taken to confirm scheduled sessions each month. Lower is better.",
-      chartData: roleData.avgConfirmBars.map((v, i) => ({ month: ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"][i], value: v })),
-      chartKey: "value",
-      breakdown: roleData.confirmBreakdown,
-      peerValue: roleData.peerAvgConfirmTime, peerLabel: `${roleData.peerAvgConfirmTime}h`, lowerIsBetter: true,
-    },
-  ], [selectedRole, weightedAvgRating, categoryRatings, roleData]);
+    };
+
+    if (isEvalModCategory) {
+      // Eval/Mod-specific cards. "Sessions" → "evaluations/moderations" and
+      // "session quality" is dropped (doesn't map to assignment-based work).
+      const workNoun = selectedRole === "Moderator" ? "moderations" : "evaluations";
+      const workNounSingular = selectedRole === "Moderator" ? "moderation" : "evaluation";
+      return [
+        sharedRatingCard,
+        {
+          label: `${workNoun.toUpperCase()} / MONTH`,
+          value: roleData.avgSessions,
+          numericValue: parseFloat(roleData.avgSessions),
+          description: `${workNoun.charAt(0).toUpperCase() + workNoun.slice(1)} delivered per month across your assignments.`,
+          delta: roleData.avgSessionsDelta,
+          deltaLabel: "vs last month",
+          deltaPositive: true,
+          bars: roleData.avgSessionsBars,
+          barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+          bg: "var(--gl-accent-amber-bg)",
+          accent: "var(--gl-accent-amber)",
+          reportTitle: `${workNoun.charAt(0).toUpperCase() + workNoun.slice(1)} per Month Report`,
+          reportSummary: `Monthly breakdown of ${workNoun} delivered as ${selectedRole}.`,
+          chartData: roleData.avgSessionsBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartKey: "value",
+          breakdown: roleData.sessionsBreakdown,
+          peerValue: roleData.peerAvgSessions, peerLabel: String(roleData.peerAvgSessions), lowerIsBetter: false,
+        },
+        {
+          label: `ON-TIME ${workNoun.toUpperCase()}`,
+          value: roleData.onTimeConfirmRate,
+          numericValue: parseFloat(roleData.onTimeConfirmRate),
+          description: `Assignments you ${workNounSingular === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned.`,
+          delta: roleData.onTimeConfirmDelta,
+          deltaLabel: "vs last quarter",
+          deltaPositive: true,
+          bars: roleData.onTimeConfirmBars,
+          barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+          bg: "var(--gl-accent-success-bg)",
+          accent: "var(--gl-accent-success)",
+          reportTitle: `On-time ${workNounSingular.charAt(0).toUpperCase() + workNounSingular.slice(1)} Report`,
+          reportSummary: `Share of assignments you ${workNounSingular === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned. Higher is better.`,
+          chartData: roleData.onTimeConfirmBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartKey: "value",
+          breakdown: roleData.onTimeConfirmBreakdown,
+          peerValue: roleData.peerOnTimeConfirmRate, peerLabel: `${roleData.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
+          supportingStat: { label: `Average time to ${workNounSingular === "moderation" ? "moderate" : "evaluate"}`, value: roleData.avgConfirmTime },
+        },
+        {
+          label: "LEARNERS IMPACTED",
+          value: roleData.learnersImpactedPerMonth,
+          numericValue: parseFloat(roleData.learnersImpactedPerMonth),
+          description: `Unique learners whose ${workNoun === "moderations" ? "discussions" : "assignments"} you ${workNounSingular === "moderation" ? "moderated" : "evaluated"} per month.`,
+          delta: roleData.learnersImpactedDelta,
+          deltaLabel: "vs last month",
+          deltaPositive: true,
+          bars: roleData.learnersImpactedBars,
+          barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+          bg: "var(--gl-accent-purple-bg)",
+          accent: "var(--gl-accent-purple)",
+          reportTitle: "Learners Impacted Report",
+          reportSummary: `Monthly count of unique learners whose work you ${workNounSingular === "moderation" ? "moderated" : "evaluated"}.`,
+          chartData: roleData.learnersImpactedBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartKey: "value",
+          breakdown: roleData.learnersImpactedBreakdown,
+          peerValue: roleData.peerLearnersImpactedPerMonth, peerLabel: String(roleData.peerLearnersImpactedPerMonth), lowerIsBetter: false,
+        },
+      ];
+    }
+
+    // Default — Teaching / Mentoring card set (today's 4 cards).
+    return [
+      sharedRatingCard,
+      {
+        label: "AVG SESSIONS / MONTH",
+        value: roleData.avgSessions,
+        numericValue: parseFloat(roleData.avgSessions),
+        description: `Average sessions delivered per month as ${selectedRole}.`,
+        delta: roleData.avgSessionsDelta,
+        deltaLabel: "vs last month",
+        deltaPositive: true,
+        bars: roleData.avgSessionsBars,
+        barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+        bg: "var(--gl-accent-amber-bg)",
+        accent: "var(--gl-accent-amber)",
+        reportTitle: "Sessions per Month Report",
+        reportSummary: `Monthly breakdown of sessions delivered as ${selectedRole}.`,
+        chartData: roleData.avgSessionsBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+        chartKey: "value",
+        breakdown: roleData.sessionsBreakdown,
+        peerValue: roleData.peerAvgSessions, peerLabel: String(roleData.peerAvgSessions), lowerIsBetter: false,
+      },
+      {
+        label: "AVG SESSION QUALITY",
+        value: roleData.avgQuality,
+        numericValue: parseFloat(roleData.avgQuality),
+        description: "Sessions rated 4.0 or above.",
+        delta: roleData.avgQualityDelta,
+        deltaLabel: "vs last month",
+        deltaPositive: true,
+        bars: roleData.avgQualityBars,
+        barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+        bg: "var(--gl-accent-purple-bg)",
+        accent: "var(--gl-accent-purple)",
+        reportTitle: "Session Quality Report",
+        reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
+        chartData: roleData.avgQualityBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+        chartKey: "value",
+        breakdown: roleData.qualityBreakdown,
+        primaryBenchmark: "Target: > 98%",
+        secondaryValue: roleData.avgQualitySecondary,
+        secondaryLabel: "Rated 4.4+",
+        secondaryBenchmark: "Target: > 90%",
+        peerValue: roleData.peerAvgQuality, peerLabel: `${roleData.peerAvgQuality}%`, lowerIsBetter: false,
+      },
+      {
+        // Reframed from "AVG CONFIRM TIME" (lower-is-better hours) to "ON-TIME CONFIRMS"
+        // (higher-is-better %), so all four KPI cards share the same semantic direction.
+        // Raw average time is preserved on the data object and surfaced inside the drawer
+        // as a supporting stat ("Avg time to confirm: 5.4h").
+        label: "ON-TIME CONFIRMS",
+        value: roleData.onTimeConfirmRate,
+        numericValue: parseFloat(roleData.onTimeConfirmRate),
+        description: "Sessions you confirmed within 24 hours of being assigned.",
+        delta: roleData.onTimeConfirmDelta,
+        deltaLabel: "vs last quarter",
+        deltaPositive: true,
+        bars: roleData.onTimeConfirmBars,
+        barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+        bg: "var(--gl-accent-success-bg)",
+        accent: "var(--gl-accent-success)",
+        reportTitle: "On-time Confirmation Report",
+        reportSummary: "Share of sessions you confirmed within 24 hours of being assigned. Higher is better.",
+        chartData: roleData.onTimeConfirmBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+        chartKey: "value",
+        breakdown: roleData.onTimeConfirmBreakdown,
+        peerValue: roleData.peerOnTimeConfirmRate, peerLabel: `${roleData.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
+        supportingStat: { label: "Average time to confirm", value: roleData.avgConfirmTime },
+      },
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRole, selectedRoles, weightedAvgRating, categoryRatings, roleData, isEvalModCategory, dataRole]);
 
   if (loading || roleLoading) {
     return (
@@ -1018,19 +1134,35 @@ export default function ProfilePage() {
             "AVG RATING": "Complete your first session to see your rating",
             "AVG SESSIONS / MONTH": "Sessions will appear here as you teach",
             "AVG SESSION QUALITY": "Quality score unlocks after your first rating",
-            "AVG CONFIRM TIME": "Confirm your first session to start tracking",
+            "ON-TIME CONFIRMS": "Confirm your first session to start tracking",
+            // Eval/Mod card-set fallbacks
+            "EVALUATIONS / MONTH": "Evaluations will appear here as you complete assignments",
+            "MODERATIONS / MONTH": "Moderations will appear here as you respond to discussions",
+            "ON-TIME EVALUATIONS": "Complete your first evaluation to start tracking",
+            "ON-TIME MODERATIONS": "Respond to your first discussion to start tracking",
+            "LEARNERS IMPACTED": "Learners count appears as you evaluate assignments",
           };
           const earlyValues: Record<string, string> = {
             "AVG RATING": "4.7",
             "AVG SESSIONS / MONTH": "2",
             "AVG SESSION QUALITY": "100%",
-            "AVG CONFIRM TIME": "3.5h",
+            "ON-TIME CONFIRMS": "100%",
+            "EVALUATIONS / MONTH": "5",
+            "MODERATIONS / MONTH": "3",
+            "ON-TIME EVALUATIONS": "100%",
+            "ON-TIME MODERATIONS": "100%",
+            "LEARNERS IMPACTED": "12",
           };
           const earlyDescriptions: Record<string, string> = {
             "AVG RATING": "Based on 2 sessions so far. Keep going!",
             "AVG SESSIONS / MONTH": "You've completed 2 sessions in your first weeks.",
             "AVG SESSION QUALITY": "All sessions rated 4.0+ so far. Great start!",
-            "AVG CONFIRM TIME": "Average time to confirm your assigned sessions.",
+            "ON-TIME CONFIRMS": "On-time confirmation rate appears as you confirm sessions.",
+            "EVALUATIONS / MONTH": "You've completed a few evaluations in your first weeks.",
+            "MODERATIONS / MONTH": "You've responded to a few discussions in your first weeks.",
+            "ON-TIME EVALUATIONS": "On-time evaluation rate appears as you complete more.",
+            "ON-TIME MODERATIONS": "On-time moderation rate appears as you respond to more discussions.",
+            "LEARNERS IMPACTED": "Learner count grows with every evaluation you complete.",
           };
           return (
             <Card
@@ -1045,64 +1177,112 @@ export default function ProfilePage() {
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
-                cursor: { xs: isNewOrEarly ? "default" : "pointer", sm: "default" },
-                "&:hover": { xs: isNewOrEarly ? {} : { borderColor: "primary.main" } },
-                transition: "border-color 0.2s",
+                cursor: isNewOrEarly ? "default" : "pointer",
+                transition: "border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+                // Interactive affordance — only when the card is actually clickable.
+                // Lifts 2px on hover, casts a soft shadow tinted with the card's own
+                // accent so each card's hover feels native to its color.
+                ...(isNewOrEarly ? {} : {
+                  "&:hover": {
+                    borderColor: `color-mix(in srgb, ${card.accent} 55%, transparent)`,
+                    transform: "translateY(-2px)",
+                    boxShadow: `0 6px 18px -6px color-mix(in srgb, ${card.accent} 35%, transparent)`,
+                  },
+                  "&:active": {
+                    transform: "translateY(-1px)",
+                    boxShadow: `0 3px 10px -4px color-mix(in srgb, ${card.accent} 30%, transparent)`,
+                  },
+                }),
               }}
             >
               <CardContent sx={{ p: 2, flex: 1, display: "flex", flexDirection: "column" }}>
-                {/* Label */}
-                <Typography
-                  variant="caption"
-                  fontWeight={700}
-                  sx={{ letterSpacing: "0.08em", color: card.accent, fontSize: { xs: "0.55rem", sm: "0.65rem" }, mb: { xs: 1, sm: 2 } }}
+                {/* Label + "open detail" pill button top-right (Swiggy-style affordance
+                    for drilling into the report; replaces the old bottom CTA footer) */}
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ mb: { xs: 1, sm: 2 } }}
                 >
-                  {card.label}
-                </Typography>
+                  <Typography
+                    variant="caption"
+                    fontWeight={700}
+                    sx={{ letterSpacing: "0.08em", color: card.accent, fontSize: { xs: "0.55rem", sm: "0.65rem" } }}
+                  >
+                    {card.label}
+                  </Typography>
+                  {!isNewOrEarly && (
+                    <MuiTooltip title="See detailed report" arrow placement="top">
+                      <IconButton
+                        size="small"
+                        aria-label="See detailed report"
+                        onClick={(e) => { e.stopPropagation(); setReportModal(card.label); }}
+                        disableRipple
+                        sx={{
+                          // Pill shape — wider than tall. No border.
+                          width: 38,
+                          height: 24,
+                          borderRadius: "999px",
+                          p: 0,
+                          // Theme from the card's own accent. The pill sits on the card's
+                          // light tinted bg, so we use the accent at ~16% (rest state) and
+                          // ~26% (hover) to step up contrast progressively.
+                          bgcolor: `color-mix(in srgb, ${card.accent} 16%, transparent)`,
+                          color: card.accent,
+                          transition: "background-color 0.18s ease, transform 0.18s ease",
+                          "& .arrow": {
+                            transition: "transform 0.18s ease",
+                          },
+                          "&:hover": {
+                            bgcolor: `color-mix(in srgb, ${card.accent} 26%, transparent)`,
+                            "& .arrow": { transform: "translateX(2px)" },
+                          },
+                          "&:active": {
+                            transform: "scale(0.96)",
+                          },
+                        }}
+                      >
+                        <ArrowForwardIcon className="arrow" sx={{ fontSize: 15 }} />
+                      </IconButton>
+                    </MuiTooltip>
+                  )}
+                </Stack>
 
-                {/* Hero number */}
-                <Typography variant="h4" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", mb: { xs: 0.5, sm: 1.5 }, fontSize: { xs: "1.35rem", sm: "2.25rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
-                  {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
-                </Typography>
+                {/* Hero number + inline delta (proximity: change sits next to the value it changed) */}
+                <Stack direction="row" alignItems="baseline" spacing={1} sx={{ mb: { xs: 1.25, sm: 2.5 }, flexWrap: "wrap" }}>
+                  <Typography variant="h4" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", fontSize: { xs: "1.35rem", sm: "2rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
+                    {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
+                  </Typography>
+                  {!isNewOrEarly && card.delta && (
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={0.5}
+                      sx={{ display: { xs: "none", sm: "inline-flex" }, lineHeight: 1 }}
+                    >
+                      {card.deltaPositive
+                        ? <TrendingUpIcon sx={{ fontSize: 14, color: "success.main", display: "block" }} />
+                        : <TrendingDownIcon sx={{ fontSize: 14, color: "error.main", display: "block" }} />}
+                      <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600, fontSize: "0.75rem", lineHeight: 1 }}>
+                        {card.delta}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem", lineHeight: 1 }}>
+                        {card.deltaLabel}
+                      </Typography>
+                    </Stack>
+                  )}
+                </Stack>
 
-                {/* Multi-category rating breakdown (AVG RATING card only) */}
-                {card.label === "AVG RATING" && !isNewOrEarly && (card as any).categoryRatings?.length > 1 && (
-                  <Box sx={{ mb: 1, display: { xs: "none", sm: "block" } }}>
-                    {((card as any).categoryRatings as { category: GuruRoleCategory; overall: number; delta: number }[]).map((cr) => (
-                      <Stack key={cr.category} direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 0.25 }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", fontWeight: 500 }}>
-                          {cr.category === "Evaluation & Moderation" ? "Eval & Mod" : cr.category}
-                        </Typography>
-                        <Stack direction="row" alignItems="center" spacing={0.5}>
-                          <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.7rem" }}>
-                            {cr.overall.toFixed(2)}
-                          </Typography>
-                          <Typography variant="caption" sx={{ fontSize: "0.55rem", color: "success.main", fontWeight: 600 }}>
-                            ↗ +{cr.delta.toFixed(2)}
-                          </Typography>
-                        </Stack>
-                      </Stack>
-                    ))}
-                  </Box>
-                )}
+                {/* Per-role category breakdown moved into the "See detailed report"
+                    modal (Rating by Role Category section) to reduce card density. */}
 
                 {/* Description */}
-                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5, mb: 1.5, display: { xs: "none", sm: "block" } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5, mb: 2, display: { xs: "none", sm: "block" } }}>
                   {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
                 </Typography>
 
-                {/* Delta + peer benchmark — desktop only */}
+                {/* Peer benchmark — desktop only (delta moved next to hero above) */}
                 <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                  {!isNewOrEarly && card.delta && (
-                    <Box sx={{ mb: 1 }}>
-                      <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.dark" : "error.main", fontWeight: 600 }}>
-                        {card.deltaPositive ? "↗" : "↘"} {card.delta}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5, fontSize: "0.65rem" }}>
-                        {card.deltaLabel}
-                      </Typography>
-                    </Box>
-                  )}
 
                   {/* Peer benchmark */}
                   {!isNewOrEarly && card.peerValue != null && (() => {
@@ -1111,15 +1291,35 @@ export default function ProfilePage() {
                     const isAhead = card.lowerIsBetter ? you < peer : you > peer;
                     const isEqual = Math.abs(you - peer) < 0.01;
                     const diff = Math.abs(you - peer);
-                    const diffStr = card.label === "AVG SESSION QUALITY" ? `${diff.toFixed(1)}%` : card.label === "AVG CONFIRM TIME" ? `${diff.toFixed(1)}h` : diff.toFixed(2);
+                    // Per-label number formatting for the "X ahead / Y to go" string.
+                    // Percent labels: ON-TIME CONFIRMS / EVALUATIONS / MODERATIONS, AVG SESSION QUALITY.
+                    // Hour labels: AVG CONFIRM TIME (legacy).
+                    // Integer labels: EVALUATIONS / MONTH, MODERATIONS / MONTH, LEARNERS IMPACTED, AVG SESSIONS / MONTH.
+                    // Default: 2-dp decimal (used by AVG RATING).
+                    const labelIsPercent = card.label === "AVG SESSION QUALITY"
+                      || card.label === "ON-TIME CONFIRMS"
+                      || card.label === "ON-TIME EVALUATIONS"
+                      || card.label === "ON-TIME MODERATIONS";
+                    const labelIsHours = card.label === "AVG CONFIRM TIME";
+                    const labelIsInteger = card.label === "AVG SESSIONS / MONTH"
+                      || card.label === "EVALUATIONS / MONTH"
+                      || card.label === "MODERATIONS / MONTH"
+                      || card.label === "LEARNERS IMPACTED";
+                    const diffStr = labelIsPercent
+                      ? `${diff.toFixed(1)}%`
+                      : labelIsHours
+                        ? `${diff.toFixed(1)}h`
+                        : labelIsInteger
+                          ? Math.round(diff).toString()
+                          : diff.toFixed(2);
                     const sentiment = isEqual
                       ? "You're on par"
                       : card.lowerIsBetter
                         ? (isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`)
                         : (isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`);
-                    const sentimentColor = isEqual ? "text.secondary" : isAhead ? "success.dark" : "warning.dark";
+                    const sentimentColor = isEqual ? "text.secondary" : isAhead ? "success.main" : "warning.dark";
                     return (
-                      <Typography variant="caption" sx={{ fontSize: "0.75rem", color: "text.secondary", mb: card.primaryBenchmark ? 0.75 : 2, display: "block", lineHeight: 1.3 }}>
+                      <Typography variant="caption" sx={{ fontSize: "0.75rem", color: "text.secondary", display: "block", lineHeight: 1.4 }}>
                         Peer avg {card.peerLabel}
                         <Typography component="span" sx={{ fontSize: "0.75rem", fontWeight: 600, color: sentimentColor, ml: 0.5 }}>
                           · {sentiment}
@@ -1128,95 +1328,79 @@ export default function ProfilePage() {
                     );
                   })()}
 
-                  {!isNewOrEarly && card.primaryBenchmark && (
-                    <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem", mb: 0.5 }}>
-                      {card.primaryBenchmark}
-                    </Typography>
-                  )}
-
-                  {/* Secondary metric (e.g. < 4.0 threshold) */}
-                  {!isNewOrEarly && card.secondaryValue && (
-                    <Box sx={{ mb: 1.5, pt: 0.75, borderTop: "1px dashed", borderColor: "divider" }}>
-                      <Stack direction="row" alignItems="baseline" spacing={0.5}>
-                        <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontSize: "0.7rem" }}>
-                          {card.secondaryLabel}:
-                        </Typography>
-                        <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.85rem" }}>
-                          {card.secondaryValue}
-                        </Typography>
-                      </Stack>
-                      <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.6rem" }}>
-                        {card.secondaryBenchmark}
-                      </Typography>
-                    </Box>
-                  )}
+                  {/* Quality thresholds moved into the "See detailed report" modal
+                      to keep the card focused on hero + delta + peer comparison. */}
                 </Box>
 
-                {/* Mini line chart (SVG sparkline with tooltips) */}
-                {isNewOrEarly ? (
-                  <Box sx={{ mt: "auto", mb: 0.5 }}>
+                {/* Mini line chart (SVG sparkline with tooltips).
+                    NOTE: The outer Box provides the breathing-room gap above the chart
+                    (pt + mt: auto). The inner Box is the SVG-sized positioning context
+                    for the hover-target dots — keeping the padding out of this inner box
+                    is what makes dots align with the line. */}
+                <Box sx={{ mt: "auto", pt: { xs: 3.5, sm: 7 }, mb: 0.5 }}>
+                  {isNewOrEarly ? (
                     <svg width="100%" height={48} viewBox="0 0 140 48" preserveAspectRatio="none" style={{ display: "block" }}>
                       <line x1="0" y1="24" x2="140" y2="24" stroke={card.accent} strokeWidth={1} strokeDasharray="4 4" opacity={0.25} />
                     </svg>
-                  </Box>
-                ) : (() => {
-                  const h = 48;
-                  const w = 140;
-                  const minVal = Math.min(...card.bars);
-                  const range = maxBar - minVal || 1;
-                  const coords = card.bars.map((v, i) => ({
-                    x: (i / (card.bars.length - 1)) * w,
-                    y: h - ((v - minVal) / range) * (h - 4) - 2,
-                    val: v,
-                    label: card.barLabels[i],
-                  }));
-                  const polyPoints = coords.map((c) => `${c.x},${c.y}`).join(" ");
-                  const areaPoints = `0,${h} ${polyPoints} ${w},${h}`;
-                  return (
-                    <Box sx={{ mt: "auto", mb: 0.5, position: "relative" }}>
-                      <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
-                        <polygon points={areaPoints} fill={card.accent} opacity={0.1} />
-                        <polyline points={polyPoints} fill="none" stroke={card.accent} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.7} />
-                      </svg>
-                      {/* Tooltip hover targets */}
-                      {coords.map((c, i) => (
-                        <MuiTooltip
-                          key={i}
-                          title={`${c.label}: ${c.val}`}
-                          placement="top"
-                          arrow
-                          slotProps={{ tooltip: { sx: { fontSize: "0.7rem", py: 0.25, px: 1 } } }}
-                        >
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              left: `${(c.x / w) * 100}%`,
-                              top: `${(c.y / h) * 100}%`,
-                              transform: "translate(-50%, -50%)",
-                              width: 12,
-                              height: 12,
-                              borderRadius: "50%",
-                              cursor: "pointer",
-                              "&:hover .spark-dot": { opacity: 1 },
-                            }}
+                  ) : (() => {
+                    const h = 48;
+                    const w = 140;
+                    const minVal = Math.min(...card.bars);
+                    const range = maxBar - minVal || 1;
+                    const coords = card.bars.map((v, i) => ({
+                      x: (i / (card.bars.length - 1)) * w,
+                      y: h - ((v - minVal) / range) * (h - 4) - 2,
+                      val: v,
+                      label: card.barLabels[i],
+                    }));
+                    const polyPoints = coords.map((c) => `${c.x},${c.y}`).join(" ");
+                    const areaPoints = `0,${h} ${polyPoints} ${w},${h}`;
+                    return (
+                      <Box sx={{ position: "relative" }}>
+                        <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
+                          <polygon points={areaPoints} fill={card.accent} opacity={0.1} />
+                          <polyline points={polyPoints} fill="none" stroke={card.accent} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.7} />
+                        </svg>
+                        {/* Tooltip hover targets */}
+                        {coords.map((c, i) => (
+                          <MuiTooltip
+                            key={i}
+                            title={`${c.label}: ${c.val}`}
+                            placement="top"
+                            arrow
+                            slotProps={{ tooltip: { sx: { fontSize: "0.7rem", py: 0.25, px: 1 } } }}
                           >
                             <Box
-                              className="spark-dot"
                               sx={{
-                                width: 6, height: 6, borderRadius: "50%",
-                                bgcolor: card.accent,
-                                position: "absolute", top: "50%", left: "50%",
+                                position: "absolute",
+                                left: `${(c.x / w) * 100}%`,
+                                top: `${(c.y / h) * 100}%`,
                                 transform: "translate(-50%, -50%)",
-                                opacity: i === card.bars.length - 1 ? 1 : 0.4,
-                                transition: "opacity 0.15s ease",
+                                width: 12,
+                                height: 12,
+                                borderRadius: "50%",
+                                cursor: "pointer",
+                                "&:hover .spark-dot": { opacity: 1 },
                               }}
-                            />
-                          </Box>
-                        </MuiTooltip>
-                      ))}
-                    </Box>
-                  );
-                })()}
+                            >
+                              <Box
+                                className="spark-dot"
+                                sx={{
+                                  width: 6, height: 6, borderRadius: "50%",
+                                  bgcolor: card.accent,
+                                  position: "absolute", top: "50%", left: "50%",
+                                  transform: "translate(-50%, -50%)",
+                                  opacity: i === card.bars.length - 1 ? 1 : 0.4,
+                                  transition: "opacity 0.15s ease",
+                                }}
+                              />
+                            </Box>
+                          </MuiTooltip>
+                        ))}
+                      </Box>
+                    );
+                  })()}
+                </Box>
                 {/* Line labels */}
                 {!isNewOrEarly && (
                   <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -1229,24 +1413,6 @@ export default function ProfilePage() {
                 )}
 
               </CardContent>
-
-              {/* CTA footer — desktop only (whole card is clickable on mobile) */}
-              {!isNewOrEarly && (
-                <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                  <Divider />
-                  <Box
-                    sx={{ px: 2, py: 1.5, cursor: "pointer", "&:hover": { bgcolor: "action.hover" }, transition: "background-color 0.15s" }}
-                    onClick={(e) => { e.stopPropagation(); setReportModal(card.label); }}
-                  >
-                    <FlexBox sx={{ justifyContent: "space-between", alignItems: "center" }}>
-                      <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>
-                        See detailed report
-                      </Typography>
-                      <Typography sx={{ fontSize: 14, color: "text.secondary" }}>→</Typography>
-                    </FlexBox>
-                  </Box>
-                </Box>
-              )}
             </Card>
           );
         })}
@@ -1757,7 +1923,7 @@ export default function ProfilePage() {
             </Box>
             <Box>
               <Typography variant="caption" color="text.secondary">Biggest gain</Typography>
-              <Typography variant="h6" fontWeight={700} sx={{ color: "success.dark", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: "success.main", fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                 +{Math.max(...demoCoursePerf.map((c) => c.delta)).toFixed(2)}
               </Typography>
             </Box>
@@ -1792,8 +1958,8 @@ export default function ProfilePage() {
                           </Box>
                           <Divider orientation="vertical" flexItem />
                           <Box>
-                            <Typography variant="body1" fontWeight={600} sx={{ color: course.delta > 0 ? "success.dark" : course.delta < 0 ? "warning.dark" : "text.secondary" }}>
-                              {course.delta > 0 ? "↗" : course.delta < 0 ? "↘" : "—"} {course.delta > 0 ? "+" : ""}{course.delta.toFixed(2)}
+                            <Typography variant="body1" fontWeight={600} sx={{ color: course.delta > 0 ? "success.main" : course.delta < 0 ? "warning.dark" : "text.secondary", display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                              {course.delta > 0 ? <TrendingUpIcon sx={{ fontSize: 16 }} /> : course.delta < 0 ? <TrendingDownIcon sx={{ fontSize: 16 }} /> : "—"} {course.delta > 0 ? "+" : ""}{course.delta.toFixed(2)}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">MoM change</Typography>
                           </Box>
@@ -1859,17 +2025,23 @@ export default function ProfilePage() {
         </DialogActions>
       </Dialog>
 
-      {/* ── Detailed Report Modal ─────────────────────────────────────────── */}
+      {/* ── Detailed Report Drawer (right-side, full height) ──────────────── */}
       {(() => {
         const activeCard = statCards.find((c) => c.label === reportModal);
         if (!activeCard) return null;
         return (
-          <Dialog
+          <Drawer
+            anchor="right"
             open={!!reportModal}
             onClose={() => setReportModal(null)}
-            maxWidth="sm"
-            fullWidth
-            PaperProps={{ sx: { borderRadius: "16px" } }}
+            PaperProps={{
+              sx: {
+                width: { xs: "100%", sm: 480 },
+                maxWidth: "100vw",
+                display: "flex",
+                flexDirection: "column",
+              },
+            }}
           >
             <Box sx={{ px: 3, pt: 3, pb: 0 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -1883,6 +2055,13 @@ export default function ProfilePage() {
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                     {activeCard.reportSummary}
                   </Typography>
+                  {/* Card description — surfaced here so opening the modal doesn't
+                      lose the contextual sentence shown on the card. */}
+                  {activeCard.description && (
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: "block", lineHeight: 1.5, fontSize: "0.75rem" }}>
+                      {activeCard.description}
+                    </Typography>
+                  )}
                 </Box>
                 <IconButton size="small" onClick={() => setReportModal(null)} sx={{ mt: -0.5 }}>
                   <CloseIcon sx={{ fontSize: 18 }} />
@@ -1895,14 +2074,89 @@ export default function ProfilePage() {
                   {activeCard.value}
                 </Typography>
                 {activeCard.delta && (
-                  <Typography variant="body2" sx={{ color: activeCard.deltaPositive ? "success.main" : "error.main", fontWeight: 600 }}>
-                    {activeCard.deltaPositive ? "↗" : "↘"} {activeCard.delta} <Typography component="span" variant="caption" color="text.disabled">{activeCard.deltaLabel}</Typography>
+                  <Typography variant="body2" sx={{ color: activeCard.deltaPositive ? "success.main" : "error.main", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                    {activeCard.deltaPositive ? <TrendingUpIcon sx={{ fontSize: 16 }} /> : <TrendingDownIcon sx={{ fontSize: 16 }} />} {activeCard.delta} <Typography component="span" variant="caption" color="text.disabled">{activeCard.deltaLabel}</Typography>
                   </Typography>
                 )}
               </Stack>
+
+              {/* Supporting stat — used by ON-TIME CONFIRMS to surface the raw average
+                  confirm time (which used to be the hero on the card). Kept as a small
+                  contextual line under the hero so the modal carries detail the card no
+                  longer leads with. */}
+              {(activeCard as any).supportingStat && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontSize: "0.75rem" }}>
+                  {(activeCard as any).supportingStat.label}:{" "}
+                  <Typography component="span" fontWeight={700} sx={{ fontSize: "0.85rem", color: "text.primary" }}>
+                    {(activeCard as any).supportingStat.value}
+                  </Typography>
+                </Typography>
+              )}
+
+              {/* Peer comparison — same data and sentiment logic as the inline card pill,
+                  rendered here as a soft pill so the modal carries the comparison context
+                  the user just clicked through from. */}
+              {activeCard.peerValue != null && (() => {
+                const you = activeCard.numericValue;
+                const peer = activeCard.peerValue;
+                const isAhead = activeCard.lowerIsBetter ? you < peer : you > peer;
+                const isEqual = Math.abs(you - peer) < 0.01;
+                const diff = Math.abs(you - peer);
+                // Same per-label formatting rules as the inline card peer pill.
+                const labelIsPercent = activeCard.label === "AVG SESSION QUALITY"
+                  || activeCard.label === "ON-TIME CONFIRMS"
+                  || activeCard.label === "ON-TIME EVALUATIONS"
+                  || activeCard.label === "ON-TIME MODERATIONS";
+                const labelIsHours = activeCard.label === "AVG CONFIRM TIME";
+                const labelIsInteger = activeCard.label === "AVG SESSIONS / MONTH"
+                  || activeCard.label === "EVALUATIONS / MONTH"
+                  || activeCard.label === "MODERATIONS / MONTH"
+                  || activeCard.label === "LEARNERS IMPACTED";
+                const diffStr = labelIsPercent
+                  ? `${diff.toFixed(1)}%`
+                  : labelIsHours
+                    ? `${diff.toFixed(1)}h`
+                    : labelIsInteger
+                      ? Math.round(diff).toString()
+                      : diff.toFixed(2);
+                const sentiment = isEqual
+                  ? "You're on par with peers"
+                  : isAhead
+                    ? `You're ${diffStr} ahead of peers`
+                    : `${diffStr} to go to reach peer average`;
+                const sentimentColor = isEqual ? "text.secondary" : isAhead ? "success.main" : "warning.dark";
+                return (
+                  <Box
+                    sx={{
+                      mt: 1.5,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: 0.75,
+                      px: 1.25,
+                      py: 0.75,
+                      borderRadius: "8px",
+                      // Neutral background so the foreground text (sentiment color)
+                      // reads clearly against it, rather than competing with a tinted
+                      // card accent.
+                      bgcolor: "action.hover",
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem" }}>
+                      Peer average
+                    </Typography>
+                    <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.8rem" }}>
+                      {activeCard.peerLabel}
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: "0.75rem", fontWeight: 600, color: sentimentColor }}>
+                      · {sentiment}
+                    </Typography>
+                  </Box>
+                );
+              })()}
             </Box>
 
-            <DialogContent sx={{ px: 3, pt: 2 }}>
+            <Box sx={{ px: 3, pt: 2, pb: 2, flex: 1, overflowY: "auto" }}>
               {/* Expanded chart */}
               <Card variant="outlined" sx={{ borderRadius: "8px", mb: 3 }}>
                 <CardContent sx={{ p: 2 }}>
@@ -1952,12 +2206,12 @@ export default function ProfilePage() {
                       <CardContent sx={{ p: 2 }}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                           <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.85rem" }}>
-                            {cr.category}
+                            {categoryDisplayLabel(cr.category)}
                           </Typography>
                           <Stack direction="row" alignItems="baseline" spacing={0.75}>
                             <Typography variant="h6" fontWeight={700}>{cr.overall.toFixed(2)}</Typography>
-                            <Typography variant="caption" sx={{ color: "success.main", fontWeight: 600 }}>
-                              ↗ +{cr.delta.toFixed(2)}
+                            <Typography variant="caption" sx={{ color: "success.main", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.25 }}>
+                              <TrendingUpIcon sx={{ fontSize: 12 }} /> +{cr.delta.toFixed(2)}
                             </Typography>
                           </Stack>
                         </Stack>
@@ -1984,6 +2238,92 @@ export default function ProfilePage() {
                 </Box>
               )}
 
+              {/* Quality thresholds (moved from the card surface) — two parallel rows
+                  so the user can see at a glance what share of sessions hit each rating
+                  bar, alongside the target for that bar. AVG SESSION QUALITY only.
+                  These benchmark fields only exist on the AVG SESSION QUALITY card,
+                  so we alias `activeCard` to `any` to read them without TS narrowing. */}
+              {((activeCard as any).primaryBenchmark || (activeCard as any).secondaryValue) && (() => {
+                const ac = activeCard as any;
+                const heroThreshold = (() => {
+                  const m = (ac.description ?? "").match(/([\d.]+)/);
+                  return m ? m[1] : "4.0";
+                })();
+                const secondaryThreshold = (() => {
+                  const m = (ac.secondaryLabel ?? "").match(/([\d.]+)/);
+                  return m ? m[1] : null;
+                })();
+                const stripTargetPrefix = (s?: string) =>
+                  (s ?? "").replace(/^Target:\s*/i, "Target ");
+                const parseTarget = (benchmark: string | undefined) => {
+                  if (!benchmark) return null;
+                  const m = benchmark.match(/([<>]=?)\s*([\d.]+)/);
+                  return m ? { op: m[1], threshold: parseFloat(m[2]) } : null;
+                };
+                const evaluate = (you: number, t: { op: string; threshold: number } | null) => {
+                  if (!t) return null;
+                  return t.op === ">" ? you > t.threshold : t.op === ">=" ? you >= t.threshold : t.op === "<" ? you < t.threshold : t.op === "<=" ? you <= t.threshold : null;
+                };
+                const primaryMet = evaluate(ac.numericValue, parseTarget(ac.primaryBenchmark));
+                const secondaryNum = ac.secondaryValue ? parseFloat(ac.secondaryValue) : null;
+                const secondaryMet = secondaryNum != null ? evaluate(secondaryNum, parseTarget(ac.secondaryBenchmark)) : null;
+                const Row = ({ label, you, target, met }: { label: string; you: string; target: string; met: boolean | null }) => (
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 1 }}>
+                    <Box sx={{ flex: 1, pr: 1 }}>
+                      <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.8rem", display: "block", mb: 0.25 }}>
+                        Sessions rated {label}
+                      </Typography>
+                      <Stack direction="row" spacing={1.5} alignItems="baseline">
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
+                          You <Typography component="span" fontWeight={700} sx={{ fontSize: "0.8rem", color: "text.primary", ml: 0.25 }}>{you}</Typography>
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
+                          {target}
+                        </Typography>
+                      </Stack>
+                    </Box>
+                    {met != null && (
+                      <Chip
+                        size="small"
+                        label={met ? "Met" : "Below target"}
+                        sx={{ fontSize: "0.65rem", fontWeight: 600, height: 22, bgcolor: met ? "success.main" : "warning.main", color: met ? "success.contrastText" : "warning.contrastText" }}
+                      />
+                    )}
+                  </Stack>
+                );
+                return (
+                  <Card variant="outlined" sx={{ borderRadius: "8px", mb: 3 }}>
+                    <CardContent sx={{ p: 2 }}>
+                      <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 0.5, display: "block" }}>
+                        Quality thresholds
+                      </Typography>
+                      <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.7rem", mb: 1, display: "block", lineHeight: 1.4 }}>
+                        Share of your sessions that meet each rating bar. Higher is better.
+                      </Typography>
+                      {ac.primaryBenchmark && (
+                        <Row
+                          label={`${heroThreshold} or above`}
+                          you={ac.value}
+                          target={stripTargetPrefix(ac.primaryBenchmark)}
+                          met={primaryMet}
+                        />
+                      )}
+                      {ac.primaryBenchmark && ac.secondaryValue && (
+                        <Divider sx={{ borderStyle: "dashed" }} />
+                      )}
+                      {ac.secondaryValue && secondaryThreshold && (
+                        <Row
+                          label={`${secondaryThreshold} or above`}
+                          you={ac.secondaryValue}
+                          target={stripTargetPrefix(ac.secondaryBenchmark)}
+                          met={secondaryMet}
+                        />
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+
               {/* Breakdown table */}
               <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: "block" }}>
                 {(activeCard as any).categoryRatings?.length > 1 ? "Overall Breakdown" : "Breakdown"}
@@ -2000,14 +2340,14 @@ export default function ProfilePage() {
                   </TableBody>
                 </Table>
               </TableContainer>
-            </DialogContent>
+            </Box>
 
-            <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Box sx={{ px: 3, py: 2, borderTop: "1px solid", borderColor: "divider", display: "flex", justifyContent: "flex-end" }}>
               <Button variant="soft" size="small" onClick={() => setReportModal(null)}>
                 Close
               </Button>
-            </DialogActions>
-          </Dialog>
+            </Box>
+          </Drawer>
         );
       })()}
     </Stack>
