@@ -81,6 +81,12 @@ const borderRotate = keyframes`
   100% { transform: rotate(360deg); }
 `;
 
+// ── Demo data for engagement stats (cumulative, monthly) ─────────────────────
+const engagementMonths = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
+const demoEngagementCount = [320, 365, 410, 438, 470, 520, 580, 620, 670, 720, 760, 800];
+const demoEngagementHours = [850, 980, 1120, 1280, 1400, 1560, 1720, 1850, 1980, 2080, 2180, 2266];
+const demoLearnersImpacted = [2800, 3200, 3650, 4100, 4500, 5100, 5600, 6050, 6500, 6850, 7100, 7332];
+
 // ── Demo data for contracts ──────────────────────────────────────────────────
 const demoContracts = [
   { program: "PGP-AIML", role: "Teacher", start: "21-01-2025", end: "31-03-2026", active: true },
@@ -107,7 +113,7 @@ const defaultCoursePerf = [
 ];
 
 // ── Demo data for monthly matrix (default fallback) ──────────────────────────
-const MONTHS = ["May 25", "Jun 25", "Jul 25", "Aug 25", "Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26", "Mar 26", "Apr 26"];
+const MONTHS = ["Apr 25", "May 25", "Jun 25", "Jul 25", "Aug 25", "Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26", "Mar 26"];
 const defaultMatrix = [
   { course: "Deep Learning Fundamentals", scores: [4.5, 4.6, null, 4.7, 4.7, 4.8, 4.6, 4.9, 4.8, 4.8, 4.9, null] },
   { course: "NLP Advanced Topics",        scores: [null, 4.4, 4.5, null, 4.5, 4.6, 4.7, 4.7, 4.8, 4.7, 4.8, 4.7] },
@@ -116,6 +122,16 @@ const defaultMatrix = [
   { course: "Product Management",         scores: [null, null, 4.2, 4.3, 4.3, 4.3, null, 4.4, 4.3, 4.4, 4.4, null] },
   { course: "Computer Vision",            scores: [null, null, null, null, null, null, 4.2, 4.3, 4.3, 4.3, 4.3, 4.4] },
   { course: "Statistics for ML",          scores: [4.2, 4.2, null, 4.3, 4.3, 4.3, 4.2, 4.2, 4.2, 4.2, 4.3, 4.2] },
+  { course: "Python for Data Science",    scores: [4.6, 4.7, 4.7, 4.8, null, 4.8, 4.7, 4.8, 4.9, 4.8, 4.9, 4.9] },
+  { course: "SQL & Databases",            scores: [4.3, 4.4, 4.4, 4.5, 4.5, null, 4.5, 4.6, 4.5, 4.6, 4.6, 4.7] },
+  { course: "MLOps & Deployment",         scores: [null, null, null, 4.3, 4.4, 4.4, 4.5, 4.5, 4.6, 4.5, 4.6, 4.6] },
+  { course: "Time Series Analysis",       scores: [4.1, 4.2, 4.3, null, 4.3, 4.4, 4.4, null, 4.5, 4.5, 4.5, 4.6] },
+  { course: "Feature Engineering",        scores: [null, 4.3, 4.4, 4.4, 4.5, 4.5, null, 4.5, 4.6, 4.6, null, 4.7] },
+  { course: "Linear Algebra Refresher",   scores: [4.0, 4.1, null, 4.2, 4.2, 4.3, 4.3, 4.3, null, 4.4, 4.4, 4.4] },
+  { course: "Probability & Inference",    scores: [4.2, null, 4.3, 4.3, 4.4, 4.4, 4.4, 4.5, 4.5, null, 4.5, 4.6] },
+  { course: "Data Visualization",         scores: [null, null, 4.5, 4.5, 4.6, 4.6, 4.7, 4.7, null, 4.7, 4.8, 4.8] },
+  { course: "Exploratory Data Analysis",  scores: [4.4, 4.4, 4.5, null, 4.5, 4.6, 4.6, 4.6, 4.7, 4.7, 4.7, null] },
+  { course: "Generative AI Foundations",  scores: [null, null, null, null, null, null, null, null, 4.5, 4.6, 4.7, 4.8] },
 ];
 
 function DeltaLabel({ value }: { value: number }) {
@@ -1549,6 +1565,78 @@ export default function ProfilePage() {
       </Box>
       </Box>
 
+      {/* ── Engagement Stats — 3-column row ──────────────────────────── */}
+      {!isNewOrEarly && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, mb: 0.5 }}>
+            Engagement Stats
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+            Cumulative engagement metrics since you joined.
+          </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
+            gap: 2,
+          }}
+        >
+          {[
+            { title: "Engagement Count", subtitle: "Cumulative", total: "800", color: "#4caf50", data: demoEngagementCount },
+            { title: "Engagement Hours", subtitle: "Cumulative", total: "2,266", color: "#3f51b5", data: demoEngagementHours },
+            { title: "Learners Impacted", subtitle: "Cumulative", total: "7,332", color: "#ff9800", data: demoLearnersImpacted },
+            { title: "Rating Trend", subtitle: "12 months", total: avgRating, color: "hsl(217, 70%, 55%)", data: ratingChartData.map((d) => d.avg ?? 0), labels: ratingChartData.map((d) => d.month), isRating: true },
+          ].map((chart) => (
+            <Card key={chart.title} variant="outlined">
+              <CardContent sx={{ p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="baseline" sx={{ mb: 1.5 }}>
+                  <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.72rem" }}>{chart.title}</Typography>
+                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.68rem", color: chart.color }}>
+                    {chart.isRating ? `Avg: ${chart.total}` : `Total: ${chart.total}`}
+                  </Typography>
+                </Stack>
+                <Box sx={{ width: "100%", height: 120 }}>
+                  <ResponsiveContainer>
+                    <LineChart data={chart.data.map((v, i) => ({ month: chart.labels ? chart.labels[i] : engagementMonths[i], value: v }))} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id={`grad-${chart.title.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={chart.color} stopOpacity={0.2} />
+                          <stop offset="100%" stopColor={chart.color} stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant) / 0.3)" vertical={false} />
+                      <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface) / 0.5)" }} axisLine={false} tickLine={false} />
+                      <YAxis domain={chart.isRating ? [4, 5] : ["auto", "auto"]} tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface) / 0.5)" }} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const d = payload[0].payload;
+                          return (
+                            <Card variant="outlined" sx={{ p: 1, borderRadius: "8px", boxShadow: 1 }}>
+                              <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.65rem" }}>{d.month}: <b>{d.value.toLocaleString()}</b></Typography>
+                            </Card>
+                          );
+                        }}
+                      />
+                      <Area type="monotone" dataKey="value" fill={`url(#grad-${chart.title.replace(/\s/g, "")})`} stroke="none" />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke={chart.color}
+                        strokeWidth={2}
+                        dot={{ r: 3, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
+                        activeDot={{ r: 5, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+        </Box>
+      )}
+
       {/* ── Testimonials horizontal scroll ────────────────────────────── */}
       {isNewOrEarly ? (
         <Paper variant="outlined" sx={{ p: 3,  textAlign: "center", borderStyle: "dashed", borderColor: "divider" }}>
@@ -1647,8 +1735,8 @@ export default function ProfilePage() {
       </Box>
       )}
 
-      {/* Rating trend chart */}
-      <Card variant="outlined" sx={{ mb: 3 }}>
+      {/* Rating trend chart (hidden — moved into Engagement Stats grid) */}
+      {false && <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent sx={{ p: 2 }}>
           <Typography variant="subtitle1" fontWeight={600} sx={{  fontSize: { xs: "0.875rem", sm: "1rem" } }}>Rating trend (last 6 months)</Typography>
 
@@ -1727,10 +1815,10 @@ export default function ProfilePage() {
             </>
           )}
         </CardContent>
-      </Card>
+      </Card>}
 
-      {/* Course performance — horizontal bars */}
-      <Card variant="outlined" sx={{ mb: 3 }}>
+      {/* Course performance — horizontal bars (hidden for now) */}
+      {false && <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent sx={{ p: 2 }}>
           <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
             <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>{coursePerfLabel}</Typography>
@@ -1834,7 +1922,7 @@ export default function ProfilePage() {
           </>
           )}
         </CardContent>
-      </Card>
+      </Card>}
 
       {/* Monthly matrix — compact heatmap */}
       <Card variant="outlined" sx={{ mb: 4 }}>
