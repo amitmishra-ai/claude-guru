@@ -762,9 +762,8 @@ export default function ProfilePage() {
           <Box sx={{ px: 2, pt: 2, pb: 0 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.9rem", sm: "0.95rem" } }}>Share your impact</Typography>
-              {/* Two independent buttons: [All Time]  [March 2026 ▾] */}
-              <Stack direction="row" alignItems="center" spacing={0.75}>
-                {/* All Time button */}
+              {/* ── Desktop: two separate buttons (unchanged) ──────────── */}
+              <Stack direction="row" alignItems="center" spacing={0.75} sx={{ display: { xs: "none", sm: "flex" } }}>
                 <Button
                   size="small"
                   variant={shareAllTime ? "contained" : "outlined"}
@@ -778,14 +777,10 @@ export default function ProfilePage() {
                 >
                   All Time
                 </Button>
-                {/* Month button — opens menu/sheet */}
                 <Button
                   size="small"
                   variant={!shareAllTime ? "contained" : "outlined"}
-                  onClick={(e) => {
-                    if (isMobile) { setShareAllTime(false); setMonthSheetOpen(true); }
-                    else setMonthMenuAnchor(e.currentTarget);
-                  }}
+                  onClick={(e) => setMonthMenuAnchor(e.currentTarget)}
                   endIcon={<ChevronRightIcon sx={{ fontSize: "14px !important", transform: "rotate(90deg)", ml: -0.5 }} />}
                   sx={{
                     borderRadius: "8px", textTransform: "none",
@@ -796,7 +791,6 @@ export default function ProfilePage() {
                 >
                   {shareMonthOptions.find((m) => m.value === shareMonth)?.label?.replace(" (Current)", "") ?? "Month"}
                 </Button>
-                {/* Desktop month menu */}
                 <Menu
                   anchorEl={monthMenuAnchor}
                   open={Boolean(monthMenuAnchor)}
@@ -818,6 +812,22 @@ export default function ProfilePage() {
                   ))}
                 </Menu>
               </Stack>
+
+              {/* ── Mobile: single dropdown (All Time + months merged) ───── */}
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => setMonthSheetOpen(true)}
+                endIcon={<ChevronRightIcon sx={{ fontSize: "14px !important", transform: "rotate(90deg)", ml: -0.5 }} />}
+                sx={{
+                  display: { xs: "inline-flex", sm: "none" },
+                  borderRadius: "8px", textTransform: "none",
+                  fontWeight: 600, fontSize: "0.75rem",
+                  px: 1.5, py: 0.4, minWidth: 0,
+                }}
+              >
+                {shareAllTime ? "All Time" : (shareMonthOptions.find((m) => m.value === shareMonth)?.label?.replace(" (Current)", "") ?? "Month")}
+              </Button>
             </Stack>
           </Box>
 
@@ -830,7 +840,26 @@ export default function ProfilePage() {
           >
             <Box sx={{ pt: 1.5, pb: 1 }}>
               <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: "divider", mx: "auto", mb: 1.5 }} />
-              <Typography variant="subtitle2" fontWeight={700} sx={{ px: 2, mb: 1 }}>Select month</Typography>
+              <Typography variant="subtitle2" fontWeight={700} sx={{ px: 2, mb: 1 }}>Select period</Typography>
+              {/* All Time option */}
+              <Box
+                component="button"
+                onClick={() => { setShareAllTime(true); setMonthSheetOpen(false); }}
+                sx={{
+                  display: "flex", alignItems: "center", width: "100%",
+                  px: 2, py: 1.5, border: "none",
+                  bgcolor: shareAllTime ? "primary.50" : "transparent",
+                  cursor: "pointer", fontFamily: "inherit",
+                  "&:hover": { bgcolor: shareAllTime ? "primary.100" : "action.hover" },
+                  "&:active": { bgcolor: "action.selected" },
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: shareAllTime ? 700 : 500, color: shareAllTime ? "primary.main" : "text.primary" }}>
+                  All Time
+                </Typography>
+              </Box>
+              <Divider sx={{ my: 0.5 }} />
+              {/* Month options */}
               {shareMonthOptions.map((m) => (
                 <Box
                   key={m.value}
@@ -839,13 +868,13 @@ export default function ProfilePage() {
                   sx={{
                     display: "flex", alignItems: "center", width: "100%",
                     px: 2, py: 1.5, border: "none",
-                    bgcolor: !isTillDate && m.value === shareMonth ? "primary.50" : "transparent",
+                    bgcolor: !shareAllTime && m.value === shareMonth ? "primary.50" : "transparent",
                     cursor: "pointer", fontFamily: "inherit",
-                    "&:hover": { bgcolor: !isTillDate && m.value === shareMonth ? "primary.100" : "action.hover" },
+                    "&:hover": { bgcolor: !shareAllTime && m.value === shareMonth ? "primary.100" : "action.hover" },
                     "&:active": { bgcolor: "action.selected" },
                   }}
                 >
-                  <Typography variant="body2" sx={{ fontWeight: !isTillDate && m.value === shareMonth ? 700 : 400, color: !isTillDate && m.value === shareMonth ? "primary.main" : "text.primary" }}>
+                  <Typography variant="body2" sx={{ fontWeight: !shareAllTime && m.value === shareMonth ? 700 : 400, color: !shareAllTime && m.value === shareMonth ? "primary.main" : "text.primary" }}>
                     {m.label}
                   </Typography>
                 </Box>
@@ -1320,7 +1349,7 @@ export default function ProfilePage() {
                 Per-category ratings + universal ON-TIME CONFIRMS in one row.
                 4-column grid on desktop; auto-fit on fewer cards. */}
             <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.12em", mb: 0, display: "block" }}>
-              Ratings & Health
+              Ratings
             </Typography>
             <Box sx={{
               display: "grid",
