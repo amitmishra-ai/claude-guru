@@ -1245,62 +1245,20 @@ export default function ProfilePage() {
         </Box>
       </FlexBox>
 
-      {/* KPI stat cards — grid when ≤4 cards, horizontal carousel when >4 (mixed roles) */}
-      <Box sx={{ position: "relative", mb: 3 }}>
-        {/* Floating edge arrows — only in carousel mode, desktop only */}
-        {statCards.length > 4 && (
-          <>
-            <IconButton
-              onClick={() => kpiScrollRef.current?.scrollBy({ left: -300, behavior: "smooth" })}
-              sx={{
-                position: "absolute", left: -18, top: "50%", transform: "translateY(-50%)", zIndex: 2,
-                width: 36, height: 36, bgcolor: "background.paper",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                color: "text.primary",
-                display: { xs: "none", sm: "flex" },
-                "&:hover": { bgcolor: "grey.100" },
-              }}
-            >
-              <ChevronLeftIcon sx={{ fontSize: 20 }} />
-            </IconButton>
-            <IconButton
-              onClick={() => kpiScrollRef.current?.scrollBy({ left: 300, behavior: "smooth" })}
-              sx={{
-                position: "absolute", right: -18, top: "50%", transform: "translateY(-50%)", zIndex: 2,
-                width: 36, height: 36, bgcolor: "background.paper",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                color: "text.primary",
-                display: { xs: "none", sm: "flex" },
-                "&:hover": { bgcolor: "grey.100" },
-              }}
-            >
-              <ChevronRightIcon sx={{ fontSize: 20 }} />
-            </IconButton>
-          </>
-        )}
+      {/* KPI stat cards — bento box grid layout */}
+      <Box sx={{ mb: 3 }}>
         <Box
-          ref={statCards.length > 4 ? kpiScrollRef : undefined}
-          sx={statCards.length > 4
-            ? {
-                display: "flex",
-                gap: 2,
-                overflowX: "auto",
-                scrollSnapType: "x mandatory",
-                scrollbarWidth: "none",
-                "&::-webkit-scrollbar": { display: "none" },
-                // Padding so hover lift + shadow don't clip against container bounds
-                px: { xs: 0.5, sm: 1 },
-                pt: 0.5,  // room for translateY(-2px) upward lift
-                pb: 2,    // room for downward box-shadow
-              }
-            : {
-                display: "grid",
-                gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
-                gap: { xs: 1.5, sm: 2 },
-                pt: 0.5,  // room for hover lift
-                pb: 2,    // room for hover shadow
-              }
-          }
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "repeat(2, 1fr)",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(4, 1fr)",
+            },
+            gap: 2,
+            pt: 0.5,
+            pb: 1.5,
+          }}
         >
         {statCards.map((card) => {
           const maxBar = Math.max(...card.bars);
@@ -1353,13 +1311,6 @@ export default function ProfilePage() {
                 overflow: "hidden",
                 cursor: isNewOrEarly ? "default" : "pointer",
                 transition: "border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
-                // In carousel mode (>4 cards), fix card width + scroll-snap
-                ...(statCards.length > 4 ? {
-                  minWidth: { xs: "70vw", sm: 280 },
-                  maxWidth: { xs: "70vw", sm: 280 },
-                  scrollSnapAlign: "start",
-                  flex: "0 0 auto",
-                } : {}),
                 // Interactive affordance — only when the card is actually clickable.
                 // Lifts 2px on hover, casts a soft shadow tinted with the card's own
                 // accent so each card's hover feels native to its color.
@@ -1376,14 +1327,12 @@ export default function ProfilePage() {
                 }),
               }}
             >
-              <CardContent sx={{ p: 2, flex: 1, display: "flex", flexDirection: "column" }}>
-                {/* Label + "open detail" pill button top-right (Swiggy-style affordance
-                    for drilling into the report; replaces the old bottom CTA footer) */}
+              <CardContent sx={{ p: { xs: 1.25, sm: 1.5 }, flex: 1, display: "flex", flexDirection: "column" }}>
                 <Stack
                   direction="row"
                   justifyContent="space-between"
                   alignItems="center"
-                  sx={{ mb: { xs: 1, sm: 2 } }}
+                  sx={{ mb: { xs: 0.75, sm: 1 } }}
                 >
                   <Typography
                     variant="caption"
@@ -1401,8 +1350,8 @@ export default function ProfilePage() {
                         disableRipple
                         sx={{
                           // Pill shape — wider than tall. No border.
-                          width: 38,
-                          height: 24,
+                          width: 30,
+                          height: 20,
                           borderRadius: "999px",
                           p: 0,
                           // Theme from the card's own accent. The pill sits on the card's
@@ -1423,15 +1372,15 @@ export default function ProfilePage() {
                           },
                         }}
                       >
-                        <ArrowForwardIcon className="arrow" sx={{ fontSize: 15 }} />
+                        <ArrowForwardIcon className="arrow" sx={{ fontSize: 12 }} />
                       </IconButton>
                     </MuiTooltip>
                   )}
                 </Stack>
 
                 {/* Hero number + inline delta (proximity: change sits next to the value it changed) */}
-                <Stack direction="row" alignItems="baseline" spacing={1} sx={{ mb: { xs: 1.25, sm: 2.5 }, flexWrap: "wrap" }}>
-                  <Typography variant="h4" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", fontSize: { xs: "1.35rem", sm: "2rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
+                <Stack direction="row" alignItems="baseline" spacing={0.75} sx={{ mb: { xs: 0.5, sm: 1 }, flexWrap: "wrap" }}>
+                  <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", fontSize: { xs: "1.15rem", sm: "1.4rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
                     {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
                   </Typography>
                   {!isNewOrEarly && card.delta && (
@@ -1458,7 +1407,7 @@ export default function ProfilePage() {
                     modal (Rating by Role Category section) to reduce card density. */}
 
                 {/* Description */}
-                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5, mb: 2, display: { xs: "none", sm: "block" } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: { xs: "none", sm: "-webkit-box" }, WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontSize: "0.68rem" }}>
                   {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
                 </Typography>
 
@@ -1518,13 +1467,13 @@ export default function ProfilePage() {
                     (pt + mt: auto). The inner Box is the SVG-sized positioning context
                     for the hover-target dots — keeping the padding out of this inner box
                     is what makes dots align with the line. */}
-                <Box sx={{ mt: "auto", pt: { xs: 3.5, sm: 7 }, mb: 0.5 }}>
+                <Box sx={{ mt: "auto", pt: { xs: 1.5, sm: 2 }, mb: 0.25 }}>
                   {isNewOrEarly ? (
-                    <svg width="100%" height={48} viewBox="0 0 140 48" preserveAspectRatio="none" style={{ display: "block" }}>
-                      <line x1="0" y1="24" x2="140" y2="24" stroke={card.accent} strokeWidth={1} strokeDasharray="4 4" opacity={0.25} />
+                    <svg width="100%" height={32} viewBox="0 0 140 32" preserveAspectRatio="none" style={{ display: "block" }}>
+                      <line x1="0" y1="16" x2="140" y2="16" stroke={card.accent} strokeWidth={1} strokeDasharray="4 4" opacity={0.25} />
                     </svg>
                   ) : (() => {
-                    const h = 48;
+                    const h = 32;
                     const w = 140;
                     const minVal = Math.min(...card.bars);
                     const range = maxBar - minVal || 1;
