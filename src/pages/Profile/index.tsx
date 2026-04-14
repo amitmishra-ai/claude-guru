@@ -195,6 +195,7 @@ export default function ProfilePage() {
   const [reportModal, setReportModal] = useState<string | null>(null);
   const [showCourseReport, setShowCourseReport] = useState(false);
   const testimonialRef = useRef<HTMLDivElement>(null);
+  const kpiScrollRef = useRef<HTMLDivElement>(null);
   const [shareMonth, setShareMonth] = useState("2026-03");
   const [shareAllTime, setShareAllTime] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -382,11 +383,26 @@ export default function ProfilePage() {
   // roles fall in the Evaluation & Moderation category, switch to set B and source
   // data from the first Eval/Mod role in the chip list. Otherwise fall back to
   // the dropdown-controlled `selectedRole` for both card set and data.
-  const isPureEvalMod = activeCategories.length === 1 && activeCategories[0] === "Evaluation & Moderation";
-  const dataRole: GuruRole = isPureEvalMod
-    ? (selectedRoles.find((r) => ROLE_TO_CATEGORY[r] === "Evaluation & Moderation") ?? selectedRole)
-    : selectedRole;
+  // Determine which card sets to show and which data sources to use.
+  // - Pure Teaching/Mentoring → set A only, data from selectedRole.
+  // - Pure Eval/Mod → set B only, data from first Eval/Mod role.
+  // - Mixed (e.g. Teacher + Evaluator) → union of A+B, each set sourced
+  //   from its own category's first role. Produces up to 7 unique cards.
+  const hasSessionRoles = activeCategories.some((c) => c === "Teaching" || c === "Mentoring");
+  const hasEvalModRoles = activeCategories.includes("Evaluation & Moderation");
+  const isMixed = hasSessionRoles && hasEvalModRoles;
+  const isPureEvalMod = !hasSessionRoles && hasEvalModRoles;
+
+  const sessionDataRole: GuruRole = selectedRoles.find(
+    (r) => ROLE_TO_CATEGORY[r] === "Teaching" || ROLE_TO_CATEGORY[r] === "Mentoring",
+  ) ?? selectedRole;
+  const evalDataRole: GuruRole = selectedRoles.find(
+    (r) => ROLE_TO_CATEGORY[r] === "Evaluation & Moderation",
+  ) ?? selectedRole;
+
+  const dataRole: GuruRole = isPureEvalMod ? evalDataRole : sessionDataRole;
   const roleData = demoRoleStatCards[dataRole];
+  const evalRoleData = demoRoleStatCards[evalDataRole];
   const isEvalModCategory = isPureEvalMod;
   const monthLabels = ["Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26"];
   const statCards = useMemo(() => {
@@ -415,11 +431,114 @@ export default function ProfilePage() {
       peerValue: roleData.peerAvgRating, peerLabel: roleData.peerAvgRating.toFixed(2), lowerIsBetter: false,
     };
 
+    // ── Helper: build set B's 3 eval/mod cards from a given data source ──
+    // Uses info (sky blue), violet, teal — distinct from set A's amber/purple/green
+    // so when both sets render in mixed mode all 7 cards look unique.
+    const buildEvalCards = (rd: typeof roleData, role: GuruRole) => {
+      const wN = role === "Moderator" ? "moderations" : "evaluations";
+      const wNs = role === "Moderator" ? "moderation" : "evaluation";
+      return [
+        {
+          label: `${wN.toUpperCase()} / MONTH`,
+          value: rd.avgSessions, numericValue: parseFloat(rd.avgSessions),
+          description: `${wN.charAt(0).toUpperCase() + wN.slice(1)} delivered per month across your assignments.`,
+          delta: rd.avgSessionsDelta, deltaLabel: "vs last month", deltaPositive: true,
+          bars: rd.avgSessionsBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+          bg: "var(--gl-accent-info-bg)", accent: "var(--gl-accent-info)",
+          reportTitle: `${wN.charAt(0).toUpperCase() + wN.slice(1)} per Month Report`,
+          reportSummary: `Monthly breakdown of ${wN} delivered as ${role}.`,
+          chartData: rd.avgSessionsBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartKey: "value", breakdown: rd.sessionsBreakdown,
+          peerValue: rd.peerAvgSessions, peerLabel: String(rd.peerAvgSessions), lowerIsBetter: false,
+        },
+        {
+          label: `ON-TIME ${wN.toUpperCase()}`,
+          value: rd.onTimeConfirmRate, numericValue: parseFloat(rd.onTimeConfirmRate),
+          description: `Assignments you ${wNs === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned.`,
+          delta: rd.onTimeConfirmDelta, deltaLabel: "vs last quarter", deltaPositive: true,
+          bars: rd.onTimeConfirmBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+          bg: "var(--gl-accent-violet-bg)", accent: "var(--gl-accent-violet)",
+          reportTitle: `On-time ${wNs.charAt(0).toUpperCase() + wNs.slice(1)} Report`,
+          reportSummary: `Share of assignments you ${wNs === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned. Higher is better.`,
+          chartData: rd.onTimeConfirmBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartKey: "value", breakdown: rd.onTimeConfirmBreakdown,
+          peerValue: rd.peerOnTimeConfirmRate, peerLabel: `${rd.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
+          supportingStat: { label: `Average time to ${wNs === "moderation" ? "moderate" : "evaluate"}`, value: rd.avgConfirmTime },
+        },
+        {
+          label: "LEARNERS IMPACTED",
+          value: rd.learnersImpactedPerMonth, numericValue: parseFloat(rd.learnersImpactedPerMonth),
+          description: `Unique learners whose ${wN === "moderations" ? "discussions" : "assignments"} you ${wNs === "moderation" ? "moderated" : "evaluated"} per month.`,
+          delta: rd.learnersImpactedDelta, deltaLabel: "vs last month", deltaPositive: true,
+          bars: rd.learnersImpactedBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+          bg: "var(--gl-accent-teal-bg)", accent: "var(--gl-accent-teal)",
+          reportTitle: "Learners Impacted Report",
+          reportSummary: `Monthly count of unique learners whose work you ${wNs === "moderation" ? "moderated" : "evaluated"}.`,
+          chartData: rd.learnersImpactedBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartKey: "value", breakdown: rd.learnersImpactedBreakdown,
+          peerValue: rd.peerLearnersImpactedPerMonth, peerLabel: String(rd.peerLearnersImpactedPerMonth), lowerIsBetter: false,
+        },
+      ] as const;
+    };
+
+    // ── Mixed mode: union of set A (session-based) + set B (eval-based) ──
+    if (isMixed) {
+      const sessionRd = demoRoleStatCards[sessionDataRole];
+      return [
+        sharedRatingCard,
+        // Set A cards (using session-based role's data)
+        {
+          label: "AVG SESSIONS / MONTH",
+          value: sessionRd.avgSessions, numericValue: parseFloat(sessionRd.avgSessions),
+          description: `Average sessions delivered per month as ${sessionDataRole}.`,
+          delta: sessionRd.avgSessionsDelta, deltaLabel: "vs last month", deltaPositive: true,
+          bars: sessionRd.avgSessionsBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+          bg: "var(--gl-accent-amber-bg)", accent: "var(--gl-accent-amber)",
+          reportTitle: "Sessions per Month Report",
+          reportSummary: `Monthly breakdown of sessions delivered as ${sessionDataRole}.`,
+          chartData: sessionRd.avgSessionsBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartKey: "value", breakdown: sessionRd.sessionsBreakdown,
+          peerValue: sessionRd.peerAvgSessions, peerLabel: String(sessionRd.peerAvgSessions), lowerIsBetter: false,
+        },
+        {
+          label: "AVG SESSION QUALITY",
+          value: sessionRd.avgQuality, numericValue: parseFloat(sessionRd.avgQuality),
+          description: "Sessions rated 4.0 or above.",
+          delta: sessionRd.avgQualityDelta, deltaLabel: "vs last month", deltaPositive: true,
+          bars: sessionRd.avgQualityBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+          bg: "var(--gl-accent-purple-bg)", accent: "var(--gl-accent-purple)",
+          reportTitle: "Session Quality Report",
+          reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
+          chartData: sessionRd.avgQualityBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartKey: "value", breakdown: sessionRd.qualityBreakdown,
+          primaryBenchmark: "Target: > 98%", secondaryValue: sessionRd.avgQualitySecondary,
+          secondaryLabel: "Rated 4.4+", secondaryBenchmark: "Target: > 90%",
+          peerValue: sessionRd.peerAvgQuality, peerLabel: `${sessionRd.peerAvgQuality}%`, lowerIsBetter: false,
+        },
+        {
+          label: "ON-TIME CONFIRMS",
+          value: sessionRd.onTimeConfirmRate, numericValue: parseFloat(sessionRd.onTimeConfirmRate),
+          description: "Sessions you confirmed within 24 hours of being assigned.",
+          delta: sessionRd.onTimeConfirmDelta, deltaLabel: "vs last quarter", deltaPositive: true,
+          bars: sessionRd.onTimeConfirmBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+          bg: "var(--gl-accent-success-bg)", accent: "var(--gl-accent-success)",
+          reportTitle: "On-time Confirmation Report",
+          reportSummary: "Share of sessions you confirmed within 24 hours of being assigned. Higher is better.",
+          chartData: sessionRd.onTimeConfirmBars.map((v, i) => ({ month: monthLabels[i], value: v })),
+          chartKey: "value", breakdown: sessionRd.onTimeConfirmBreakdown,
+          peerValue: sessionRd.peerOnTimeConfirmRate, peerLabel: `${sessionRd.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
+          supportingStat: { label: "Average time to confirm", value: sessionRd.avgConfirmTime },
+        },
+        // Set B cards (using eval/mod role's data)
+        ...buildEvalCards(evalRoleData, evalDataRole),
+      ];
+    }
+
     if (isEvalModCategory) {
       // Eval/Mod-specific cards. "Sessions" → "evaluations/moderations" and
       // "session quality" is dropped (doesn't map to assignment-based work).
-      const workNoun = selectedRole === "Moderator" ? "moderations" : "evaluations";
-      const workNounSingular = selectedRole === "Moderator" ? "moderation" : "evaluation";
+      const workNoun = dataRole === "Moderator" ? "moderations" : "evaluations";
+      const workNounSingular = dataRole === "Moderator" ? "moderation" : "evaluation";
       return [
         sharedRatingCard,
         {
@@ -554,7 +673,7 @@ export default function ProfilePage() {
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRole, selectedRoles, weightedAvgRating, categoryRatings, roleData, isEvalModCategory, dataRole]);
+  }, [selectedRole, selectedRoles, weightedAvgRating, categoryRatings, roleData, evalRoleData, isEvalModCategory, isMixed, dataRole, sessionDataRole, evalDataRole]);
 
   if (loading || roleLoading) {
     return (
@@ -1126,8 +1245,63 @@ export default function ProfilePage() {
         </Box>
       </FlexBox>
 
-      {/* KPI stat cards */}
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }, gap: { xs: 1.5, sm: 2 }, mb: 3 }}>
+      {/* KPI stat cards — grid when ≤4 cards, horizontal carousel when >4 (mixed roles) */}
+      <Box sx={{ position: "relative", mb: 3 }}>
+        {/* Floating edge arrows — only in carousel mode, desktop only */}
+        {statCards.length > 4 && (
+          <>
+            <IconButton
+              onClick={() => kpiScrollRef.current?.scrollBy({ left: -300, behavior: "smooth" })}
+              sx={{
+                position: "absolute", left: -18, top: "50%", transform: "translateY(-50%)", zIndex: 2,
+                width: 36, height: 36, bgcolor: "background.paper",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                color: "text.primary",
+                display: { xs: "none", sm: "flex" },
+                "&:hover": { bgcolor: "grey.100" },
+              }}
+            >
+              <ChevronLeftIcon sx={{ fontSize: 20 }} />
+            </IconButton>
+            <IconButton
+              onClick={() => kpiScrollRef.current?.scrollBy({ left: 300, behavior: "smooth" })}
+              sx={{
+                position: "absolute", right: -18, top: "50%", transform: "translateY(-50%)", zIndex: 2,
+                width: 36, height: 36, bgcolor: "background.paper",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                color: "text.primary",
+                display: { xs: "none", sm: "flex" },
+                "&:hover": { bgcolor: "grey.100" },
+              }}
+            >
+              <ChevronRightIcon sx={{ fontSize: 20 }} />
+            </IconButton>
+          </>
+        )}
+        <Box
+          ref={statCards.length > 4 ? kpiScrollRef : undefined}
+          sx={statCards.length > 4
+            ? {
+                display: "flex",
+                gap: 2,
+                overflowX: "auto",
+                scrollSnapType: "x mandatory",
+                scrollbarWidth: "none",
+                "&::-webkit-scrollbar": { display: "none" },
+                // Padding so hover lift + shadow don't clip against container bounds
+                px: { xs: 0.5, sm: 1 },
+                pt: 0.5,  // room for translateY(-2px) upward lift
+                pb: 2,    // room for downward box-shadow
+              }
+            : {
+                display: "grid",
+                gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
+                gap: { xs: 1.5, sm: 2 },
+                pt: 0.5,  // room for hover lift
+                pb: 2,    // room for hover shadow
+              }
+          }
+        >
         {statCards.map((card) => {
           const maxBar = Math.max(...card.bars);
           const zeroMessages: Record<string, string> = {
@@ -1179,6 +1353,13 @@ export default function ProfilePage() {
                 overflow: "hidden",
                 cursor: isNewOrEarly ? "default" : "pointer",
                 transition: "border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+                // In carousel mode (>4 cards), fix card width + scroll-snap
+                ...(statCards.length > 4 ? {
+                  minWidth: { xs: "70vw", sm: 280 },
+                  maxWidth: { xs: "70vw", sm: 280 },
+                  scrollSnapAlign: "start",
+                  flex: "0 0 auto",
+                } : {}),
                 // Interactive affordance — only when the card is actually clickable.
                 // Lifts 2px on hover, casts a soft shadow tinted with the card's own
                 // accent so each card's hover feels native to its color.
@@ -1417,6 +1598,7 @@ export default function ProfilePage() {
           );
         })}
       </Box>
+      </Box>
 
       {/* ── Testimonials horizontal scroll ────────────────────────────── */}
       {isNewOrEarly ? (
@@ -1430,36 +1612,47 @@ export default function ProfilePage() {
         </Paper>
       ) : (
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>What learners say</Typography>
-          <Stack direction="row" spacing={0.5}>
-            <IconButton
-              size="small"
-              onClick={() => testimonialRef.current?.scrollBy({ left: -320, behavior: "smooth" })}
-              sx={{ width: 30, height: 30, bgcolor: "action.hover", "&:hover": { bgcolor: "action.selected" } }}
-            >
-              <ChevronLeftIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => testimonialRef.current?.scrollBy({ left: 320, behavior: "smooth" })}
-              sx={{ width: 30, height: 30, bgcolor: "action.hover", "&:hover": { bgcolor: "action.selected" } }}
-            >
-              <ChevronRightIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Stack>
-        </Stack>
-        <Box
-          ref={testimonialRef}
-          sx={{
-            display: "flex",
-            gap: 2,
-            overflowX: "auto",
-            scrollSnapType: "x mandatory",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
+        <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, mb: 1.5 }}>What learners say</Typography>
+        <Box sx={{ position: "relative" }}>
+          {/* Floating edge arrows — desktop only */}
+          <IconButton
+            onClick={() => testimonialRef.current?.scrollBy({ left: -320, behavior: "smooth" })}
+            sx={{
+              position: "absolute", left: -18, top: "50%", transform: "translateY(-50%)", zIndex: 2,
+              width: 36, height: 36, bgcolor: "background.paper",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              color: "text.primary",
+              display: { xs: "none", sm: "flex" },
+              "&:hover": { bgcolor: "grey.100" },
+            }}
+          >
+            <ChevronLeftIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+          <IconButton
+            onClick={() => testimonialRef.current?.scrollBy({ left: 320, behavior: "smooth" })}
+            sx={{
+              position: "absolute", right: -18, top: "50%", transform: "translateY(-50%)", zIndex: 2,
+              width: 36, height: 36, bgcolor: "background.paper",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              color: "text.primary",
+              display: { xs: "none", sm: "flex" },
+              "&:hover": { bgcolor: "grey.100" },
+            }}
+          >
+            <ChevronRightIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+          <Box
+            ref={testimonialRef}
+            sx={{
+              display: "flex",
+              gap: 2,
+              overflowX: "auto",
+              scrollSnapType: "x mandatory",
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+              px: { sm: 1 },
+            }}
+          >
           {[
             { quote: "One of the most structured and engaging sessions I've attended. The real-world examples made complex concepts feel intuitive and easy to follow.", name: "Priya S.", info: "PGP-DS · Cohort 26A", avatar: "P" },
             { quote: "Truly inspiring mentor. Always goes above and beyond to ensure every learner understands the material. The Q&A sessions are incredibly helpful.", name: "Aarav M.", info: "PGP-AIML · Cohort 25B", avatar: "A" },
@@ -1500,6 +1693,7 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           ))}
+        </Box>
         </Box>
       </Box>
       )}

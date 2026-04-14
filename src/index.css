@@ -134,8 +134,12 @@
   --gl-accent-success: #22bb34;
   --gl-accent-success-bg: rgba(34, 187, 52, 0.06);
   --gl-accent-info: #0ea5e9;
+  --gl-accent-info-bg: rgba(14, 165, 233, 0.06);
   --gl-accent-green: #16a34a;
   --gl-accent-violet: #7c3aed;
+  --gl-accent-violet-bg: rgba(124, 58, 237, 0.06);
+  --gl-accent-teal: #009688;
+  --gl-accent-teal-bg: rgba(0, 150, 136, 0.06);
   --gl-new-badge-bg: #e53935;
   --gl-new-badge-text: #ffffff;
   --gl-mapped-session-bg: rgba(37, 99, 235, 0.08);
@@ -275,8 +279,12 @@
   --gl-accent-success: #66bb6a;
   --gl-accent-success-bg: rgba(102, 187, 106, 0.08);
   --gl-accent-info: #4fc3f7;
+  --gl-accent-info-bg: rgba(79, 195, 247, 0.08);
   --gl-accent-green: #66bb6a;
   --gl-accent-violet: #b388ff;
+  --gl-accent-violet-bg: rgba(179, 136, 255, 0.08);
+  --gl-accent-teal: #4db6ac;
+  --gl-accent-teal-bg: rgba(77, 182, 172, 0.08);
   --gl-new-badge-bg: #e53935;
   --gl-new-badge-text: #ffffff;
   --gl-mapped-session-bg: rgba(96, 165, 250, 0.12);
