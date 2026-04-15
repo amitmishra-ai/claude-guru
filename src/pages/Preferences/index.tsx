@@ -208,6 +208,7 @@ export default function PreferencesPage() {
   const dispatch = useAppDispatch();
   const prefs = useAppSelector((s) => s.preferences.prefs);
   const themeMode = useAppSelector((s) => s.ui.themeMode);
+  const isV1Mode = useAppSelector((s) => s.devPanel.isV1Mode);
   const guruName = useAppSelector((s) => s.profile.guruName);
   const guruEmail = useAppSelector((s) => s.profile.guruEmail);
   const guruPhoto = useAppSelector((s) => s.profile.guruPhoto);
@@ -409,25 +410,29 @@ export default function PreferencesPage() {
           />
         </SectionCard>
 
-        {/* ═══ Communication ═════════════════════════════════════════════ */}
-        <SectionTitle>Communication</SectionTitle>
-        <SectionCard>
-          {commItems.map((item, idx) => (
-            <Box key={item.key}>
-              <Row
-                label={item.label}
-                description={item.description}
-                control={
-                  <Switch
-                    checked={prefs[item.key]}
-                    onChange={() => dispatch(togglePref(item.key))}
+        {/* ═══ Communication (hidden in V1 ship scope) ═══════════════════ */}
+        {!isV1Mode && (
+          <>
+            <SectionTitle>Communication</SectionTitle>
+            <SectionCard>
+              {commItems.map((item, idx) => (
+                <Box key={item.key}>
+                  <Row
+                    label={item.label}
+                    description={item.description}
+                    control={
+                      <Switch
+                        checked={prefs[item.key]}
+                        onChange={() => dispatch(togglePref(item.key))}
+                      />
+                    }
                   />
-                }
-              />
-              {idx < commItems.length - 1 && <Divider />}
-            </Box>
-          ))}
-        </SectionCard>
+                  {idx < commItems.length - 1 && <Divider />}
+                </Box>
+              ))}
+            </SectionCard>
+          </>
+        )}
       </Box>
 
       {/* ── Edit dialogs - atomic field edit with Save/Cancel ─────────── */}
