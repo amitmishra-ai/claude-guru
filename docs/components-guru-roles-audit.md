@@ -166,7 +166,7 @@
 | Card State | Online Session | Residency | Career/Mock | CV Review | Evaluation | Moderation | Capstone |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | Confirmed | Y | Y | Y | Y | Y | Y | Y |
-| Combined - Confirmed | Y | Y | - | - | - | - | - |
+| Combined - Confirmed | Y | Y  the| - | - | - | - | - |
 | Scheduled | Y | Y | Y | - | Y | Y | - |
 | Combined - Scheduled | Y | Y | - | - | - | - | - |
 | Tentative | Y | - | - | - | Y | Y | - |

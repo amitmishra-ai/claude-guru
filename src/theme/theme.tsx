@@ -198,7 +198,7 @@ function buildTheme(mode: "light" | "dark") {
 
     /* ── Component Overrides ───────────────────────────────────── */
     components: {
-      /* Button — 8px radius, no elevation, no uppercase */
+      /* Button - 8px radius, no elevation, no uppercase */
       MuiButton: {
         defaultProps: { disableElevation: true },
         styleOverrides: {
@@ -244,7 +244,7 @@ function buildTheme(mode: "light" | "dark") {
         ],
       },
 
-      /* Chip — 4px radius (smallest level) */
+      /* Chip - 4px radius (smallest level) */
       MuiChip: {
         styleOverrides: {
           root: {
@@ -254,7 +254,7 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* Card — 12px outer radius, outlined, no shadow */
+      /* Card - 12px outer radius, outlined, no shadow */
       MuiCard: {
         defaultProps: { variant: "outlined" as const },
         styleOverrides: {
@@ -266,7 +266,7 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* CardContent — 16px padding, fix MUI's last-child extra bottom padding */
+      /* CardContent - 16px padding, fix MUI's last-child extra bottom padding */
       MuiCardContent: {
         styleOverrides: {
           root: {
@@ -278,7 +278,7 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* Paper — no background gradient, themed border */
+      /* Paper - no background gradient, themed border */
       MuiPaper: {
         styleOverrides: {
           root: { backgroundImage: "none" },
@@ -288,14 +288,14 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* Dialog — 16px radius (outermost container level) */
+      /* Dialog - 16px radius (outermost container level) */
       MuiDialog: {
         styleOverrides: {
           paper: { borderRadius: 16 },
         },
       },
 
-      /* DialogTitle — standardized weight, size, padding */
+      /* DialogTitle - standardized weight, size, padding */
       MuiDialogTitle: {
         styleOverrides: {
           root: {
@@ -306,7 +306,7 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* DialogContent — standardized padding */
+      /* DialogContent - standardized padding */
       MuiDialogContent: {
         styleOverrides: {
           root: {
@@ -315,7 +315,7 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* DialogActions — standardized padding + gap */
+      /* DialogActions - standardized padding + gap */
       MuiDialogActions: {
         styleOverrides: {
           root: {
@@ -325,7 +325,7 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* Popover — 16px radius (outermost container level) */
+      /* Popover - 16px radius (outermost container level) */
       MuiPopover: {
         styleOverrides: {
           paper: {
@@ -338,7 +338,7 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* Tabs — compact, no uppercase */
+      /* Tabs - compact, no uppercase */
       MuiTab: {
         styleOverrides: {
           root: {
@@ -359,7 +359,7 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* Table — refined sizing and themed borders */
+      /* Table - refined sizing and themed borders */
       MuiTableCell: {
         styleOverrides: {
           root: {
@@ -377,7 +377,7 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* TextField — 8px radius */
+      /* TextField - 8px radius */
       MuiTextField: {
         defaultProps: { size: "small" as const },
         styleOverrides: {
@@ -389,14 +389,14 @@ function buildTheme(mode: "light" | "dark") {
         },
       },
 
-      /* Select — 4px inner radius */
+      /* Select - 4px inner radius */
       MuiSelect: {
         styleOverrides: {
           root: { borderRadius: 8 },
         },
       },
 
-      /* Avatar — 4px inner radius (use borderRadius: "50%" in sx for circles) */
+      /* Avatar - 4px inner radius (use borderRadius: "50%" in sx for circles) */
       MuiAvatar: {
         styleOverrides: {
           root: { borderRadius: 8 },

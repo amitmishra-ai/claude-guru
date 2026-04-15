@@ -230,7 +230,7 @@ function CourseCard({
             {c.program} &middot; {c.batch}
           </Typography>
 
-          {/* Mapped sessions — only for teach courses */}
+          {/* Mapped sessions - only for teach courses */}
           {!isLearn && (
             <>
               <Divider sx={{ mb: { xs: 0.75, sm: 1.5 } }} />

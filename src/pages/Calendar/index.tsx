@@ -112,14 +112,14 @@ function computeEventLayout(
 
 /** Full-day time range for the calendar grid (midnight to midnight). */
 const CAL_START = 0;       // 00:00
-const CAL_END = 24 * 60;   // 24:00 (midnight — includes 11 PM–12 AM slot)
+const CAL_END = 24 * 60;   // 24:00 (midnight - includes 11 PM–12 AM slot)
 
 /** Convert minutes-since-midnight to a percentage within the visible grid. */
 function timeToPercent(mins: number) {
   return ((mins - CAL_START) / (CAL_END - CAL_START)) * 100;
 }
 
-/** Hours to render on the time axis (12 AM … 11 PM — 24 rows). */
+/** Hours to render on the time axis (12 AM … 11 PM - 24 rows). */
 const HOUR_LABELS: number[] = (() => {
   const arr: number[] = [];
   for (let m = CAL_START; m < CAL_END; m += 60) arr.push(m);
@@ -381,7 +381,7 @@ export default function CalendarPage() {
   /* ═══════════════════════════════════════════════════════════════════════ */
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: { md: "calc(100vh - 48px)" }, overflow: "hidden", gap: 2 }}>
-      {/* ── Toolbar — single row ── */}
+      {/* ── Toolbar - single row ── */}
       <Stack direction="row" alignItems="center" sx={{ flexShrink: 0 }}>
         {/* LEFT */}
         <Stack direction="row" alignItems="center" sx={{ gap: 1 }}>
@@ -408,7 +408,7 @@ export default function CalendarPage() {
           </Box>
         </Stack>
 
-        {/* CENTER — date nav */}
+        {/* CENTER - date nav */}
         <Stack direction="row" alignItems="center" justifyContent="center" sx={{ flex: 1, gap: 0.5 }}>
           <Button variant="text" size="small" aria-label="Previous" sx={{ minWidth: 0, height: 32, width: 32, p: 0, color: "text.secondary", borderRadius: "50%", "&:hover": { bgcolor: "action.hover" } }} onClick={navPrev}>
             <ChevronLeftIcon sx={{ fontSize: 22 }} />
@@ -525,7 +525,7 @@ export default function CalendarPage() {
           {/* ── Mobile time-grid view (below md) ────────────────────────── */}
           <Box sx={{ display: { md: "none" } }}>
 
-            {/* Day strip — respects view mode (day/weekend/week) */}
+            {/* Day strip - respects view mode (day/weekend/week) */}
             <Box sx={{ display: "grid", gridTemplateColumns: `repeat(${visibleDays.length}, 1fr)`, mb: 1.5 }}>
               {visibleDays.map((d, i) => {
                 const ymd = toYmd(d);
@@ -714,9 +714,9 @@ export default function CalendarPage() {
             }}
           >
 
-            {/* Time grid body — scrollable, auto-scrolled to 8 AM. Header is inside scroll container so columns align perfectly. */}
+            {/* Time grid body - scrollable, auto-scrolled to 8 AM. Header is inside scroll container so columns align perfectly. */}
             <Box ref={desktopGridRef} sx={{ flex: 1, minHeight: 0, overflowY: 'auto', scrollbarWidth: 'thin' }}>
-              {/* Day-of-week header row — sticky inside scroll */}
+              {/* Day-of-week header row - sticky inside scroll */}
               <Box
                 sx={{
                   display: 'grid',
@@ -858,7 +858,7 @@ export default function CalendarPage() {
                   const drawnSessions = daySessions.filter((s) => !sessionDeclined[s.id]);
                   drawnSessions.forEach((s) => occupiedIntervals.push({ start: s.start, end: s.end }));
 
-                  // Declined sessions — their time slots
+                  // Declined sessions - their time slots
                   const declinedSessions = daySessions.filter((s) => !!sessionDeclined[s.id]);
 
                   // Requests add to occupied
@@ -938,7 +938,7 @@ export default function CalendarPage() {
                         bgcolor: colIsToday ? 'hsl(var(--md-primary) / 0.03)' : 'transparent',
                       }}
                     >
-                      {/* Current time indicator — today column only */}
+                      {/* Current time indicator - today column only */}
                       {colIsToday && (() => {
                         const nowMins = realNow.getHours() * 60 + realNow.getMinutes();
                         if (nowMins < CAL_START || nowMins > CAL_END) return null;
@@ -995,7 +995,7 @@ export default function CalendarPage() {
                         </Box>
                       ))}
 
-                      {/* §8.2 Draw order: 2. Leave (unavailable) — dashed border */}
+                      {/* §8.2 Draw order: 2. Leave (unavailable) - dashed border */}
                       {filteredNaBlocks.map((n) => (
                         <Box
                           key={`na-${n.id}`}
@@ -1037,7 +1037,7 @@ export default function CalendarPage() {
                         </Box>
                       ))}
 
-                      {/* §8.2 Draw order: 3. Availability placeholders — dashed emerald */}
+                      {/* §8.2 Draw order: 3. Availability placeholders - dashed emerald */}
                       {filteredAvailBlocks.map((p) => {
                         const virtualId = `pat-${p.id}-${ymd}`;
                         if (removedAvailabilityIds[virtualId]) return null;
@@ -1079,7 +1079,7 @@ export default function CalendarPage() {
                         );
                       })}
 
-                      {/* One-off availability blocks — dashed emerald */}
+                      {/* One-off availability blocks - dashed emerald */}
                       {filteredOneOffBlocks.map((b) => {
                         if (removedAvailabilityIds[b.id]) return null;
                         return (
@@ -1176,7 +1176,7 @@ export default function CalendarPage() {
                         );
                       })}
 
-                      {/* §8.2 Draw order: 5. Sessions (top) — with status dot + pulse */}
+                      {/* §8.2 Draw order: 5. Sessions (top) - with status dot + pulse */}
                       {daySessions.map((s) => {
                         const declined = !!sessionDeclined[s.id];
                         const confirmed = !!confirmations[s.id];
@@ -1280,7 +1280,7 @@ export default function CalendarPage() {
               </Box>
             </Box>
 
-            {/* ── Legend + timezone bar — inside calendar card ── */}
+            {/* ── Legend + timezone bar - inside calendar card ── */}
             <Box
               sx={{
                 display: 'flex',
@@ -1354,7 +1354,7 @@ export default function CalendarPage() {
       {hasUserConfiguredAvailability && calendarViewMode === "month" && (
         <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           <Card variant="outlined" sx={{ p: { xs: 1, md: 2 }, overflow: 'hidden', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', borderRadius: "16px", bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' }}>
-            {/* §9.1 Sunday-first visual month grid — but we use Monday-first to match week view DOW header */}
+            {/* §9.1 Sunday-first visual month grid - but we use Monday-first to match week view DOW header */}
             <Box
               sx={{
                 display: 'grid',

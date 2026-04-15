@@ -438,7 +438,7 @@ export function MarkNotAvailableDialog() {
               ))}
             </Box>
 
-            {/* Auto-decline checkbox — highlighted */}
+            {/* Auto-decline checkbox - highlighted */}
             <Box
               sx={{
                 px: 1.5,

@@ -66,7 +66,7 @@ const STEP_GRADIENTS = [
 ];
 
 /* ════════════════════════════════════════════════════════
-   CONTENT DATA — Code of Conduct
+   CONTENT DATA - Code of Conduct
    ════════════════════════════════════════════════════════ */
 
 interface Section {
@@ -236,7 +236,7 @@ const COC_SECTIONS: Section[] = [
 ];
 
 /* ════════════════════════════════════════════════════════
-   CONTENT DATA — IP Declaration
+   CONTENT DATA - IP Declaration
    ════════════════════════════════════════════════════════ */
 
 interface IPSubSection {
@@ -380,7 +380,7 @@ function SidebarPanel({
         }}
       />
 
-      {/* Top — Step counter */}
+      {/* Top - Step counter */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
         <Typography
           sx={{
@@ -415,7 +415,7 @@ function SidebarPanel({
         </Typography>
       </Box>
 
-      {/* Center — Document icon */}
+      {/* Center - Document icon */}
       <Box sx={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", py: 4 }}>
         <Box
           sx={{
@@ -469,7 +469,7 @@ function SidebarPanel({
         </Box>
       </Box>
 
-      {/* Bottom — Progress */}
+      {/* Bottom - Progress */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
           <Typography sx={{ fontSize: "0.72rem", fontWeight: 600, opacity: 0.6 }}>
@@ -886,7 +886,7 @@ export default function OnboardingPage() {
     if (step < STEPS.length - 1) {
       setStep(step + 1);
     } else {
-      // Final step — transition to dashboard
+      // Final step - transition to dashboard
       dispatch(setGuruStage("new"));
     }
   };
@@ -897,7 +897,7 @@ export default function OnboardingPage() {
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1300, display: "flex", background: theme.palette.background.default }}>
-      {/* ── Left panel — desktop only, full height ── */}
+      {/* ── Left panel - desktop only, full height ── */}
       {!isMobile && (
         <Box
           sx={{
@@ -916,7 +916,7 @@ export default function OnboardingPage() {
         </Box>
       )}
 
-      {/* ── Right panel — content + footer ── */}
+      {/* ── Right panel - content + footer ── */}
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {/* Mobile top bar */}
         {isMobile && (
@@ -1061,7 +1061,7 @@ export default function OnboardingPage() {
           </Box>
         )}
 
-        {/* ── Footer — inside right panel ── */}
+        {/* ── Footer - inside right panel ── */}
         <Box
           sx={{
             flexShrink: 0,
@@ -1084,7 +1084,7 @@ export default function OnboardingPage() {
             {/* Acceptance control */}
             <Box sx={{ flex: 1 }}>
               {!hasReachedBottom ? (
-                /* ── Scroll requirement banner — visible & prominent ── */
+                /* ── Scroll requirement banner - visible & prominent ── */
                 <Box
                   sx={{
                     display: "flex",
@@ -1157,7 +1157,7 @@ export default function OnboardingPage() {
               )}
             </Box>
 
-            {/* Action button — wrapper catches clicks when disabled to pulse the banner */}
+            {/* Action button - wrapper catches clicks when disabled to pulse the banner */}
             <Box
               onClick={() => {
                 if (!canProceed) {

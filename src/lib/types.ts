@@ -73,7 +73,7 @@ export type Session = {
   endDateYmd?: string;
   /** Residency day-level schedule (date + time per day) */
   residencySchedule?: { dateYmd: string; start: number; end: number }[];
-  /** Combined session — lists the batches merged into this session */
+  /** Combined session - lists the batches merged into this session */
   combinedBatches?: {
     batch: string;
     group: string;

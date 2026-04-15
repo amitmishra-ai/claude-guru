@@ -1,5 +1,5 @@
 /**
- * Memoized selectors for the calendar module — §7 of CALENDAR_FUNCTIONALITY_RTK_MUI.md
+ * Memoized selectors for the calendar module - §7 of CALENDAR_FUNCTIONALITY_RTK_MUI.md
  *
  * Using RTK's createSelector (re-exports Reselect's createSelector) so that
  * derived values are only recomputed when their inputs change.

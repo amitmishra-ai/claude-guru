@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material/styles";
 
 /**
- * Contextual info/hint box — a rounded bordered container with icon + message.
+ * Contextual info/hint box - a rounded bordered container with icon + message.
  * Replaces 10+ identical rounded border+bg inline blocks in dialogs.
  *
  * Variants:

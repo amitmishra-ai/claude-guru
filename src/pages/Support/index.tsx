@@ -233,7 +233,7 @@ export default function SupportPage() {
       </Stack>
 
       <Card sx={{ p: { xs: 1.5, sm: 2 }, borderRadius: "16px" }}>
-      {/* Tabs — scrollable on mobile */}
+      {/* Tabs - scrollable on mobile */}
       <Tabs
         value={activeTab}
         onChange={(_e, v) => dispatch(setActiveTab(v))}

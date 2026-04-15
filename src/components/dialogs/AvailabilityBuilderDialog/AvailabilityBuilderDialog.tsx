@@ -431,7 +431,7 @@ const AvailabilityBuilderDialog = () => {
         {step === 2 && (
           /* ── Step 2: Weekly availability ── */
           <Stack spacing={1.5}>
-            {/* Active slots — enabled presets + custom drafts */}
+            {/* Active slots - enabled presets + custom drafts */}
             {(cards.filter((c) => c.enabled).length > 0 || draftPatterns.length > 0) && (
               <>
               <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8rem" }}>Added slots</Typography>
@@ -552,7 +552,7 @@ const AvailabilityBuilderDialog = () => {
               </>
             )}
 
-            {/* Popular slots — unselected presets */}
+            {/* Popular slots - unselected presets */}
             {cards.filter((c) => !c.enabled).length > 0 && (
               <>
                 {(cards.filter((c) => c.enabled).length > 0 || draftPatterns.length > 0) && <Divider sx={{ my: 0.5 }} />}

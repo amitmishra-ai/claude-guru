@@ -49,7 +49,7 @@ export function MobileAppBar() {
             </Typography>
           </Box>
 
-          {/* Account avatar — navigates to /account on mobile */}
+          {/* Account avatar - navigates to /account on mobile */}
           <IconButton
             size="small"
             aria-label="Account"

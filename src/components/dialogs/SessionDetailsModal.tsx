@@ -608,7 +608,7 @@ export function SessionDetailsModal() {
                   }}
                 >
                   <Stack spacing={1}>
-                    {/* Date + Time — hero line */}
+                    {/* Date + Time - hero line */}
                     <Stack direction="row" alignItems="center" spacing={1.5}>
                       <Box sx={{ width: 36, height: 36, borderRadius: "8px", bgcolor: "hsl(var(--md-primary-container))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: "hsl(var(--md-on-primary-container))" }} />
@@ -878,7 +878,7 @@ export function SessionDetailsModal() {
                                 </Typography>
                               </Box>
                             </Stack>
-                            {/* Group info — show group identifier + batch */}
+                            {/* Group info - show group identifier + batch */}
                             {cb.audienceType === "Group" && cb.group && (
                               <Box sx={{ mb: 1.5 }}>
                                 <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.5, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>

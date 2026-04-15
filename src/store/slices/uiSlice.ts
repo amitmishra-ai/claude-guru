@@ -73,7 +73,7 @@ const initialState: UiState = {
     const saved = window.localStorage.getItem("guru-theme");
     if (saved === "light") return false;
     if (saved === "dark") return true;
-    // system or no saved value — check OS preference
+    // system or no saved value - check OS preference
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   })(),
   themeMode: (typeof window !== "undefined" ? window.localStorage.getItem("guru-theme") as "system" | "dark" | "light" : null) || "system",

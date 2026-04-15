@@ -232,7 +232,7 @@ export function Sidebar() {
         >
           {isNavCollapsed ? (
             <>
-              {/* GL logo — visible by default, fades out on sidebar hover */}
+              {/* GL logo - visible by default, fades out on sidebar hover */}
               <Box
                 sx={{
                   position: "absolute",
@@ -246,7 +246,7 @@ export function Sidebar() {
               >
                 <GLLogo size={28} />
               </Box>
-              {/* Hamburger — hidden by default, fades in on sidebar hover */}
+              {/* Hamburger - hidden by default, fades in on sidebar hover */}
               <Box
                 sx={{
                   position: "absolute",

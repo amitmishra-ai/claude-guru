@@ -3397,7 +3397,7 @@ export type RoleStatCardData = {
   avgConfirmTime: string;
   avgConfirmDelta: string;
   avgConfirmBars: number[];
-  /** On-time confirmation rate — % of sessions confirmed within 24 hours of being
+  /** On-time confirmation rate - % of sessions confirmed within 24 hours of being
    *  assigned. This is the metric shown on the card surface so all four cards share
    *  "higher is better" semantics. */
   onTimeConfirmRate: string;
@@ -3408,7 +3408,7 @@ export type RoleStatCardData = {
   sessionsBreakdown: { name: string; value: string }[];
   qualityBreakdown: { name: string; value: string }[];
   confirmBreakdown: { name: string; value: string }[];
-  /** Monthly unique learners impacted — used by the LEARNERS IMPACTED card on
+  /** Monthly unique learners impacted - used by the LEARNERS IMPACTED card on
    *  the Evaluation & Moderation variant of the Performance KPI row. Populated
    *  for every role for completeness (in case the card is reused later for
    *  Teaching/Mentoring), but only rendered for Evaluator / Moderator today. */
@@ -3416,7 +3416,7 @@ export type RoleStatCardData = {
   learnersImpactedDelta: string;
   learnersImpactedBars: number[];
   learnersImpactedBreakdown: { name: string; value: string }[];
-  /** Peer benchmark values — what the average guru scores */
+  /** Peer benchmark values - what the average guru scores */
   peerAvgRating: number;
   peerAvgSessions: number;
   peerAvgQuality: number;

@@ -37,6 +37,7 @@ interface DevPanelState {
   selectedRoles: GuruRole[];
   isRoleSwitching: boolean;
   guruStage: GuruStage;
+  isV1Mode: boolean;
 }
 
 const savedRole =
@@ -57,12 +58,18 @@ const parseSavedRoles = (): GuruRole[] | null => {
 
 const resolvedRole = savedRole && GURU_ROLES.includes(savedRole) ? savedRole : "Course Mentor";
 
+const parseSavedV1Mode = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem("guru-dev-v1-mode") === "true";
+};
+
 const initialState: DevPanelState = {
   isOpen: false,
   selectedRole: resolvedRole,
   selectedRoles: parseSavedRoles() ?? [resolvedRole],
   isRoleSwitching: false,
   guruStage: "experienced",
+  isV1Mode: parseSavedV1Mode(),
 };
 
 const devPanelSlice = createSlice({
@@ -80,7 +87,7 @@ const devPanelSlice = createSlice({
         state.isRoleSwitching = true;
       }
       state.selectedRole = action.payload;
-      // Keep selectedRoles in sync — add the new primary role if not present
+      // Keep selectedRoles in sync - add the new primary role if not present
       if (!state.selectedRoles.includes(action.payload)) {
         state.selectedRoles = [...state.selectedRoles, action.payload];
       }
@@ -115,8 +122,20 @@ const devPanelSlice = createSlice({
     setGuruStage(state, action: PayloadAction<GuruStage>) {
       state.guruStage = action.payload;
     },
+    setV1Mode(state, action: PayloadAction<boolean>) {
+      state.isV1Mode = action.payload;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("guru-dev-v1-mode", String(action.payload));
+      }
+    },
+    toggleV1Mode(state) {
+      state.isV1Mode = !state.isV1Mode;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("guru-dev-v1-mode", String(state.isV1Mode));
+      }
+    },
   },
 });
 
-export const { toggleDevPanel, setDevPanelOpen, setSelectedRole, setSelectedRoles, toggleRole, clearRoleSwitching, setGuruStage } = devPanelSlice.actions;
+export const { toggleDevPanel, setDevPanelOpen, setSelectedRole, setSelectedRoles, toggleRole, clearRoleSwitching, setGuruStage, setV1Mode, toggleV1Mode } = devPanelSlice.actions;
 export default devPanelSlice.reducer;

@@ -5,7 +5,7 @@ import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 
 /**
- * Compact stat card — icon avatar + label + value.
+ * Compact stat card - icon avatar + label + value.
  * Extracted from Dashboard local StatTile (lines 91-138).
  *
  * The icon background uses the `color` prop at 8% opacity.

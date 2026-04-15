@@ -2,6 +2,9 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 interface ProfileState {
   guruName: string;
+  guruEmail: string;
+  /** Avatar photo as a data URL (base64). null = show initials fallback. */
+  guruPhoto: string | null;
   primaryMode: "Online" | "Hybrid" | "In-person";
   guruPrograms: string;
   timeZoneMode: "auto" | "manual";
@@ -14,8 +17,12 @@ interface ProfileState {
   draftPrograms: string;
 }
 
+const savedPhoto = typeof window !== "undefined" ? window.localStorage.getItem("guru-photo") : null;
+
 const initialState: ProfileState = {
   guruName: "Snehanjan Shome",
+  guruEmail: "snehanjan.shome@greatlearning.in",
+  guruPhoto: savedPhoto,
   primaryMode: "Online",
   guruPrograms: "PGP-DS",
   timeZoneMode: "auto",
@@ -32,6 +39,16 @@ const profileSlice = createSlice({
   reducers: {
     setGuruName(state, action: PayloadAction<string>) {
       state.guruName = action.payload;
+    },
+    setGuruEmail(state, action: PayloadAction<string>) {
+      state.guruEmail = action.payload;
+    },
+    setGuruPhoto(state, action: PayloadAction<string | null>) {
+      state.guruPhoto = action.payload;
+      if (typeof window !== "undefined") {
+        if (action.payload) window.localStorage.setItem("guru-photo", action.payload);
+        else window.localStorage.removeItem("guru-photo");
+      }
     },
     setPrimaryMode(state, action: PayloadAction<"Online" | "Hybrid" | "In-person">) {
       state.primaryMode = action.payload;
@@ -72,6 +89,8 @@ const profileSlice = createSlice({
 
 export const {
   setGuruName,
+  setGuruEmail,
+  setGuruPhoto,
   setPrimaryMode,
   setGuruPrograms,
   setTimeZoneMode,

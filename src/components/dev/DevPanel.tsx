@@ -16,6 +16,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import Switch from "@mui/material/Switch";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import CodeOutlinedIcon from "@mui/icons-material/CodeOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
@@ -24,6 +25,7 @@ import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
 import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
 import Button from "@mui/material/Button";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import RocketLaunchOutlinedIcon from "@mui/icons-material/RocketLaunchOutlined";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { resetAvailability } from "@/store/slices/availabilitySlice";
 import { setOpenLearnerRatings, setLearnerRatingsSessionId } from "@/store/slices/uiSlice";
@@ -33,6 +35,7 @@ import {
   setSelectedRole,
   toggleRole,
   setGuruStage,
+  toggleV1Mode,
   GURU_ROLES,
   GURU_STAGES,
   type GuruRole,
@@ -49,6 +52,7 @@ export function DevPanel() {
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
   const selectedRoles = useAppSelector((s) => s.devPanel.selectedRoles);
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+  const isV1Mode = useAppSelector((s) => s.devPanel.isV1Mode);
 
   // Cmd/Ctrl + K shortcut
   useEffect(() => {
@@ -128,6 +132,39 @@ export function DevPanel() {
             <CloseOutlinedIcon fontSize="small" />
           </IconButton>
         </Box>
+
+        {/* Version 1 Mode Toggle */}
+        <Box
+          sx={{
+            px: 2.5,
+            pt: 2,
+            pb: 1.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+          }}
+        >
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0 }}>
+            <RocketLaunchOutlinedIcon sx={{ fontSize: 18, color: isV1Mode ? "primary.main" : "text.secondary" }} />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.2 }}>
+                Version 1 Mode
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", display: "block" }}>
+                Show only v1 ship scope
+              </Typography>
+            </Box>
+          </Stack>
+          <Switch
+            size="small"
+            checked={isV1Mode}
+            onChange={() => dispatch(toggleV1Mode())}
+            inputProps={{ "aria-label": "Toggle Version 1 mode" }}
+          />
+        </Box>
+
+        <Divider sx={{ mx: 2.5 }} />
 
         {/* Role Selector */}
         <Box sx={{ px: 2.5, pt: 2, pb: 1.5 }}>

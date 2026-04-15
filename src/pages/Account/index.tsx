@@ -17,9 +17,9 @@ import { pushToast } from "@/store/slices/toastsSlice";
 import { setIsDarkMode } from "@/store/slices/uiSlice";
 
 /**
- * Mobile Account page — Material 3 native Android approach.
+ * Mobile Account page - Material 3 native Android approach.
  * Full-screen page with top app bar, profile hero, and grouped menu sections.
- * No bottom nav, no top bar — immersive like Groww / Google Wallet account screens.
+ * No bottom nav, no top bar - immersive like Groww / Google Wallet account screens.
  */
 
 type MenuItem = {
@@ -136,7 +136,7 @@ export default function AccountPage() {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
 
-      {/* ═══ M3 Small Top App Bar — full bleed ═══ */}
+      {/* ═══ M3 Small Top App Bar - full bleed ═══ */}
       <Box
         sx={{
           position: "sticky",
@@ -242,7 +242,7 @@ export default function AccountPage() {
         <MenuCard items={dangerSection} />
       </Box>
 
-      {/* ═══ Footer — version ═══ */}
+      {/* ═══ Footer - version ═══ */}
       <Typography
         variant="caption"
         sx={{

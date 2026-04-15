@@ -27,12 +27,12 @@ interface EmptyStateProps {
   subtitle?: string;
   /** Optional action button or link */
   action?: ReactNode;
-  /** Compact mode — smaller padding for inline/card use */
+  /** Compact mode - smaller padding for inline/card use */
   compact?: boolean;
 }
 
 /**
- * Premium empty-state placeholder — consistent, refined visual across all pages.
+ * Premium empty-state placeholder - consistent, refined visual across all pages.
  * Animated entrance, illustrated icon area, subtle depth treatment.
  */
 export function EmptyState({ icon, title, subtitle, action, compact }: EmptyStateProps) {
@@ -45,7 +45,7 @@ export function EmptyState({ icon, title, subtitle, action, compact }: EmptyStat
         borderRadius: "12px",
         position: "relative",
         overflow: "hidden",
-        /* Soft elevated container — no dashed border */
+        /* Soft elevated container - no dashed border */
         bgcolor: (t) => alpha(t.palette.primary.main, t.palette.mode === "light" ? 0.018 : 0.025),
         border: "1px solid",
         borderColor: (t) => alpha(t.palette.primary.main, t.palette.mode === "light" ? 0.07 : 0.08),
@@ -81,7 +81,7 @@ export function EmptyState({ icon, title, subtitle, action, compact }: EmptyStat
         }}
       />
 
-      {/* Content — on top of overlays */}
+      {/* Content - on top of overlays */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
         {/* Icon container with soft circle backdrop */}
         <Box
