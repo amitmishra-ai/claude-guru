@@ -12,7 +12,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import Box from "@mui/material/Box";
 
 /**
- * Material 3 Navigation Bar — native Android feel.
+ * Material 3 Navigation Bar - native Android feel.
  * Active state: filled icon inside a tinted pill indicator + bold label.
  * Inactive: outlined icon + muted label.
  */
@@ -40,7 +40,7 @@ export function MobileNav() {
         borderTop: "1px solid",
         borderColor: "hsl(var(--md-outline-variant) / 0.5)",
         pb: "env(safe-area-inset-bottom)",
-        /* Subtle elevation — M3 surface tint */
+        /* Subtle elevation - M3 surface tint */
         boxShadow: "0 -1px 3px rgba(0,0,0,0.06)",
       }}
     >

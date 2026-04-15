@@ -2,7 +2,7 @@ import Chip from "@mui/material/Chip";
 import type { SxProps, Theme } from "@mui/material/styles";
 
 /**
- * Semantic status pill — reads colors from --gl-status-* CSS tokens.
+ * Semantic status pill - reads colors from --gl-status-* CSS tokens.
  * Replaces 20+ inline Chip sx blocks with hardcoded hex across pages/dialogs.
  *
  * Usage:

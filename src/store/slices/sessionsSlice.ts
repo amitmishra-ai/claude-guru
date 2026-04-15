@@ -62,7 +62,7 @@ const sessionsSlice = createSlice({
         state.sessionDeclinedReasons[action.payload.id] = action.payload.reason;
       }
     },
-    /** §8.3 Accept from Declined — undecline + re-confirm */
+    /** §8.3 Accept from Declined - undecline + re-confirm */
     acceptSession(state, action: PayloadAction<string>) {
       delete state.sessionDeclined[action.payload];
       delete state.sessionDeclinedAtYmd[action.payload];

@@ -15,7 +15,7 @@ import { setOpenLearnerRatings, setLearnerRatingsSessionId } from "@/store/slice
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import { demoLearnerRatingsBySessionId, demoFeedbackSummaryBySessionId, demoQualitativeFeedbackBySessionId } from "@/data/demo-sessions";
 
-/* ── Palette — derived from theme ── */
+/* ── Palette - derived from theme ── */
 function useRatingColors() {
   const theme = useTheme();
   return {
@@ -27,7 +27,7 @@ function useRatingColors() {
 
 type Filter = "5star" | "4star" | "3below";
 
-/* ── Card shell — uses theme tokens, not hardcoded colors ── */
+/* ── Card shell - uses theme tokens, not hardcoded colors ── */
 function Card({ children, sx }: { children: React.ReactNode; sx?: SxProps<Theme> }) {
   return (
     <Box

@@ -576,7 +576,7 @@ export default function DashboardPage() {
             <Card sx={{ p: { xs: 2, sm: 2 }, borderRadius: "16px", ...(isEmpty && { flex: { xs: 1, sm: "unset" }, display: "flex", flexDirection: "column" }) }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: { xs: 1, sm: 1.5 }, fontSize: { xs: "0.875rem", sm: "1rem" } }}>Activities</Typography>
               <Stack spacing={2} sx={{ ...(isEmpty && { flex: 1 }) }}>
-                {/* Next Activities — hidden when no today sessions */}
+                {/* Next Activities - hidden when no today sessions */}
                 {todaySessions.length > 0 && (
                 <Box>
                   <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
@@ -853,7 +853,7 @@ export default function DashboardPage() {
                                   </Stack>
                                   </AccordionDetails>
                                 </Accordion>
-                                {/* Mobile view details row — below accordion */}
+                                {/* Mobile view details row - below accordion */}
                                 <Box
                                   onClick={() => { dispatch(setSessionFocus(s)); dispatch(setOpenSessionDetails(true)); }}
                                   sx={{
@@ -890,7 +890,7 @@ export default function DashboardPage() {
                       )}
                     </Stack>
 
-                    {/* ── Planned Events (subject to change) — only show when data exists ── */}
+                    {/* ── Planned Events (subject to change) - only show when data exists ── */}
                     {rolePlannedEvents.length > 0 && (
                       <>
                         <Divider sx={{ mt: 2.5, mb: 0 }} />
@@ -920,7 +920,7 @@ export default function DashboardPage() {
                               : { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" };
                             return (
                               <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-                                {/* Header — matches SessionDetailsModal */}
+                                {/* Header - matches SessionDetailsModal */}
                                 <Box
                                   sx={{
                                     position: "sticky",
@@ -946,7 +946,7 @@ export default function DashboardPage() {
                                   </IconButton>
                                 </Box>
 
-                                {/* Scrollable content — matches SessionDetailsModal layout */}
+                                {/* Scrollable content - matches SessionDetailsModal layout */}
                                 <Box className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto" }}>
                                   {/* Hero: Title + Schedule */}
                                   <Box sx={{ px: 2, pt: 2, pb: 2 }}>
@@ -1006,7 +1006,7 @@ export default function DashboardPage() {
 
                                   <Divider />
 
-                                  {/* ═══ DETAIL SECTIONS — same pattern as SessionDetailsModal ═══ */}
+                                  {/* ═══ DETAIL SECTIONS - same pattern as SessionDetailsModal ═══ */}
                                   <Stack spacing={0} sx={{ px: 2, py: 2 }}>
                                     <Box sx={{ mb: 2.5 }}>
                                       {/* SectionHeading */}
@@ -1188,7 +1188,7 @@ export default function DashboardPage() {
                             </Stack>
                           );
 
-                          // Star rating helpers — numeric for Online/Residency, icons-only for Evaluation/Moderation
+                          // Star rating helpers - numeric for Online/Residency, icons-only for Evaluation/Moderation
                           const numericRating = avg ? (
                             <Stack direction="row" spacing={0.5} alignItems="center" className="star-rating-numeric">
                               <StarOutlinedIcon sx={{ fontSize: 14, color: "var(--gl-star-color)" }} />
@@ -1220,7 +1220,7 @@ export default function DashboardPage() {
                               </Stack>
                             );
                           } else {
-                            // No payment chip — rating will be placed inline with title
+                            // No payment chip - rating will be placed inline with title
                             topRightContent = null;
                           }
 
@@ -1294,7 +1294,7 @@ export default function DashboardPage() {
                             );
                           }
 
-                          // Card title — Residency/Capstone use custom prefix
+                          // Card title - Residency/Capstone use custom prefix
                           const cardTitle = isResidency
                             ? s.title
                             : isCapstone
@@ -1318,7 +1318,7 @@ export default function DashboardPage() {
                                 </Stack>
                               )}
                             <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-                              {/* Card header: title row + date + actions — custom for non-SessionCard types */}
+                              {/* Card header: title row + date + actions - custom for non-SessionCard types */}
                               {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
                                 <>
                                   {/* MOBILE: chips on top line when present */}
@@ -1484,7 +1484,7 @@ export default function DashboardPage() {
             <Card sx={{ p: 2, mb: 2, borderRadius: "16px" }}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Tasks</Typography>
               <Stack spacing={2}>
-                {/* Priority-sorted desktop tasks — same logic as mobile */}
+                {/* Priority-sorted desktop tasks - same logic as mobile */}
                 {(() => {
                   const dt: { p: number; k: string; n: React.ReactNode }[] = [];
 

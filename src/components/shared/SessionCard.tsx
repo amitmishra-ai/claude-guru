@@ -23,7 +23,7 @@ export type SessionCardStatus = {
 export type SessionCardProps = {
   /** Session title (course name) */
   title: string;
-  /** Title variant — defaults to "h6" */
+  /** Title variant - defaults to "h6" */
   titleVariant?: "h5" | "h6";
   /** Session type label (e.g. "Mentored Learning session") */
   sessionType?: string;
@@ -287,7 +287,7 @@ export function SessionCard({
     </Box>
   );
 
-  /* Mobile full-width "View details →" row — rendered outside actionsRow to span full card width */
+  /* Mobile full-width "View details →" row - rendered outside actionsRow to span full card width */
   const mobileViewDetailsRow = onViewDetails && !hideMobileViewDetails && (
     <Box
       onClick={onViewDetails}

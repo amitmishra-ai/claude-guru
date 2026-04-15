@@ -5,7 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 
 /**
- * Material 3 — Small Top App Bar (mobile only).
+ * Material 3 - Small Top App Bar (mobile only).
  *
  * Spec reference (M3 guidelines):
  * - Height: 64dp
@@ -28,7 +28,7 @@ export function MobilePageHeader({ title }: { title: string }) {
         /* M3: 4dp padding-start for leading icon */
         pl: 0.5,
         pr: 2,
-        /* Surface container color — matches M3 top app bar */
+        /* Surface container color - matches M3 top app bar */
         bgcolor: "background.paper",
         /* Sticky so content scrolls beneath */
         position: "sticky",
@@ -44,7 +44,7 @@ export function MobilePageHeader({ title }: { title: string }) {
         mb: 1.5,
       }}
     >
-      {/* Leading navigation icon — 48×48 touch target */}
+      {/* Leading navigation icon - 48×48 touch target */}
       <IconButton
         onClick={() => navigate(-1)}
         aria-label="Navigate back"
@@ -59,7 +59,7 @@ export function MobilePageHeader({ title }: { title: string }) {
         <ArrowBackIcon sx={{ fontSize: 24 }} />
       </IconButton>
 
-      {/* Headline — M3 Title Large = 22sp, or Body Large = 16sp
+      {/* Headline - M3 Title Large = 22sp, or Body Large = 16sp
           Using 18px (1.125rem) as a practical middle ground */}
       <Typography
         variant="h6"

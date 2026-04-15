@@ -2,7 +2,7 @@ import Chip from "@mui/material/Chip";
 import type { SxProps, Theme } from "@mui/material/styles";
 
 /**
- * Program badge chip — reads colors from --gl-program-* CSS tokens.
+ * Program badge chip - reads colors from --gl-program-* CSS tokens.
  * Extracted from Courses local PROGRAM_COLORS (lines 72-83).
  *
  * Known programs: PGDM, AIML, PGP-SE, Core, PGP-DS.

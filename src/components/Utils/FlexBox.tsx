@@ -1,7 +1,7 @@
 import Box, { type BoxProps } from "@mui/material/Box";
 
 /**
- * FlexBox — Use instead of `<Box display="flex">` or `<Stack direction="row">`.
+ * FlexBox - Use instead of `<Box display="flex">` or `<Stack direction="row">`.
  *
  * Usage:
  *   <FlexBox alignItems="center" gap={2}>…</FlexBox>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme, ThemeProvider } from "@mui/material/styles";
 import { lightTheme } from "@/theme/theme";
@@ -8,6 +9,7 @@ import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Skeleton from "@mui/material/Skeleton";
@@ -82,10 +84,41 @@ const borderRotate = keyframes`
 `;
 
 // ── Demo data for engagement stats (cumulative, monthly) ─────────────────────
-const engagementMonths = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
-const demoEngagementCount = [320, 365, 410, 438, 470, 520, 580, 620, 670, 720, 760, 800];
-const demoEngagementHours = [850, 980, 1120, 1280, 1400, 1560, 1720, 1850, 1980, 2080, 2180, 2266];
-const demoLearnersImpacted = [2800, 3200, 3650, 4100, 4500, 5100, 5600, 6050, 6500, 6850, 7100, 7332];
+/* Engagement Stats run all-time - from joining month (Feb 2023) through
+   the current month (Apr 2026) = 39 months. Values are cumulative, so the
+   curve ramps from near-zero early on to the final totals shown in each
+   card's "Total: X" chip. Labels include year ("Feb 23") to disambiguate
+   repeated month names across multiple years. */
+const engagementMonths: string[] = (() => {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const out: string[] = [];
+  // Feb 2023 -> Apr 2026
+  let year = 2023;
+  for (let m = 1; m < 12; m++) out.push(`${months[m]} ${String(year).slice(2)}`); // Feb..Dec 23
+  for (year = 2024; year <= 2025; year++) {
+    for (let m = 0; m < 12; m++) out.push(`${months[m]} ${String(year).slice(2)}`);
+  }
+  for (let m = 0; m < 4; m++) out.push(`${months[m]} ${String(2026).slice(2)}`); // Jan..Apr 26
+  return out;
+})();
+
+/* S-curve cumulative generator: slow start, steady middle, gentle plateau.
+   Endpoint always matches the final total so the card's "Total" chip stays
+   consistent with the chart's last point. */
+function buildCumulative(total: number): number[] {
+  const months = engagementMonths.length;
+  const out: number[] = [];
+  for (let i = 0; i < months; i++) {
+    const t = i / (months - 1);
+    const s = t * t * (3 - 2 * t); // smoothstep
+    out.push(Math.round(total * s));
+  }
+  return out;
+}
+
+const demoEngagementCount = buildCumulative(800);
+const demoEngagementHours = buildCumulative(2266);
+const demoLearnersImpacted = buildCumulative(7332);
 
 // ── Demo data for contracts ──────────────────────────────────────────────────
 const demoContracts = [
@@ -148,12 +181,14 @@ function DeltaLabel({ value }: { value: number }) {
 
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const [loading, setLoading] = useState(true);
   useEffect(() => { const t = setTimeout(() => setLoading(false), 800); return () => clearTimeout(t); }, []);
 
   const guruName      = useAppSelector((s) => s.profile.guruName);
+  const guruEmail     = useAppSelector((s) => s.profile.guruEmail);
   const primaryMode   = useAppSelector((s) => s.profile.primaryMode);
   const guruPrograms  = useAppSelector((s) => s.profile.guruPrograms);
   const timeZoneMode  = useAppSelector((s) => s.profile.timeZoneMode);
@@ -164,12 +199,13 @@ export default function ProfilePage() {
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
   const selectedRoles = useAppSelector((s) => s.devPanel.selectedRoles);
   const isRoleSwitching = useAppSelector((s) => s.devPanel.isRoleSwitching);
+  const isV1Mode = useAppSelector((s) => s.devPanel.isV1Mode);
   const isEmpty = guruStage === "empty";
   const isNewUser = guruStage === "new" || isEmpty;
   const isEarlyUser = guruStage === "early";
   const isNewOrEarly = isNewUser || isEarlyUser;
 
-  // Role switch animation — show skeleton briefly
+  // Role switch animation - show skeleton briefly
   const [roleLoading, setRoleLoading] = useState(false);
   useEffect(() => {
     if (isRoleSwitching) {
@@ -182,7 +218,7 @@ export default function ProfilePage() {
   // Active role categories for multi-role rating display
   const activeCategories = useMemo(() => getCategoriesForRoles(selectedRoles), [selectedRoles]);
 
-  // Display label for a role category — expands the "Evaluation & Moderation"
+  // Display label for a role category - expands the "Evaluation & Moderation"
   // bucket to the specific role(s) the user actually has, to avoid the ambiguous
   // "Eval & Mod" abbreviation.
   const categoryDisplayLabel = (category: GuruRoleCategory): string => {
@@ -199,6 +235,23 @@ export default function ProfilePage() {
   const demoCoursePerf = useMemo(() => demoRoleCoursePerf[selectedRole] ?? defaultCoursePerf, [selectedRole]);
   const demoMatrix = useMemo(() => demoRoleMatrix[selectedRole] ?? defaultMatrix, [selectedRole]);
 
+  // Monthly Rating Trends grouped by category - one table per active category,
+  // aggregating the course rows from every selected role in that category.
+  const matricesByCategory = useMemo(() => {
+    return activeCategories.map((cat) => {
+      const rolesInCat = selectedRoles.filter((r) => ROLE_TO_CATEGORY[r] === cat);
+      const rowsFromRoles = rolesInCat.flatMap((r) => demoRoleMatrix[r] ?? []);
+      // Dedupe course name - keep first occurrence so each table row is unique.
+      const seen = new Set<string>();
+      const rows = rowsFromRoles.filter((row) => {
+        if (seen.has(row.course)) return false;
+        seen.add(row.course);
+        return true;
+      });
+      return { category: cat, rows: rows.length ? rows : defaultMatrix };
+    });
+  }, [activeCategories, selectedRoles]);
+
   // Performance section label adapts for non-teaching roles
   const isEvalOrMod = selectedRole === "Evaluator" || selectedRole === "Moderator";
   const coursePerfLabel = isEvalOrMod ? "Session Performance" : "Course Performance";
@@ -212,7 +265,7 @@ export default function ProfilePage() {
   const [showCourseReport, setShowCourseReport] = useState(false);
   const testimonialRef = useRef<HTMLDivElement>(null);
 
-  // Operational tab items — splits "Evaluation & Moderation" into separate
+  // Operational tab items - splits "Evaluation & Moderation" into separate
   // Evaluation / Moderation tabs when both roles are selected, so each gets
   // its own stats. Teaching and Mentoring stay as single category tabs.
   const tabItems = useMemo(() => {
@@ -231,13 +284,6 @@ export default function ProfilePage() {
     return items;
   }, [activeCategories, selectedRoles, selectedRole]);
 
-  const [activeTab, setActiveTab] = useState(tabItems[0]?.key ?? "");
-  // Sync activeTab when tab items change (role chip toggle)
-  useEffect(() => {
-    if (!tabItems.some((t) => t.key === activeTab)) {
-      setActiveTab(tabItems[0]?.key ?? "");
-    }
-  }, [tabItems, activeTab]);
   const [shareMonth, setShareMonth] = useState("2026-03");
   const [shareAllTime, setShareAllTime] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -352,7 +398,7 @@ export default function ProfilePage() {
     return { ...tillDate, monthLabel: "ALL TIME" };
   }, [selectedRole]);
 
-  // Active share data — "All Time" toggle takes precedence over month selector
+  // Active share data - "All Time" toggle takes precedence over month selector
   const isTillDate = shareAllTime;
   const activeShareData = useMemo((): ShareMonthDatum => {
     if (shareAllTime) return shareTillDateData;
@@ -438,7 +484,7 @@ export default function ProfilePage() {
   [categoryRatings, selectedRole]);
 
   // ══ HERO: On-time confirmation rate (universal, always visible) ═════════
-  // This metric is shared across all roles — pulled out of the tabbed section
+  // This metric is shared across all roles - pulled out of the tabbed section
   // so it doesn't repeat per tab. Uses the dropdown-controlled selectedRole.
   const heroRd = demoRoleStatCards[selectedRole];
   const onTimeHeroCard = useMemo(() => ({
@@ -465,85 +511,335 @@ export default function ProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [selectedRole, heroRd]);
 
-  // ══ ZONE 2: Operational cards (2, tab-switched) ════════════════════════
-  // Driven by `tabItems` — Evaluation and Moderation are separate tabs.
-  const operationalCards = useMemo(() => {
-    const currentTab = tabItems.find((t) => t.key === activeTab) ?? tabItems[0];
-    if (!currentTab) return [];
-    const tabRole = currentTab.dataRole;
-    const rd = demoRoleStatCards[tabRole];
-    const isEvalMod = currentTab.isEvalMod;
-
-    if (isEvalMod) {
-      const wN = tabRole === "Moderator" ? "moderations" : "evaluations";
-      const wNs = tabRole === "Moderator" ? "moderation" : "evaluation";
-      return [
-        {
-          label: `${wN.toUpperCase()} / MONTH`,
-          value: rd.avgSessions, numericValue: parseFloat(rd.avgSessions),
-          description: `${wN.charAt(0).toUpperCase() + wN.slice(1)} delivered per month across your assignments.`,
-          delta: rd.avgSessionsDelta, deltaLabel: "vs last month", deltaPositive: true,
-          bars: rd.avgSessionsBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-          bg: "var(--gl-accent-info-bg)", accent: "var(--gl-accent-info)",
-          reportTitle: `${wN.charAt(0).toUpperCase() + wN.slice(1)} per Month Report`,
-          reportSummary: `Monthly breakdown of ${wN} delivered as ${tabRole}.`,
-          chartData: rd.avgSessionsBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
-          chartKey: "value", breakdown: rd.sessionsBreakdown,
-          peerValue: rd.peerAvgSessions, peerLabel: String(rd.peerAvgSessions), lowerIsBetter: false,
-        },
-        {
-          label: `ON-TIME ${wN.toUpperCase()}`,
-          value: rd.onTimeConfirmRate, numericValue: parseFloat(rd.onTimeConfirmRate),
-          description: `Assignments you ${wNs === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned.`,
-          delta: rd.onTimeConfirmDelta, deltaLabel: "vs last quarter", deltaPositive: true,
-          bars: rd.onTimeConfirmBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-          bg: "var(--gl-accent-violet-bg)", accent: "var(--gl-accent-violet)",
-          reportTitle: `On-time ${wNs.charAt(0).toUpperCase() + wNs.slice(1)} Report`,
-          reportSummary: `Share of assignments you ${wNs === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned. Higher is better.`,
-          chartData: rd.onTimeConfirmBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
-          chartKey: "value", breakdown: rd.onTimeConfirmBreakdown,
-          peerValue: rd.peerOnTimeConfirmRate, peerLabel: `${rd.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
-          supportingStat: { label: `Average time to ${wNs === "moderation" ? "moderate" : "evaluate"}`, value: rd.avgConfirmTime },
-        },
-      ];
-    }
-
-    // Teaching / Mentoring — 2 session-based cards (on-time removed)
-    return [
-      {
-        label: "AVG SESSIONS / MONTH",
-        value: rd.avgSessions, numericValue: parseFloat(rd.avgSessions),
-        description: `Average sessions delivered per month as ${tabRole}.`,
-        delta: rd.avgSessionsDelta, deltaLabel: "vs last month", deltaPositive: true,
-        bars: rd.avgSessionsBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-        bg: "var(--gl-accent-amber-bg)", accent: "var(--gl-accent-amber)",
-        reportTitle: "Sessions per Month Report",
-        reportSummary: `Monthly breakdown of sessions delivered as ${tabRole}.`,
-        chartData: rd.avgSessionsBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
-        chartKey: "value", breakdown: rd.sessionsBreakdown,
-        peerValue: rd.peerAvgSessions, peerLabel: String(rd.peerAvgSessions), lowerIsBetter: false,
-      },
-      {
-        label: "AVG SESSION QUALITY",
-        value: rd.avgQuality, numericValue: parseFloat(rd.avgQuality),
-        description: "Sessions rated 4.0 or above.",
-        delta: rd.avgQualityDelta, deltaLabel: "vs last month", deltaPositive: true,
-        bars: rd.avgQualityBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-        bg: "var(--gl-accent-purple-bg)", accent: "var(--gl-accent-purple)",
-        reportTitle: "Session Quality Report",
-        reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
-        chartData: rd.avgQualityBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
-        chartKey: "value", breakdown: rd.qualityBreakdown,
-        primaryBenchmark: "Target: > 98%", secondaryValue: rd.avgQualitySecondary,
-        secondaryLabel: "Rated 4.4+", secondaryBenchmark: "Target: > 90%",
-        peerValue: rd.peerAvgQuality, peerLabel: `${rd.peerAvgQuality}%`, lowerIsBetter: false,
-      },
-    ];
+  // ══ ZONE 2: Operational cards - flat list across ALL tabItems ═════════
+  // No tab switching - every category's operational metrics are visible at
+  // once so nothing is hidden behind a tab.
+  // ══ ZONE 2: Operational cards grouped by category ═════════════════════
+  // Each tab (Evaluation, Moderation, Teaching, Mentoring) becomes its own
+  // group with its own overline heading and a 2-col grid of its 2 cards.
+  const operationalGroups = useMemo(() => {
+    return tabItems.map((tab) => {
+      const tabRole = tab.dataRole;
+      const rd = demoRoleStatCards[tabRole];
+      if (tab.isEvalMod) {
+        const wN = tabRole === "Moderator" ? "moderations" : "evaluations";
+        const wNs = tabRole === "Moderator" ? "moderation" : "evaluation";
+        return {
+          key: tab.key,
+          title: tab.label,
+          cards: [
+            {
+              id: `${tab.key}:${wN.toUpperCase()} / MONTH`,
+              neutral: true,
+              label: `${wN.toUpperCase()} / MONTH`,
+              value: rd.avgSessions, numericValue: parseFloat(rd.avgSessions),
+              description: `${wN.charAt(0).toUpperCase() + wN.slice(1)} delivered per month across your assignments.`,
+              delta: rd.avgSessionsDelta, deltaLabel: "vs last month", deltaPositive: true,
+              bars: rd.avgSessionsBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+              bg: "var(--gl-accent-info-bg)", accent: "var(--gl-accent-info)",
+              reportTitle: `${wN.charAt(0).toUpperCase() + wN.slice(1)} per Month Report`,
+              reportSummary: `Monthly breakdown of ${wN} delivered as ${tabRole}.`,
+              chartData: rd.avgSessionsBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
+              chartKey: "value", breakdown: rd.sessionsBreakdown,
+              peerValue: rd.peerAvgSessions, peerLabel: String(rd.peerAvgSessions), lowerIsBetter: false,
+            },
+            {
+              id: `${tab.key}:ON-TIME ${wN.toUpperCase()}`,
+              neutral: true,
+              label: `ON-TIME ${wN.toUpperCase()}`,
+              value: rd.onTimeConfirmRate, numericValue: parseFloat(rd.onTimeConfirmRate),
+              description: `Assignments you ${wNs === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned.`,
+              delta: rd.onTimeConfirmDelta, deltaLabel: "vs last quarter", deltaPositive: true,
+              bars: rd.onTimeConfirmBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+              bg: "var(--gl-accent-violet-bg)", accent: "var(--gl-accent-violet)",
+              reportTitle: `On-time ${wNs.charAt(0).toUpperCase() + wNs.slice(1)} Report`,
+              reportSummary: `Share of assignments you ${wNs === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned. Higher is better.`,
+              chartData: rd.onTimeConfirmBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
+              chartKey: "value", breakdown: rd.onTimeConfirmBreakdown,
+              peerValue: rd.peerOnTimeConfirmRate, peerLabel: `${rd.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
+              supportingStat: { label: `Average time to ${wNs === "moderation" ? "moderate" : "evaluate"}`, value: rd.avgConfirmTime },
+            },
+          ],
+        };
+      }
+      return {
+        key: tab.key,
+        title: tab.label,
+        cards: [
+          {
+            id: `${tab.key}:AVG SESSIONS / MONTH`,
+            neutral: true,
+            label: "AVG SESSIONS / MONTH",
+            value: rd.avgSessions, numericValue: parseFloat(rd.avgSessions),
+            description: `Average sessions delivered per month as ${tabRole}.`,
+            delta: rd.avgSessionsDelta, deltaLabel: "vs last month", deltaPositive: true,
+            bars: rd.avgSessionsBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+            bg: "var(--gl-accent-amber-bg)", accent: "var(--gl-accent-amber)",
+            reportTitle: "Sessions per Month Report",
+            reportSummary: `Monthly breakdown of sessions delivered as ${tabRole}.`,
+            chartData: rd.avgSessionsBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
+            chartKey: "value", breakdown: rd.sessionsBreakdown,
+            peerValue: rd.peerAvgSessions, peerLabel: String(rd.peerAvgSessions), lowerIsBetter: false,
+          },
+          {
+            id: `${tab.key}:AVG SESSION QUALITY`,
+            neutral: true,
+            label: "AVG SESSION QUALITY",
+            value: rd.avgQuality, numericValue: parseFloat(rd.avgQuality),
+            description: "Sessions rated 4.0 or above.",
+            delta: rd.avgQualityDelta, deltaLabel: "vs last month", deltaPositive: true,
+            bars: rd.avgQualityBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
+            bg: "var(--gl-accent-purple-bg)", accent: "var(--gl-accent-purple)",
+            reportTitle: "Session Quality Report",
+            reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
+            chartData: rd.avgQualityBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
+            chartKey: "value", breakdown: rd.qualityBreakdown,
+            primaryBenchmark: "Target: > 98%", secondaryValue: rd.avgQualitySecondary,
+            secondaryLabel: "Rated 4.4+", secondaryBenchmark: "Target: > 90%",
+            peerValue: rd.peerAvgQuality, peerLabel: `${rd.peerAvgQuality}%`, lowerIsBetter: false,
+          },
+        ],
+      };
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, tabItems, selectedRoles, selectedRole]);
+  }, [tabItems, selectedRoles, selectedRole]);
 
-  // Combined for the drawer (which card was clicked — could be hero, rating, or operational)
-  const statCards = [onTimeHeroCard, ...ratingCards, ...operationalCards];
+  // V1 ship scope - hide ON-TIME * and AVG SESSION QUALITY cards site-wide.
+  // Filtering at the memo level keeps statCards (drawer lookup) consistent
+  // with what the user can actually see.
+  const v1HiddenLabels = useMemo(
+    () => new Set(["ON-TIME EVALUATIONS", "ON-TIME MODERATIONS", "AVG SESSION QUALITY"]),
+    [],
+  );
+  const visibleOperationalGroups = useMemo(() => {
+    if (!isV1Mode) return operationalGroups;
+    return operationalGroups
+      .map((g) => ({ ...g, cards: g.cards.filter((c) => !v1HiddenLabels.has(c.label)) }))
+      .filter((g) => g.cards.length > 0);
+  }, [operationalGroups, isV1Mode, v1HiddenLabels]);
+
+  // Flat list for drawer lookup (reportModal matches on card.label)
+  const operationalCards = useMemo(
+    () => visibleOperationalGroups.flatMap((g) => g.cards),
+    [visibleOperationalGroups],
+  );
+
+  // Map operational cards to their role category so each Monthly Rating
+  // Trends card can embed its own performance stats above the matrix.
+  // Evaluation + Moderation groups both roll up to "Evaluation & Moderation".
+  type OperationalCard = typeof visibleOperationalGroups[number]["cards"][number];
+  const operationalCardsByCategory = useMemo(() => {
+    const map = new Map<string, OperationalCard[]>();
+    for (const group of visibleOperationalGroups) {
+      const cat = (group.key === "Evaluation" || group.key === "Moderation")
+        ? "Evaluation & Moderation"
+        : group.key;
+      const existing = map.get(cat) ?? [];
+      map.set(cat, [...existing, ...group.cards]);
+    }
+    return map;
+  }, [visibleOperationalGroups]);
+
+  // Combined for the drawer (which card was clicked - could be hero, rating, or operational).
+  // onTimeHeroCard is excluded when v1Mode is on.
+  const statCards = isV1Mode
+    ? [...ratingCards, ...operationalCards]
+    : [onTimeHeroCard, ...ratingCards, ...operationalCards];
+
+  /* ══ KPI Card Renderer (used by top Ratings row + per-category blocks) ══
+     Extracted to component scope so both sites can share one card template. */
+  const zeroMessages: Record<string, string> = {
+    "AVG RATING": "Complete your first session to see your rating",
+    "TEACHING": "Complete your first teaching session to see your rating",
+    "MENTORING": "Complete your first mentoring session to see your rating",
+    "EVALUATION": "Complete your first evaluation to see your rating",
+    "MODERATION": "Complete your first moderation to see your rating",
+    "EVALUATION & MODERATION": "Complete your first assignment to see your rating",
+    "AVG SESSIONS / MONTH": "Sessions will appear here as you teach",
+    "AVG SESSION QUALITY": "Quality score unlocks after your first rating",
+    "ON-TIME CONFIRMS": "Confirm your first session to start tracking",
+    "EVALUATIONS / MONTH": "Evaluations will appear here as you complete assignments",
+    "MODERATIONS / MONTH": "Moderations will appear here as you respond to discussions",
+    "ON-TIME EVALUATIONS": "Complete your first evaluation to start tracking",
+    "ON-TIME MODERATIONS": "Respond to your first discussion to start tracking",
+    "LEARNERS IMPACTED": "Learners count appears as you evaluate assignments",
+  };
+  const earlyValues: Record<string, string> = {
+    "AVG RATING": "4.7", "TEACHING": "4.7", "MENTORING": "4.7",
+    "EVALUATION": "4.8", "MODERATION": "4.8", "EVALUATION & MODERATION": "4.8",
+    "AVG SESSIONS / MONTH": "2", "AVG SESSION QUALITY": "100%", "ON-TIME CONFIRMS": "100%",
+    "EVALUATIONS / MONTH": "5", "MODERATIONS / MONTH": "3",
+    "ON-TIME EVALUATIONS": "100%", "ON-TIME MODERATIONS": "100%", "LEARNERS IMPACTED": "12",
+  };
+  const earlyDescriptions: Record<string, string> = {
+    "AVG RATING": "Based on 2 sessions so far. Keep going!",
+    "TEACHING": "Based on your first teaching sessions. Keep going!",
+    "MENTORING": "Based on your first mentoring sessions. Keep going!",
+    "EVALUATION": "Based on your first evaluations. Keep going!",
+    "MODERATION": "Based on your first moderations. Keep going!",
+    "EVALUATION & MODERATION": "Based on your first assignments. Keep going!",
+    "AVG SESSIONS / MONTH": "You've completed 2 sessions in your first weeks.",
+    "AVG SESSION QUALITY": "All sessions rated 4.0+ so far. Great start!",
+    "ON-TIME CONFIRMS": "On-time confirmation rate appears as you confirm sessions.",
+    "EVALUATIONS / MONTH": "You've completed a few evaluations in your first weeks.",
+    "MODERATIONS / MONTH": "You've responded to a few discussions in your first weeks.",
+    "ON-TIME EVALUATIONS": "On-time evaluation rate appears as you complete more.",
+    "ON-TIME MODERATIONS": "On-time moderation rate appears as you respond to more discussions.",
+    "LEARNERS IMPACTED": "Learner count grows with every evaluation you complete.",
+  };
+
+  const renderCard = (card: typeof statCards[number]) => {
+    const maxBar = Math.max(...card.bars);
+    const cardId: string = (card as { id?: string }).id ?? card.label;
+    const isNeutral = (card as { neutral?: boolean }).neutral === true;
+    const cardBg = isNeutral ? "background.paper" : card.bg;
+    const labelColor = isNeutral ? "text.secondary" : card.accent;
+    const hoverBorder = isNeutral ? "text.disabled" : `color-mix(in srgb, ${card.accent} 55%, transparent)`;
+    const hoverShadow = isNeutral
+      ? "0 6px 18px -6px rgba(0,0,0,0.08)"
+      : `0 6px 18px -6px color-mix(in srgb, ${card.accent} 35%, transparent)`;
+    const activeShadow = isNeutral
+      ? "0 3px 10px -4px rgba(0,0,0,0.06)"
+      : `0 3px 10px -4px color-mix(in srgb, ${card.accent} 30%, transparent)`;
+    const ctaBg = isNeutral
+      ? "rgba(0,0,0,0.06)"
+      : `color-mix(in srgb, ${card.accent} 16%, transparent)`;
+    const ctaBgHover = isNeutral
+      ? "rgba(0,0,0,0.1)"
+      : `color-mix(in srgb, ${card.accent} 26%, transparent)`;
+    const ctaColor = isNeutral ? "text.secondary" : card.accent;
+    return (
+      <Card
+        key={cardId}
+        elevation={0}
+        onClick={() => { if (!isNewOrEarly) setReportModal(cardId); }}
+        sx={{
+          borderRadius: "12px",
+          bgcolor: cardBg,
+          border: "1px solid",
+          borderColor: "divider",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          cursor: isNewOrEarly ? "default" : "pointer",
+          transition: "border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+          ...(isNewOrEarly ? {} : {
+            "&:hover": { borderColor: hoverBorder, transform: "translateY(-2px)", boxShadow: hoverShadow },
+            "&:active": { transform: "translateY(-1px)", boxShadow: activeShadow },
+          }),
+        }}
+      >
+        <CardContent sx={{ p: { xs: 1.25, sm: 1.5 }, flex: 1, display: "flex", flexDirection: "column" }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: { xs: 0.75, sm: 1 } }}>
+            <Typography variant="caption" fontWeight={700} sx={{ letterSpacing: "0.08em", color: labelColor, fontSize: { xs: "0.55rem", sm: "0.65rem" } }}>
+              {card.label}
+            </Typography>
+            {!isNewOrEarly && (
+              <MuiTooltip title="See detailed report" arrow placement="top">
+                <IconButton
+                  size="small"
+                  aria-label="See detailed report"
+                  onClick={(e) => { e.stopPropagation(); setReportModal(cardId); }}
+                  disableRipple
+                  sx={{
+                    width: 30, height: 20, borderRadius: "999px", p: 0,
+                    bgcolor: ctaBg, color: ctaColor,
+                    transition: "background-color 0.18s ease, transform 0.18s ease",
+                    "& .arrow": { transition: "transform 0.18s ease" },
+                    "&:hover": { bgcolor: ctaBgHover, "& .arrow": { transform: "translateX(2px)" } },
+                    "&:active": { transform: "scale(0.96)" },
+                  }}
+                >
+                  <ArrowForwardIcon className="arrow" sx={{ fontSize: 12 }} />
+                </IconButton>
+              </MuiTooltip>
+            )}
+          </Stack>
+          <Stack direction="row" alignItems="baseline" spacing={0.75} sx={{ mb: { xs: 0.5, sm: 1 }, flexWrap: "wrap" }}>
+            <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", fontSize: { xs: "1.15rem", sm: "1.4rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
+              {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
+            </Typography>
+            {!isNewOrEarly && card.delta && (
+              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ display: { xs: "none", sm: "inline-flex" }, lineHeight: 1 }}>
+                {card.deltaPositive
+                  ? <TrendingUpIcon sx={{ fontSize: 14, color: "success.main", display: "block" }} />
+                  : <TrendingDownIcon sx={{ fontSize: 14, color: "error.main", display: "block" }} />}
+                <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600, fontSize: "0.75rem", lineHeight: 1 }}>
+                  {card.delta}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem", lineHeight: 1 }}>
+                  {card.deltaLabel}
+                </Typography>
+              </Stack>
+            )}
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: { xs: "none", sm: "-webkit-box" }, WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontSize: "0.68rem" }}>
+            {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
+          </Typography>
+          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+            {!isV1Mode && !isNewOrEarly && card.peerValue != null && (() => {
+              const you = card.numericValue;
+              const peer = card.peerValue;
+              const isAhead = card.lowerIsBetter ? you < peer : you > peer;
+              const isEqual = Math.abs(you - peer) < 0.01;
+              const diff = Math.abs(you - peer);
+              const labelIsPercent = card.label.startsWith("ON-TIME") || card.label === "AVG SESSION QUALITY";
+              const labelIsInteger = card.label.includes("/ MONTH") || card.label === "LEARNERS IMPACTED";
+              const diffStr = labelIsPercent ? `${diff.toFixed(1)}%` : labelIsInteger ? Math.round(diff).toString() : diff.toFixed(2);
+              const sentiment = isEqual ? "You're on par" : isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`;
+              const sentimentColor = isEqual ? "text.secondary" : isAhead ? "success.main" : "warning.dark";
+              return (
+                <Typography variant="caption" sx={{ fontSize: "0.75rem", color: "text.secondary", display: "block", lineHeight: 1.4 }}>
+                  Peer avg {card.peerLabel}
+                  <Typography component="span" sx={{ fontSize: "0.75rem", fontWeight: 600, color: sentimentColor, ml: 0.5 }}>· {sentiment}</Typography>
+                </Typography>
+              );
+            })()}
+          </Box>
+          <Box sx={{ mt: "auto", pt: { xs: 1.5, sm: 2 }, mb: 0.25 }}>
+            {isNewOrEarly ? (
+              <svg width="100%" height={32} viewBox="0 0 140 32" preserveAspectRatio="none" style={{ display: "block" }}>
+                <line x1="0" y1="16" x2="140" y2="16" stroke={card.accent} strokeWidth={1} strokeDasharray="4 4" opacity={0.25} />
+              </svg>
+            ) : (() => {
+              const h = 32, w = 140;
+              const minVal = Math.min(...card.bars);
+              const range = maxBar - minVal || 1;
+              const coords = card.bars.map((v: number, i: number) => ({
+                x: (i / (card.bars.length - 1)) * w,
+                y: h - ((v - minVal) / range) * (h - 4) - 2,
+                val: v, label: card.barLabels[i],
+              }));
+              const polyPoints = coords.map((c) => `${c.x},${c.y}`).join(" ");
+              const areaPoints = `0,${h} ${polyPoints} ${w},${h}`;
+              return (
+                <Box sx={{ position: "relative" }}>
+                  <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
+                    <polygon points={areaPoints} fill={card.accent} opacity={0.1} />
+                    <polyline points={polyPoints} fill="none" stroke={card.accent} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.7} />
+                  </svg>
+                  {coords.map((c, i) => (
+                    <MuiTooltip key={i} title={`${c.label}: ${c.val}`} placement="top" arrow slotProps={{ tooltip: { sx: { fontSize: "0.7rem", py: 0.25, px: 1 } } }}>
+                      <Box sx={{ position: "absolute", left: `${(c.x / w) * 100}%`, top: `${(c.y / h) * 100}%`, transform: "translate(-50%, -50%)", width: 12, height: 12, borderRadius: "50%", cursor: "pointer", "&:hover .spark-dot": { opacity: 1 } }}>
+                        <Box className="spark-dot" sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: card.accent, position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: i === card.bars.length - 1 ? 1 : 0.4, transition: "opacity 0.15s ease" }} />
+                      </Box>
+                    </MuiTooltip>
+                  ))}
+                </Box>
+              );
+            })()}
+          </Box>
+          {!isNewOrEarly && (
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              {card.barLabels.map((lbl: string, i: number) => (
+                <Typography key={i} variant="caption" color="text.disabled" sx={{ fontSize: "0.55rem" }}>{lbl}</Typography>
+              ))}
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   if (loading || roleLoading) {
     return (
@@ -638,59 +934,95 @@ export default function ProfilePage() {
 
   return (
     <Stack spacing={2}>
-      {/* ── Page header ──────────────────────────────────────────────────── */}
-      <FlexBox sx={{ justifyContent: "space-between", alignItems: "flex-start",  flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 0 } }}>
-        <Box>
-          <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Profile</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Your identity, performance trends, and financial overview.
+      {/* ── Identity header - two-line flat row ────────────────────────────
+          Line 1: name (page title). Line 2: email · timezone (clickable).
+          Right-aligned pencil icon opens the inline edit dialog. */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1}
+        sx={{ px: { xs: 0, sm: 0.5 }, py: { xs: 0.25, sm: 0.5 } }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            sx={{
+              fontSize: { xs: "1.05rem", sm: "1.25rem" },
+              lineHeight: 1.2,
+              letterSpacing: "-0.01em",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {guruName}
           </Typography>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={0.75}
+            sx={{ mt: 0.25, minWidth: 0 }}
+            divider={<Typography component="span" sx={{ color: "text.disabled", fontSize: { xs: "0.75rem", sm: "0.8125rem" }, lineHeight: 1 }}>·</Typography>}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                fontSize: { xs: "0.75rem", sm: "0.8125rem" },
+                lineHeight: 1.3,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                minWidth: 0,
+              }}
+            >
+              {guruEmail}
+            </Typography>
+            <Box
+              component="span"
+              onClick={() => dispatch(setOpenTimezone(true))}
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.5,
+                fontSize: { xs: "0.75rem", sm: "0.8125rem" },
+                color: "text.secondary",
+                cursor: "pointer",
+                flexShrink: 0,
+                "&:hover": { color: "primary.main", textDecoration: "underline" },
+              }}
+            >
+              <PublicOutlinedIcon sx={{ fontSize: 13 }} />
+              {tzLabel}
+            </Box>
+          </Stack>
         </Box>
         <Button
           variant="soft"
           size="small"
+          color="primary"
           startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
-          sx={{ borderRadius: "8px", flexShrink: 0, mt: 0.5 }}
-          onClick={() => { dispatch(populateDrafts()); dispatch(setOpenProfileEdit(true)); }}
+          onClick={() => navigate("/preferences#profile")}
+          sx={{
+            flexShrink: 0,
+            borderRadius: "8px",
+            textTransform: "none",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            px: 1.25,
+            py: 0.25,
+            minHeight: 30,
+            "& .MuiButton-startIcon": { mr: 0.5 },
+          }}
         >
-          Edit profile
+          Edit Profile
         </Button>
-      </FlexBox>
-
-      {/* ── Identity card ────────────────────────────────────────────────── */}
-      <Card variant="outlined" sx={{ borderRadius: "16px" }}>
-        <CardContent sx={{ px: { xs: 2, sm: 3 }, py: 2 }}>
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(4, auto)" }, gap: { xs: 1.5, sm: 4 } }}>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>Name</Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25, fontSize: { xs: "0.78rem", sm: "0.875rem" } }}>{guruName}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>Timezone</Typography>
-              <Typography
-                variant="body2"
-                fontWeight={600}
-                sx={{ mt: 0.25, fontSize: { xs: "0.78rem", sm: "0.875rem" }, color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
-                onClick={() => dispatch(setOpenTimezone(true))}
-              >
-                {tzLabel}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>Primary mode</Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25, fontSize: { xs: "0.78rem", sm: "0.875rem" } }}>{primaryMode}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" } }}>Programs</Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ mt: 0.25, fontSize: { xs: "0.78rem", sm: "0.875rem" } }}>{guruPrograms}</Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+      </Stack>
 
       {/* ══ SHARE YOUR IMPACT ═════════════════════════════════════════════ */}
       {!isNewOrEarly && (() => {
-        /* Shared card JSX — rendered identically in thumbnail & dialog */
+        /* Shared card JSX - rendered identically in thumbnail & dialog */
         const shareCardContent = (
           <ThemeProvider theme={lightTheme}>
           <Card
@@ -891,7 +1223,7 @@ export default function ProfilePage() {
             gap: 2,
             alignItems: "start",
           }}>
-            {/* Thumbnail — pixel-perfect scaled card */}
+            {/* Thumbnail - pixel-perfect scaled card */}
             <Box
               onClick={() => !isMobile && setShareOpen(true)}
               sx={{
@@ -1086,7 +1418,7 @@ export default function ProfilePage() {
               </Menu>
             </Stack>
 
-            {/* Preview card — 340px on mobile via transform scale, zoom on desktop */}
+            {/* Preview card - 340px on mobile via transform scale, zoom on desktop */}
             {isMobile ? (
               <Box sx={{ width: 340, height: Math.round(420 * (340 / SHARE_CARD_WIDTH)), overflow: "hidden", mb: 3, borderRadius: "8px" }}>
                 <Box sx={{ width: SHARE_CARD_WIDTH, height: 420, transform: `scale(${340 / SHARE_CARD_WIDTH})`, transformOrigin: "top left" }}>
@@ -1144,210 +1476,11 @@ export default function ProfilePage() {
         </Box>
       </FlexBox>
 
-      {/* ══ KPI Card Renderer (shared by Zone 1 & Zone 2) ════════════════════
-           Extracted as an IIFE-scoped function so both grids reuse the same
-           card rendering without duplicating 250+ lines of JSX. */}
+      {/* ══ ZONE 1: Ratings row (headline cross-category scan) ══════════ */}
       {(() => {
-        const zeroMessages: Record<string, string> = {
-          "AVG RATING": "Complete your first session to see your rating",
-          "TEACHING": "Complete your first teaching session to see your rating",
-          "MENTORING": "Complete your first mentoring session to see your rating",
-          "EVALUATION": "Complete your first evaluation to see your rating",
-          "MODERATION": "Complete your first moderation to see your rating",
-          "EVALUATION & MODERATION": "Complete your first assignment to see your rating",
-          "AVG SESSIONS / MONTH": "Sessions will appear here as you teach",
-          "AVG SESSION QUALITY": "Quality score unlocks after your first rating",
-          "ON-TIME CONFIRMS": "Confirm your first session to start tracking",
-          "EVALUATIONS / MONTH": "Evaluations will appear here as you complete assignments",
-          "MODERATIONS / MONTH": "Moderations will appear here as you respond to discussions",
-          "ON-TIME EVALUATIONS": "Complete your first evaluation to start tracking",
-          "ON-TIME MODERATIONS": "Respond to your first discussion to start tracking",
-          "LEARNERS IMPACTED": "Learners count appears as you evaluate assignments",
-        };
-        const earlyValues: Record<string, string> = {
-          "AVG RATING": "4.7", "TEACHING": "4.7", "MENTORING": "4.7",
-          "EVALUATION": "4.8", "MODERATION": "4.8", "EVALUATION & MODERATION": "4.8",
-          "AVG SESSIONS / MONTH": "2", "AVG SESSION QUALITY": "100%", "ON-TIME CONFIRMS": "100%",
-          "EVALUATIONS / MONTH": "5", "MODERATIONS / MONTH": "3",
-          "ON-TIME EVALUATIONS": "100%", "ON-TIME MODERATIONS": "100%", "LEARNERS IMPACTED": "12",
-        };
-        const earlyDescriptions: Record<string, string> = {
-          "AVG RATING": "Based on 2 sessions so far. Keep going!",
-          "TEACHING": "Based on your first teaching sessions. Keep going!",
-          "MENTORING": "Based on your first mentoring sessions. Keep going!",
-          "EVALUATION": "Based on your first evaluations. Keep going!",
-          "MODERATION": "Based on your first moderations. Keep going!",
-          "EVALUATION & MODERATION": "Based on your first assignments. Keep going!",
-          "AVG SESSIONS / MONTH": "You've completed 2 sessions in your first weeks.",
-          "AVG SESSION QUALITY": "All sessions rated 4.0+ so far. Great start!",
-          "ON-TIME CONFIRMS": "On-time confirmation rate appears as you confirm sessions.",
-          "EVALUATIONS / MONTH": "You've completed a few evaluations in your first weeks.",
-          "MODERATIONS / MONTH": "You've responded to a few discussions in your first weeks.",
-          "ON-TIME EVALUATIONS": "On-time evaluation rate appears as you complete more.",
-          "ON-TIME MODERATIONS": "On-time moderation rate appears as you respond to more discussions.",
-          "LEARNERS IMPACTED": "Learner count grows with every evaluation you complete.",
-        };
-
-        const renderCard = (card: typeof statCards[number]) => {
-          const maxBar = Math.max(...card.bars);
-          return (
-            <Card
-              key={card.label}
-              elevation={0}
-              onClick={() => { if (!isNewOrEarly) setReportModal(card.label); }}
-              sx={{
-                borderRadius: "12px",
-                bgcolor: card.bg,
-                border: "1px solid",
-                borderColor: "divider",
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                cursor: isNewOrEarly ? "default" : "pointer",
-                transition: "border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
-                ...(isNewOrEarly ? {} : {
-                  "&:hover": {
-                    borderColor: `color-mix(in srgb, ${card.accent} 55%, transparent)`,
-                    transform: "translateY(-2px)",
-                    boxShadow: `0 6px 18px -6px color-mix(in srgb, ${card.accent} 35%, transparent)`,
-                  },
-                  "&:active": {
-                    transform: "translateY(-1px)",
-                    boxShadow: `0 3px 10px -4px color-mix(in srgb, ${card.accent} 30%, transparent)`,
-                  },
-                }),
-              }}
-            >
-              <CardContent sx={{ p: { xs: 1.25, sm: 1.5 }, flex: 1, display: "flex", flexDirection: "column" }}>
-                {/* Label + pill CTA */}
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: { xs: 0.75, sm: 1 } }}>
-                  <Typography variant="caption" fontWeight={700} sx={{ letterSpacing: "0.08em", color: card.accent, fontSize: { xs: "0.55rem", sm: "0.65rem" } }}>
-                    {card.label}
-                  </Typography>
-                  {!isNewOrEarly && (
-                    <MuiTooltip title="See detailed report" arrow placement="top">
-                      <IconButton
-                        size="small"
-                        aria-label="See detailed report"
-                        onClick={(e) => { e.stopPropagation(); setReportModal(card.label); }}
-                        disableRipple
-                        sx={{
-                          width: 30, height: 20, borderRadius: "999px", p: 0,
-                          bgcolor: `color-mix(in srgb, ${card.accent} 16%, transparent)`,
-                          color: card.accent,
-                          transition: "background-color 0.18s ease, transform 0.18s ease",
-                          "& .arrow": { transition: "transform 0.18s ease" },
-                          "&:hover": { bgcolor: `color-mix(in srgb, ${card.accent} 26%, transparent)`, "& .arrow": { transform: "translateX(2px)" } },
-                          "&:active": { transform: "scale(0.96)" },
-                        }}
-                      >
-                        <ArrowForwardIcon className="arrow" sx={{ fontSize: 12 }} />
-                      </IconButton>
-                    </MuiTooltip>
-                  )}
-                </Stack>
-
-                {/* Hero + inline delta */}
-                <Stack direction="row" alignItems="baseline" spacing={0.75} sx={{ mb: { xs: 0.5, sm: 1 }, flexWrap: "wrap" }}>
-                  <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", fontSize: { xs: "1.15rem", sm: "1.4rem" }, ...(isNewUser ? { opacity: 0.3 } : {}) }}>
-                    {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
-                  </Typography>
-                  {!isNewOrEarly && card.delta && (
-                    <Stack direction="row" alignItems="center" spacing={0.5} sx={{ display: { xs: "none", sm: "inline-flex" }, lineHeight: 1 }}>
-                      {card.deltaPositive
-                        ? <TrendingUpIcon sx={{ fontSize: 14, color: "success.main", display: "block" }} />
-                        : <TrendingDownIcon sx={{ fontSize: 14, color: "error.main", display: "block" }} />}
-                      <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600, fontSize: "0.75rem", lineHeight: 1 }}>
-                        {card.delta}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem", lineHeight: 1 }}>
-                        {card.deltaLabel}
-                      </Typography>
-                    </Stack>
-                  )}
-                </Stack>
-
-                {/* Description */}
-                <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: { xs: "none", sm: "-webkit-box" }, WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontSize: "0.68rem" }}>
-                  {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
-                </Typography>
-
-                {/* Peer benchmark — desktop only */}
-                <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                  {!isNewOrEarly && card.peerValue != null && (() => {
-                    const you = card.numericValue;
-                    const peer = card.peerValue;
-                    const isAhead = card.lowerIsBetter ? you < peer : you > peer;
-                    const isEqual = Math.abs(you - peer) < 0.01;
-                    const diff = Math.abs(you - peer);
-                    const labelIsPercent = card.label.startsWith("ON-TIME") || card.label === "AVG SESSION QUALITY";
-                    const labelIsInteger = card.label.includes("/ MONTH") || card.label === "LEARNERS IMPACTED";
-                    const diffStr = labelIsPercent ? `${diff.toFixed(1)}%` : labelIsInteger ? Math.round(diff).toString() : diff.toFixed(2);
-                    const sentiment = isEqual ? "You're on par" : isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`;
-                    const sentimentColor = isEqual ? "text.secondary" : isAhead ? "success.main" : "warning.dark";
-                    return (
-                      <Typography variant="caption" sx={{ fontSize: "0.75rem", color: "text.secondary", display: "block", lineHeight: 1.4 }}>
-                        Peer avg {card.peerLabel}
-                        <Typography component="span" sx={{ fontSize: "0.75rem", fontWeight: 600, color: sentimentColor, ml: 0.5 }}>· {sentiment}</Typography>
-                      </Typography>
-                    );
-                  })()}
-                </Box>
-
-                {/* Sparkline */}
-                <Box sx={{ mt: "auto", pt: { xs: 1.5, sm: 2 }, mb: 0.25 }}>
-                  {isNewOrEarly ? (
-                    <svg width="100%" height={32} viewBox="0 0 140 32" preserveAspectRatio="none" style={{ display: "block" }}>
-                      <line x1="0" y1="16" x2="140" y2="16" stroke={card.accent} strokeWidth={1} strokeDasharray="4 4" opacity={0.25} />
-                    </svg>
-                  ) : (() => {
-                    const h = 32, w = 140;
-                    const minVal = Math.min(...card.bars);
-                    const range = maxBar - minVal || 1;
-                    const coords = card.bars.map((v: number, i: number) => ({
-                      x: (i / (card.bars.length - 1)) * w,
-                      y: h - ((v - minVal) / range) * (h - 4) - 2,
-                      val: v, label: card.barLabels[i],
-                    }));
-                    const polyPoints = coords.map((c) => `${c.x},${c.y}`).join(" ");
-                    const areaPoints = `0,${h} ${polyPoints} ${w},${h}`;
-                    return (
-                      <Box sx={{ position: "relative" }}>
-                        <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
-                          <polygon points={areaPoints} fill={card.accent} opacity={0.1} />
-                          <polyline points={polyPoints} fill="none" stroke={card.accent} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" opacity={0.7} />
-                        </svg>
-                        {coords.map((c, i) => (
-                          <MuiTooltip key={i} title={`${c.label}: ${c.val}`} placement="top" arrow slotProps={{ tooltip: { sx: { fontSize: "0.7rem", py: 0.25, px: 1 } } }}>
-                            <Box sx={{ position: "absolute", left: `${(c.x / w) * 100}%`, top: `${(c.y / h) * 100}%`, transform: "translate(-50%, -50%)", width: 12, height: 12, borderRadius: "50%", cursor: "pointer", "&:hover .spark-dot": { opacity: 1 } }}>
-                              <Box className="spark-dot" sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: card.accent, position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: i === card.bars.length - 1 ? 1 : 0.4, transition: "opacity 0.15s ease" }} />
-                            </Box>
-                          </MuiTooltip>
-                        ))}
-                      </Box>
-                    );
-                  })()}
-                </Box>
-                {!isNewOrEarly && (
-                  <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                    {card.barLabels.map((lbl: string, i: number) => (
-                      <Typography key={i} variant="caption" color="text.disabled" sx={{ fontSize: "0.55rem" }}>{lbl}</Typography>
-                    ))}
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          );
-        };
-
-        // Merge rating cards + on-time card into one row
-        const topRowCards = [...ratingCards, onTimeHeroCard];
-
+        const topRowCards = isV1Mode ? [...ratingCards] : [...ratingCards, onTimeHeroCard];
         return (
           <>
-            {/* ══ ZONE 1: Ratings & health at a glance ═══════════════════════
-                Per-category ratings + universal ON-TIME CONFIRMS in one row.
-                4-column grid on desktop; auto-fit on fewer cards. */}
             <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.12em", mb: 0, display: "block" }}>
               Ratings
             </Typography>
@@ -1358,49 +1491,23 @@ export default function ProfilePage() {
             }}>
               {topRowCards.map(renderCard)}
             </Box>
-
-            {/* ══ ZONE 2: Operational metrics (tabbed, 2 cards per tab) ══════ */}
-            <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.12em", mb: 0, mt: 0, display: "block" }}>
-              Operational
-            </Typography>
-            {tabItems.length > 1 && (
-              <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                {tabItems.map((tab) => (
-                  <Chip
-                    key={tab.key}
-                    label={tab.label}
-                    variant={activeTab === tab.key ? "filled" : "outlined"}
-                    color={activeTab === tab.key ? "primary" : "default"}
-                    onClick={() => setActiveTab(tab.key)}
-                    sx={{ height: 32, fontWeight: 600, fontSize: "0.75rem" }}
-                  />
-                ))}
-              </Stack>
-            )}
-            <Box sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(2, 1fr)" },
-              gap: 2, mb: 3, pb: 1,
-            }}>
-              {operationalCards.map(renderCard)}
-            </Box>
           </>
         );
       })()}
 
-      {/* ── Engagement Stats — 3-column row ──────────────────────────── */}
+      {/* ── Engagement Stats - 3-column row (all-time cumulative) ─────── */}
       {!isNewOrEarly && (
         <Box sx={{ mb: 3 }}>
           <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, mb: 0.5 }}>
             Engagement Stats
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
-            Cumulative engagement metrics since you joined.
+            All-time cumulative metrics since you joined ({engagementMonths[0]} - {engagementMonths[engagementMonths.length - 1]}).
           </Typography>
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
             gap: 2,
           }}
         >
@@ -1408,19 +1515,18 @@ export default function ProfilePage() {
             { title: "Engagement Count", subtitle: "Cumulative", total: "800", color: "#4caf50", data: demoEngagementCount },
             { title: "Engagement Hours", subtitle: "Cumulative", total: "2,266", color: "#3f51b5", data: demoEngagementHours },
             { title: "Learners Impacted", subtitle: "Cumulative", total: "7,332", color: "#ff9800", data: demoLearnersImpacted },
-            { title: "Rating Trend", subtitle: "12 months", total: avgRating, color: "hsl(217, 70%, 55%)", data: ratingChartData.map((d) => d.avg ?? 0), labels: ratingChartData.map((d) => d.month), isRating: true },
           ].map((chart) => (
             <Card key={chart.title} variant="outlined">
               <CardContent sx={{ p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="baseline" sx={{ mb: 1.5 }}>
                   <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.72rem" }}>{chart.title}</Typography>
                   <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.68rem", color: chart.color }}>
-                    {chart.isRating ? `Avg: ${chart.total}` : `Total: ${chart.total}`}
+                    {`Total: ${chart.total}`}
                   </Typography>
                 </Stack>
-                <Box sx={{ width: "100%", height: 120 }}>
+                <Box sx={{ width: "100%", height: { xs: 160, sm: 180 } }}>
                   <ResponsiveContainer>
-                    <LineChart data={chart.data.map((v, i) => ({ month: chart.labels ? chart.labels[i] : engagementMonths[i], value: v }))} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <LineChart data={chart.data.map((v, i) => ({ month: engagementMonths[i], value: v }))} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id={`grad-${chart.title.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor={chart.color} stopOpacity={0.2} />
@@ -1428,9 +1534,10 @@ export default function ProfilePage() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant) / 0.3)" vertical={false} />
-                      <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface) / 0.5)" }} axisLine={false} tickLine={false} />
-                      <YAxis domain={chart.isRating ? [4, 5] : ["auto", "auto"]} tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface) / 0.5)" }} axisLine={false} tickLine={false} />
+                      <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface) / 0.5)" }} axisLine={false} tickLine={false} interval={5} minTickGap={8} />
+                      <YAxis domain={["auto", "auto"]} tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface) / 0.5)" }} axisLine={false} tickLine={false} />
                       <Tooltip
+                        cursor={{ stroke: chart.color, strokeDasharray: "3 3", strokeOpacity: 0.55, strokeWidth: 1 }}
                         content={({ active, payload }) => {
                           if (!active || !payload?.length) return null;
                           const d = payload[0].payload;
@@ -1447,7 +1554,7 @@ export default function ProfilePage() {
                         dataKey="value"
                         stroke={chart.color}
                         strokeWidth={2}
-                        dot={{ r: 3, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
+                        dot={false}
                         activeDot={{ r: 5, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
                       />
                     </LineChart>
@@ -1474,7 +1581,7 @@ export default function ProfilePage() {
       <Box sx={{ mb: 3 }}>
         <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, mb: 1.5 }}>What learners say</Typography>
         <Box sx={{ position: "relative" }}>
-          {/* Floating edge arrows — desktop only */}
+          {/* Floating edge arrows - desktop only */}
           <IconButton
             onClick={() => testimonialRef.current?.scrollBy({ left: -320, behavior: "smooth" })}
             sx={{
@@ -1558,7 +1665,7 @@ export default function ProfilePage() {
       </Box>
       )}
 
-      {/* Rating trend chart (hidden — moved into Engagement Stats grid) */}
+      {/* Rating trend chart (hidden - moved into Engagement Stats grid) */}
       {false && <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent sx={{ p: 2 }}>
           <Typography variant="subtitle1" fontWeight={600} sx={{  fontSize: { xs: "0.875rem", sm: "1rem" } }}>Rating trend (last 6 months)</Typography>
@@ -1640,7 +1747,7 @@ export default function ProfilePage() {
         </CardContent>
       </Card>}
 
-      {/* Course performance — horizontal bars (hidden for now) */}
+      {/* Course performance - horizontal bars (hidden for now) */}
       {false && <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent sx={{ p: 2 }}>
           <FlexBox sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}>
@@ -1747,45 +1854,77 @@ export default function ProfilePage() {
         </CardContent>
       </Card>}
 
-      {/* Monthly matrix — compact heatmap */}
-      <Card variant="outlined" sx={{ mb: 4 }}>
-        <CardContent sx={{ p: 2 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>Monthly Rating Trends</Typography>
-          <TableContainer>
-            <Table size="small" sx={{ tableLayout: "auto" }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, borderBottom: "1px solid", borderColor: "divider", pl: 0, px: { xs: 0.5, sm: 1 }, position: "sticky", left: 0, bgcolor: "background.paper", zIndex: 1 }}>
-                    Course
-                  </TableCell>
-                  {MONTHS.map((m) => (
-                    <TableCell key={m} sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, textAlign: "center", borderBottom: "1px solid", borderColor: "divider", px: { xs: 0.5, sm: 1 }, whiteSpace: "nowrap" }}>
-                      {m}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {(isNewUser
-                  ? demoMatrix.map((r) => ({ ...r, scores: r.scores.map(() => null) }))
-                  : isEarlyUser
-                    ? demoMatrix.slice(0, 2).map((r) => ({ ...r, scores: r.scores.map((s, i) => i === 5 ? s : null) }))
-                    : demoMatrix
-                ).map((row) => (
-                  <TableRow key={row.course} sx={{ "&:last-child td": { border: 0 } }}>
-                    <TableCell sx={{ fontSize: { xs: 10, sm: 11 }, color: isNewOrEarly ? "text.disabled" : "text.secondary", pl: 0, whiteSpace: "nowrap", px: { xs: 0.5, sm: 1 }, position: "sticky", left: 0, bgcolor: "background.paper", zIndex: 1 }}>
-                      {row.course}
-                    </TableCell>
-                    {row.scores.map((s, i) => (
-                      <ScoreCell key={i} value={s} />
+      {/* Per-category Performance blocks - one card per active role category.
+          Each card holds: (1) compact clickable stat summaries (volume /
+          month), (2) course x month rating matrix. Merges the old separate
+          "Operational" zone with "Monthly Rating Trends" so a user sees
+          everything about one category in one block (Gestalt proximity). */}
+      {matricesByCategory.map(({ category, rows }) => {
+        const displayRows = isNewUser
+          ? rows.map((r) => ({ ...r, scores: r.scores.map(() => null) }))
+          : isEarlyUser
+            ? rows.slice(0, 2).map((r) => ({ ...r, scores: r.scores.map((s, i) => i === 5 ? s : null) }))
+            : rows;
+        const categoryStats = operationalCardsByCategory.get(category) ?? [];
+        return (
+          <Card key={category} variant="outlined" sx={{ mb: 3 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "0.95rem", sm: "1.05rem" }, mb: 2 }}>
+                {category} Performance
+              </Typography>
+
+              {/* Subsection 1: KPI cards - no overline label, cards self-describe */}
+              {categoryStats.length > 0 && (
+                <Box sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "repeat(2, 1fr)",
+                    sm: `repeat(${Math.min(categoryStats.length, 2)}, 1fr)`,
+                    md: `repeat(${Math.min(categoryStats.length, 4)}, 1fr)`,
+                  },
+                  gap: 2,
+                  mb: 3,
+                }}>
+                  {categoryStats.map(renderCard)}
+                </Box>
+              )}
+
+              {/* Subsection 2: Avg. month-on-month trends - course x month matrix */}
+              <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.12em", mb: 1, display: "block" }}>
+                Avg. month-on-month trends
+              </Typography>
+              <TableContainer>
+                <Table size="small" sx={{ tableLayout: "auto" }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, borderBottom: "1px solid", borderColor: "divider", pl: 0, px: { xs: 0.5, sm: 1 }, position: "sticky", left: 0, bgcolor: "background.paper", zIndex: 1 }}>
+                        Course
+                      </TableCell>
+                      {MONTHS.map((m) => (
+                        <TableCell key={m} sx={{ fontWeight: 600, fontSize: { xs: 10, sm: 11 }, textAlign: "center", borderBottom: "1px solid", borderColor: "divider", px: { xs: 0.5, sm: 1 }, whiteSpace: "nowrap" }}>
+                          {m}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {displayRows.map((row) => (
+                      <TableRow key={row.course} sx={{ "&:last-child td": { border: 0 } }}>
+                        <TableCell sx={{ fontSize: { xs: 10, sm: 11 }, color: isNewOrEarly ? "text.disabled" : "text.secondary", pl: 0, whiteSpace: "nowrap", px: { xs: 0.5, sm: 1 }, position: "sticky", left: 0, bgcolor: "background.paper", zIndex: 1 }}>
+                          {row.course}
+                        </TableCell>
+                        {row.scores.map((s, i) => (
+                          <ScoreCell key={i} value={s} />
+                        ))}
+                      </TableRow>
                     ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        );
+      })}
 
 
       {/* ══ CONTRACTS SECTION ═══════════════════════════════════════════════ */}
@@ -2013,7 +2152,7 @@ export default function ProfilePage() {
                           <Divider orientation="vertical" flexItem />
                           <Box>
                             <Typography variant="body1" fontWeight={600} sx={{ color: course.delta > 0 ? "success.main" : course.delta < 0 ? "warning.dark" : "text.secondary", display: "inline-flex", alignItems: "center", gap: 0.5 }}>
-                              {course.delta > 0 ? <TrendingUpIcon sx={{ fontSize: 16 }} /> : course.delta < 0 ? <TrendingDownIcon sx={{ fontSize: 16 }} /> : "—"} {course.delta > 0 ? "+" : ""}{course.delta.toFixed(2)}
+                              {course.delta > 0 ? <TrendingUpIcon sx={{ fontSize: 16 }} /> : course.delta < 0 ? <TrendingDownIcon sx={{ fontSize: 16 }} /> : "-"} {course.delta > 0 ? "+" : ""}{course.delta.toFixed(2)}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">MoM change</Typography>
                           </Box>
@@ -2046,7 +2185,7 @@ export default function ProfilePage() {
                                     return (
                                       <Card variant="outlined" sx={{ p: 0.75, borderRadius: "8px", fontSize: "0.7rem" }}>
                                         <Typography variant="caption" fontWeight={600}>{d.month}</Typography>
-                                        <Typography variant="caption" display="block">{d.rating != null ? d.rating.toFixed(1) : "—"}</Typography>
+                                        <Typography variant="caption" display="block">{d.rating != null ? d.rating.toFixed(1) : "-"}</Typography>
                                       </Card>
                                     );
                                   }}
@@ -2081,7 +2220,7 @@ export default function ProfilePage() {
 
       {/* ── Detailed Report Drawer (right-side, full height) ──────────────── */}
       {(() => {
-        const activeCard = statCards.find((c) => c.label === reportModal);
+        const activeCard = statCards.find((c) => ((c as { id?: string }).id ?? c.label) === reportModal);
         if (!activeCard) return null;
         return (
           <Drawer
@@ -2106,14 +2245,9 @@ export default function ProfilePage() {
                   <Typography variant="h5" fontWeight={700} sx={{ mt: 0.5, fontSize: { xs: "1.1rem", sm: "1.5rem" } }}>
                     {activeCard.reportTitle}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    {activeCard.reportSummary}
-                  </Typography>
-                  {/* Card description — surfaced here so opening the modal doesn't
-                      lose the contextual sentence shown on the card. */}
-                  {activeCard.description && (
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: "block", lineHeight: 1.5, fontSize: "0.75rem" }}>
-                      {activeCard.description}
+                  {activeCard.reportSummary && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      {activeCard.reportSummary}
                     </Typography>
                   )}
                 </Box>
@@ -2134,7 +2268,7 @@ export default function ProfilePage() {
                 )}
               </Stack>
 
-              {/* Supporting stat — used by ON-TIME CONFIRMS to surface the raw average
+              {/* Supporting stat - used by ON-TIME CONFIRMS to surface the raw average
                   confirm time (which used to be the hero on the card). Kept as a small
                   contextual line under the hero so the modal carries detail the card no
                   longer leads with. */}
@@ -2147,10 +2281,10 @@ export default function ProfilePage() {
                 </Typography>
               )}
 
-              {/* Peer comparison — same data and sentiment logic as the inline card pill,
+              {/* Peer comparison - same data and sentiment logic as the inline card pill,
                   rendered here as a soft pill so the modal carries the comparison context
-                  the user just clicked through from. */}
-              {activeCard.peerValue != null && (() => {
+                  the user just clicked through from. Hidden in V1 ship scope. */}
+              {!isV1Mode && activeCard.peerValue != null && (() => {
                 const you = activeCard.numericValue;
                 const peer = activeCard.peerValue;
                 const isAhead = activeCard.lowerIsBetter ? you < peer : you > peer;
@@ -2249,11 +2383,11 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
 
-              {/* Per-category breakdown removed — each category now gets its own
+              {/* Per-category breakdown removed - each category now gets its own
                   rating card on the card surface, so the drill-through drawer shows
                   one category's trend + breakdown directly. */}
 
-              {/* Quality thresholds (moved from the card surface) — two parallel rows
+              {/* Quality thresholds (moved from the card surface) - two parallel rows
                   so the user can see at a glance what share of sessions hit each rating
                   bar, alongside the target for that bar. AVG SESSION QUALITY only.
                   These benchmark fields only exist on the AVG SESSION QUALITY card,
@@ -2339,22 +2473,6 @@ export default function ProfilePage() {
                 );
               })()}
 
-              {/* Breakdown table */}
-              <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: "block" }}>
-                Breakdown
-              </Typography>
-              <TableContainer>
-                <Table size="small">
-                  <TableBody>
-                    {activeCard.breakdown.map((row, i) => (
-                      <TableRow key={i} sx={{ "&:last-child td": { border: 0 } }}>
-                        <TableCell sx={{ pl: 0, fontSize: 12, color: "text.secondary" }}>{row.name}</TableCell>
-                        <TableCell align="right" sx={{ pr: 0, fontSize: 12, fontWeight: 600 }}>{row.value}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
             </Box>
 
             <Box sx={{ px: 3, py: 2, borderTop: "1px solid", borderColor: "divider", display: "flex", justifyContent: "flex-end" }}>
