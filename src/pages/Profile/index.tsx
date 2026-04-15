@@ -262,6 +262,40 @@ export default function ProfilePage() {
 
   const [ratingView, setRatingView] = useState<"course" | "program">("course");
   const [reportModal, setReportModal] = useState<string | null>(null);
+  const [engagementModal, setEngagementModal] = useState<string | null>(null);
+
+  /* Engagement Stats cards - shared config used by the grid tiles and by
+     the detail drawer. Title acts as the lookup key for `engagementModal`. */
+  type EngagementChart = {
+    title: string;
+    description: string;
+    total: string;
+    color: string;
+    data: number[];
+  };
+  const engagementCharts: EngagementChart[] = [
+    {
+      title: "Engagement Count",
+      description: "Total number of sessions you've delivered across every role since you joined.",
+      total: "800",
+      color: "#4caf50",
+      data: demoEngagementCount,
+    },
+    {
+      title: "Engagement Hours",
+      description: "Cumulative hours spent delivering sessions across every role.",
+      total: "2,266",
+      color: "#3f51b5",
+      data: demoEngagementHours,
+    },
+    {
+      title: "Learners Impacted",
+      description: "Unique learners you've reached through your sessions.",
+      total: "7,332",
+      color: "#ff9800",
+      data: demoLearnersImpacted,
+    },
+  ];
   const [showCourseReport, setShowCourseReport] = useState(false);
   const testimonialRef = useRef<HTMLDivElement>(null);
 
@@ -760,23 +794,23 @@ export default function ProfilePage() {
               {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
             </Typography>
             {!isNewOrEarly && card.delta && (
-              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ display: { xs: "none", sm: "inline-flex" }, lineHeight: 1 }}>
+              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ display: "inline-flex", lineHeight: 1, flexWrap: "wrap" }}>
                 {card.deltaPositive
                   ? <TrendingUpIcon sx={{ fontSize: 14, color: "success.main", display: "block" }} />
                   : <TrendingDownIcon sx={{ fontSize: 14, color: "error.main", display: "block" }} />}
                 <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600, fontSize: "0.75rem", lineHeight: 1 }}>
                   {card.delta}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem", lineHeight: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem", lineHeight: 1, display: { xs: "none", sm: "inline" } }}>
                   {card.deltaLabel}
                 </Typography>
               </Stack>
             )}
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: { xs: "none", sm: "-webkit-box" }, WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontSize: "0.68rem" }}>
+          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontSize: { xs: "0.65rem", sm: "0.68rem" } }}>
             {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
           </Typography>
-          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+          <Box>
             {!isV1Mode && !isNewOrEarly && card.peerValue != null && (() => {
               const you = card.numericValue;
               const peer = card.peerValue;
@@ -789,9 +823,9 @@ export default function ProfilePage() {
               const sentiment = isEqual ? "You're on par" : isAhead ? `You're ${diffStr} ahead` : `${diffStr} to go`;
               const sentimentColor = isEqual ? "text.secondary" : isAhead ? "success.main" : "warning.dark";
               return (
-                <Typography variant="caption" sx={{ fontSize: "0.75rem", color: "text.secondary", display: "block", lineHeight: 1.4 }}>
+                <Typography variant="caption" sx={{ fontSize: { xs: "0.68rem", sm: "0.75rem" }, color: "text.secondary", display: "block", lineHeight: 1.4 }}>
                   Peer avg {card.peerLabel}
-                  <Typography component="span" sx={{ fontSize: "0.75rem", fontWeight: 600, color: sentimentColor, ml: 0.5 }}>· {sentiment}</Typography>
+                  <Typography component="span" sx={{ fontSize: { xs: "0.68rem", sm: "0.75rem" }, fontWeight: 600, color: sentimentColor, ml: 0.5 }}>· {sentiment}</Typography>
                 </Typography>
               );
             })()}
@@ -1486,7 +1520,10 @@ export default function ProfilePage() {
             </Typography>
             <Box sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: `repeat(${Math.min(topRowCards.length, 4)}, 1fr)` },
+              gridTemplateColumns: {
+                xs: topRowCards.length === 1 ? "1fr" : "repeat(2, 1fr)",
+                sm: `repeat(${Math.min(topRowCards.length, 4)}, 1fr)`,
+              },
               gap: 2, mb: 5, pb: 0.5,
             }}>
               {topRowCards.map(renderCard)}
@@ -1502,40 +1539,72 @@ export default function ProfilePage() {
             Engagement Stats
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
-            All-time cumulative metrics since you joined ({engagementMonths[0]} - {engagementMonths[engagementMonths.length - 1]}).
+            All-time cumulative metrics since you joined.
           </Typography>
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
+            gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
             gap: 2,
           }}
         >
-          {[
-            { title: "Engagement Count", subtitle: "Cumulative", total: "800", color: "#4caf50", data: demoEngagementCount },
-            { title: "Engagement Hours", subtitle: "Cumulative", total: "2,266", color: "#3f51b5", data: demoEngagementHours },
-            { title: "Learners Impacted", subtitle: "Cumulative", total: "7,332", color: "#ff9800", data: demoLearnersImpacted },
-          ].map((chart) => (
-            <Card key={chart.title} variant="outlined">
-              <CardContent sx={{ p: 2 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="baseline" sx={{ mb: 1.5 }}>
-                  <Typography variant="caption" fontWeight={700} sx={{ fontSize: "0.72rem" }}>{chart.title}</Typography>
-                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.68rem", color: chart.color }}>
-                    {`Total: ${chart.total}`}
+          {engagementCharts.map((chart) => (
+            <Card
+              key={chart.title}
+              variant="outlined"
+              onClick={() => setEngagementModal(chart.title)}
+              sx={{
+                cursor: "pointer",
+                transition: "border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
+                "&:hover": {
+                  borderColor: `color-mix(in srgb, ${chart.color} 55%, transparent)`,
+                  transform: "translateY(-2px)",
+                  boxShadow: `0 6px 18px -6px color-mix(in srgb, ${chart.color} 35%, transparent)`,
+                },
+                "&:active": { transform: "translateY(-1px)" },
+              }}>
+              <CardContent sx={{ p: { xs: 1.25, sm: 1.5 } }}>
+                {/* Header row: title + pill CTA (mirrors Performance stat cards
+                    so the click affordance is consistent across both sets) */}
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: { xs: 0.5, sm: 0.75 } }}>
+                  <Typography variant="caption" fontWeight={700} sx={{ fontSize: { xs: "0.55rem", sm: "0.65rem" }, letterSpacing: "0.08em", textTransform: "uppercase", color: chart.color }}>
+                    {chart.title}
                   </Typography>
+                  <MuiTooltip title="See detailed report" arrow placement="top">
+                    <IconButton
+                      size="small"
+                      aria-label={`See ${chart.title} report`}
+                      onClick={(e) => { e.stopPropagation(); setEngagementModal(chart.title); }}
+                      disableRipple
+                      sx={{
+                        width: 30, height: 20, borderRadius: "999px", p: 0,
+                        bgcolor: `color-mix(in srgb, ${chart.color} 16%, transparent)`,
+                        color: chart.color,
+                        transition: "background-color 0.18s ease, transform 0.18s ease",
+                        "& .arrow": { transition: "transform 0.18s ease" },
+                        "&:hover": { bgcolor: `color-mix(in srgb, ${chart.color} 26%, transparent)`, "& .arrow": { transform: "translateX(2px)" } },
+                        "&:active": { transform: "scale(0.96)" },
+                      }}
+                    >
+                      <ArrowForwardIcon className="arrow" sx={{ fontSize: 12 }} />
+                    </IconButton>
+                  </MuiTooltip>
                 </Stack>
-                <Box sx={{ width: "100%", height: { xs: 160, sm: 180 } }}>
+                {/* Total value */}
+                <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1, letterSpacing: "-0.02em", fontSize: { xs: "1.15rem", sm: "1.4rem" }, mb: 0.5 }}>
+                  {chart.total}
+                </Typography>
+                <Box sx={{ width: "100%", height: { xs: 70, sm: 90 } }}>
                   <ResponsiveContainer>
-                    <LineChart data={chart.data.map((v, i) => ({ month: engagementMonths[i], value: v }))} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                    <LineChart data={chart.data.map((v, i) => ({ month: engagementMonths[i], value: v }))} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id={`grad-${chart.title.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor={chart.color} stopOpacity={0.2} />
                           <stop offset="100%" stopColor={chart.color} stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant) / 0.3)" vertical={false} />
-                      <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface) / 0.5)" }} axisLine={false} tickLine={false} interval={5} minTickGap={8} />
-                      <YAxis domain={["auto", "auto"]} tick={{ fontSize: 9, fill: "hsl(var(--md-on-surface) / 0.5)" }} axisLine={false} tickLine={false} />
+                      <XAxis dataKey="month" tick={{ fontSize: 8, fill: "hsl(var(--md-on-surface) / 0.45)" }} axisLine={false} tickLine={false} interval={11} minTickGap={12} />
+                      <YAxis hide domain={["auto", "auto"]} />
                       <Tooltip
                         cursor={{ stroke: chart.color, strokeDasharray: "3 3", strokeOpacity: 0.55, strokeWidth: 1 }}
                         content={({ active, payload }) => {
@@ -1878,7 +1947,7 @@ export default function ProfilePage() {
                 <Box sx={{
                   display: "grid",
                   gridTemplateColumns: {
-                    xs: "repeat(2, 1fr)",
+                    xs: categoryStats.length === 1 ? "1fr" : "repeat(2, 1fr)",
                     sm: `repeat(${Math.min(categoryStats.length, 2)}, 1fr)`,
                     md: `repeat(${Math.min(categoryStats.length, 4)}, 1fr)`,
                   },
@@ -2477,6 +2546,123 @@ export default function ProfilePage() {
 
             <Box sx={{ px: 3, py: 2, borderTop: "1px solid", borderColor: "divider", display: "flex", justifyContent: "flex-end" }}>
               <Button variant="soft" size="small" onClick={() => setReportModal(null)}>
+                Close
+              </Button>
+            </Box>
+          </Drawer>
+        );
+      })()}
+
+      {/* ── Engagement Stats detail drawer (right-side, detailed chart) ──── */}
+      {(() => {
+        const chart = engagementCharts.find((c) => c.title === engagementModal);
+        if (!chart) return null;
+        const gradientId = `grad-engagement-drawer-${chart.title.replace(/\s/g, "")}`;
+        return (
+          <Drawer
+            anchor="right"
+            open={!!engagementModal}
+            onClose={() => setEngagementModal(null)}
+            PaperProps={{
+              sx: { width: { xs: "100%", sm: 520 }, maxWidth: "100vw", display: "flex", flexDirection: "column" },
+            }}
+          >
+            <Box sx={{ px: 3, pt: 3, pb: 2 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                <Box>
+                  <Typography variant="caption" fontWeight={700} sx={{ letterSpacing: "0.08em", color: chart.color, fontSize: "0.65rem", textTransform: "uppercase" }}>
+                    {chart.title}
+                  </Typography>
+                  <Typography variant="h5" fontWeight={700} sx={{ mt: 0.5, fontSize: { xs: "1.1rem", sm: "1.5rem" } }}>
+                    {chart.title} Report
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    {chart.description}
+                  </Typography>
+                </Box>
+                <IconButton size="small" onClick={() => setEngagementModal(null)} sx={{ mt: -0.5 }}>
+                  <CloseIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Stack>
+
+              {/* Hero total */}
+              <Stack direction="row" alignItems="baseline" spacing={1.5} sx={{ mt: 2.5 }}>
+                <Typography variant="h3" fontWeight={700} sx={{ letterSpacing: "-0.02em" }}>
+                  {chart.total}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8rem" }}>
+                  all-time cumulative
+                </Typography>
+              </Stack>
+            </Box>
+
+            <Box sx={{ flex: 1, overflowY: "auto", px: 3, pb: 3 }}>
+              {/* Detailed chart - much bigger, full axes, grid lines, all tick labels */}
+              <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mt: 1, mb: 1, display: "block", letterSpacing: "0.06em", textTransform: "uppercase", fontSize: "0.65rem" }}>
+                Monthly trend ({engagementMonths[0]} - {engagementMonths[engagementMonths.length - 1]})
+              </Typography>
+              <Box sx={{ width: "100%", height: 320, mb: 3 }}>
+                <ResponsiveContainer>
+                  <LineChart
+                    data={chart.data.map((v, i) => ({ month: engagementMonths[i], value: v }))}
+                    margin={{ top: 8, right: 16, left: -10, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={chart.color} stopOpacity={0.25} />
+                        <stop offset="100%" stopColor={chart.color} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant) / 0.35)" vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.6)" }}
+                      axisLine={false}
+                      tickLine={false}
+                      interval="preserveStartEnd"
+                      minTickGap={36}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.6)" }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={44}
+                      tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v)}
+                    />
+                    <Tooltip
+                      cursor={{ stroke: chart.color, strokeDasharray: "3 3", strokeOpacity: 0.55, strokeWidth: 1 }}
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null;
+                        const d = payload[0].payload;
+                        return (
+                          <Card variant="outlined" sx={{ p: 1.25, borderRadius: "8px", boxShadow: 2 }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", display: "block" }}>
+                              {d.month}
+                            </Typography>
+                            <Typography variant="body2" fontWeight={700} sx={{ fontSize: "0.9rem", color: chart.color }}>
+                              {d.value.toLocaleString()}
+                            </Typography>
+                          </Card>
+                        );
+                      }}
+                    />
+                    <Area type="monotone" dataKey="value" fill={`url(#${gradientId})`} stroke="none" />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke={chart.color}
+                      strokeWidth={2.5}
+                      dot={false}
+                      activeDot={{ r: 6, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Box>
+
+            </Box>
+
+            <Box sx={{ px: 3, py: 2, borderTop: "1px solid", borderColor: "divider", display: "flex", justifyContent: "flex-end" }}>
+              <Button variant="soft" size="small" onClick={() => setEngagementModal(null)}>
                 Close
               </Button>
             </Box>
