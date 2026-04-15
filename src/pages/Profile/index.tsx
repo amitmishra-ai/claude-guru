@@ -1032,6 +1032,19 @@ export default function ProfilePage() {
             </Box>
           </Stack>
         </Box>
+        {/* Mobile: plain icon button (no tonal bg). Desktop: soft pill with text. */}
+        <IconButton
+          size="small"
+          aria-label="Edit profile"
+          onClick={() => navigate("/preferences#profile")}
+          sx={{
+            display: { xs: "inline-flex", sm: "none" },
+            flexShrink: 0,
+            color: "primary.main",
+          }}
+        >
+          <EditOutlinedIcon sx={{ fontSize: 20 }} />
+        </IconButton>
         <Button
           variant="soft"
           size="small"
@@ -1039,6 +1052,7 @@ export default function ProfilePage() {
           startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
           onClick={() => navigate("/preferences#profile")}
           sx={{
+            display: { xs: "none", sm: "inline-flex" },
             flexShrink: 0,
             borderRadius: "8px",
             textTransform: "none",
