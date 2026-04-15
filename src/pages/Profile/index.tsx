@@ -55,7 +55,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import MuiTooltip from "@mui/material/Tooltip";
 import {
-  LineChart, Line, Area, XAxis, YAxis, Tooltip,
+  LineChart, Line, Area, AreaChart, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
   BarChart, Bar,
 } from "recharts";
@@ -1596,11 +1596,11 @@ export default function ProfilePage() {
                 </Typography>
                 <Box sx={{ width: "100%", height: { xs: 70, sm: 90 } }}>
                   <ResponsiveContainer>
-                    <LineChart data={chart.data.map((v, i) => ({ month: engagementMonths[i], value: v }))} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                    <AreaChart data={chart.data.map((v, i) => ({ month: engagementMonths[i], value: v }))} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id={`grad-${chart.title.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={chart.color} stopOpacity={0.2} />
-                          <stop offset="100%" stopColor={chart.color} stopOpacity={0} />
+                          <stop offset="0%" stopColor={chart.color} stopOpacity={0.22} />
+                          <stop offset="100%" stopColor={chart.color} stopOpacity={0.02} />
                         </linearGradient>
                       </defs>
                       <XAxis dataKey="month" tick={{ fontSize: 8, fill: "hsl(var(--md-on-surface) / 0.45)" }} axisLine={false} tickLine={false} interval={11} minTickGap={12} />
@@ -1617,16 +1617,16 @@ export default function ProfilePage() {
                           );
                         }}
                       />
-                      <Area type="monotone" dataKey="value" fill={`url(#grad-${chart.title.replace(/\s/g, "")})`} stroke="none" />
-                      <Line
+                      <Area
                         type="monotone"
                         dataKey="value"
                         stroke={chart.color}
                         strokeWidth={2}
+                        fill={`url(#grad-${chart.title.replace(/\s/g, "")})`}
                         dot={false}
                         activeDot={{ r: 5, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
                       />
-                    </LineChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 </Box>
               </CardContent>
