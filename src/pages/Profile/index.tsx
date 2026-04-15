@@ -794,23 +794,23 @@ export default function ProfilePage() {
               {isNewUser ? "-" : isEarlyUser ? (earlyValues[card.label] ?? card.value) : card.value}
             </Typography>
             {!isNewOrEarly && card.delta && (
-              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ display: "inline-flex", lineHeight: 1, flexWrap: "wrap" }}>
+              <Stack direction="row" alignItems="center" spacing={0.5} sx={{ display: { xs: "none", sm: "inline-flex" }, lineHeight: 1 }}>
                 {card.deltaPositive
                   ? <TrendingUpIcon sx={{ fontSize: 14, color: "success.main", display: "block" }} />
                   : <TrendingDownIcon sx={{ fontSize: 14, color: "error.main", display: "block" }} />}
                 <Typography variant="caption" sx={{ color: card.deltaPositive ? "success.main" : "error.main", fontWeight: 600, fontSize: "0.75rem", lineHeight: 1 }}>
                   {card.delta}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem", lineHeight: 1, display: { xs: "none", sm: "inline" } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem", lineHeight: 1 }}>
                   {card.deltaLabel}
                 </Typography>
               </Stack>
             )}
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontSize: { xs: "0.65rem", sm: "0.68rem" } }}>
+          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, mb: 1, display: { xs: "none", sm: "-webkit-box" }, WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", fontSize: "0.68rem" }}>
             {isNewUser ? zeroMessages[card.label] ?? card.description : isEarlyUser ? (earlyDescriptions[card.label] ?? card.description) : card.description}
           </Typography>
-          <Box>
+          <Box sx={{ display: { xs: "none", sm: "block" } }}>
             {!isV1Mode && !isNewOrEarly && card.peerValue != null && (() => {
               const you = card.numericValue;
               const peer = card.peerValue;
