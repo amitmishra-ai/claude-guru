@@ -4,6 +4,7 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
+import CheckIcon from "@mui/icons-material/Check";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Avatar from "@mui/material/Avatar";
@@ -16,8 +17,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import { MobilePageHeader } from "@/components/layout/MobilePageHeader";
@@ -43,14 +42,16 @@ const commItems: Array<{ key: keyof Preferences; label: string; description: str
    by Dividers. Every row is a flex row: label+description on the left,
    control on the right. Uniform across Profile / Appearance / Communication. */
 
-function SectionTitle({ id, children }: { id?: string; children: React.ReactNode }) {
+function SectionTitle({ id, children, first = false }: { id?: string; children: React.ReactNode; first?: boolean }) {
   return (
     <Typography
       id={id}
       variant="overline"
       sx={{
         display: "block",
-        mt: 3,
+        // First section on the page: tight on mobile (no PageHeader above),
+        // normal on desktop. Subsequent sections: consistent rhythm.
+        mt: first ? { xs: 0, sm: 3 } : 3,
         mb: 0.75,
         px: 1,
         fontSize: "0.7rem",
@@ -278,14 +279,20 @@ export default function PreferencesPage() {
   return (
     <>
       <MobilePageHeader title="Settings" />
-      <PageHeader title="Settings" subtitle="Manage your profile, appearance, notifications, and communication preferences." />
+      {/* Desktop title - mobile uses MobilePageHeader, no need to repeat */}
+      <Box sx={{ display: { xs: "none", sm: "block" } }}>
+        <PageHeader title="Settings" subtitle="Manage your profile, appearance, notifications, and communication preferences." />
+      </Box>
 
       {/* No extra max-width wrapper - AppLayout already constrains content to
-          72rem, so Settings inherits the same page grid as every other page. */}
-      <Box sx={{ pb: 4 }}>
+          72rem, so Settings inherits the same page grid as every other page.
+          Negative top margin on mobile absorbs the stacked gap from
+          AppLayout's gap:3 + MobilePageHeader's mb so Profile sits close to
+          the top app bar. Desktop unaffected. */}
+      <Box sx={{ pb: 4, mt: { xs: -2.5, sm: 0 } }}>
 
         {/* ═══ Profile ═══════════════════════════════════════════════════ */}
-        <SectionTitle id="profile">Profile</SectionTitle>
+        <SectionTitle id="profile" first>Profile</SectionTitle>
         <SectionCard>
           {/* Photo - breaks the label/control pattern (avatar + buttons) */}
           <Stack direction="row" spacing={2} alignItems="center" sx={{ px: 2, py: 2 }}>
@@ -380,34 +387,270 @@ export default function PreferencesPage() {
         {/* ═══ Appearance ════════════════════════════════════════════════ */}
         <SectionTitle>Appearance</SectionTitle>
         <SectionCard>
-          <Row
-            label="Theme"
-            description="Choose your preferred appearance."
-            control={
-              <ToggleButtonGroup
-                value={themeMode}
-                exclusive
-                onChange={(_e, val) => { if (val) dispatch(setThemeMode(val)); }}
-                size="small"
-                sx={{
-                  "& .MuiToggleButton-root": {
-                    textTransform: "none", fontWeight: 500,
-                    fontSize: "0.8rem", px: 1.5, gap: 0.5,
+          {/* Visual radio cards with mini app-chrome previews. On mobile:
+              full-width below the label. On desktop: smaller, right-aligned
+              next to the label (Row pattern, like the rest of Settings).
+              Thumbnails mirror the dashboard's actual layout (top bar +
+              sidebar + main content card + accent CTA) so users see a real
+              preview of the theme they're picking. Inspired by Linear
+              settings, Notion appearance picker, macOS System Settings.
+              Selected state: 2px primary border + soft glow + check badge. */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            justifyContent="space-between"
+            spacing={{ xs: 1.5, sm: 2 }}
+            sx={{ p: { xs: 2, sm: 2 } }}
+          >
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.35 }}>
+                Theme
+              </Typography>
+              <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mt: 0.25, lineHeight: 1.4 }}>
+                Choose your preferred appearance.
+              </Typography>
+            </Box>
+            <Box sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: { xs: 1.25, sm: 1 },
+              flexShrink: 0,
+              // Mobile: span full width below the label.
+              // Desktop: compact right-aligned, ~280px total.
+              width: { xs: "100%", sm: 300 },
+            }}>
+              {([
+                {
+                  value: "light" as const,
+                  label: "Light",
+                  icon: <LightModeOutlinedIcon sx={{ fontSize: 14 }} />,
+                  palette: {
+                    bg: "#f8fafc",
+                    sidebar: "#ffffff",
+                    surface: "#ffffff",
+                    border: "#e5e7eb",
+                    text: "#1f2937",
+                    textDim: "#9ca3af",
+                    accent: "#196ae5",
+                    accentSoft: "#dbeafe",
                   },
-                }}
-              >
-                <ToggleButton value="system">
-                  <SettingsBrightnessOutlinedIcon sx={{ fontSize: 16 }} /> System
-                </ToggleButton>
-                <ToggleButton value="light">
-                  <LightModeOutlinedIcon sx={{ fontSize: 16 }} /> Light
-                </ToggleButton>
-                <ToggleButton value="dark">
-                  <DarkModeOutlinedIcon sx={{ fontSize: 16 }} /> Dark
-                </ToggleButton>
-              </ToggleButtonGroup>
-            }
-          />
+                },
+                {
+                  value: "dark" as const,
+                  label: "Dark",
+                  icon: <DarkModeOutlinedIcon sx={{ fontSize: 14 }} />,
+                  palette: {
+                    bg: "#0f172a",
+                    sidebar: "#1e293b",
+                    surface: "#1e293b",
+                    border: "#334155",
+                    text: "#f1f5f9",
+                    textDim: "#64748b",
+                    accent: "#60a5fa",
+                    accentSoft: "#1e3a8a",
+                  },
+                },
+              ]).map(({ value, label, icon, palette }) => {
+                const selected = themeMode === value;
+                /* Mini app-chrome preview: top bar + sidebar + main content. */
+                const Chrome = (p: typeof palette) => (
+                  <Box sx={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", bgcolor: p.bg }}>
+                    {/* Top bar */}
+                    <Box sx={{ height: "16%", bgcolor: p.surface, borderBottom: "1px solid", borderColor: p.border, display: "flex", alignItems: "center", px: 0.5, gap: 0.4 }}>
+                      <Box sx={{ width: 10, height: 2, borderRadius: 0.5, bgcolor: p.text, opacity: 0.85 }} />
+                      <Box sx={{ flex: 1 }} />
+                      <Box sx={{ width: 5, height: 5, borderRadius: "50%", bgcolor: p.accent }} />
+                    </Box>
+                    {/* Body: sidebar + main */}
+                    <Box sx={{ flex: 1, display: "flex", minHeight: 0 }}>
+                      {/* Sidebar with nav dots */}
+                      <Box sx={{ width: "22%", bgcolor: p.sidebar, borderRight: "1px solid", borderColor: p.border, display: "flex", flexDirection: "column", alignItems: "center", pt: 0.5, gap: 0.4 }}>
+                        <Box sx={{ width: 5, height: 5, borderRadius: 0.6, bgcolor: p.accent }} />
+                        <Box sx={{ width: 5, height: 5, borderRadius: 0.6, bgcolor: p.textDim, opacity: 0.6 }} />
+                        <Box sx={{ width: 5, height: 5, borderRadius: 0.6, bgcolor: p.textDim, opacity: 0.6 }} />
+                        <Box sx={{ width: 5, height: 5, borderRadius: 0.6, bgcolor: p.textDim, opacity: 0.6 }} />
+                      </Box>
+                      {/* Main content: card with header + lines + accent CTA */}
+                      <Box sx={{ flex: 1, p: 0.5, display: "flex", flexDirection: "column", gap: 0.35 }}>
+                        <Box sx={{
+                          flex: 1, bgcolor: p.surface, borderRadius: 0.75, border: "1px solid", borderColor: p.border,
+                          p: 0.4, display: "flex", flexDirection: "column", justifyContent: "space-between",
+                        }}>
+                          <Box>
+                            <Box sx={{ height: 3, width: "55%", borderRadius: 0.5, bgcolor: p.text, opacity: 0.9, mb: 0.4 }} />
+                            <Box sx={{ height: 2, width: "80%", borderRadius: 0.5, bgcolor: p.textDim, mb: 0.25 }} />
+                            <Box sx={{ height: 2, width: "65%", borderRadius: 0.5, bgcolor: p.textDim }} />
+                          </Box>
+                          {/* Accent button + soft chip row */}
+                          <Box sx={{ display: "flex", gap: 0.3, alignItems: "center" }}>
+                            <Box sx={{ width: 14, height: 4, borderRadius: 0.6, bgcolor: p.accent }} />
+                            <Box sx={{ width: 8, height: 4, borderRadius: 0.6, bgcolor: p.accentSoft }} />
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
+                );
+                return (
+                  <Box
+                    key={value}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={selected}
+                    aria-label={`${label} theme`}
+                    onClick={() => dispatch(setThemeMode(value))}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); dispatch(setThemeMode(value)); } }}
+                    sx={{
+                      position: "relative",
+                      cursor: "pointer",
+                      borderRadius: "12px",
+                      border: "2px solid",
+                      borderColor: selected ? "primary.main" : "divider",
+                      bgcolor: selected ? "action.selected" : "transparent",
+                      p: 0.875,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 0.75,
+                      transition: "border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
+                      boxShadow: selected ? "0 4px 12px -4px rgba(25,106,229,0.35)" : "none",
+                      "&:hover": { borderColor: selected ? "primary.main" : "text.disabled" },
+                      "&:active": { transform: "scale(0.98)" },
+                      "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main", outlineOffset: 2 },
+                    }}
+                  >
+                    {/* Selected check badge - top-right corner */}
+                    {selected && (
+                      <Box sx={{
+                        position: "absolute",
+                        top: -6,
+                        right: -6,
+                        width: 20,
+                        height: 20,
+                        borderRadius: "50%",
+                        bgcolor: "primary.main",
+                        color: "primary.contrastText",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                      }}>
+                        <CheckIcon sx={{ fontSize: 13 }} />
+                      </Box>
+                    )}
+                    <Box
+                      sx={{
+                        width: "100%",
+                        aspectRatio: "16 / 10",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        border: "1px solid",
+                        borderColor: palette.border,
+                        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.02)",
+                      }}
+                    >
+                      <Chrome {...palette} />
+                    </Box>
+                    <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: selected ? "primary.main" : "text.primary" }}>
+                      {icon}
+                      <Typography sx={{ fontSize: "0.75rem", fontWeight: selected ? 700 : 500 }}>
+                        {label}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                );
+              })}
+              {/* System: render half-light + half-dark mini chromes side by side
+                  so users see exactly what "follows system" produces. */}
+              {(() => {
+                const value = "system" as const;
+                const selected = themeMode === value;
+                const lightPalette = { bg: "#f8fafc", sidebar: "#ffffff", surface: "#ffffff", border: "#e5e7eb", text: "#1f2937", textDim: "#9ca3af", accent: "#196ae5", accentSoft: "#dbeafe" };
+                const darkPalette = { bg: "#0f172a", sidebar: "#1e293b", surface: "#1e293b", border: "#334155", text: "#f1f5f9", textDim: "#64748b", accent: "#60a5fa", accentSoft: "#1e3a8a" };
+                const HalfChrome = (p: typeof lightPalette) => (
+                  <Box sx={{ width: "100%", height: "100%", bgcolor: p.bg, display: "flex", flexDirection: "column" }}>
+                    <Box sx={{ height: "16%", bgcolor: p.surface, borderBottom: "1px solid", borderColor: p.border, display: "flex", alignItems: "center", px: 0.4, gap: 0.3 }}>
+                      <Box sx={{ width: 6, height: 2, borderRadius: 0.5, bgcolor: p.text, opacity: 0.85 }} />
+                    </Box>
+                    <Box sx={{ flex: 1, p: 0.4, display: "flex", flexDirection: "column", gap: 0.3 }}>
+                      <Box sx={{ height: 2, width: "70%", borderRadius: 0.5, bgcolor: p.text, opacity: 0.85 }} />
+                      <Box sx={{ height: 2, width: "85%", borderRadius: 0.5, bgcolor: p.textDim }} />
+                      <Box sx={{ height: 2, width: "55%", borderRadius: 0.5, bgcolor: p.textDim }} />
+                      <Box sx={{ mt: "auto", width: 14, height: 4, borderRadius: 0.6, bgcolor: p.accent }} />
+                    </Box>
+                  </Box>
+                );
+                return (
+                  <Box
+                    key={value}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={selected}
+                    aria-label="System theme"
+                    onClick={() => dispatch(setThemeMode(value))}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); dispatch(setThemeMode(value)); } }}
+                    sx={{
+                      position: "relative",
+                      cursor: "pointer",
+                      borderRadius: "12px",
+                      border: "2px solid",
+                      borderColor: selected ? "primary.main" : "divider",
+                      bgcolor: selected ? "action.selected" : "transparent",
+                      p: 0.875,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 0.75,
+                      transition: "border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
+                      boxShadow: selected ? "0 4px 12px -4px rgba(25,106,229,0.35)" : "none",
+                      "&:hover": { borderColor: selected ? "primary.main" : "text.disabled" },
+                      "&:active": { transform: "scale(0.98)" },
+                      "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main", outlineOffset: 2 },
+                    }}
+                  >
+                    {selected && (
+                      <Box sx={{
+                        position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%",
+                        bgcolor: "primary.main", color: "primary.contrastText",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                      }}>
+                        <CheckIcon sx={{ fontSize: 13 }} />
+                      </Box>
+                    )}
+                    <Box
+                      sx={{
+                        width: "100%",
+                        aspectRatio: "16 / 10",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        border: "1px solid",
+                        borderColor: lightPalette.border,
+                        display: "flex",
+                        position: "relative",
+                      }}
+                    >
+                      {/* Two halves - light on left, dark on right, with subtle
+                          divider line down the middle */}
+                      <Box sx={{ width: "50%", height: "100%" }}>
+                        <HalfChrome {...lightPalette} />
+                      </Box>
+                      <Box sx={{ width: "50%", height: "100%" }}>
+                        <HalfChrome {...darkPalette} />
+                      </Box>
+                      <Box sx={{ position: "absolute", inset: 0, pointerEvents: "none", borderLeft: "0.5px solid rgba(255,255,255,0.15)", left: "50%", width: 1 }} />
+                    </Box>
+                    <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: selected ? "primary.main" : "text.primary" }}>
+                      <SettingsBrightnessOutlinedIcon sx={{ fontSize: 14 }} />
+                      <Typography sx={{ fontSize: "0.75rem", fontWeight: selected ? 700 : 500 }}>
+                        System
+                      </Typography>
+                    </Stack>
+                  </Box>
+                );
+              })()}
+            </Box>
+          </Stack>
         </SectionCard>
 
         {/* ═══ Communication (hidden in V1 ship scope) ═══════════════════ */}
