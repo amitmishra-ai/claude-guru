@@ -92,10 +92,10 @@ function Row({
 }) {
   return (
     <Stack
-      direction={{ xs: "column", sm: "row" }}
-      alignItems={{ xs: "stretch", sm: "center" }}
+      direction="row"
+      alignItems="center"
       justifyContent="space-between"
-      spacing={{ xs: 0.75, sm: 2 }}
+      spacing={2}
       sx={{ px: 2, py: 1.5 }}
     >
       <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -106,13 +106,13 @@ function Row({
           <Typography
             component="div"
             variant="caption"
-            sx={{ color: "text.secondary", display: "block", mt: 0.25, lineHeight: 1.4 }}
+            sx={{ color: "text.secondary", display: "block", mt: 0.25, lineHeight: 1.4, wordBreak: "break-word" }}
           >
             {description}
           </Typography>
         )}
       </Box>
-      <Box sx={{ flexShrink: 0, alignSelf: { xs: "stretch", sm: "center" }, width: { xs: "100%", sm: "auto" } }}>
+      <Box sx={{ flexShrink: 0 }}>
         {control}
       </Box>
     </Stack>
