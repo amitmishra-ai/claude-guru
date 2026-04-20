@@ -1300,20 +1300,22 @@ export default function ProfilePage() {
           }}>
             {/* Thumbnail - pixel-perfect scaled share card. Sized per breakpoint:
                 xs=320 (mobile, full row), sm/md=272 (tablets, ~220 tall),
-                lg+=180 (desktop beside editorial content). */}
+                lg+=180 (desktop beside editorial content). On mobile the big
+                thumbnail itself IS the preview, so click does nothing — download
+                + social actions render inline below instead of in a dialog. */}
             <Box
-              onClick={() => setShareOpen(true)}
+              onClick={isMobile ? undefined : () => setShareOpen(true)}
               sx={{
                 justifySelf: { xs: "center", sm: "start" },
                 width: { xs: thumbWMobile, sm: thumbWTablet, lg: thumbW },
                 height: { xs: thumbHMobile, sm: thumbHTablet, lg: thumbH },
                 flexShrink: 0,
                 overflow: "hidden",
-                cursor: "pointer",
+                cursor: { xs: "default", sm: "pointer" },
                 position: "relative",
                 borderRadius: "8px",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
-                "&:hover .share-thumb-overlay": { opacity: 1 },
+                "&:hover .share-thumb-overlay": { opacity: { xs: 0, sm: 1 } },
               }}
             >
               <Box sx={{ width: SHARE_CARD_WIDTH, height: 420, transform: { xs: `scale(${thumbScaleMobile})`, sm: `scale(${thumbScaleTablet})`, lg: `scale(${thumbScale})` }, transformOrigin: "top left", pointerEvents: "none" }}>
@@ -1418,6 +1420,7 @@ export default function ProfilePage() {
                     startIcon={<IosShareOutlinedIcon sx={{ fontSize: 16 }} />}
                     onClick={() => setShareOpen(true)}
                     sx={{
+                      display: { xs: "none", sm: "inline-flex" },
                       borderRadius: "10px",
                       textTransform: "none", fontWeight: 600, fontSize: "0.8rem",
                       px: 2, py: 1, minHeight: 44,
@@ -1428,6 +1431,30 @@ export default function ProfilePage() {
                   </Button>
                 </Box>
               </Box>
+
+              {/* Mobile-only: inline download + social buttons (no dialog,
+                  since the big thumbnail is already the preview). */}
+              <Stack spacing={1} sx={{ display: { xs: "flex", sm: "none" } }}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  startIcon={<DownloadOutlinedIcon sx={{ fontSize: 18 }} />}
+                  sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.85rem", py: 1.1, minHeight: 44 }}
+                >
+                  Download stats card
+                </Button>
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0.75 }}>
+                  <Button variant="soft" startIcon={<LinkedInIcon sx={{ fontSize: 16 }} />} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.9 }}>
+                    LinkedIn
+                  </Button>
+                  <Button variant="soft" startIcon={<XIcon sx={{ fontSize: 14 }} />} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.9 }}>
+                    X
+                  </Button>
+                  <Button variant="soft" startIcon={<FacebookIcon sx={{ fontSize: 16 }} />} sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.9 }}>
+                    Facebook
+                  </Button>
+                </Box>
+              </Stack>
             </Stack>
           </Box>
         </Box>
