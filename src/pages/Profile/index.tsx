@@ -4,7 +4,6 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme, ThemeProvider } from "@mui/material/styles";
 import { lightTheme } from "@/theme/theme";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
-import StarIcon from "@mui/icons-material/Star";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -16,7 +15,6 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
@@ -30,7 +28,6 @@ import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import { keyframes } from "@mui/system";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import Paper from "@mui/material/Paper";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
@@ -120,18 +117,33 @@ const demoEngagementCount = buildCumulative(800);
 const demoEngagementHours = buildCumulative(2266);
 const demoLearnersImpacted = buildCumulative(7332);
 
-// ── Demo data for contracts ──────────────────────────────────────────────────
-const demoContracts = [
-  { program: "PGP-AIML", role: "Teacher", start: "21-01-2025", end: "31-03-2026", active: true },
-  { program: "PGP-DSBA", role: "Course Mentor", start: "27-03-2025", end: "31-03-2026", active: true },
-  { program: "PGP-DS", role: "Course Mentor", start: "27-03-2025", end: "31-03-2026", active: true },
-  { program: "GL-DS", role: "Teacher", start: "29-05-2025", end: "10-08-2025", active: true },
-  { program: "UoA-MSBA", role: "Teacher", start: "15-05-2025", end: "30-11-2025", active: true },
-  { program: "IITB-CSE", role: "Teacher", start: "01-09-2025", end: "31-01-2026", active: true },
-  { program: "MCA-Unified", role: "Teacher", start: "11-10-2023", end: "11-10-2025", active: false },
-  { program: "PGP-AIML", role: "Course Mentor", start: "27-06-2024", end: "31-03-2025", active: false },
-  { program: "Deloitte", role: "Teacher", start: "20-12-2024", end: "31-12-2024", active: false },
-];
+/* Mid-user engagement: 6 months (Nov 25 → Apr 26), smaller totals */
+const midEngagementMonths = ["Nov 25", "Dec 25", "Jan 26", "Feb 26", "Mar 26", "Apr 26"];
+function buildMidCumulative(total: number): number[] {
+  const n = midEngagementMonths.length;
+  const out: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    const s = t * t * (3 - 2 * t);
+    out.push(Math.round(total * s));
+  }
+  return out;
+}
+const midEngagementCount = buildMidCumulative(95);
+const midEngagementHours = buildMidCumulative(248);
+const midLearnersImpacted = buildMidCumulative(820);
+
+/* Aggregate monthly cumulative data into yearly points.
+   Takes the last value from each calendar year as the year-end cumulative.
+   Labels are just the year ("2023", "2024", etc.). */
+function aggregateYearly(monthlyData: number[], monthLabels: string[]): { labels: string[]; data: number[] } {
+  const yearMap = new Map<string, number>();
+  for (let i = 0; i < monthLabels.length; i++) {
+    const year = "'" + monthLabels[i].slice(-2); // e.g. "'23", "'24"
+    yearMap.set(year, monthlyData[i]); // last entry per year wins (cumulative)
+  }
+  return { labels: Array.from(yearMap.keys()), data: Array.from(yearMap.values()) };
+}
 
 // ── Demo data for course performance (default fallback) ──────────────────────
 const defaultCoursePerf = [
@@ -203,6 +215,7 @@ export default function ProfilePage() {
   const isEmpty = guruStage === "empty";
   const isNewUser = guruStage === "new" || isEmpty;
   const isEarlyUser = guruStage === "early";
+  const isMidUser = guruStage === "mid";
   const isNewOrEarly = isNewUser || isEarlyUser;
 
   // Role switch animation - show skeleton briefly
@@ -273,10 +286,32 @@ export default function ProfilePage() {
     color: string;
     data: number[];
   };
-  const engagementCharts: EngagementChart[] = [
+  const engagementCharts: EngagementChart[] = isMidUser ? [
     {
       title: "Engagement Count",
-      description: "Total number of sessions you've delivered across every role since you joined.",
+      description: "Total number of activities you've delivered across every role since you joined.",
+      total: "95",
+      color: "#4caf50",
+      data: midEngagementCount,
+    },
+    {
+      title: "Engagement Hours",
+      description: "Cumulative hours spent delivering sessions across every role.",
+      total: "248",
+      color: "#3f51b5",
+      data: midEngagementHours,
+    },
+    {
+      title: "Learners Impacted",
+      description: "Unique learners you've reached through your sessions.",
+      total: "820",
+      color: "#ff9800",
+      data: midLearnersImpacted,
+    },
+  ] : [
+    {
+      title: "Engagement Count",
+      description: "Total number of activities you've delivered across every role since you joined.",
       total: "800",
       color: "#4caf50",
       data: demoEngagementCount,
@@ -297,7 +332,6 @@ export default function ProfilePage() {
     },
   ];
   const [showCourseReport, setShowCourseReport] = useState(false);
-  const testimonialRef = useRef<HTMLDivElement>(null);
 
   // Operational tab items - splits "Evaluation & Moderation" into separate
   // Evaluation / Moderation tabs when both roles are selected, so each gets
@@ -439,6 +473,48 @@ export default function ProfilePage() {
     return roleMonthlyData[shareMonth] ?? roleMonthlyData["2026-03"];
   }, [shareMonth, shareAllTime, roleMonthlyData, shareTillDateData]);
 
+  // Category-aware labels for the share card: percentile badge, hours verb,
+  // and learners verb all adapt to the selected role so a Mentor isn't told
+  // they "taught" anything and a Moderator isn't ranked against Faculty.
+  const shareLabels = useMemo(() => {
+    switch (selectedRole) {
+      case "Teacher":
+      case "Industry Expert":
+        return {
+          percentile: "Top 10% of Faculty",
+          hoursTillDate: "Total hours taught",
+          hoursMonthly: "Taught this month",
+          learnersTillDate: "Learners impacted",
+          learnersMonthly: "Learners taught",
+        };
+      case "Evaluator":
+        return {
+          percentile: "Top 10% of Evaluators",
+          hoursTillDate: "Total hours of evaluation",
+          hoursMonthly: "Evaluated this month",
+          learnersTillDate: "Learners impacted",
+          learnersMonthly: "Learners evaluated",
+        };
+      case "Moderator":
+        return {
+          percentile: "Top 10% of Moderators",
+          hoursTillDate: "Total hours of moderation",
+          hoursMonthly: "Moderated this month",
+          learnersTillDate: "Learners impacted",
+          learnersMonthly: "Learners moderated",
+        };
+      default:
+        // All Mentor roles (Course, Career, CV Review, Project)
+        return {
+          percentile: "Top 10% of Mentors",
+          hoursTillDate: "Total hours of mentoring",
+          hoursMonthly: "Mentored this month",
+          learnersTillDate: "Learners impacted",
+          learnersMonthly: "Learners mentored",
+        };
+    }
+  }, [selectedRole]);
+
   const shareTheme = shareAllTime
     ? MONTH_THEMES["till-date"] ?? MONTH_THEMES["2026-03"]
     : MONTH_THEMES[shareMonth] ?? MONTH_THEMES["2026-03"];
@@ -557,7 +633,6 @@ export default function ProfilePage() {
       const rd = demoRoleStatCards[tabRole];
       if (tab.isEvalMod) {
         const wN = tabRole === "Moderator" ? "moderations" : "evaluations";
-        const wNs = tabRole === "Moderator" ? "moderation" : "evaluation";
         return {
           key: tab.key,
           title: tab.label,
@@ -576,22 +651,6 @@ export default function ProfilePage() {
               chartData: rd.avgSessionsBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
               chartKey: "value", breakdown: rd.sessionsBreakdown,
               peerValue: rd.peerAvgSessions, peerLabel: String(rd.peerAvgSessions), lowerIsBetter: false,
-            },
-            {
-              id: `${tab.key}:ON-TIME ${wN.toUpperCase()}`,
-              neutral: true,
-              label: `ON-TIME ${wN.toUpperCase()}`,
-              value: rd.onTimeConfirmRate, numericValue: parseFloat(rd.onTimeConfirmRate),
-              description: `Assignments you ${wNs === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned.`,
-              delta: rd.onTimeConfirmDelta, deltaLabel: "vs last quarter", deltaPositive: true,
-              bars: rd.onTimeConfirmBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
-              bg: "var(--gl-accent-violet-bg)", accent: "var(--gl-accent-violet)",
-              reportTitle: `On-time ${wNs.charAt(0).toUpperCase() + wNs.slice(1)} Report`,
-              reportSummary: `Share of assignments you ${wNs === "moderation" ? "moderated" : "evaluated"} within 24 hours of being assigned. Higher is better.`,
-              chartData: rd.onTimeConfirmBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
-              chartKey: "value", breakdown: rd.onTimeConfirmBreakdown,
-              peerValue: rd.peerOnTimeConfirmRate, peerLabel: `${rd.peerOnTimeConfirmRate}%`, lowerIsBetter: false,
-              supportingStat: { label: `Average time to ${wNs === "moderation" ? "moderate" : "evaluate"}`, value: rd.avgConfirmTime },
             },
           ],
         };
@@ -625,11 +684,9 @@ export default function ProfilePage() {
             bars: rd.avgQualityBars, barLabels: ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"],
             bg: "var(--gl-accent-purple-bg)", accent: "var(--gl-accent-purple)",
             reportTitle: "Session Quality Report",
-            reportSummary: "Percentage of sessions meeting quality thresholds. Higher is better.",
+            reportSummary: "Percentage of sessions rated 4.0 or above. Higher is better.",
             chartData: rd.avgQualityBars.map((v: number, i: number) => ({ month: monthLabels[i], value: v })),
             chartKey: "value", breakdown: rd.qualityBreakdown,
-            primaryBenchmark: "Target: > 98%", secondaryValue: rd.avgQualitySecondary,
-            secondaryLabel: "Rated 4.4+", secondaryBenchmark: "Target: > 90%",
             peerValue: rd.peerAvgQuality, peerLabel: `${rd.peerAvgQuality}%`, lowerIsBetter: false,
           },
         ],
@@ -675,8 +732,9 @@ export default function ProfilePage() {
   }, [visibleOperationalGroups]);
 
   // Combined for the drawer (which card was clicked - could be hero, rating, or operational).
-  // onTimeHeroCard is excluded when v1Mode is on.
-  const statCards = isV1Mode
+  // onTimeHeroCard is hidden for Evaluator/Moderator (confirmation doesn't apply)
+  // and hidden in V1 ship scope.
+  const statCards = isEvalOrMod || isV1Mode
     ? [...ratingCards, ...operationalCards]
     : [onTimeHeroCard, ...ratingCards, ...operationalCards];
 
@@ -1093,20 +1151,20 @@ export default function ProfilePage() {
                       <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.sessions}</Typography>
                       <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.7rem", fontWeight: 400, mt: 0.5, lineHeight: 1.43 }}>{isTillDate ? "Total sessions delivered" : "Sessions delivered this month"}</Typography>
                     </Box>
-                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label="Top 10% Gurus" size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: isTillDate ? "rgba(255,255,255,0.5)" : "rgba(33,33,33,0.3)", color: isTillDate ? "#fff" : "inherit", "& .MuiChip-icon": { ml: 0.5, color: isTillDate ? "#fff" : "inherit" } }} />
+                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label={shareLabels.percentile} size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: isTillDate ? "rgba(255,255,255,0.5)" : "rgba(33,33,33,0.3)", color: isTillDate ? "#fff" : "inherit", "& .MuiChip-icon": { ml: 0.5, color: isTillDate ? "#fff" : "inherit" } }} />
                   </Box>
                   <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <Box>
                       <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.hours} Hrs</Typography>
-                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>{isTillDate ? "Total hours taught" : "Taught this month"}</Typography>
+                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>{isTillDate ? shareLabels.hoursTillDate : shareLabels.hoursMonthly}</Typography>
                     </Box>
-                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label="Top 10% Gurus" size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: isTillDate ? "rgba(255,255,255,0.5)" : "rgba(33,33,33,0.3)", color: isTillDate ? "#fff" : "inherit", "& .MuiChip-icon": { ml: 0.5, color: isTillDate ? "#fff" : "inherit" } }} />
+                    <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label={shareLabels.percentile} size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: isTillDate ? "rgba(255,255,255,0.5)" : "rgba(33,33,33,0.3)", color: isTillDate ? "#fff" : "inherit", "& .MuiChip-icon": { ml: 0.5, color: isTillDate ? "#fff" : "inherit" } }} />
                   </Box>
                 </Stack>
                 <Stack spacing={1}>
                   <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
                     <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.learners}</Typography>
-                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>{isTillDate ? "Learners impacted" : "Learners taught"}</Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>{isTillDate ? shareLabels.learnersTillDate : shareLabels.learnersMonthly}</Typography>
                   </Box>
                   <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
                     <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.rating}/5</Typography>
@@ -1120,10 +1178,6 @@ export default function ProfilePage() {
               </Box>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pt: 1, borderTop: "1px dashed", borderColor: "divider" }}>
                 <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.55rem", fontWeight: 600 }}>Empowering careers, one lesson at a time.</Typography>
-                <Stack direction="row" alignItems="center" spacing={0.15}>
-                  {[1, 2, 3, 4, 5].map((i) => <StarIcon key={i} sx={{ fontSize: 12, color: "var(--gl-star-color)" }} />)}
-                  <Typography sx={{ color: shareTheme.nameColor, fontWeight: 700, fontSize: "0.65rem", ml: 0.25 }}>{activeShareData.rating}</Typography>
-                </Stack>
               </Stack>
             </Box>
           </Card>
@@ -1526,7 +1580,7 @@ export default function ProfilePage() {
 
       {/* ══ ZONE 1: Ratings row (headline cross-category scan) ══════════ */}
       {(() => {
-        const topRowCards = isV1Mode ? [...ratingCards] : [...ratingCards, onTimeHeroCard];
+        const topRowCards = isEvalOrMod || isV1Mode ? [...ratingCards] : [...ratingCards, onTimeHeroCard];
         return (
           <>
             <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.12em", mb: 0, display: "block" }}>
@@ -1610,37 +1664,47 @@ export default function ProfilePage() {
                 </Typography>
                 <Box sx={{ width: "100%", height: { xs: 70, sm: 90 } }}>
                   <ResponsiveContainer>
-                    <AreaChart data={chart.data.map((v, i) => ({ month: engagementMonths[i], value: v }))} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id={`grad-${chart.title.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={chart.color} stopOpacity={0.22} />
-                          <stop offset="100%" stopColor={chart.color} stopOpacity={0.02} />
-                        </linearGradient>
-                      </defs>
-                      <XAxis dataKey="month" tick={{ fontSize: 8, fill: "hsl(var(--md-on-surface) / 0.45)" }} axisLine={false} tickLine={false} interval={11} minTickGap={12} />
-                      <YAxis hide domain={["auto", "auto"]} />
-                      <Tooltip
-                        cursor={{ stroke: chart.color, strokeDasharray: "3 3", strokeOpacity: 0.55, strokeWidth: 1 }}
-                        content={({ active, payload }) => {
-                          if (!active || !payload?.length) return null;
-                          const d = payload[0].payload;
-                          return (
-                            <Card variant="outlined" sx={{ p: 1, borderRadius: "8px", boxShadow: 1 }}>
-                              <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.65rem" }}>{d.month}: <b>{d.value.toLocaleString()}</b></Typography>
-                            </Card>
-                          );
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="value"
-                        stroke={chart.color}
-                        strokeWidth={2}
-                        fill={`url(#grad-${chart.title.replace(/\s/g, "")})`}
-                        dot={false}
-                        activeDot={{ r: 5, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
-                      />
-                    </AreaChart>
+                    {(() => {
+                      const months = isMidUser ? midEngagementMonths : engagementMonths;
+                      const useYearly = months.length > 12;
+                      const yearly = useYearly ? aggregateYearly(chart.data, months) : null;
+                      const chartData = useYearly
+                        ? yearly!.labels.map((label, i) => ({ month: label, value: yearly!.data[i] }))
+                        : chart.data.map((v, i) => ({ month: months[i], value: v }));
+                      return (
+                        <AreaChart data={chartData} margin={{ top: 4, right: useYearly ? 14 : 4, left: useYearly ? 10 : 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id={`grad-${chart.title.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor={chart.color} stopOpacity={0.22} />
+                              <stop offset="100%" stopColor={chart.color} stopOpacity={0.02} />
+                            </linearGradient>
+                          </defs>
+                          <XAxis dataKey="month" tick={{ fontSize: 8, fill: "hsl(var(--md-on-surface) / 0.45)" }} axisLine={false} tickLine={false} interval={0} minTickGap={8} />
+                          <YAxis hide domain={["auto", "auto"]} />
+                          <Tooltip
+                            cursor={{ stroke: chart.color, strokeDasharray: "3 3", strokeOpacity: 0.55, strokeWidth: 1 }}
+                            content={({ active, payload }) => {
+                              if (!active || !payload?.length) return null;
+                              const d = payload[0].payload;
+                              return (
+                                <Card variant="outlined" sx={{ p: 1, borderRadius: "8px", boxShadow: 1 }}>
+                                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.65rem" }}>{d.month}: <b>{d.value.toLocaleString()}</b></Typography>
+                                </Card>
+                              );
+                            }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="value"
+                            stroke={chart.color}
+                            strokeWidth={2}
+                            fill={`url(#grad-${chart.title.replace(/\s/g, "")})`}
+                            dot={useYearly ? { r: 3, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 } : false}
+                            activeDot={{ r: 5, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
+                          />
+                        </AreaChart>
+                      );
+                    })()}
                   </ResponsiveContainer>
                 </Box>
               </CardContent>
@@ -1648,104 +1712,6 @@ export default function ProfilePage() {
           ))}
         </Box>
         </Box>
-      )}
-
-      {/* ── Testimonials horizontal scroll ────────────────────────────── */}
-      {isNewOrEarly ? (
-        <Paper variant="outlined" sx={{ p: 3,  textAlign: "center", borderStyle: "dashed", borderColor: "divider" }}>
-          <Typography variant="body2" color="text.secondary" fontWeight={500}>
-            Your learner testimonials will appear here after your first few sessions.
-          </Typography>
-          <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: "block" }}>
-            {isEarlyUser ? "You're almost there. Feedback usually starts flowing after 3-4 sessions." : "Gurus typically receive their first feedback within 2 weeks."}
-          </Typography>
-        </Paper>
-      ) : (
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ fontSize: { xs: "0.875rem", sm: "1rem" }, mb: 1.5 }}>What learners say</Typography>
-        <Box sx={{ position: "relative" }}>
-          {/* Floating edge arrows - desktop only */}
-          <IconButton
-            onClick={() => testimonialRef.current?.scrollBy({ left: -320, behavior: "smooth" })}
-            sx={{
-              position: "absolute", left: -18, top: "50%", transform: "translateY(-50%)", zIndex: 2,
-              width: 36, height: 36, bgcolor: "background.paper",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-              color: "text.primary",
-              display: { xs: "none", sm: "flex" },
-              "&:hover": { bgcolor: "grey.100" },
-            }}
-          >
-            <ChevronLeftIcon sx={{ fontSize: 20 }} />
-          </IconButton>
-          <IconButton
-            onClick={() => testimonialRef.current?.scrollBy({ left: 320, behavior: "smooth" })}
-            sx={{
-              position: "absolute", right: -18, top: "50%", transform: "translateY(-50%)", zIndex: 2,
-              width: 36, height: 36, bgcolor: "background.paper",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-              color: "text.primary",
-              display: { xs: "none", sm: "flex" },
-              "&:hover": { bgcolor: "grey.100" },
-            }}
-          >
-            <ChevronRightIcon sx={{ fontSize: 20 }} />
-          </IconButton>
-          <Box
-            ref={testimonialRef}
-            sx={{
-              display: "flex",
-              gap: 2,
-              overflowX: "auto",
-              scrollSnapType: "x mandatory",
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": { display: "none" },
-              px: { sm: 1 },
-            }}
-          >
-          {[
-            { quote: "One of the most structured and engaging sessions I've attended. The real-world examples made complex concepts feel intuitive and easy to follow.", name: "Priya S.", info: "PGP-DS · Cohort 26A", avatar: "P" },
-            { quote: "Truly inspiring mentor. Always goes above and beyond to ensure every learner understands the material. The Q&A sessions are incredibly helpful.", name: "Aarav M.", info: "PGP-AIML · Cohort 25B", avatar: "A" },
-            { quote: "The session on neural networks was phenomenal. Clear explanations, great pacing, and very approachable for questions even after class.", name: "Neha K.", info: "PGP-DS · Cohort 25A", avatar: "N" },
-            { quote: "Hands-down the best mentor I've had in this program. Every session has practical takeaways I can immediately apply at work.", name: "Rohan D.", info: "PGP-SE · Cohort 26A", avatar: "R" },
-            { quote: "Amazing depth of knowledge and an incredible ability to simplify difficult topics. Made the statistics module genuinely enjoyable.", name: "Sneha T.", info: "PGP-DS · Cohort 25B", avatar: "S" },
-            { quote: "Very patient with questions and always brings interesting industry examples. The best part is the follow-up resources shared after each session.", name: "Vikram P.", info: "PGP-AIML · Cohort 26A", avatar: "V" },
-          ].map((t) => (
-            <Card
-              key={t.name}
-              variant="outlined"
-              sx={{
-                minWidth: 280,
-                maxWidth: 320,
-                flexShrink: 0,
-                scrollSnapAlign: "start",
-                borderRadius: "12px",
-                borderColor: "divider",
-              }}
-            >
-              <CardContent sx={{ p: 2, display: "flex", flexDirection: "column", height: "100%", "&:last-child": { pb: 2 } }}>
-                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "normal", lineHeight: 1.6, flex: 1, mb: 2 }}>
-                  &ldquo;{t.quote}&rdquo;
-                </Typography>
-                <Stack direction="row" alignItems="center" spacing={1.25}>
-                  <Box sx={{ width: 36, height: 36, borderRadius: "50%", bgcolor: "action.selected", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Typography variant="caption" fontWeight={600}>{t.avatar}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" fontWeight={600} sx={{ display: "block", lineHeight: 1.2 }}>
-                      {t.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.65rem" }}>
-                      {t.info}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-        </Box>
-      </Box>
       )}
 
       {/* Rating trend chart (hidden - moved into Engagement Stats grid) */}
@@ -1947,7 +1913,9 @@ export default function ProfilePage() {
           ? rows.map((r) => ({ ...r, scores: r.scores.map(() => null) }))
           : isEarlyUser
             ? rows.slice(0, 2).map((r) => ({ ...r, scores: r.scores.map((s, i) => i === 5 ? s : null) }))
-            : rows;
+            : isMidUser
+              ? rows.map((r) => ({ ...r, scores: r.scores.map((s, i) => i >= 6 ? s : null) }))
+              : rows;
         const categoryStats = operationalCardsByCategory.get(category) ?? [];
         return (
           <Card key={category} variant="outlined" sx={{ mb: 3 }}>
@@ -1972,9 +1940,9 @@ export default function ProfilePage() {
                 </Box>
               )}
 
-              {/* Subsection 2: Avg. month-on-month trends - course x month matrix */}
+              {/* Subsection 2: Avg. month-on-month Course Ratings */}
               <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.12em", mb: 1, display: "block" }}>
-                Avg. month-on-month trends
+                Avg. month-on-month Course Ratings
               </Typography>
               <TableContainer>
                 <Table size="small" sx={{ tableLayout: "auto" }}>
@@ -2004,108 +1972,12 @@ export default function ProfilePage() {
                   </TableBody>
                 </Table>
               </TableContainer>
+
             </CardContent>
           </Card>
         );
       })}
 
-
-      {/* ══ CONTRACTS SECTION ═══════════════════════════════════════════════ */}
-      <FlexBox sx={{ justifyContent: "space-between", alignItems: "baseline", mb: 1.5 }}>
-        <Box>
-          <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}>Contracts</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Your active and past program contracts.
-          </Typography>
-        </Box>
-      </FlexBox>
-
-      {isNewUser ? (
-        <Paper variant="outlined" sx={{ p: 3,  textAlign: "center", borderStyle: "dashed", borderColor: "divider" }}>
-          <Typography variant="body2" color="text.disabled">
-            No active contracts. Your program contracts will appear here once assigned.
-          </Typography>
-        </Paper>
-      ) : (
-      <Card variant="outlined" sx={{ mb: 4 }}>
-        {/* Mobile card layout */}
-        <Box sx={{ display: { xs: "block", sm: "none" } }}>
-          <Stack spacing={0} divider={<Divider />}>
-            {(isEarlyUser ? demoContracts.filter(c => c.active).slice(0, 1) : demoContracts).map((c, i) => (
-              <Box key={i} sx={{ px: 2, py: 1.5 }}>
-                <Typography variant="body2" fontWeight={700}>{c.program}</Typography>
-                <Typography variant="caption" color="text.secondary">{c.role}</Typography>
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 0.75 }}>
-                  <Typography variant="caption" color="text.secondary">{c.start} – {c.end}</Typography>
-                  <Chip
-                    label={c.active ? "Active" : "Expired"}
-                    size="small"
-                    sx={{
-                      fontWeight: 600,
-                      fontSize: "0.65rem",
-                      height: 22,
-                      bgcolor: c.active ? "var(--gl-status-confirmed-bg)" : "action.hover",
-                      color: c.active ? "var(--gl-status-confirmed-text)" : "text.disabled",
-                      border: c.active ? "1px solid var(--gl-status-confirmed-border)" : "none",
-                    }}
-                  />
-                </Stack>
-              </Box>
-            ))}
-          </Stack>
-        </Box>
-        {/* Desktop table layout */}
-        <Box sx={{ display: { xs: "none", sm: "block" } }}>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>Program</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>Role</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>Start date</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>End date</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12 }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12 }} align="right">Contract</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(isEarlyUser ? demoContracts.filter(c => c.active).slice(0, 1) : demoContracts).map((c, i) => (
-                <TableRow key={i} sx={{ "&:last-child td": { border: 0 } }}>
-                  <TableCell sx={{ fontSize: 12, fontWeight: 600 }}>{c.program}</TableCell>
-                  <TableCell sx={{ fontSize: 12, color: "text.secondary" }}>{c.role}</TableCell>
-                  <TableCell sx={{ fontSize: 12, color: "text.secondary" }}>{c.start}</TableCell>
-                  <TableCell sx={{ fontSize: 12, color: "text.secondary" }}>{c.end}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={c.active ? "Active" : "Expired"}
-                      size="small"
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: "0.65rem",
-                        height: 22,
-                        bgcolor: c.active ? "var(--gl-status-confirmed-bg)" : "action.hover",
-                        color: c.active ? "var(--gl-status-confirmed-text)" : "text.disabled",
-                        border: c.active ? "1px solid var(--gl-status-confirmed-border)" : "none",
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button
-                      size="small"
-                      variant="text"
-                      sx={{ fontSize: 12, textTransform: "none", p: 0, color: "primary.main", minWidth: 0 }}
-                    >
-                      View Contract
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        </Box>
-      </Card>
-      )}
 
       {/* ── Edit profile dialog ───────────────────────────────────────────── */}
       <Dialog
@@ -2613,12 +2485,12 @@ export default function ProfilePage() {
             <Box sx={{ flex: 1, overflowY: "auto", px: 3, pb: 3 }}>
               {/* Detailed chart - much bigger, full axes, grid lines, all tick labels */}
               <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mt: 1, mb: 1, display: "block", letterSpacing: "0.06em", textTransform: "uppercase", fontSize: "0.65rem" }}>
-                Monthly trend ({engagementMonths[0]} - {engagementMonths[engagementMonths.length - 1]})
+                {(() => { const m = isMidUser ? midEngagementMonths : engagementMonths; return `${m.length > 12 ? "Yearly" : "Monthly"} trend (${m[0]} – ${m[m.length - 1]})`; })()}
               </Typography>
               <Box sx={{ width: "100%", height: 320, mb: 3 }}>
                 <ResponsiveContainer>
                   <LineChart
-                    data={chart.data.map((v, i) => ({ month: engagementMonths[i], value: v }))}
+                    data={chart.data.map((v, i) => ({ month: (isMidUser ? midEngagementMonths : engagementMonths)[i], value: v }))}
                     margin={{ top: 8, right: 16, left: -10, bottom: 0 }}
                   >
                     <defs>
@@ -2628,14 +2500,22 @@ export default function ProfilePage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant) / 0.35)" vertical={false} />
-                    <XAxis
-                      dataKey="month"
-                      tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.6)" }}
-                      axisLine={false}
-                      tickLine={false}
-                      interval="preserveStartEnd"
-                      minTickGap={36}
-                    />
+                    {(() => {
+                      const m = isMidUser ? midEngagementMonths : engagementMonths;
+                      const isLong = m.length > 12;
+                      return (
+                        <XAxis
+                          dataKey="month"
+                          tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.6)" }}
+                          axisLine={false}
+                          tickLine={false}
+                          ticks={isLong ? m.filter((l) => l.startsWith("Jan")) : undefined}
+                          interval={isLong ? undefined : "preserveStartEnd"}
+                          minTickGap={isLong ? undefined : 36}
+                          tickFormatter={isLong ? (v: string) => "20" + v.slice(-2) : undefined}
+                        />
+                      );
+                    })()}
                     <YAxis
                       tick={{ fontSize: 10, fill: "hsl(var(--md-on-surface) / 0.6)" }}
                       axisLine={false}

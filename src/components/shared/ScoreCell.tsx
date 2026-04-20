@@ -3,19 +3,16 @@ import TableCell from "@mui/material/TableCell";
 
 /**
  * Heatmap-colored table cell for rating scores.
- * Extracted from Profile local ScoreCell (lines 90-107).
  *
- * Colors read from --gl-score-* CSS tokens with 4-tier thresholds:
- *   ≥ 4.7 → excellent (green)
- *   ≥ 4.4 → good (amber)
- *   ≥ 4.0 → fair (orange)
+ * 3-tier thresholds matched to the dashboard's traffic-light scheme:
+ *   ≥ 4.5 → excellent (green)
+ *   ≥ 4.0 → good (amber/yellow)
  *   < 4.0 → poor (red)
  */
 
-function scoreTier(value: number): "excellent" | "good" | "fair" | "poor" {
-  if (value >= 4.7) return "excellent";
-  if (value >= 4.4) return "good";
-  if (value >= 4.0) return "fair";
+function scoreTier(value: number): "excellent" | "good" | "poor" {
+  if (value >= 4.5) return "excellent";
+  if (value >= 4.0) return "good";
   return "poor";
 }
 

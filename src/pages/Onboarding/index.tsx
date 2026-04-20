@@ -20,8 +20,12 @@ import GavelOutlinedIcon from "@mui/icons-material/GavelOutlined";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
+import Avatar from "@mui/material/Avatar";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setGuruStage } from "@/store/slices/devPanelSlice";
+import { setGuruPhoto } from "@/store/slices/profileSlice";
 
 /* ════════════════════════════════════════════════════════
    STEP DEFINITIONS
@@ -34,7 +38,7 @@ interface StepMeta {
   sidebarTitle: string;
   sidebarDesc: string;
   icon: React.ReactNode;
-  acceptType: "checkbox" | "name";
+  acceptType: "checkbox" | "name" | "photo";
 }
 
 const STEPS: StepMeta[] = [
@@ -56,6 +60,15 @@ const STEPS: StepMeta[] = [
     icon: <ShieldOutlinedIcon />,
     acceptType: "name",
   },
+  {
+    id: "photo",
+    title: "Profile Photo",
+    subtitle: "Help learners recognize you",
+    sidebarTitle: "Profile Photo",
+    sidebarDesc: "Upload a clear, front-facing photo so your learners can recognize you across programs.",
+    icon: <AccountCircleOutlinedIcon />,
+    acceptType: "photo",
+  },
 ];
 
 const STEP_GRADIENTS = [
@@ -63,6 +76,8 @@ const STEP_GRADIENTS = [
   `linear-gradient(160deg, hsl(215, 82%, 44%) 0%, hsl(215, 82%, 38%) 35%, hsl(210, 70%, 28%) 100%)`,
   // Step 2: Teal/Green
   `linear-gradient(160deg, hsl(170, 60%, 35%) 0%, hsl(175, 55%, 28%) 35%, hsl(180, 50%, 20%) 100%)`,
+  // Step 3: Warm amber
+  `linear-gradient(160deg, hsl(28, 82%, 48%) 0%, hsl(24, 78%, 40%) 35%, hsl(18, 72%, 28%) 100%)`,
 ];
 
 /* ════════════════════════════════════════════════════════
@@ -792,6 +807,106 @@ function IPContent({
 }
 
 /* ════════════════════════════════════════════════════════
+   CONTENT COMPONENT - Profile Photo
+   ════════════════════════════════════════════════════════ */
+
+function PhotoUploadContent({
+  guruName,
+  guruPhoto,
+  onPhotoChange,
+}: {
+  guruName: string;
+  guruPhoto: string | null;
+  onPhotoChange: (dataUrl: string) => void;
+}) {
+  const initials = guruName
+    .split(/\s+/)
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const handleFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") onPhotoChange(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="body1" sx={{ lineHeight: 1.7, fontSize: "0.95rem", color: "text.primary", mb: 1.5 }}>
+          Dear <strong>{guruName}</strong>,
+        </Typography>
+        <Typography variant="body2" sx={{ lineHeight: 1.7, fontSize: "0.88rem", color: "text.secondary" }}>
+          Upload a clear, front-facing photo of yourself. This helps learners recognize you across live sessions, discussion threads, and feedback — and is a required part of your profile.
+        </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: "center",
+          gap: 3,
+          p: 3,
+          borderRadius: "12px",
+          border: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+        }}
+      >
+        <Avatar
+          src={guruPhoto ?? undefined}
+          sx={{
+            width: 140,
+            height: 140,
+            fontSize: "2.5rem",
+            fontWeight: 600,
+            bgcolor: guruPhoto ? "transparent" : "primary.main",
+          }}
+        >
+          {!guruPhoto && initials}
+        </Avatar>
+
+        <Stack spacing={1.5} sx={{ flex: 1, alignItems: { xs: "center", sm: "flex-start" } }}>
+          <Button
+            variant="contained"
+            component="label"
+            startIcon={<CameraAltOutlinedIcon sx={{ fontSize: 18 }} />}
+            sx={{ textTransform: "none", fontWeight: 600 }}
+          >
+            {guruPhoto ? "Change photo" : "Upload photo"}
+            <input
+              hidden
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFile(file);
+                e.target.value = "";
+              }}
+            />
+          </Button>
+          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem", lineHeight: 1.5, textAlign: { xs: "center", sm: "left" } }}>
+            JPG or PNG, square aspect works best. Make sure your face is clearly visible and well lit.
+          </Typography>
+        </Stack>
+      </Box>
+
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem", fontStyle: "italic" }}>
+          Your photo is visible to learners on your sessions, in the mentor directory, and in feedback. You can update it anytime from your Profile settings.
+        </Typography>
+      </Box>
+    </>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
    MAIN ONBOARDING PAGE
    ════════════════════════════════════════════════════════ */
 
@@ -800,6 +915,7 @@ export default function OnboardingPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const guruName = useAppSelector((s) => s.profile.guruName);
+  const guruPhoto = useAppSelector((s) => s.profile.guruPhoto);
 
   const [step, setStep] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -893,7 +1009,13 @@ export default function OnboardingPage() {
 
   const canProceed =
     hasReachedBottom &&
-    (currentMeta.acceptType === "checkbox" ? cocAccepted : nameMatches);
+    (currentMeta.acceptType === "checkbox"
+      ? cocAccepted
+      : currentMeta.acceptType === "name"
+        ? nameMatches
+        : currentMeta.acceptType === "photo"
+          ? guruPhoto != null
+          : false);
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1300, display: "flex", background: theme.palette.background.default }}>
@@ -1014,6 +1136,13 @@ export default function OnboardingPage() {
           <Box sx={{ maxWidth: 820, mx: "auto", width: "100%" }}>
             {step === 0 && <CoCContent theme={theme} />}
             {step === 1 && <IPContent theme={theme} guruName={guruName} />}
+            {step === 2 && (
+              <PhotoUploadContent
+                guruName={guruName}
+                guruPhoto={guruPhoto}
+                onPhotoChange={(dataUrl) => dispatch(setGuruPhoto(dataUrl))}
+              />
+            )}
 
             {/* End marker */}
             <Box sx={{ textAlign: "center", mt: 4, mb: 2 }}>
@@ -1132,7 +1261,7 @@ export default function OnboardingPage() {
                     </Typography>
                   }
                 />
-              ) : (
+              ) : currentMeta.acceptType === "name" ? (
                 <Stack spacing={0.75}>
                   <Typography
                     variant="body2"
@@ -1153,6 +1282,20 @@ export default function OnboardingPage() {
                       "& .MuiOutlinedInput-root": { fontSize: "0.85rem" },
                     }}
                   />
+                </Stack>
+              ) : (
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  {guruPhoto ? (
+                    <CheckCircleIcon sx={{ fontSize: 18, color: "success.main" }} />
+                  ) : (
+                    <CameraAltOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+                  )}
+                  <Typography
+                    variant="body2"
+                    sx={{ fontSize: "0.82rem", fontWeight: 500, color: guruPhoto ? "success.main" : "text.secondary" }}
+                  >
+                    {guruPhoto ? "Photo added — you're good to go" : "Upload a profile photo above to continue"}
+                  </Typography>
                 </Stack>
               )}
             </Box>
