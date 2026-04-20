@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme, ThemeProvider } from "@mui/material/styles";
+import { useTheme, ThemeProvider, alpha } from "@mui/material/styles";
 import { lightTheme } from "@/theme/theme";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
@@ -132,18 +132,6 @@ function buildMidCumulative(total: number): number[] {
 const midEngagementCount = buildMidCumulative(95);
 const midEngagementHours = buildMidCumulative(248);
 const midLearnersImpacted = buildMidCumulative(820);
-
-/* Aggregate monthly cumulative data into yearly points.
-   Takes the last value from each calendar year as the year-end cumulative.
-   Labels are just the year ("2023", "2024", etc.). */
-function aggregateYearly(monthlyData: number[], monthLabels: string[]): { labels: string[]; data: number[] } {
-  const yearMap = new Map<string, number>();
-  for (let i = 0; i < monthLabels.length; i++) {
-    const year = "'" + monthLabels[i].slice(-2); // e.g. "'23", "'24"
-    yearMap.set(year, monthlyData[i]); // last entry per year wins (cumulative)
-  }
-  return { labels: Array.from(yearMap.keys()), data: Array.from(yearMap.values()) };
-}
 
 // ── Demo data for course performance (default fallback) ──────────────────────
 const defaultCoursePerf = [
@@ -1149,7 +1137,7 @@ export default function ProfilePage() {
                   <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <Box>
                       <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.sessions}</Typography>
-                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.7rem", fontWeight: 400, mt: 0.5, lineHeight: 1.43 }}>{isTillDate ? "Total sessions delivered" : "Sessions delivered this month"}</Typography>
+                      <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.7rem", fontWeight: 400, mt: 0.5, lineHeight: 1.43 }}>{isTillDate ? "Total activities delivered" : "Activities delivered this month"}</Typography>
                     </Box>
                     <Chip icon={<TrendingUpOutlinedIcon sx={{ fontSize: 16 }} />} label={shareLabels.percentile} size="small" variant="outlined" sx={{ alignSelf: "flex-start", mt: 1, height: 24, fontSize: "0.6rem", fontWeight: 500, borderColor: isTillDate ? "rgba(255,255,255,0.5)" : "rgba(33,33,33,0.3)", color: isTillDate ? "#fff" : "inherit", "& .MuiChip-icon": { ml: 0.5, color: isTillDate ? "#fff" : "inherit" } }} />
                   </Box>
@@ -1172,7 +1160,7 @@ export default function ProfilePage() {
                   </Box>
                   <Box sx={{ flex: 1, bgcolor: isTillDate ? "rgba(255,255,255,0.08)" : "var(--gl-accent-primary-bg)", borderRadius: "8px", p: 1.5 }}>
                     <Typography sx={{ color: shareTheme.nameColor, fontWeight: 600, fontSize: "1.6rem", lineHeight: 1.17, letterSpacing: "-0.025em" }}>{activeShareData.rated4Plus === activeShareData.sessions ? "100%" : `${Math.round((+activeShareData.rated4Plus / +activeShareData.sessions) * 100)}%`}</Typography>
-                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Sessions rated 4+</Typography>
+                    <Typography sx={{ color: shareTheme.headingColor, fontSize: "0.8rem", fontWeight: 400, mt: 0.5, lineHeight: 1.5 }}>Activities rated 4+</Typography>
                   </Box>
                 </Stack>
               </Box>
@@ -1184,170 +1172,158 @@ export default function ProfilePage() {
           </ThemeProvider>
         );
 
-        const thumbScaleXs = 320 / SHARE_CARD_WIDTH;
-        const thumbScaleSm = 200 / SHARE_CARD_WIDTH;
-        const thumbHXs = Math.round(420 * thumbScaleXs);
-        const thumbHSm = Math.round(420 * thumbScaleSm);
+        const heroLearners = activeShareData.learners;
+        const prettyMonth = shareMonthOptions.find((m) => m.value === shareMonth)?.label?.replace(" (Current)", "") ?? activeShareData.monthLabel;
+        const heroTail = isTillDate
+          ? "since you joined Great Learning"
+          : `in ${prettyMonth}`;
+        const thumbW = 180;           // lg+ desktop
+        const thumbWTablet = 272;     // sm/md tablets — yields ~220px tall
+        const thumbWMobile = 320;     // xs phones
+        const thumbScale = thumbW / SHARE_CARD_WIDTH;
+        const thumbScaleTablet = thumbWTablet / SHARE_CARD_WIDTH;
+        const thumbScaleMobile = thumbWMobile / SHARE_CARD_WIDTH;
+        const thumbH = Math.round(420 * thumbScale);
+        const thumbHTablet = Math.round(420 * thumbScaleTablet);
+        const thumbHMobile = Math.round(420 * thumbScaleMobile);
 
         return (
         <>
-        <Card variant="outlined" sx={{ borderRadius: "16px" }}>
-          {/* ── Header row: full width ─────────────────────────────────── */}
-          <Box sx={{ px: 2, pt: 2, pb: 0 }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.9rem", sm: "0.95rem" } }}>Share your impact</Typography>
-              {/* ── Desktop: two separate buttons (unchanged) ──────────── */}
-              <Stack direction="row" alignItems="center" spacing={0.75} sx={{ display: { xs: "none", sm: "flex" } }}>
-                <Button
-                  size="small"
-                  variant={shareAllTime ? "contained" : "outlined"}
-                  onClick={() => setShareAllTime(true)}
-                  sx={{
-                    borderRadius: "8px", textTransform: "none",
-                    fontWeight: 600, fontSize: "0.75rem",
-                    px: 1.5, py: 0.4, minWidth: 0,
-                    ...(!shareAllTime && { borderColor: "divider", color: "text.secondary" }),
-                  }}
-                >
-                  All Time
-                </Button>
-                <Button
-                  size="small"
-                  variant={!shareAllTime ? "contained" : "outlined"}
-                  onClick={(e) => setMonthMenuAnchor(e.currentTarget)}
-                  endIcon={<ChevronRightIcon sx={{ fontSize: "14px !important", transform: "rotate(90deg)", ml: -0.5 }} />}
-                  sx={{
-                    borderRadius: "8px", textTransform: "none",
-                    fontWeight: 600, fontSize: "0.75rem",
-                    px: 1.5, py: 0.4, minWidth: 0,
-                    ...(!shareAllTime ? {} : { borderColor: "divider", color: "text.secondary" }),
-                  }}
-                >
-                  {shareMonthOptions.find((m) => m.value === shareMonth)?.label?.replace(" (Current)", "") ?? "Month"}
-                </Button>
-                <Menu
-                  anchorEl={monthMenuAnchor}
-                  open={Boolean(monthMenuAnchor)}
-                  onClose={() => setMonthMenuAnchor(null)}
-                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                  transformOrigin={{ vertical: "top", horizontal: "right" }}
-                  slotProps={{ paper: { sx: { borderRadius: "10px", mt: 0.5, minWidth: 200 } } }}
-                >
-                  {shareMonthOptions.map((m) => (
-                    <MenuItem
-                      key={m.value}
-                      selected={!shareAllTime && m.value === shareMonth}
-                      onClick={() => { setShareMonth(m.value); setShareAllTime(false); setMonthMenuAnchor(null); }}
-                      sx={{ fontSize: "0.8rem", py: 1, display: "flex", justifyContent: "space-between" }}
-                    >
-                      <ListItemText primaryTypographyProps={{ fontSize: "0.8rem" }}>{m.label}</ListItemText>
-                      {!shareAllTime && m.value === shareMonth && <CheckIcon sx={{ fontSize: 16, ml: 1.5, color: "primary.main" }} />}
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </Stack>
+        {/* Editorial impact block — app-theme-aware surface, confident typography,
+            one hero stat + 4 supporting tiles + single share CTA. Downloadable
+            share card preview lives in the Dialog below, not on-page. Uses the
+            app palette (not shareTheme) so light/dark both have proper contrast. */}
+        <Box sx={{
+          position: "relative",
+          borderRadius: "16px",
+          overflow: "hidden",
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          backgroundImage: (theme) => `radial-gradient(circle at 100% 0%, ${alpha(theme.palette.primary.main, theme.palette.mode === "dark" ? 0.16 : 0.07)} 0%, transparent 55%)`,
+          px: { xs: 2, sm: 2.5 },
+          py: { xs: 2, sm: 2.25 },
+        }}>
+          {/* Top bar: overline + period controls (tight single row) */}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: { xs: 1.5, sm: 1.75 }, position: "relative", zIndex: 1 }}>
+            <Typography variant="subtitle2" fontWeight={700} color="text.primary">
+              Share Your Impact
+            </Typography>
 
-              {/* ── Mobile: single dropdown (All Time + months merged) ───── */}
+            {/* Desktop: All Time + Month buttons — both neutral-toned so the
+                Share my impact CTA remains the sole primary action. Selected
+                state is indicated with a subtle filled background, not primary. */}
+            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ display: { xs: "none", sm: "flex" } }}>
               <Button
                 size="small"
-                variant="contained"
-                onClick={() => setMonthSheetOpen(true)}
+                variant="outlined"
+                onClick={() => setShareAllTime(true)}
+                sx={{
+                  borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.72rem",
+                  px: 1.25, py: 0.25, minWidth: 0, minHeight: 26,
+                  borderColor: "divider",
+                  color: shareAllTime ? "text.primary" : "text.secondary",
+                  bgcolor: (theme) => shareAllTime ? alpha(theme.palette.text.primary, theme.palette.mode === "dark" ? 0.08 : 0.05) : "transparent",
+                  "&:hover": { bgcolor: (theme) => alpha(theme.palette.text.primary, theme.palette.mode === "dark" ? 0.1 : 0.06), borderColor: "divider" },
+                }}
+              >
+                All Time
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={(e) => setMonthMenuAnchor(e.currentTarget)}
                 endIcon={<ChevronRightIcon sx={{ fontSize: "14px !important", transform: "rotate(90deg)", ml: -0.5 }} />}
                 sx={{
-                  display: { xs: "inline-flex", sm: "none" },
-                  borderRadius: "8px", textTransform: "none",
-                  fontWeight: 600, fontSize: "0.75rem",
-                  px: 1.5, py: 0.4, minWidth: 0,
+                  borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.72rem",
+                  px: 1.25, py: 0.25, minWidth: 0, minHeight: 26,
+                  borderColor: "divider",
+                  color: !shareAllTime ? "text.primary" : "text.secondary",
+                  bgcolor: (theme) => !shareAllTime ? alpha(theme.palette.text.primary, theme.palette.mode === "dark" ? 0.08 : 0.05) : "transparent",
+                  "&:hover": { bgcolor: (theme) => alpha(theme.palette.text.primary, theme.palette.mode === "dark" ? 0.1 : 0.06), borderColor: "divider" },
                 }}
               >
-                {shareAllTime ? "All Time" : (shareMonthOptions.find((m) => m.value === shareMonth)?.label?.replace(" (Current)", "") ?? "Month")}
+                {shareMonthOptions.find((m) => m.value === shareMonth)?.label?.replace(" (Current)", "") ?? "Month"}
               </Button>
-            </Stack>
-          </Box>
-
-          {/* Month picker bottom sheet (mobile only) */}
-          <Drawer
-            anchor="bottom"
-            open={monthSheetOpen}
-            onClose={() => setMonthSheetOpen(false)}
-            sx={{ "& .MuiDrawer-paper": { borderRadius: "16px 16px 0 0", maxHeight: "50vh" } }}
-          >
-            <Box sx={{ pt: 1.5, pb: 1 }}>
-              <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: "divider", mx: "auto", mb: 1.5 }} />
-              <Typography variant="subtitle2" fontWeight={700} sx={{ px: 2, mb: 1 }}>Select period</Typography>
-              {/* All Time option */}
-              <Box
-                component="button"
-                onClick={() => { setShareAllTime(true); setMonthSheetOpen(false); }}
-                sx={{
-                  display: "flex", alignItems: "center", width: "100%",
-                  px: 2, py: 1.5, border: "none",
-                  bgcolor: shareAllTime ? "primary.50" : "transparent",
-                  cursor: "pointer", fontFamily: "inherit",
-                  "&:hover": { bgcolor: shareAllTime ? "primary.100" : "action.hover" },
-                  "&:active": { bgcolor: "action.selected" },
-                }}
+              <Menu
+                anchorEl={monthMenuAnchor}
+                open={Boolean(monthMenuAnchor)}
+                onClose={() => setMonthMenuAnchor(null)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                slotProps={{ paper: { sx: { borderRadius: "10px", mt: 0.5, minWidth: 200 } } }}
               >
-                <Typography variant="body2" sx={{ fontWeight: shareAllTime ? 700 : 500, color: shareAllTime ? "primary.main" : "text.primary" }}>
-                  All Time
-                </Typography>
-              </Box>
-              <Divider sx={{ my: 0.5 }} />
-              {/* Month options */}
-              {shareMonthOptions.map((m) => (
-                <Box
-                  key={m.value}
-                  component="button"
-                  onClick={() => { setShareMonth(m.value); setShareAllTime(false); setMonthSheetOpen(false); }}
-                  sx={{
-                    display: "flex", alignItems: "center", width: "100%",
-                    px: 2, py: 1.5, border: "none",
-                    bgcolor: !shareAllTime && m.value === shareMonth ? "primary.50" : "transparent",
-                    cursor: "pointer", fontFamily: "inherit",
-                    "&:hover": { bgcolor: !shareAllTime && m.value === shareMonth ? "primary.100" : "action.hover" },
-                    "&:active": { bgcolor: "action.selected" },
-                  }}
-                >
-                  <Typography variant="body2" sx={{ fontWeight: !shareAllTime && m.value === shareMonth ? 700 : 400, color: !shareAllTime && m.value === shareMonth ? "primary.main" : "text.primary" }}>
-                    {m.label}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          </Drawer>
+                {shareMonthOptions.map((m) => (
+                  <MenuItem
+                    key={m.value}
+                    selected={!shareAllTime && m.value === shareMonth}
+                    onClick={() => { setShareMonth(m.value); setShareAllTime(false); setMonthMenuAnchor(null); }}
+                    sx={{ fontSize: "0.8rem", py: 1, display: "flex", justifyContent: "space-between" }}
+                  >
+                    <ListItemText primaryTypographyProps={{ fontSize: "0.8rem" }}>{m.label}</ListItemText>
+                    {!shareAllTime && m.value === shareMonth && <CheckIcon sx={{ fontSize: 16, ml: 1.5, color: "primary.main" }} />}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Stack>
 
-          {/* ── Content grid: thumbnail | stats + actions ──────────────── */}
-          <Box sx={{
-            px: 2,
-            py: 2,
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "200px 1fr" },
-            gap: 2,
-            alignItems: "start",
-          }}>
-            {/* Thumbnail - pixel-perfect scaled card */}
-            <Box
-              onClick={() => !isMobile && setShareOpen(true)}
+            {/* Mobile: single dropdown — neutral-toned so Share CTA stays primary */}
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setMonthSheetOpen(true)}
+              endIcon={<ChevronRightIcon sx={{ fontSize: "14px !important", transform: "rotate(90deg)", ml: -0.5 }} />}
               sx={{
-                justifySelf: { xs: "center", sm: "start" },
-                width: { xs: 320, sm: 200 },
-                height: { xs: thumbHXs, sm: thumbHSm },
-                flexShrink: 0,
-                overflow: "hidden",
-                cursor: { xs: "default", sm: "pointer" },
-                position: "relative",
-                borderRadius: "8px",
-                "&:hover .share-thumb-overlay": { opacity: { xs: 0, sm: 1 } },
+                display: { xs: "inline-flex", sm: "none" },
+                borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.72rem",
+                px: 1.25, py: 0.25, minWidth: 0, minHeight: 26,
+                borderColor: "divider",
+                color: "text.primary",
+                bgcolor: (theme) => alpha(theme.palette.text.primary, theme.palette.mode === "dark" ? 0.08 : 0.05),
+                "&:hover": { bgcolor: (theme) => alpha(theme.palette.text.primary, theme.palette.mode === "dark" ? 0.1 : 0.06), borderColor: "divider" },
               }}
             >
-              <Box sx={{ width: SHARE_CARD_WIDTH, height: 420, transform: { xs: `scale(${thumbScaleXs})`, sm: `scale(${thumbScaleSm})` }, transformOrigin: "top left", pointerEvents: "none" }}>
+              {shareAllTime ? "All Time" : (shareMonthOptions.find((m) => m.value === shareMonth)?.label?.replace(" (Current)", "") ?? "Month")}
+            </Button>
+          </Stack>
+
+          {/* Body grid: thumbnail preview on left, editorial content on right.
+              Stacks on mobile (thumbnail first). Right content is vertically
+              centered against the thumbnail height on desktop. */}
+          <Box sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: `${thumbWTablet}px 1fr`, lg: `${thumbW}px 1fr` },
+            gap: { xs: 1.5, sm: 2 },
+            alignItems: { xs: "start", sm: "center" },
+            position: "relative",
+            zIndex: 1,
+          }}>
+            {/* Thumbnail - pixel-perfect scaled share card. Sized per breakpoint:
+                xs=320 (mobile, full row), sm/md=272 (tablets, ~220 tall),
+                lg+=180 (desktop beside editorial content). */}
+            <Box
+              onClick={() => setShareOpen(true)}
+              sx={{
+                justifySelf: { xs: "center", sm: "start" },
+                width: { xs: thumbWMobile, sm: thumbWTablet, lg: thumbW },
+                height: { xs: thumbHMobile, sm: thumbHTablet, lg: thumbH },
+                flexShrink: 0,
+                overflow: "hidden",
+                cursor: "pointer",
+                position: "relative",
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
+                "&:hover .share-thumb-overlay": { opacity: 1 },
+              }}
+            >
+              <Box sx={{ width: SHARE_CARD_WIDTH, height: 420, transform: { xs: `scale(${thumbScaleMobile})`, sm: `scale(${thumbScaleTablet})`, lg: `scale(${thumbScale})` }, transformOrigin: "top left", pointerEvents: "none" }}>
                 {shareCardContent}
               </Box>
               <Box
                 className="share-thumb-overlay"
                 sx={{
                   position: "absolute", inset: 0,
-                  display: { xs: "none", sm: "flex" }, alignItems: "center", justifyContent: "center",
+                  display: "flex", alignItems: "center", justifyContent: "center",
                   bgcolor: "rgba(0,0,0,0.35)", opacity: 0,
                   transition: "opacity 0.2s",
                   borderRadius: "8px",
@@ -1360,90 +1336,150 @@ export default function ProfilePage() {
               </Box>
             </Box>
 
-            {/* ── Mobile: CTA buttons directly below thumbnail ───────── */}
-            {isMobile && (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {/* Primary action */}
-                <Button
-                  fullWidth
-                  variant="contained"
-                  startIcon={<DownloadOutlinedIcon sx={{ fontSize: 18 }} />}
-                  sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.8rem", py: 1 }}
-                >
-                  Download stats card
-                </Button>
-                {/* Social share row */}
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0.75 }}>
+            {/* Editorial content column — hero above, stat-row + Share below */}
+            <Stack spacing={{ xs: 1.5, sm: 1.75 }}>
+              {/* Hero text + chip */}
+              <Box>
+                <Stack direction="row" alignItems="baseline" spacing={1} flexWrap="wrap">
+                  <Typography sx={{
+                    fontWeight: 800,
+                    fontSize: { xs: "1.75rem", sm: "2.25rem" },
+                    lineHeight: 1,
+                    letterSpacing: "-0.03em",
+                    color: "text.primary",
+                  }}>
+                    {heroLearners}
+                  </Typography>
+                  <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.95rem", sm: "1.1rem" }, color: "text.secondary", letterSpacing: "-0.01em" }}>
+                    learners impacted · {heroTail}
+                  </Typography>
+                </Stack>
+                <Chip
+                  icon={<TrendingUpOutlinedIcon sx={{ fontSize: 13 }} />}
+                  label={shareLabels.percentile}
+                  size="small"
+                  sx={{ mt: 1, height: 22, fontSize: "0.68rem", fontWeight: 600, bgcolor: (theme) => alpha(theme.palette.success.main, theme.palette.mode === "dark" ? 0.18 : 0.1), border: "1px solid", borderColor: (theme) => alpha(theme.palette.success.main, theme.palette.mode === "dark" ? 0.35 : 0.25), color: "success.main", "& .MuiChip-icon": { color: "success.main", ml: "4px" }, "& .MuiChip-label": { px: 0.75 } }}
+                />
+              </Box>
+
+              {/* Stat pills + Share button — uses container queries so the
+                  layout reacts to the ACTUAL block width, not viewport width.
+                  This handles both sidebar-collapsed wide layouts and
+                  sidebar-expanded narrow layouts correctly.
+                  • block narrower than ~760px: 2×2 pills + full-width Share
+                  • block wider: all 5 items on one line, pills flex equally */}
+              <Box sx={{ containerType: "inline-size" }}>
+                <Box sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: { xs: 0.75, sm: 1 },
+                  alignItems: "stretch",
+                  "& > .stat-pill": { flex: "1 1 calc(50% - 4px)" },
+                  "& > .share-cta": { flex: "1 1 100%" },
+                  "@container (min-width: 900px)": {
+                    flexWrap: "nowrap",
+                    "& > .stat-pill": { flex: "1 1 0" },
+                    "& > .share-cta": { flex: "0 0 auto", width: "auto" },
+                  },
+                }}>
+                  {[
+                    { value: activeShareData.sessions, label: "Activities" },
+                    { value: `${activeShareData.hours}`, suffix: "hrs", label: (isTillDate ? shareLabels.hoursTillDate : shareLabels.hoursMonthly).replace(/ this month$/, "").replace(/^Total hours of /, "Total ").replace(/^Total hours /, "Total ") },
+                    { value: `${activeShareData.rating}`, suffix: "/5", label: "Avg rating" },
+                    { value: activeShareData.rated4Plus === activeShareData.sessions ? "100%" : `${Math.round((+activeShareData.rated4Plus / +activeShareData.sessions) * 100)}%`, label: "Activities rated 4+" },
+                  ].map((s) => (
+                    <Box key={s.label} className="stat-pill" sx={{
+                      minWidth: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                      bgcolor: (theme) => alpha(theme.palette.text.primary, theme.palette.mode === "dark" ? 0.04 : 0.025),
+                      border: "1px solid",
+                      borderColor: "divider",
+                      borderRadius: "10px",
+                      px: { xs: 1, sm: 1.25 },
+                      py: 1,
+                      minHeight: 44,
+                    }}>
+                      <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5, minWidth: 0, flex: 1 }}>
+                        <Typography sx={{ fontWeight: 700, fontSize: { xs: "1rem", sm: "1.05rem" }, lineHeight: 1.1, letterSpacing: "-0.02em", color: "text.primary", flexShrink: 0 }}>
+                          {s.value}
+                          {s.suffix && <Box component="span" sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem" }, fontWeight: 600, color: "text.secondary", ml: 0.25 }}>{s.suffix}</Box>}
+                        </Typography>
+                        <Typography sx={{ fontSize: { xs: "0.7rem", sm: "0.72rem" }, color: "text.secondary", fontWeight: 500, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                          {s.label}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
                   <Button
-                    variant="soft"
-                    size="small"
-                    startIcon={<LinkedInIcon sx={{ fontSize: 16 }} />}
-                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
+                    className="share-cta"
+                    variant="contained"
+                    startIcon={<IosShareOutlinedIcon sx={{ fontSize: 16 }} />}
+                    onClick={() => setShareOpen(true)}
+                    sx={{
+                      borderRadius: "10px",
+                      textTransform: "none", fontWeight: 600, fontSize: "0.8rem",
+                      px: 2, py: 1, minHeight: 44,
+                      whiteSpace: "nowrap",
+                    }}
                   >
-                    LinkedIn
-                  </Button>
-                  <Button
-                    variant="soft"
-                    size="small"
-                    startIcon={<XIcon sx={{ fontSize: 14 }} />}
-                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
-                  >
-                    X
-                  </Button>
-                  <Button
-                    variant="soft"
-                    size="small"
-                    startIcon={<FacebookIcon sx={{ fontSize: 16 }} />}
-                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", py: 0.75 }}
-                  >
-                    Facebook
+                    Share my impact
                   </Button>
                 </Box>
               </Box>
-            )}
-
-            {/* ── Desktop: Stats + actions column ────────────────────── */}
-            {!isMobile && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {/* Stats section */}
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.75 }}>{isTillDate ? "Your all-time impact" : "Your month at a glance"}</Typography>
-                <Box sx={{ display: "flex", gap: 0 }}>
-                {[
-                  { value: activeShareData.sessions, label: "Sessions" },
-                  { value: `${activeShareData.hours}h`, label: "Hours" },
-                  { value: activeShareData.learners, label: "Learners" },
-                  { value: `${activeShareData.rating}`, label: "Rating" },
-                  { value: activeShareData.rated4Plus === activeShareData.sessions ? "100%" : `${Math.round((+activeShareData.rated4Plus / +activeShareData.sessions) * 100)}%`, label: "4+ rated" },
-                ].map((s, i, arr) => (
-                  <Box key={s.label} sx={{ textAlign: "center", flex: 1, px: 0.5, ...(i < arr.length - 1 && { borderRight: "1px solid", borderColor: "divider" }) }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: "1rem", color: "text.primary", lineHeight: 1.2, letterSpacing: "-0.01em" }}>{s.value}</Typography>
-                    <Typography sx={{ fontSize: "0.6rem", color: "text.secondary", fontWeight: 500, mt: 0.25 }}>{s.label}</Typography>
-                  </Box>
-                ))}
-              </Box>
-              </Box>
-
-              {/* Actions section */}
-              <Box>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem", fontWeight: 500, mb: 0.75, display: "block" }}>Download your stats card or share directly to social media.</Typography>
-                <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", gap: 0.75 }}>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<IosShareOutlinedIcon sx={{ fontSize: 14 }} />}
-                    onClick={() => setShareOpen(true)}
-                    sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", px: 2, py: 0.6 }}
-                  >
-                    Preview & share
-                  </Button>
-                  <Button variant="soft" size="small" startIcon={<DownloadOutlinedIcon sx={{ fontSize: 14 }} />} sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600, fontSize: "0.75rem", px: 1.5, minWidth: 0 }}>Download</Button>
-                </Stack>
-              </Box>
-            </Box>
-            )}
+            </Stack>
           </Box>
-        </Card>
+        </Box>
+
+        {/* Month picker bottom sheet (mobile only) */}
+        <Drawer
+          anchor="bottom"
+          open={monthSheetOpen}
+          onClose={() => setMonthSheetOpen(false)}
+          sx={{ "& .MuiDrawer-paper": { borderRadius: "16px 16px 0 0", maxHeight: "50vh" } }}
+        >
+          <Box sx={{ pt: 1.5, pb: 1 }}>
+            <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: "divider", mx: "auto", mb: 1.5 }} />
+            <Typography variant="subtitle2" fontWeight={700} sx={{ px: 2, mb: 1 }}>Select period</Typography>
+            <Box
+              component="button"
+              onClick={() => { setShareAllTime(true); setMonthSheetOpen(false); }}
+              sx={{
+                display: "flex", alignItems: "center", width: "100%",
+                px: 2, py: 1.5, border: "none",
+                bgcolor: shareAllTime ? "primary.50" : "transparent",
+                cursor: "pointer", fontFamily: "inherit",
+                "&:hover": { bgcolor: shareAllTime ? "primary.100" : "action.hover" },
+                "&:active": { bgcolor: "action.selected" },
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: shareAllTime ? 700 : 500, color: shareAllTime ? "primary.main" : "text.primary" }}>
+                All Time
+              </Typography>
+            </Box>
+            <Divider sx={{ my: 0.5 }} />
+            {shareMonthOptions.map((m) => (
+              <Box
+                key={m.value}
+                component="button"
+                onClick={() => { setShareMonth(m.value); setShareAllTime(false); setMonthSheetOpen(false); }}
+                sx={{
+                  display: "flex", alignItems: "center", width: "100%",
+                  px: 2, py: 1.5, border: "none",
+                  bgcolor: !shareAllTime && m.value === shareMonth ? "primary.50" : "transparent",
+                  cursor: "pointer", fontFamily: "inherit",
+                  "&:hover": { bgcolor: !shareAllTime && m.value === shareMonth ? "primary.100" : "action.hover" },
+                  "&:active": { bgcolor: "action.selected" },
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: !shareAllTime && m.value === shareMonth ? 700 : 400, color: !shareAllTime && m.value === shareMonth ? "primary.main" : "text.primary" }}>
+                  {m.label}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Drawer>
 
         {/* ── Share Impact Dialog ─────────────────────────────────────── */}
         <Dialog
@@ -1583,7 +1619,7 @@ export default function ProfilePage() {
         const topRowCards = isEvalOrMod || isV1Mode ? [...ratingCards] : [...ratingCards, onTimeHeroCard];
         return (
           <>
-            <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.6rem", letterSpacing: "0.12em", mb: 0, display: "block" }}>
+            <Typography variant="subtitle2" fontWeight={700} color="text.primary" sx={{ mb: 1, display: "block" }}>
               Ratings
             </Typography>
             <Box sx={{
@@ -1666,20 +1702,17 @@ export default function ProfilePage() {
                   <ResponsiveContainer>
                     {(() => {
                       const months = isMidUser ? midEngagementMonths : engagementMonths;
-                      const useYearly = months.length > 12;
-                      const yearly = useYearly ? aggregateYearly(chart.data, months) : null;
-                      const chartData = useYearly
-                        ? yearly!.labels.map((label, i) => ({ month: label, value: yearly!.data[i] }))
-                        : chart.data.map((v, i) => ({ month: months[i], value: v }));
+                      const tickInterval = months.length > 12 ? 11 : 0;
+                      const chartData = chart.data.map((v, i) => ({ month: months[i], value: v }));
                       return (
-                        <AreaChart data={chartData} margin={{ top: 4, right: useYearly ? 14 : 4, left: useYearly ? 10 : 0, bottom: 0 }}>
+                        <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                           <defs>
                             <linearGradient id={`grad-${chart.title.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
                               <stop offset="0%" stopColor={chart.color} stopOpacity={0.22} />
                               <stop offset="100%" stopColor={chart.color} stopOpacity={0.02} />
                             </linearGradient>
                           </defs>
-                          <XAxis dataKey="month" tick={{ fontSize: 8, fill: "hsl(var(--md-on-surface) / 0.45)" }} axisLine={false} tickLine={false} interval={0} minTickGap={8} />
+                          <XAxis dataKey="month" tick={{ fontSize: 8, fill: "hsl(var(--md-on-surface) / 0.45)" }} axisLine={false} tickLine={false} interval={tickInterval} minTickGap={12} />
                           <YAxis hide domain={["auto", "auto"]} />
                           <Tooltip
                             cursor={{ stroke: chart.color, strokeDasharray: "3 3", strokeOpacity: 0.55, strokeWidth: 1 }}
@@ -1699,7 +1732,7 @@ export default function ProfilePage() {
                             stroke={chart.color}
                             strokeWidth={2}
                             fill={`url(#grad-${chart.title.replace(/\s/g, "")})`}
-                            dot={useYearly ? { r: 3, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 } : false}
+                            dot={false}
                             activeDot={{ r: 5, fill: chart.color, stroke: "hsl(var(--md-surface))", strokeWidth: 2 }}
                           />
                         </AreaChart>
