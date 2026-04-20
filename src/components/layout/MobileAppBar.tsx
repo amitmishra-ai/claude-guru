@@ -11,6 +11,7 @@ export function MobileAppBar() {
   const navigate = useNavigate();
   const isDarkMode = useAppSelector((s) => s.ui.isDarkMode);
   const guruName = useAppSelector((s) => s.profile.guruName);
+  const guruPhoto = useAppSelector((s) => s.profile.guruPhoto);
 
   const initials = guruName
     .split(" ")
@@ -57,6 +58,7 @@ export function MobileAppBar() {
             sx={{ p: 0.5 }}
           >
             <Avatar
+              src={guruPhoto ?? undefined}
               sx={{
                 width: 28,
                 height: 28,

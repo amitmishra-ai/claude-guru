@@ -174,6 +174,7 @@ export function Sidebar() {
   const navigate = useNavigate();
   const isNavCollapsed = useAppSelector((s) => s.ui.isNavCollapsed);
   const guruName = useAppSelector((s) => s.profile.guruName);
+  const guruPhoto = useAppSelector((s) => s.profile.guruPhoto);
   const [isHovered, setIsHovered] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const sidebarWidth = isNavCollapsed ? 80 : 256;
@@ -458,7 +459,7 @@ export function Sidebar() {
                   onClick={(e) => setMenuAnchor(e.currentTarget)}
                   sx={{ borderRadius: "50%", p: 0.5 }}
                 >
-                  <Avatar variant="circular" sx={{ width: 32, height: 32, fontSize: "0.75rem", fontWeight: 700, bgcolor: "primary.main", borderRadius: "50%" }}>
+                  <Avatar variant="circular" src={guruPhoto ?? undefined} sx={{ width: 32, height: 32, fontSize: "0.75rem", fontWeight: 700, bgcolor: "primary.main", borderRadius: "50%" }}>
                     {initials}
                   </Avatar>
                 </ButtonBase>
@@ -479,7 +480,7 @@ export function Sidebar() {
                 "&:hover": { backgroundColor: "hsl(var(--md-surface-container) / 0.3)" },
               }}
             >
-              <Avatar variant="circular" sx={{ width: 32, height: 32, fontSize: "0.75rem", fontWeight: 700, bgcolor: "primary.main", borderRadius: "50%" }}>
+              <Avatar variant="circular" src={guruPhoto ?? undefined} sx={{ width: 32, height: 32, fontSize: "0.75rem", fontWeight: 700, bgcolor: "primary.main", borderRadius: "50%" }}>
                 {initials}
               </Avatar>
               <Box sx={{ flex: 1, textAlign: "left", overflow: "hidden" }}>
