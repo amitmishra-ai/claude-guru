@@ -351,7 +351,7 @@ export default function ProfilePage() {
 
   // Generate last 6 months for the share card month dropdown
   const shareMonthOptions = useMemo(() => {
-    const base = new Date("2026-03-24");
+    const base = new Date("2026-04-21");
     const months: { value: string; label: string }[] = [];
     for (let i = 0; i < 6; i++) {
       const d = new Date(base.getFullYear(), base.getMonth() - i, 1);

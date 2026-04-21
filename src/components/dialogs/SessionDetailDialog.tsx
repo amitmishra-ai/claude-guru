@@ -62,7 +62,7 @@ export function SessionDetailDialog() {
     >
       <Box sx={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
         <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 10, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 3, py: 2 }}>
-          Event details &amp; confirmation
+          Activity Details &amp; confirmation
         </DialogTitle>
 
         <DialogContent className="themed-scrollbar" sx={{ flex: 1, overflowY: "auto", scrollbarGutter: "stable", p: 0 }}>

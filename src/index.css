@@ -151,6 +151,10 @@
   --gl-stat-hours: #196ae5;
   --gl-stat-sessions: #22bb34;
   --gl-stat-learners: #9c27b0;
+
+  /* Chart bar color — saturated blue tuned for light bg. Paired with a
+     brighter saturated value in dark mode for consistent visual weight. */
+  --gl-chart-bar-earnings: #2563eb;
 }
 
 .dark {
@@ -296,6 +300,10 @@
   --gl-stat-hours: #66bbff;
   --gl-stat-sessions: #66bb6a;
   --gl-stat-learners: #ce93d8;
+
+  /* Chart bar color (dark) — brighter saturated blue with enough luminance
+     to pop against the dark canvas without losing saturation. */
+  --gl-chart-bar-earnings: #4f8cff;
 }
 
 * {

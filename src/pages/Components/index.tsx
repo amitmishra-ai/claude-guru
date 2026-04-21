@@ -1475,8 +1475,8 @@ function ResidencyCards() {
             title="AI in Practice Workshop"
             sessionType="Residency"
             batch="AIML Online March 26 A"
-            dateYmd="2026-03-20"
-            endDateYmd="2026-03-22"
+            dateYmd="2026-04-17"
+            endDateYmd="2026-04-19"
             start={minutes(9)}
             end={minutes(17)}
             locationText="Bangalore"
@@ -1503,8 +1503,8 @@ function ResidencyCards() {
             title="Deep Learning Fundamentals"
             sessionType="Residency"
             batch="AIML Online March 26 A"
-            dateYmd="2026-04-02"
-            endDateYmd="2026-04-04"
+            dateYmd="2026-04-30"
+            endDateYmd="2026-05-02"
             start={minutes(9)}
             end={minutes(17)}
             locationText="Bangalore"
@@ -1532,8 +1532,8 @@ function ResidencyCards() {
             title="Deep Learning Fundamentals"
             sessionType="Residency"
             batch="AIML Online March 26 A"
-            dateYmd="2026-04-02"
-            endDateYmd="2026-04-04"
+            dateYmd="2026-04-30"
+            endDateYmd="2026-05-02"
             start={minutes(9)}
             end={minutes(17)}
             locationText="Bangalore"
@@ -1560,8 +1560,8 @@ function ResidencyCards() {
             title="AI in Practice Workshop"
             sessionType="Residency"
             batch="AIML Online March 26 A"
-            dateYmd="2026-03-27"
-            endDateYmd="2026-03-29"
+            dateYmd="2026-04-24"
+            endDateYmd="2026-04-26"
             start={minutes(9)}
             end={minutes(17)}
             locationText="Bangalore"
@@ -1589,8 +1589,8 @@ function ResidencyCards() {
             title="Program Overview (All)"
             sessionType="Residency"
             batch="AIML Online March 26 A"
-            dateYmd="2026-03-05"
-            endDateYmd="2026-03-07"
+            dateYmd="2026-04-02"
+            endDateYmd="2026-04-04"
             start={minutes(9)}
             end={minutes(17)}
             topRight={
@@ -1615,8 +1615,8 @@ function ResidencyCards() {
             title="Program Overview (All)"
             sessionType="Residency"
             batch="AIML Online March 26 A"
-            dateYmd="2026-03-05"
-            endDateYmd="2026-03-07"
+            dateYmd="2026-04-02"
+            endDateYmd="2026-04-04"
             start={minutes(9)}
             end={minutes(17)}
             topRight={
@@ -1642,8 +1642,8 @@ function ResidencyCards() {
             title="Program Overview (All)"
             sessionType="Residency"
             batch="AIML Online March 26 A"
-            dateYmd="2026-01-10"
-            endDateYmd="2026-01-12"
+            dateYmd="2026-02-07"
+            endDateYmd="2026-02-09"
             start={minutes(9)}
             end={minutes(17)}
             topRight={
@@ -1670,8 +1670,8 @@ function ResidencyCards() {
               title="AI in Practice Workshop"
               sessionType="Residency"
               batch="AIML Online March 26 A"
-              dateYmd="2026-02-10"
-              endDateYmd="2026-02-12"
+              dateYmd="2026-03-10"
+              endDateYmd="2026-03-12"
               start={minutes(9)}
               end={minutes(17)}
               topRight={
@@ -1691,8 +1691,8 @@ function ResidencyCards() {
               title="AI in Practice Workshop"
               sessionType="Residency"
               batch="AIML Online March 26 B"
-              dateYmd="2026-02-10"
-              endDateYmd="2026-02-12"
+              dateYmd="2026-03-10"
+              endDateYmd="2026-03-12"
               start={minutes(9)}
               end={minutes(17)}
               topRight={
@@ -1730,8 +1730,8 @@ function OnlineSessionCards() {
         batch="PGP-AIML-BA-UTA-Nov25-C"
         program="PGP-AIML"
         contactEmail="gurus_support@greatlearning.in"
-        startDateYmd="2026-01-22"
-        endDateYmd="2026-02-14"
+        startDateYmd="2026-02-19"
+        endDateYmd="2026-03-14"
       />
 
       {/* 1. Mentoring - Confirmed */}
@@ -1742,7 +1742,7 @@ function OnlineSessionCards() {
             sessionType="Online session"
             onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
-            dateYmd="2026-03-18"
+            dateYmd="2026-04-15"
             start={minutes(18)}
             end={minutes(20)}
             status={STATUS_CONFIRMED()}
@@ -1765,7 +1765,7 @@ function OnlineSessionCards() {
             sessionType="Online session"
             onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
-            dateYmd="2026-03-18"
+            dateYmd="2026-04-15"
             start={minutes(18)}
             end={minutes(20)}
             status={STATUS_CONFIRMED()}
@@ -1820,7 +1820,7 @@ function OnlineSessionCards() {
             sessionType="Online session"
             onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
-            dateYmd="2026-03-20"
+            dateYmd="2026-04-17"
             start={minutes(9, 30)}
             end={minutes(11)}
             status={STATUS_SCHEDULED}
@@ -1843,7 +1843,7 @@ function OnlineSessionCards() {
             sessionType="Online session"
             onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
-            dateYmd="2026-03-20"
+            dateYmd="2026-04-17"
             start={minutes(18)}
             end={minutes(20)}
             status={STATUS_SCHEDULED}
@@ -1894,7 +1894,7 @@ function OnlineSessionCards() {
             title="Mock Interview"
             sessionType="Career mentoring session"
             batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-03-19"
+            dateYmd="2026-04-16"
             start={minutes(16)}
             end={minutes(17)}
             status={STATUS_CONFIRMED()}
@@ -1918,8 +1918,8 @@ function OnlineSessionCards() {
           batch="PGP-AIML-BA-UTA-Nov25-C"
           program="PGP-AIML"
           contactEmail="gurus_support@greatlearning.in"
-          startDateYmd="2026-01-22"
-          endDateYmd="2026-02-14"
+          startDateYmd="2026-02-19"
+          endDateYmd="2026-03-14"
           onViewDetails={() => setPlannedDetailOpen(true)}
         />
       </ComponentSection>
@@ -1932,7 +1932,7 @@ function OnlineSessionCards() {
             sessionType="Online session"
             onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
-            dateYmd="2026-03-12"
+            dateYmd="2026-04-09"
             start={minutes(18)}
             end={minutes(20)}
             topRight={
@@ -1957,7 +1957,7 @@ function OnlineSessionCards() {
             sessionType="Online session"
             onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
-            dateYmd="2026-03-12"
+            dateYmd="2026-04-09"
             start={minutes(18)}
             end={minutes(20)}
             topRight={
@@ -1987,7 +1987,7 @@ function OnlineSessionCards() {
             sessionType="Online session"
             onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
-            dateYmd="2026-01-15"
+            dateYmd="2026-02-12"
             start={minutes(9, 30)}
             end={minutes(11)}
             topRight={
@@ -2012,7 +2012,7 @@ function OnlineSessionCards() {
             sessionType="Online session"
             onCourseClick={() => {}}
             batch="PGPDS.O.MAR26.A"
-            dateYmd="2026-03-05"
+            dateYmd="2026-04-02"
             start={minutes(18)}
             end={minutes(20)}
             topRight={
@@ -2041,7 +2041,7 @@ function OnlineSessionCards() {
               title="Statistics for Data Science"
               sessionType="Online session"
               batch="PGPDS.O.MAR26.A"
-              dateYmd="2026-03-05"
+              dateYmd="2026-04-02"
               start={minutes(18)}
               end={minutes(20)}
               topRight={
@@ -2065,7 +2065,7 @@ function OnlineSessionCards() {
               title="Statistics for Data Science"
               sessionType="Online session"
               batch="PGPDS.O.MAR26.B"
-              dateYmd="2026-03-05"
+              dateYmd="2026-04-02"
               start={minutes(18)}
               end={minutes(20)}
               topRight={
@@ -2107,7 +2107,7 @@ function CareerMentorOnlineSessionCards() {
             title="Career Mentoring"
             sessionType="Career mentoring session"
             batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-03-18"
+            dateYmd="2026-04-15"
             start={minutes(14)}
             end={minutes(15)}
             status={STATUS_CONFIRMED()}
@@ -2126,7 +2126,7 @@ function CareerMentorOnlineSessionCards() {
             title="Mock Interview"
             sessionType="Career mentoring session"
             batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-03-19"
+            dateYmd="2026-04-16"
             start={minutes(16)}
             end={minutes(17)}
             status={STATUS_CONFIRMED()}
@@ -2148,7 +2148,7 @@ function CareerMentorOnlineSessionCards() {
             title="Career Mentoring"
             sessionType="Career mentoring session"
             batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-03-22"
+            dateYmd="2026-04-19"
             start={minutes(14)}
             end={minutes(15)}
             status={STATUS_SCHEDULED}
@@ -2170,7 +2170,7 @@ function CareerMentorOnlineSessionCards() {
             title="Career Mentoring"
             sessionType="Career mentoring session"
             batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-03-10"
+            dateYmd="2026-04-07"
             start={minutes(14)}
             end={minutes(15)}
             topRight={
@@ -2194,7 +2194,7 @@ function CareerMentorOnlineSessionCards() {
             title="Career Mentoring"
             sessionType="Career mentoring session"
             batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-02-20"
+            dateYmd="2026-03-20"
             start={minutes(14)}
             end={minutes(15)}
             topRight={
@@ -2221,7 +2221,7 @@ function CareerMentorOnlineSessionCards() {
             title="Mock Interview"
             sessionType="Career mentoring session"
             batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-02-18"
+            dateYmd="2026-03-18"
             start={minutes(16)}
             end={minutes(17)}
             topRight={
@@ -2249,7 +2249,7 @@ function CareerMentorOnlineSessionCards() {
             title="Career Mentoring"
             sessionType="Career mentoring session"
             batch="PGP-AIML-BA-UTA-Nov25-C"
-            dateYmd="2026-01-08"
+            dateYmd="2026-02-05"
             start={minutes(14)}
             end={minutes(15)}
             topRight={
@@ -2630,6 +2630,9 @@ const ROLE_SECTIONS: Record<GuruRole, { label: string; render: () => React.React
   "Industry Expert": [
     { label: "Online Event", render: () => <OnlineSessionCards /> },
   ],
+  "Secondary Guru": [
+    { label: "Online Event", render: () => <OnlineSessionCards /> },
+  ],
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -2682,6 +2685,7 @@ const ROLE_ACTIVITIES: Record<GuruRole, { activities: ActivityType[]; note?: str
   Moderator:        { activities: ["Moderation"] },
   "Project Mentor": { activities: ["Capstone"] },
   "Industry Expert":{ activities: ["Online Session"], note: "Subset of Teacher (no Residency)" },
+  "Secondary Guru":{ activities: ["Online Session"], note: "Online sessions only; renders a 'Secondary' badge, no Join, no Polls" },
 };
 
 const DUPLICATES: { roles: string; shared: string; diff: string }[] = [

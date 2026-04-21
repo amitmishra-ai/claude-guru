@@ -4,6 +4,13 @@ All notable changes to the Guru Dashboard are documented here.
 
 ---
 
+## 2026-04-21
+
+### Payments - all-time earnings chart, latest-first, scrollable
+- **Top earnings chart now shows every month from Jan 2021 → Mar 2026 (63 bars) instead of a rolling 12-month window** — and it renders **descending** (latest month on the left, scrolling right reveals older history). Data in [src/data/demo-sessions.ts](src/data/demo-sessions.ts): replaced the hand-written 6-month `demoMonthlyEarnings` with a deterministic IIFE generator that produces 63 stable monthly entries with a realistic ramp (base 12k + ~11.4k/year growth), a 12-month seasonal multiplier, and a deterministic jitter so values don't look flat. Payments page in [src/pages/Payments/index.tsx](src/pages/Payments/index.tsx): dropped the now-unused `build12MonthChart` helper and `MONTH_SHORT` constant; new `chartData` memo does `[...demoMonthlyEarnings].reverse()` to surface latest-first; `momTrend` recalculated as `arr[0] - arr[1]` since the array is now descending. The chart wrapper wraps the `ResponsiveContainer` in a horizontal scroller (`overflowX: auto` + thin 6px webkit scrollbar) with `minWidth = bars × 36px` so each bar stays readable; XAxis `interval={0}` forces every month label to render. Chart height bumped 160 → 180 to give the scrollbar room, skeleton height matched.
+
+---
+
 ## 2026-04-20
 
 ### Profile - Share Your Impact redesigned as editorial block

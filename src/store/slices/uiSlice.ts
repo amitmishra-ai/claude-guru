@@ -36,6 +36,9 @@ interface UiState {
   isDarkMode: boolean;
   themeMode: "system" | "dark" | "light";
   isNavCollapsed: boolean;
+  /** Payments-page "Show values" toggle — lifted to Redux so the activity
+      drawer, when opened from /payments, can inherit the current visibility. */
+  paymentsShowValues: boolean;
 }
 
 const initialState: UiState = {
@@ -78,6 +81,7 @@ const initialState: UiState = {
   })(),
   themeMode: (typeof window !== "undefined" ? window.localStorage.getItem("guru-theme") as "system" | "dark" | "light" : null) || "system",
   isNavCollapsed: true,
+  paymentsShowValues: false,
 };
 
 const uiSlice = createSlice({
@@ -180,6 +184,9 @@ const uiSlice = createSlice({
     setCourseDetailId(state, action: PayloadAction<string | null>) {
       state.courseDetailId = action.payload;
     },
+    setPaymentsShowValues(state, action: PayloadAction<boolean>) {
+      state.paymentsShowValues = action.payload;
+    },
   },
 });
 
@@ -216,6 +223,7 @@ export const {
   setMarkUnavailableTarget,
   setOpenCourseDetail,
   setCourseDetailId,
+  setPaymentsShowValues,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
