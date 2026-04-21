@@ -42,6 +42,9 @@ import { useAppSelector, useAppDispatch } from "@/store";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { MobilePageHeader } from "@/components/layout/MobilePageHeader";
 import { pushToast } from "@/store/slices/toastsSlice";
+import { setSessionFocus } from "@/store/slices/sessionsSlice";
+import { setOpenSessionDetails, setPaymentsShowValues } from "@/store/slices/uiSlice";
+import type { Session } from "@/lib/types";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
@@ -82,15 +85,15 @@ const SESSION_TYPES: { type: string; dur: string; amount: number }[] = [
 
 // Payments linked to completed sessions (need summary)
 const completedSessionPayments = [
-  { event: "Mentor Session: Capstone Project Review", date: "14 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Pending", txn: "–", inv: "–", sessionId: "ch30", _date: new Date("2026-02-14") },
-  { event: "Mentor Session: Python Fundamentals", date: "12 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Pending", txn: "–", inv: "–", sessionId: "c1", _date: new Date("2026-02-12") },
-  { event: "Mentor Session: SQL Practice", date: "10 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Pending", txn: "–", inv: "–", sessionId: "c2", _date: new Date("2026-02-10") },
-  { event: "Workshop: LLM Fine-tuning", date: "9 Feb 2026", type: "Workshop", dur: "3h", amount: 18000, status: "Pending", txn: "–", inv: "–", sessionId: "ch29", _date: new Date("2026-02-09") },
-  { event: "Mentor Session: Statistics Foundations", date: "8 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-9X2M7P", inv: "INV-2026-0208-001", sessionId: "c3", _date: new Date("2026-02-08") },
-  { event: "Mentor Session: MLOps Best Practices", date: "6 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-CC3DD4", inv: "INV-2026-0206-001", sessionId: "ch28", _date: new Date("2026-02-06") },
-  { event: "Deep Learning Workshop", date: "5 Feb 2026", type: "Workshop", dur: "3h", amount: 18000, status: "Completed", txn: "TXN-GL-DL0205", inv: "INV-2026-0205-001", sessionId: "c4", _date: new Date("2026-02-05") },
-  { event: "Mentor Session: Graph Neural Networks", date: "3 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-BB2CC3", inv: "INV-2026-0203-001", sessionId: "ch27", _date: new Date("2026-02-03") },
-  { event: "Mentor Session: Data Ethics & Bias", date: "1 Feb 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-AA1BB2", inv: "INV-2026-0201-001", sessionId: "ch26", _date: new Date("2026-02-01") },
+  { event: "Mentor Session: Capstone Project Review", date: "14 Mar 2026", type: "Live", dur: "2h", amount: 12000, status: "Pending", txn: "–", inv: "–", sessionId: "ch30", _date: new Date("2026-03-14") },
+  { event: "Mentor Session: Python Fundamentals", date: "12 Mar 2026", type: "Live", dur: "2h", amount: 12000, status: "Pending", txn: "–", inv: "–", sessionId: "c1", _date: new Date("2026-03-12") },
+  { event: "Mentor Session: SQL Practice", date: "10 Mar 2026", type: "Live", dur: "2h", amount: 12000, status: "Pending", txn: "–", inv: "–", sessionId: "c2", _date: new Date("2026-03-10") },
+  { event: "Workshop: LLM Fine-tuning", date: "9 Mar 2026", type: "Workshop", dur: "3h", amount: 18000, status: "Pending", txn: "–", inv: "–", sessionId: "ch29", _date: new Date("2026-03-09") },
+  { event: "Mentor Session: Statistics Foundations", date: "8 Mar 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-9X2M7P", inv: "INV-2026-0208-001", sessionId: "c3", _date: new Date("2026-03-08") },
+  { event: "Mentor Session: MLOps Best Practices", date: "6 Mar 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-CC3DD4", inv: "INV-2026-0206-001", sessionId: "ch28", _date: new Date("2026-03-06") },
+  { event: "Deep Learning Workshop", date: "5 Mar 2026", type: "Workshop", dur: "3h", amount: 18000, status: "Completed", txn: "TXN-GL-DL0205", inv: "INV-2026-0205-001", sessionId: "c4", _date: new Date("2026-03-05") },
+  { event: "Mentor Session: Graph Neural Networks", date: "3 Mar 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-BB2CC3", inv: "INV-2026-0203-001", sessionId: "ch27", _date: new Date("2026-03-03") },
+  { event: "Mentor Session: Data Ethics & Bias", date: "1 Mar 2026", type: "Live", dur: "2h", amount: 12000, status: "Completed", txn: "TXN-GL-AA1BB2", inv: "INV-2026-0201-001", sessionId: "ch26", _date: new Date("2026-03-01") },
 ];
 
 const generatedPayments = Array.from({ length: 92 }, (_, i) => {
@@ -127,29 +130,6 @@ const fmtInr = (n: number) =>
 
 const maskValue = (val: string) => val.replace(/[0-9]/g, "•");
 
-const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-/** Show 12 months starting from the guru's first earning month. Empty future months get amount 0. */
-function build12MonthChart(earnings: typeof demoMonthlyEarnings) {
-  if (!earnings.length) return [];
-
-  // Start from the guru's first month
-  const firstKey = earnings[0].key; // e.g. "2025-10"
-  const [firstY, firstM] = firstKey.split("-").map(Number);
-
-  const result: { key: string; label: string; amount: number }[] = [];
-  for (let i = 0; i < 12; i++) {
-    let m = firstM + i;
-    let y = firstY;
-    while (m > 12) { m -= 12; y++; }
-    const key = `${y}-${String(m).padStart(2, "0")}`;
-    const label = `${MONTH_SHORT[m - 1]} ${String(y).slice(-2)}`;
-    const existing = earnings.find((e) => e.key === key);
-    result.push({ key, label, amount: existing?.amount ?? 0 });
-  }
-  return result;
-}
-
 type PaymentFilter = "All" | "Completed" | "Pending" | "Disputed";
 
 const highlightFade = keyframes`
@@ -165,7 +145,13 @@ export default function PaymentsPage() {
   const [page, setPage] = useState(0);
   const [chartLoading, setChartLoading] = useState(true);
   const [tableLoading, setTableLoading] = useState(true);
-  const [showNumbers, setShowNumbers] = useState(false);
+  /* Lifted to Redux (uiSlice.paymentsShowValues) so that opening the universal
+     activity drawer from THIS page inherits the current visibility state. */
+  const showNumbers = useAppSelector((s) => s.ui.paymentsShowValues);
+  const setShowNumbers = (next: boolean | ((prev: boolean) => boolean)) => {
+    const value = typeof next === "function" ? (next as (p: boolean) => boolean)(showNumbers) : next;
+    dispatch(setPaymentsShowValues(value));
+  };
   const rowsPerPage = 30;
 
   // Dispute state
@@ -174,7 +160,7 @@ export default function PaymentsPage() {
   const [disputeReason, setDisputeReason] = useState("");
   const [disputeNotes, setDisputeNotes] = useState("");
   const [isRefiningDispute, setIsRefiningDispute] = useState(false);
-  const disputeCutoff = new Date("2025-12-18"); // 60 days before demoNow (2026-02-16)
+  const disputeCutoff = new Date("2026-01-15"); // ~96 days before demoNow (2026-04-21)
 
   // Pick up highlight param from URL
   useEffect(() => {
@@ -216,16 +202,65 @@ export default function PaymentsPage() {
     }
     setPage(0);
   };
-  const _chartData = useMemo(() => build12MonthChart(demoMonthlyEarnings), []);
-  const chartData = isEmpty ? _chartData.map((d) => ({ ...d, amount: 0 })) : _chartData;
+  /* All-time earnings shown DESCENDING (latest on the left, oldest on the right).
+     Source data is ascending chronological; reverse once here and thread the
+     same descending array through chart + stats. */
+  const chartData = useMemo(() => {
+    const src = isEmpty ? demoMonthlyEarnings.map((d) => ({ ...d, amount: 0 })) : demoMonthlyEarnings;
+    return [...src].reverse();
+  }, [isEmpty]);
   const earningsOnly = useMemo(() => chartData.filter((d) => d.amount > 0), [chartData]);
   const totalEarnings = useMemo(() => earningsOnly.reduce((a, m) => a + m.amount, 0), [earningsOnly]);
   const avgMonthly    = useMemo(() => earningsOnly.length ? Math.round(totalEarnings / earningsOnly.length) : 0, [totalEarnings, earningsOnly]);
   const bestMonth     = useMemo(() => earningsOnly.length ? earningsOnly.reduce((a, b) => b.amount > a.amount ? b : a, earningsOnly[0]) : { label: "-", amount: 0 }, [earningsOnly]);
+  /* MoM trend: in descending order arr[0] is the most recent month and arr[1]
+     is the previous month, so latest minus previous gives the current MoM delta. */
   const momTrend      = useMemo(() => {
-    const lastTwo = earningsOnly.slice(-2);
-    return lastTwo.length === 2 ? lastTwo[1].amount - lastTwo[0].amount : 0;
+    if (earningsOnly.length < 2) return 0;
+    return earningsOnly[0].amount - earningsOnly[1].amount;
   }, [earningsOnly]);
+
+  /* Click-on-activity handler — opens the universal activity/session details
+     drawer used everywhere else (Dashboard "View Details", Courses, Calendar).
+     Prefers the real Session from Redux; if the payment row has no matching
+     session (many generated demo rows don't), we synthesize a minimal Session
+     from the payment fields so EVERY activity in the table is clickable. */
+  const allSessions = useAppSelector((s) => s.sessions.items);
+  const openActivityDrawer = (p: { event: string; date: string; type: string; dur: string; amount: number; status: string; txn: string; inv: string; sessionId?: string }) => {
+    const match = p.sessionId ? allSessions.find((s) => s.id === p.sessionId) : undefined;
+    if (match) {
+      dispatch(setSessionFocus(match));
+      dispatch(setOpenSessionDetails(true));
+      return;
+    }
+
+    // Parse "5 Mar 2026" → "2026-03-05"
+    const MONTH_IDX: Record<string, number> = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+    const [dStr, mStr, yStr] = p.date.split(" ");
+    const ymd = `${yStr}-${String(MONTH_IDX[mStr] ?? 1).padStart(2, "0")}-${String(Number(dStr) || 1).padStart(2, "0")}`;
+    const durMin = Math.round((parseFloat(p.dur.replace("h", "")) || 1) * 60);
+    const start = 600; // default 10:00
+    const typeMap: Record<string, Session["sessionType"]> = { Live: "Online session", Workshop: "Industry session", Recorded: "Others" };
+
+    const synthetic: Session = {
+      id: p.sessionId ?? `payment-${p.event}-${p.date}`,
+      title: p.event,
+      program: "-",
+      cohort: "-",
+      group: "-",
+      dateYmd: ymd,
+      start,
+      end: start + durMin,
+      location: "Online",
+      sessionType: typeMap[p.type] ?? "Others",
+      contentReady: false,
+      paymentAmountInr: p.amount,
+      transactionId: p.txn && p.txn !== "–" ? p.txn : undefined,
+      invoiceId: p.inv && p.inv !== "–" ? p.inv : undefined,
+    };
+    dispatch(setSessionFocus(synthetic));
+    dispatch(setOpenSessionDetails(true));
+  };
 
   return (
     <>
@@ -299,7 +334,7 @@ export default function PaymentsPage() {
                   </Box>
                 ))}
               </FlexBox>
-              <Skeleton variant="rounded" width="100%" height={160} />
+              <Skeleton variant="rounded" width="100%" height={200} />
             </>
           ) : (
             <>
@@ -322,55 +357,71 @@ export default function PaymentsPage() {
                   </Box>
                 ))}
               </FlexBox>
-              <Box sx={{ width: "100%", height: 160 }}>
-            <ResponsiveContainer>
-              <BarChart data={chartData} margin={{ top: 8, right: 12, left: -20, bottom: 0 }} barCategoryGap="20%">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }}
-                  tickFormatter={(v) => showNumbers ? `${(v / 1000).toFixed(0)}k` : "••"}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: "hsl(var(--md-outline-variant))", opacity: 0.15 }}
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length) return null;
-                    const val = Number(payload[0].value ?? 0);
-                    const amtStr = val > 0 ? fmtInr(val) : "–";
-                    return (
-                      <Chip
-                        size="small"
-                        label={`${label} · ${showNumbers ? amtStr : maskValue(amtStr)}`}
-                        sx={{
-                          fontSize: 11,
-                          fontWeight: 600,
-                          height: 24,
-                          bgcolor: "background.paper",
-                          border: 1,
-                          borderColor: "divider",
-                          boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+              {/* All-time chart (5+ years of monthly data) — scrolls horizontally.
+                  Bars are sized so ~16 months are visible in the first viewport
+                  on a typical desktop; scrolling right reveals older history
+                  back to 2021. Latest month is leftmost. */}
+              <Box sx={{
+                width: "100%",
+                height: 200,
+                overflowX: "auto",
+                overflowY: "hidden",
+                pb: 0.5,
+                // soft scrollbar so it doesn't eat vertical space dramatically
+                "&::-webkit-scrollbar": { height: 6 },
+                "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: 3 },
+              }}>
+                <Box sx={{ minWidth: `${Math.max(chartData.length * 68, 600)}px`, height: "100%" }}>
+                  <ResponsiveContainer>
+                    <BarChart data={chartData} margin={{ top: 8, right: 12, left: -20, bottom: 0 }} barCategoryGap="18%">
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }}
+                        axisLine={false}
+                        tickLine={false}
+                        interval={0}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }}
+                        tickFormatter={(v) => showNumbers ? `${(v / 1000).toFixed(0)}k` : "••"}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        cursor={{ fill: "hsl(var(--md-outline-variant))", opacity: 0.15 }}
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length) return null;
+                          const val = Number(payload[0].value ?? 0);
+                          const amtStr = val > 0 ? fmtInr(val) : "–";
+                          return (
+                            <Chip
+                              size="small"
+                              label={`${label} · ${showNumbers ? amtStr : maskValue(amtStr)}`}
+                              sx={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                height: 24,
+                                bgcolor: "background.paper",
+                                border: 1,
+                                borderColor: "divider",
+                                boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                              }}
+                            />
+                          );
                         }}
                       />
-                    );
-                  }}
-                />
-                <Bar
-                  dataKey="amount"
-                  radius={[4, 4, 0, 0]}
-                  fill="var(--gl-stat-hours)"
-                  fillOpacity={0.85}
-                  activeBar={{ fillOpacity: 1 }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </Box>
+                      <Bar
+                        dataKey="amount"
+                        radius={[4, 4, 0, 0]}
+                        fill="var(--gl-chart-bar-earnings)"
+                        fillOpacity={0.95}
+                        activeBar={{ fillOpacity: 1 }}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </Box>
+              </Box>
             </>
           )}
         </CardContent>
@@ -411,7 +462,7 @@ export default function PaymentsPage() {
             <TableHead>
               <TableRow sx={{ bgcolor: "action.hover" }}>
                 {([
-                  { label: "Event", key: "event" },
+                  { label: "Activity", key: "event" },
                   { label: "Date", key: "date" },
                   { label: "Type", key: "type" },
                   { label: "Duration", key: "dur" },
@@ -477,7 +528,28 @@ export default function PaymentsPage() {
                   }}
                 >
                   <TableCell sx={{ fontSize: 12, maxWidth: 280 }} title={p.event}>
-                    <Typography variant="body2" sx={{ fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <Typography
+                      component="button"
+                      onClick={() => openActivityDrawer(p)}
+                      variant="body2"
+                      sx={{
+                        fontSize: 12,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        background: "none",
+                        border: "none",
+                        p: 0,
+                        textAlign: "left",
+                        cursor: "pointer",
+                        color: "primary.main",
+                        fontWeight: 500,
+                        maxWidth: "100%",
+                        display: "block",
+                        "&:hover": { textDecoration: "underline" },
+                        "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main", outlineOffset: 2, borderRadius: "2px" },
+                      }}
+                    >
                       {p.event}
                     </Typography>
                   </TableCell>

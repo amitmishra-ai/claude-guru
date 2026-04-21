@@ -253,6 +253,37 @@ export default function DashboardPage() {
 
     return filtered;
   }, [completedSessions, selectedSessionType, selectedTimePeriod]);
+
+  /* Group completed sessions by month for accordion rendering. Order is
+     preserved (input is already most-recent-first), so the first group in
+     the list is the current / latest month. */
+  const currentMonthKey = demoNow.toISOString().slice(0, 7); // "YYYY-MM"
+  const completedMonthGroups = useMemo(() => {
+    const map = new Map<string, { key: string; label: string; sessions: typeof filteredCompletedSessions }>();
+    for (const s of filteredCompletedSessions) {
+      const key = s.dateYmd.slice(0, 7);
+      if (!map.has(key)) {
+        const label = new Date(s.dateYmd + "T00:00:00").toLocaleDateString(userLocale, { month: "long", year: "numeric" });
+        map.set(key, { key, label, sessions: [] });
+      }
+      map.get(key)!.sessions.push(s);
+    }
+    return Array.from(map.values());
+  }, [filteredCompletedSessions, userLocale]);
+  /* Accordion expand state — prefer current month. If the current month has
+     no completed activities (group missing), fall back to the latest month
+     that does have data (first in the most-recent-first list). Re-seeds
+     whenever the group list changes (filter/period swap). */
+  const [expandedCompletedMonths, setExpandedCompletedMonths] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    if (!completedMonthGroups.length) { setExpandedCompletedMonths({}); return; }
+    const defaultOpenKey = completedMonthGroups.some((g) => g.key === currentMonthKey)
+      ? currentMonthKey
+      : completedMonthGroups[0].key;
+    const seed: Record<string, boolean> = {};
+    for (const g of completedMonthGroups) seed[g.key] = g.key === defaultOpenKey;
+    setExpandedCompletedMonths(seed);
+  }, [completedMonthGroups, currentMonthKey]);
   const declinedSessions = useMemo(
     () => sessions.filter((s) => sessionDeclined[s.id]),
     [sessions, sessionDeclined]
@@ -587,6 +618,8 @@ export default function DashboardPage() {
                         const sessionStartMs = dateTimeMs(s.dateYmd, s.start);
                         const startsWithin30 = sessionStartMs - nowMs <= 30 * 60 * 1000 && sessionStartMs >= nowMs;
                         const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
+                        /* Secondary Guru: no Join button, show a "Secondary" badge on the card. */
+                        const isSecondaryGuru = selectedRole === "Secondary Guru";
                         return (
                           <Card
                             key={s.id}
@@ -625,15 +658,17 @@ export default function DashboardPage() {
                               onCourseClick={getOnCourseClick(s)}
                               actions={
                                 <>
-                                  <Button
-                                    variant={joinEnabled ? "contained" : "soft"}
-                                    size="small"
-                                    startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}
-                                    disabled={!joinEnabled}
-                                    onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
-                                  >
-                                    Join session
-                                  </Button>
+                                  {!isSecondaryGuru && (
+                                    <Button
+                                      variant={joinEnabled ? "contained" : "soft"}
+                                      size="small"
+                                      startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}
+                                      disabled={!joinEnabled}
+                                      onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
+                                    >
+                                      Join session
+                                    </Button>
+                                  )}
                                   <Button
                                     variant="soft"
                                     size="small"
@@ -1147,13 +1182,43 @@ export default function DashboardPage() {
                     </Stack>
 
                     {filteredCompletedSessions.length > 0 ? (
-                      <Stack spacing={1.5}>
-                        {filteredCompletedSessions.map((s, idx) => {
-                          // Month divider logic
-                          const sessionMonth = s.dateYmd.slice(0, 7); // "YYYY-MM"
-                          const prevMonth = idx > 0 ? filteredCompletedSessions[idx - 1].dateYmd.slice(0, 7) : null;
-                          const showMonthDivider = sessionMonth !== prevMonth;
-                          const monthLabel = new Date(s.dateYmd + "T00:00:00").toLocaleDateString(userLocale, { month: "long", year: "numeric" });
+                      <Stack spacing={1}>
+                        {completedMonthGroups.map((group) => (
+                          <Accordion
+                            key={group.key}
+                            elevation={0}
+                            disableGutters
+                            expanded={!!expandedCompletedMonths[group.key]}
+                            onChange={(_, isOpen) => setExpandedCompletedMonths((prev) => ({ ...prev, [group.key]: isOpen }))}
+                            sx={{
+                              border: "1px solid",
+                              borderColor: "divider",
+                              borderRadius: "12px",
+                              overflow: "hidden",
+                              "&:before": { display: "none" },
+                              "&.Mui-expanded": { m: 0 },
+                            }}
+                          >
+                            <AccordionSummary
+                              expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 20 }} />}
+                              sx={{
+                                px: 2,
+                                bgcolor: "hsl(var(--md-surface-container) / 0.4)",
+                                "& .MuiAccordionSummary-content": { alignItems: "center", gap: 1, my: 1 },
+                              }}
+                            >
+                              <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.875rem" }}>
+                                {group.label}
+                              </Typography>
+                              <Chip
+                                label={group.sessions.length}
+                                size="small"
+                                sx={{ height: 20, fontSize: "0.7rem", fontWeight: 600, bgcolor: "action.hover" }}
+                              />
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ p: { xs: 1.25, sm: 1.5 } }}>
+                              <Stack spacing={1.5}>
+                                {group.sessions.map((s) => {
                           const ratings = demoLearnerRatingsBySessionId[s.id];
                           const hasRatings = ratings && ratings.length > 0;
                           const avg = hasRatings
@@ -1308,16 +1373,7 @@ export default function DashboardPage() {
                                     : s.title;
 
                           return (
-                            <Fragment key={s.id}>
-                              {showMonthDivider && (
-                                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ pt: idx === 0 ? 0 : 1, pb: 0.5 }}>
-                                  <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ whiteSpace: "nowrap", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                                    {monthLabel}
-                                  </Typography>
-                                  <Divider sx={{ flex: 1 }} />
-                                </Stack>
-                              )}
-                            <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
                               {/* Card header: title row + date + actions - custom for non-SessionCard types */}
                               {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
                                 <>
@@ -1388,9 +1444,12 @@ export default function DashboardPage() {
                                 />
                               )}
                             </Card>
-                            </Fragment>
                           );
                         })}
+                              </Stack>
+                            </AccordionDetails>
+                          </Accordion>
+                        ))}
                       </Stack>
                     ) : (
                       <EmptyState

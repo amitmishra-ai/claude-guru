@@ -83,7 +83,7 @@ export function CompletedSessionDetailDialog() {
           }}
         >
           <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Activity Details</Typography>
             <Chip
               label="Completed"
               size="small"

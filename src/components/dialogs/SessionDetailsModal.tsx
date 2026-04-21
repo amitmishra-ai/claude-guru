@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
@@ -44,7 +44,10 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import Stack from "@mui/material/Stack";
+import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import Typography from "@mui/material/Typography";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
@@ -487,15 +490,34 @@ function PollsSection({ sessionId }: { sessionId: string }) {
 export function SessionDetailsModal() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const open = useAppSelector((s) => s.ui.openSessionDetails);
   const session = useAppSelector((s) => s.sessions.sessionFocus);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
   const allSessions = useAppSelector((s) => s.sessions.items);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
+  const paymentsShowValues = useAppSelector((s) => s.ui.paymentsShowValues);
   const nowMs = demoNow.getTime();
   const tzOffset = useAppSelector((s) => s.profile.tzOffsetMinutes);
   const [expandedCombinedBatch, setExpandedCombinedBatch] = useState<string | false>(false);
   const [expandedGroup, setExpandedGroup] = useState(false);
+
+  /* Drawer-scoped Remuneration visibility. When opened on /payments the
+     drawer inherits the page-level toggle, so a guru who already revealed
+     their values keeps seeing them. Everywhere else it defaults hidden so
+     remuneration isn't leaked in over-the-shoulder / screen-share scenarios.
+     Toggling inside the drawer is local — it never writes back to the
+     Payments page state. The state resets on each open. */
+  const isOnPaymentsPage = location.pathname.startsWith("/payments");
+  const [drawerShowValues, setDrawerShowValues] = useState(false);
+  useEffect(() => {
+    if (open) setDrawerShowValues(isOnPaymentsPage ? paymentsShowValues : false);
+    // intentionally omit paymentsShowValues — we only want the initial snapshot
+    // at open-time; later edits on Payments shouldn't retroactively flip the drawer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isOnPaymentsPage]);
+
+  const maskInr = (value: string) => drawerShowValues ? value : value.replace(/[0-9]/g, "•");
 
   const nextSessionId = sortByDateTime(allSessions).find(
     (s) => dateTimeMs(s.dateYmd, s.start) >= nowMs && !sessionDeclined[s.id]
@@ -514,7 +536,10 @@ export function SessionDetailsModal() {
     ? demoCourseCatalog.find((c) => c.id === session.linkedCourseId)
     : null;
   const isMentoring = session?.sessionType === "Career mentoring session";
-  const showPolls = session && isConfirmed && !isCompleted;
+  const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
+  const isSecondaryGuru = selectedRole === "Secondary Guru";
+  /* Polls: hidden for Secondary Gurus per spec (no create / no view). */
+  const showPolls = session && isConfirmed && !isCompleted && !isSecondaryGuru;
 
   /* Status chip config */
   const statusLabel = isCompleted ? "Completed" : isMissed ? "Missed" : isConfirmed ? "Confirmed" : isPast ? "Past" : "Scheduled";
@@ -562,7 +587,7 @@ export function SessionDetailsModal() {
           }}
         >
           <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Activity Details</Typography>
             {session && (
               <Chip
                 label={statusLabel}
@@ -1180,80 +1205,87 @@ export function SessionDetailsModal() {
                 {/* ── Remuneration ── */}
                 {(isConfirmed || isCompleted) && session.paymentAmountInr && (
                   <Box sx={{ mb: 1 }}>
-                    <SectionHeading icon={<SavingsOutlinedIcon sx={{ fontSize: 14 }} />}>Remuneration</SectionHeading>
-                    <SectionCard>
-                      {session.paymentModel && (
-                        <DetailRow label="Model" compact>
-                          <Chip label={session.paymentModel === "hourly" ? "Hourly" : "Fixed"} size="small" sx={{ height: 20, fontSize: "0.65rem", fontWeight: 600 }} />
-                        </DetailRow>
-                      )}
-                      {session.paymentModel === "hourly" && session.hourlyRateInr && (
-                        <DetailRow label="Rate" compact>{fmtInr(session.hourlyRateInr)}/hr</DetailRow>
-                      )}
-                      <DetailRow label="Event fee" compact>
-                        <Typography variant="body2" fontWeight={700}>{fmtInr(session.paymentAmountInr)}</Typography>
-                      </DetailRow>
-
-                      {isCompleted && (
-                        <>
-                          <Divider sx={{ my: 1 }} />
-                          <Box
-                            sx={{
-                              p: 1.25,
-                              borderRadius: "12px",
-                              bgcolor: "hsl(var(--md-surface-container) / 0.3)",
-                            }}
-                          >
-                            <Stack spacing={0.75}>
-                              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                <Typography variant="caption" color="text.secondary" fontWeight={500}>Total earnings</Typography>
-                                <Typography variant="body2" fontWeight={700}>
-                                  {fmtInr(session.totalEarningsInr ?? session.paymentAmountInr)}
-                                </Typography>
-                              </Stack>
-                              {session.paymentModel === "hourly" && session.hourlyRateInr && (
-                                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                  <Typography variant="caption" color="text.secondary" fontWeight={500}>Breakdown</Typography>
-                                  <Typography variant="caption" fontWeight={500}>
-                                    {fmtInr(session.hourlyRateInr)}/hr &times; {fmtDuration(session.start, session.end)}
-                                  </Typography>
-                                </Stack>
-                              )}
-                              {session.paymentStatus && (
-                                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                  <Typography variant="caption" color="text.secondary" fontWeight={500}>Status</Typography>
-                                  <Chip
-                                    label={
-                                      session.paymentStatus === "paid" ? "Paid"
-                                        : session.paymentStatus === "invoice_pending" ? "Invoice Pending"
-                                        : "Invoice Not Raised"
-                                    }
-                                    size="small"
-                                    sx={{
-                                      fontWeight: 600,
-                                      fontSize: "0.65rem",
-                                      height: 20,
-                                      ...(session.paymentStatus === "paid"
-                                        ? { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" }
-                                        : session.paymentStatus === "invoice_pending"
-                                        ? { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }
-                                        : {}
-                                      ),
-                                    }}
-                                  />
-                                </Stack>
-                              )}
-                              {session.transactionId && (
-                                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                                  <Typography variant="caption" color="text.secondary" fontWeight={500}>TXN ID</Typography>
-                                  <Typography variant="caption" sx={{ fontFamily: "monospace", fontWeight: 500 }}>{session.transactionId}</Typography>
-                                </Stack>
-                              )}
-                            </Stack>
-                          </Box>
-                        </>
-                      )}
-                    </SectionCard>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                      <SectionHeading icon={<SavingsOutlinedIcon sx={{ fontSize: 14 }} />}>Remuneration</SectionHeading>
+                      {/* Per-drawer show-values toggle — visually matches the
+                          Payments page pill toggle so users see a consistent
+                          affordance across surfaces. */}
+                      <Box
+                        component="label"
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          cursor: "pointer",
+                          userSelect: "none",
+                          bgcolor: drawerShowValues ? "action.hover" : "transparent",
+                          border: "1px solid",
+                          borderColor: drawerShowValues ? "text.disabled" : "divider",
+                          borderRadius: "20px",
+                          pl: 1.5,
+                          pr: 0.5,
+                          py: 0.25,
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <VisibilityOffOutlinedIcon sx={{ fontSize: 16, color: "text.secondary", opacity: drawerShowValues ? 1 : 0.5, transition: "opacity 0.2s" }} />
+                        <Typography variant="caption" sx={{ fontSize: "0.75rem", fontWeight: 600, color: "text.secondary", whiteSpace: "nowrap" }}>
+                          Show values
+                        </Typography>
+                        <Switch
+                          size="small"
+                          checked={drawerShowValues}
+                          onChange={() => setDrawerShowValues((v) => !v)}
+                          sx={{
+                            width: 32,
+                            height: 18,
+                            p: 0,
+                            "& .MuiSwitch-switchBase": {
+                              p: "2px",
+                              "&.Mui-checked": {
+                                transform: "translateX(14px)",
+                                "& + .MuiSwitch-track": { bgcolor: "primary.main", opacity: 0.35 },
+                              },
+                            },
+                            "& .MuiSwitch-thumb": { width: 14, height: 14, boxShadow: "none" },
+                            "& .MuiSwitch-track": { borderRadius: 9, bgcolor: "action.disabled", opacity: 1 },
+                          }}
+                        />
+                      </Box>
+                    </Stack>
+                    {(() => {
+                      /* Five-row summary spec: Type, Status, Transaction ID,
+                         Amount, Net amount. Model/Rate/Breakdown and the
+                         nested "total earnings" sub-card are intentionally
+                         dropped in favor of this flat layout. */
+                      const statusLabel =
+                        session.paymentStatus === "paid" ? "Completed"
+                          : session.paymentStatus === "invoice_pending" ? "Invoice Pending"
+                          : session.paymentStatus === "invoice_not_raised" ? "Invoice Not Raised"
+                          : isCompleted ? "Completed"
+                          : "Pending";
+                      const gross = session.paymentAmountInr ?? 0;
+                      const net = session.totalEarningsInr ?? gross;
+                      const inrAmount = `INR ${gross.toLocaleString("en-IN")}`;
+                      const inrNet = `INR ${net.toLocaleString("en-IN")}`;
+                      const txn = session.transactionId;
+                      const txnDisplay = txn
+                        ? (drawerShowValues ? txn : txn.replace(/[A-Za-z0-9]/g, "•"))
+                        : "–";
+                      return (
+                        <SectionCard>
+                          <DetailRow label="Type" compact>Fee Payment</DetailRow>
+                          <DetailRow label="Status" compact>{statusLabel}</DetailRow>
+                          <DetailRow label="Transaction ID" compact>
+                            <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem", fontFamily: txn ? "monospace" : undefined }}>
+                              {txnDisplay}
+                            </Typography>
+                          </DetailRow>
+                          <DetailRow label="Amount" compact>{maskInr(inrAmount)}</DetailRow>
+                          <DetailRow label="Net amount" compact>{maskInr(inrNet)}</DetailRow>
+                        </SectionCard>
+                      );
+                    })()}
                   </Box>
                 )}
               </Stack>

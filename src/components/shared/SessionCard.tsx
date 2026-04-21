@@ -118,6 +118,25 @@ export function SessionCard({
   const tzOffset = useAppSelector((s) => s.profile.tzOffsetMinutes);
   const tzStart = applyTzOffset(start, tzOffset);
   const tzEnd = applyTzOffset(end, tzOffset);
+  /* Secondary Guru tag — auto-injected on every activity card when the
+     current Guru role is "Secondary Guru". Surfaces the secondary status
+     consistently across Dashboard / Calendar / Courses / Payments. */
+  const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
+  const secondaryChip = selectedRole === "Secondary Guru" ? (
+    <Chip
+      label="Secondary"
+      size="small"
+      sx={{
+        height: 20,
+        fontSize: "0.65rem",
+        fontWeight: 600,
+        bgcolor: "var(--gl-status-pending-bg)",
+        color: "var(--gl-status-pending-text)",
+        border: "1px solid var(--gl-status-pending-border)",
+        flexShrink: 0,
+      }}
+    />
+  ) : null;
 
   const statusChip = status && (
     <Chip
@@ -195,7 +214,10 @@ export function SessionCard({
       >
         {titleContent}
       </Typography>
-      {statusChip}
+      <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
+        {secondaryChip}
+        {statusChip}
+      </Stack>
     </Stack>
   );
 
@@ -321,6 +343,7 @@ export function SessionCard({
           {/* ── MOBILE (xs): chips on top line, title below ── */}
           <Box sx={{ display: { xs: "block", sm: "none" } }}>
             <Box sx={{ mb: 0.75, display: "flex", alignItems: "center", gap: 0.75, "& > .MuiStack-root": { width: "100%", "& .star-rating-numeric": { ml: "auto" } } }}>
+              {secondaryChip}
               {statusChip}
               {topRight}
             </Box>
@@ -342,6 +365,7 @@ export function SessionCard({
               {titleContent}
             </Typography>
             <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap justifyContent="flex-end" sx={{ flexShrink: 0 }}>
+              {secondaryChip}
               {statusChip}
               {topRight}
             </Stack>
@@ -352,9 +376,10 @@ export function SessionCard({
         </>
       ) : (
         <>
-          {/* ── MOBILE (xs): status chip on top line, title below ── */}
-          {statusChip && (
-            <Box sx={{ display: { xs: "flex", sm: "none" }, mb: 0.75 }}>
+          {/* ── MOBILE (xs): status / secondary chip on top line, title below ── */}
+          {(statusChip || secondaryChip) && (
+            <Box sx={{ display: { xs: "flex", sm: "none" }, mb: 0.75, gap: 0.75 }}>
+              {secondaryChip}
               {statusChip}
             </Box>
           )}
@@ -378,6 +403,7 @@ export function SessionCard({
               {titleContent}
             </Typography>
             <Stack direction="row" spacing={0.75} alignItems="center">
+              {secondaryChip}
               {statusChip}
               {titleRight}
             </Stack>

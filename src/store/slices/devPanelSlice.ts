@@ -8,6 +8,7 @@ export type GuruRole =
   | "Industry Expert"
   | "Moderator"
   | "Project Mentor"
+  | "Secondary Guru"
   | "Teacher";
 
 export type GuruStage = "experienced" | "mid" | "new" | "early" | "onboarding" | "empty";
@@ -29,6 +30,7 @@ export const GURU_ROLES: GuruRole[] = [
   "Industry Expert",
   "Moderator",
   "Project Mentor",
+  "Secondary Guru",
   "Teacher",
 ];
 

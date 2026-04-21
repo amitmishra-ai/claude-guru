@@ -8,6 +8,7 @@ export type GuruRoleCategory = "Teaching" | "Mentoring" | "Evaluation & Moderati
 export const ROLE_TO_CATEGORY: Record<GuruRole, GuruRoleCategory> = {
   Teacher: "Teaching",
   "Industry Expert": "Teaching",
+  "Secondary Guru": "Teaching",
   "Course Mentor": "Mentoring",
   "Career Mentor": "Mentoring",
   "CV Review Mentor": "Mentoring",
@@ -50,6 +51,9 @@ export const ROLE_SESSION_TYPES: Record<GuruRole, SessionType[] | "all"> = {
   Moderator: ["Moderation"],
   "Project Mentor": ["Capstone project mentoring session"],
   "Industry Expert": ["Industry session", "Online session"],
+  /* Secondary Guru assists on online sessions only — no classes, residencies,
+     mentoring, evaluation, or moderation. */
+  "Secondary Guru": ["Online session"],
 };
 
 export function filterSessionsByRole<T extends { sessionType: string }>(
