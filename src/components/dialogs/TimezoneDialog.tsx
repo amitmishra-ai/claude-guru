@@ -1,10 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -13,143 +9,64 @@ import DialogActions from "@mui/material/DialogActions";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setTimeZoneMode, setManualTimeZone, setTzOffsetMinutes } from "@/store/slices/profileSlice";
 import { setOpenTimezone } from "@/store/slices/uiSlice";
-import { getTimeZoneOffsetMinutes, formatGMTOffsetFromMinutesAhead } from "@/lib/helpers";
+import { getTimeZoneOffsetMinutes } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
+import { TimezonePicker } from "@/components/shared/TimezonePicker";
+import { getSystemTimezone } from "@/lib/timezone";
 
-const manualTimeZoneOptions = [
-  { value: "Asia/Kolkata", label: "Asia/Kolkata (India)" },
-  { value: "Asia/Dubai", label: "Asia/Dubai (UAE)" },
-  { value: "Asia/Singapore", label: "Asia/Singapore" },
-  { value: "Europe/London", label: "Europe/London" },
-  { value: "Europe/Berlin", label: "Europe/Berlin" },
-  { value: "America/New_York", label: "America/New_York" },
-  { value: "America/Los_Angeles", label: "America/Los_Angeles" },
-  { value: "Australia/Sydney", label: "Australia/Sydney" },
-];
-
-function utcLabelForTimeZone(timeZone: string) {
-  try {
-    const ahead = getTimeZoneOffsetMinutes(timeZone, demoNow);
-    return formatGMTOffsetFromMinutesAhead(ahead).replace("GMT", "UTC");
-  } catch {
-    return "UTC";
-  }
-}
-
+/**
+ * Timezone picker dialog — opened from Calendar bottom-right chip,
+ * the Profile header link, and the Settings timezone row.
+ *
+ * Uses the shared TimezonePicker so the UI is identical to the
+ * "Update availability" Step 1 picker. Draft state + Save button
+ * mean changes apply when the user confirms rather than immediately.
+ */
 export function TimezoneDialog() {
   const dispatch = useAppDispatch();
   const open = useAppSelector((s) => s.ui.openTimezone);
   const timeZoneMode = useAppSelector((s) => s.profile.timeZoneMode);
   const manualTimeZone = useAppSelector((s) => s.profile.manualTimeZone);
 
-  const effectiveTimeZone = useMemo(() => {
-    if (timeZoneMode === "manual") return manualTimeZone;
-    const tz = Intl.DateTimeFormat().resolvedOptions?.().timeZone;
-    return tz || "Asia/Kolkata";
-  }, [timeZoneMode, manualTimeZone]);
+  /* Local draft so closing without Save doesn't mutate global state. */
+  const initial = timeZoneMode === "auto" ? "__auto__" : manualTimeZone;
+  const [draft, setDraft] = useState(initial);
+  useEffect(() => { if (open) setDraft(initial); }, [open, initial]);
 
-  const effectiveGmt = useMemo(() => {
-    try {
-      const ahead = getTimeZoneOffsetMinutes(effectiveTimeZone, demoNow);
-      return formatGMTOffsetFromMinutesAhead(ahead);
-    } catch {
-      return "GMT+5:30";
+  const handleClose = () => dispatch(setOpenTimezone(false));
+  const handleSave = () => {
+    const baseTzOffset = getTimeZoneOffsetMinutes("Asia/Kolkata", demoNow);
+    if (draft === "__auto__") {
+      dispatch(setTimeZoneMode("auto"));
+      const sysTz = getSystemTimezone();
+      const targetTzOffset = getTimeZoneOffsetMinutes(sysTz, demoNow);
+      dispatch(setTzOffsetMinutes(targetTzOffset - baseTzOffset));
+    } else {
+      dispatch(setTimeZoneMode("manual"));
+      dispatch(setManualTimeZone(draft));
+      const targetTzOffset = getTimeZoneOffsetMinutes(draft, demoNow);
+      dispatch(setTzOffsetMinutes(targetTzOffset - baseTzOffset));
     }
-  }, [effectiveTimeZone]);
+    handleClose();
+  };
 
   return (
-    <Dialog open={open} onClose={() => dispatch(setOpenTimezone(false))} maxWidth={false} PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 } } }}>
-      <DialogTitle>Timezone</DialogTitle>
+    <Dialog open={open} onClose={handleClose} maxWidth={false} PaperProps={{ sx: { width: { xs: "calc(100vw - 1.5rem)", sm: 420 } } }}>
+      <DialogTitle sx={{ pb: 1 }}>Timezone</DialogTitle>
 
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box
-            sx={{
-              borderRadius: "12px",
-              border: 1,
-              borderColor: "divider",
-              backgroundColor: "hsl(var(--md-surface-container) / 0.3)",
-              p: 1.5,
-              fontSize: "0.875rem",
-              color: "hsl(var(--md-on-surface-variant))",
-            }}
-          >
-            Choose which timezone you want to view the schedule in.
-          </Box>
+          <Typography variant="body2" color="text.secondary">
+            Choose which timezone you want to view your schedule and availability in.
+          </Typography>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel id="timezone-mode-label">Timezone</InputLabel>
-              <Select
-                labelId="timezone-mode-label"
-                value={timeZoneMode}
-                label="Timezone"
-                onChange={(e: SelectChangeEvent) => dispatch(setTimeZoneMode(e.target.value as "auto" | "manual"))}
-              >
-                <MenuItem value="auto">Use system timezone</MenuItem>
-                <MenuItem value="manual">Choose another timezone</MenuItem>
-              </Select>
-            </FormControl>
-            <Box sx={{ fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
-              Current: <Typography component="span" sx={{ fontWeight: 500, fontSize: "0.75rem", color: "hsl(var(--md-on-surface))" }}>{effectiveTimeZone}</Typography> ({effectiveGmt})
-            </Box>
-          </Box>
-
-          {timeZoneMode === "manual" ? (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="manual-timezone-label">Select a timezone</InputLabel>
-                <Select
-                  labelId="manual-timezone-label"
-                  value={manualTimeZone}
-                  label="Select a timezone"
-                  onChange={(e: SelectChangeEvent) => dispatch(setManualTimeZone(e.target.value))}
-                  renderValue={(selected) => {
-                    const option = manualTimeZoneOptions.find((tz) => tz.value === selected);
-                    return (
-                      <Box sx={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", pr: 2.5 }}>
-                        <Box component="span" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {option?.label || selected}
-                        </Box>
-                        <Box component="span" sx={{ ml: 1.5, flexShrink: 0, fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
-                          {utcLabelForTimeZone(selected)}
-                        </Box>
-                      </Box>
-                    );
-                  }}
-                  MenuProps={{ PaperProps: { style: { maxHeight: 288 } } }}
-                >
-                  {manualTimeZoneOptions.map((tz) => {
-                    const utcLabel = utcLabelForTimeZone(tz.value);
-                    return (
-                      <MenuItem key={tz.value} value={tz.value}>
-                        <Box sx={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: 1.5, pr: 0.5 }}>
-                          <span>{tz.label}</span>
-                          <Box component="span" sx={{ fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>{utcLabel}</Box>
-                        </Box>
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
-              <Box sx={{ fontSize: "0.75rem", color: "hsl(var(--md-on-surface-variant))" }}>
-                Offset updates based on today's date (DST aware where applicable).
-              </Box>
-            </Box>
-          ) : null}
-
+          <TimezonePicker value={draft} onChange={setDraft} />
         </Box>
       </DialogContent>
 
       <DialogActions>
-        <Button variant="contained" onClick={() => {
-          const baseTzOffset = getTimeZoneOffsetMinutes("Asia/Kolkata", demoNow);
-          const targetTzOffset = getTimeZoneOffsetMinutes(effectiveTimeZone, demoNow);
-          dispatch(setTzOffsetMinutes(targetTzOffset - baseTzOffset));
-          dispatch(setOpenTimezone(false));
-        }}>
-          Save
-        </Button>
+        <Button onClick={handleClose} color="inherit">Cancel</Button>
+        <Button variant="contained" onClick={handleSave}>Save</Button>
       </DialogActions>
     </Dialog>
   );

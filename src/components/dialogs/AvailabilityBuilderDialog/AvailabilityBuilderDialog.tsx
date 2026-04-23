@@ -4,7 +4,6 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -41,6 +40,7 @@ import { pushToast } from "@/store/slices/toastsSlice";
 import { useSaveAvailabilityMutation } from "@/api/ninja/availabilityApi";
 import { DOW_LONG, timeOptions12 } from "@/lib/constants";
 import { parseHHMM, fmtTime, fmtTime12, formatDayGroupShort } from "@/lib/helpers";
+import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import type { PresetCard } from "@/lib/types";
 
 const defaultPresets: PresetCard[] = [
@@ -48,31 +48,6 @@ const defaultPresets: PresetCard[] = [
   { key: "weekendAfternoons", label: "Weekend afternoon", days: ["Saturday", "Sunday"], start: "14:00", end: "16:00", enabled: false },
   { key: "weekdayEvenings", label: "Weekday evenings", days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], start: "18:00", end: "20:00", enabled: false },
 ];
-
-const TIMEZONE_OPTIONS = [
-  { value: "__auto__", label: "System timezone" },
-  { value: "Asia/Kolkata", label: "Asia/Kolkata (India)" },
-  { value: "Asia/Dubai", label: "Asia/Dubai (UAE)" },
-  { value: "Asia/Singapore", label: "Asia/Singapore" },
-  { value: "Europe/London", label: "Europe/London" },
-  { value: "Europe/Berlin", label: "Europe/Berlin" },
-  { value: "America/New_York", label: "America/New_York" },
-  { value: "America/Los_Angeles", label: "America/Los_Angeles" },
-  { value: "Australia/Sydney", label: "Australia/Sydney" },
-];
-
-function fmtTimezoneDisplay(tz: string): string {
-  try {
-    const parts = new Intl.DateTimeFormat("en", {
-      timeZone: tz,
-      timeZoneName: "shortOffset",
-    }).formatToParts(new Date());
-    const gmtOffset = parts.find((p) => p.type === "timeZoneName")?.value ?? "";
-    return `${tz} (${gmtOffset.replace("GMT", "UTC")})`;
-  } catch {
-    return tz;
-  }
-}
 
 /* ── Step indicator pill ── */
 function StepPill({ stepNum, label, active, done }: { stepNum: number; label: string; active: boolean; done: boolean }) {
@@ -338,89 +313,18 @@ const AvailabilityBuilderDialog = () => {
               </Typography>
             </Box>
 
-            {/* Timezone selector */}
-            <Box
-              sx={{
-                border: 1,
-                borderColor: "divider",
-                borderRadius: "8px",
-                p: 2,
-                bgcolor: "action.hover",
+            {/* Timezone selector — shared picker (unified across the app) */}
+            <TimezonePicker
+              value={timeZoneMode === "auto" ? "__auto__" : manualTimeZone}
+              onChange={(val) => {
+                if (val === "__auto__") {
+                  dispatch(setTimeZoneMode("auto"));
+                } else {
+                  dispatch(setTimeZoneMode("manual"));
+                  dispatch(setManualTimeZone(val));
+                }
               }}
-            >
-              <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
-                <PublicOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
-                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.03em", fontSize: "0.68rem" }}>
-                  Select timezone
-                </Typography>
-              </Stack>
-              <FormControl fullWidth size="small">
-                <Select
-                  displayEmpty
-                  value={timeZoneMode === "auto" ? "__auto__" : manualTimeZone}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === "__auto__") {
-                      dispatch(setTimeZoneMode("auto"));
-                    } else {
-                      dispatch(setTimeZoneMode("manual"));
-                      dispatch(setManualTimeZone(val));
-                    }
-                  }}
-                  renderValue={(selected) => {
-                    if (selected === "__auto__") {
-                      const sysTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                      return (
-                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: "100%", pr: 1 }}>
-                          <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.85rem" }}>
-                            {sysTz}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {fmtTimezoneDisplay(sysTz).split("(")[1]?.replace(")", "") || ""} · Auto
-                          </Typography>
-                        </Stack>
-                      );
-                    }
-                    return (
-                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: "100%", pr: 1 }}>
-                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.85rem" }}>
-                          {selected}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {fmtTimezoneDisplay(selected).split("(")[1]?.replace(")", "") || ""}
-                        </Typography>
-                      </Stack>
-                    );
-                  }}
-                  sx={{
-                    bgcolor: "background.paper",
-                    "& .MuiSelect-select": { py: 1.25 },
-                  }}
-                  MenuProps={{ PaperProps: { sx: { maxHeight: 280 } } }}
-                >
-                  {TIMEZONE_OPTIONS.map((tz) => {
-                    const isAuto = tz.value === "__auto__";
-                    const sysTz = isAuto ? Intl.DateTimeFormat().resolvedOptions().timeZone : "";
-                    return (
-                      <MenuItem key={tz.value} value={tz.value} sx={{ py: 1, fontSize: "0.85rem" }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%" }}>
-                          <Box>
-                            <Typography variant="body2" sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
-                              {isAuto ? `System - ${sysTz}` : tz.label}
-                            </Typography>
-                          </Box>
-                          <Typography variant="caption" color="text.secondary" sx={{ ml: 2, flexShrink: 0 }}>
-                            {isAuto
-                              ? fmtTimezoneDisplay(sysTz).split("(")[1]?.replace(")", "") || ""
-                              : fmtTimezoneDisplay(tz.value).split("(")[1]?.replace(")", "") || ""}
-                          </Typography>
-                        </Stack>
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
-            </Box>
+            />
 
             <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
               You can update this later from your profile settings.
