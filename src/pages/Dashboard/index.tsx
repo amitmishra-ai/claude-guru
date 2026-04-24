@@ -529,9 +529,21 @@ export default function DashboardPage() {
         {/* Left column (2/3) */}
         <Grid size={{ xs: 12, md: 8 }} sx={{ ...(isEmpty && { display: "flex", flexDirection: "column", flex: { xs: 1, sm: "unset" } }) }}>
           <Stack sx={{ ...(isEmpty && { flex: 1 }) }}>
-            {/* Mobile tasks (horizontal scroll) */}
+            {/* Mobile tasks (horizontal scroll). On xs the card framing is
+                stripped so task items get the full page width; tablets and
+                up keep the original paper card. */}
             <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 1.5 }}>
-              <Card sx={{ p: 2, borderRadius: "16px" }}>
+              <Card sx={(theme) => ({
+                p: 2,
+                borderRadius: "16px",
+                [theme.breakpoints.down("sm")]: {
+                  p: 0,
+                  borderRadius: 0,
+                  border: "none",
+                  boxShadow: "none",
+                  bgcolor: "transparent",
+                },
+              })}>
                 <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Tasks</Typography>
                 <Box
                   sx={{
@@ -539,14 +551,27 @@ export default function DashboardPage() {
                     gap: 1.5,
                     overflowX: "auto",
                     scrollSnapType: "x mandatory",
+                    /* Break out to the viewport edge on xs (counter AppLayout's
+                       `px: 2`); sm+ counters the parent Card's `p: 2`. */
                     mx: -2,
                     pb: 0.5,
                     "&::-webkit-scrollbar": { display: "none" },
                     scrollbarWidth: "none",
-                    /* Scroll-padding so first/last snap positions respect 16px inset */
+                    /* `scrollPaddingInline` matches the ::before inset so the
+                       first snap-point lands with the first card aligned to
+                       the heading. */
                     scrollPaddingInline: "16px",
-                    /* Pseudo-elements as inline spacers that scroll with content */
-                    "&::before, &::after": { content: '""', minWidth: 16, flexShrink: 0 },
+                    /* ::before adds a 16px leading inset so the first card
+                       lines up with the "Tasks" heading (16px page padding).
+                       ::after adds a 16px trailing cushion on sm+ only so
+                       the last card can reach the viewport's right edge on
+                       mobile (matching the expected carousel pattern). */
+                    "&::before": { content: '""', minWidth: 16, flexShrink: 0 },
+                    "&::after": {
+                      content: { xs: "none", sm: '""' },
+                      minWidth: { xs: 0, sm: 16 },
+                      flexShrink: 0,
+                    },
                   }}
                 >
                 {/* Priority-sorted task cards:
@@ -603,8 +628,22 @@ export default function DashboardPage() {
               </Card>
             </Box>
 
-            {/* ── Big container for entire left section ── */}
-            <Card sx={{ p: { xs: 2, sm: 2 }, borderRadius: "16px", ...(isEmpty && { flex: { xs: 1, sm: "unset" }, display: "flex", flexDirection: "column" }) }}>
+            {/* ── Big container for entire left section ──
+                On xs the framing dissolves (no border/padding/shadow) so
+                inner cards get the full page width; sm+ keeps the original
+                paper card exactly as before. */}
+            <Card sx={(theme) => ({
+              p: 2,
+              borderRadius: "16px",
+              [theme.breakpoints.down("sm")]: {
+                p: 0,
+                borderRadius: 0,
+                border: "none",
+                boxShadow: "none",
+                bgcolor: "transparent",
+              },
+              ...(isEmpty && { flex: { xs: 1, sm: "unset" }, display: "flex", flexDirection: "column" }),
+            })}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: { xs: 1, sm: 1.5 }, fontSize: { xs: "0.875rem", sm: "1rem" } }}>Activities</Typography>
               <Stack spacing={2} sx={{ ...(isEmpty && { flex: 1 }) }}>
                 {/* Next Activities - hidden when no today sessions */}
@@ -637,12 +676,11 @@ export default function DashboardPage() {
                                 size="small"
                                 sx={{
                                   mb: 1,
-                                  height: 20,
-                                  fontSize: 10,
-                                  fontWeight: 600,
-                                  borderRadius: "4px",
+                                  fontWeight: 500,
+                                  fontSize: "0.75rem",
                                   bgcolor: "var(--gl-status-declined-bg)",
                                   color: "var(--gl-status-declined-text)",
+                                  border: "1px solid var(--gl-status-declined-border)",
                                 }}
                               />
                             )}
