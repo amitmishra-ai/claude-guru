@@ -25,9 +25,10 @@ import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
-import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -35,11 +36,6 @@ import Chip from "@mui/material/Chip";
 import Collapse from "@mui/material/Collapse";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Avatar from "@mui/material/Avatar";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
@@ -110,6 +106,48 @@ function SectionCard({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
+    </Box>
+  );
+}
+
+function AttendeeRow({
+  title,
+  subtitle,
+  chipLabel,
+}: {
+  title: string;
+  subtitle?: string;
+  chipLabel: string;
+}) {
+  return (
+    <Box
+      sx={{
+        borderRadius: "10px",
+        border: 1,
+        borderColor: "divider",
+        bgcolor: "hsl(var(--md-surface))",
+        px: 1.5,
+        py: 0.875,
+      }}
+    >
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+          <Typography sx={{ display: "block", fontSize: "0.75rem", fontWeight: 600, lineHeight: 1.3 }} noWrap>
+            {title}
+          </Typography>
+          {subtitle && (
+            <Typography color="text.secondary" sx={{ display: "block", fontSize: "0.75rem", fontWeight: 400, lineHeight: 1.4 }}>
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
+        <Chip
+          label={chipLabel}
+          size="small"
+          variant="outlined"
+          sx={{ fontWeight: 500, fontSize: "0.75rem", flexShrink: 0, height: 20, color: "text.secondary", borderColor: "divider" }}
+        />
+      </Stack>
     </Box>
   );
 }
@@ -499,8 +537,6 @@ export function SessionDetailsModal() {
   const paymentsShowValues = useAppSelector((s) => s.ui.paymentsShowValues);
   const nowMs = demoNow.getTime();
   const tzOffset = useAppSelector((s) => s.profile.tzOffsetMinutes);
-  const [expandedCombinedBatch, setExpandedCombinedBatch] = useState<string | false>(false);
-  const [expandedGroup, setExpandedGroup] = useState(false);
 
   /* Drawer-scoped Remuneration visibility. When opened on /payments the
      drawer inherits the page-level toggle, so a guru who already revealed
@@ -756,7 +792,7 @@ export function SessionDetailsModal() {
 
                 {/* ── Details ── */}
                 <Box sx={{ mb: 2.5 }}>
-                  <SectionHeading>Details</SectionHeading>
+                  <SectionHeading icon={<InfoOutlinedIcon sx={{ fontSize: 14 }} />}>Details</SectionHeading>
                   <SectionCard>
                     {session.cohort && <DetailRow label="Batch">{session.cohort}</DetailRow>}
                     {session.group && !session.groupMembers && (
@@ -781,222 +817,66 @@ export function SessionDetailsModal() {
                   </SectionCard>
                 </Box>
 
-                {/* ── Group members accordion ── */}
-                {session.group && session.groupMembers && session.groupMembers.length > 0 && (
+                {/* ── Attendees ── */}
+                {((session.group && session.groupMembers && session.groupMembers.length > 0) ||
+                  (session.combinedBatches && session.combinedBatches.length > 0)) && (
                   <Box sx={{ mb: 2.5 }}>
-                    <SectionHeading icon={<GroupsOutlinedIcon sx={{ fontSize: 14 }} />}>
-                      {session.group} &middot; {session.groupMembers.length} learners
-                    </SectionHeading>
-                    <Accordion
-                      disableGutters
-                      elevation={0}
-                      expanded={expandedGroup}
-                      onChange={(_, isExpanded) => setExpandedGroup(isExpanded)}
-                      sx={{ border: "1px solid", borderColor: "divider", "&.MuiAccordion-root": { borderRadius: "12px" }, overflow: "hidden", "&::before": { display: "none" } }}
-                    >
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
-                        sx={{ px: 1.5, minHeight: "unset", "& .MuiAccordionSummary-content": { my: 0.75 } }}
-                      >
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%", mr: 1 }}>
-                          <Box>
-                            <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>
-                              {session.group} &middot; {session.batch ?? session.cohort}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem", display: "block", lineHeight: 1.2 }}>
-                              {session.groupMembers.length} learners
-                            </Typography>
-                          </Box>
-                          <Chip
-                            label="Group"
-                            size="small"
-                            variant="outlined"
-                            sx={{ height: 18, fontSize: "0.55rem", fontWeight: 600, borderRadius: "4px" }}
-                          />
+                    <SectionHeading icon={<GroupsOutlinedIcon sx={{ fontSize: 14 }} />}>Attendees</SectionHeading>
+
+                    {/* Group sub-section */}
+                    {session.group && session.groupMembers && session.groupMembers.length > 0 && (
+                      <Box sx={{ mb: session.combinedBatches && session.combinedBatches.length > 0 ? 2 : 0 }}>
+                        <Typography variant="overline" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, fontSize: "0.625rem", lineHeight: 1.6 }}>
+                          Group
+                        </Typography>
+                        <AttendeeRow
+                          title={`${session.group} · ${session.batch ?? session.cohort}`}
+                          subtitle={`${session.groupMembers.length} learner${session.groupMembers.length !== 1 ? "s" : ""}`}
+                          chipLabel="Group"
+                        />
+                      </Box>
+                    )}
+
+                    {/* Combined sub-section */}
+                    {session.combinedBatches && session.combinedBatches.length > 0 && (
+                      <Box>
+                        <Typography variant="overline" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, fontSize: "0.625rem", lineHeight: 1.6 }}>
+                          Combined session &middot; {session.combinedBatches.reduce((sum, cb) => sum + (cb.audienceType === "Individual" ? (cb.members?.length ?? cb.learnerCount ?? 0) : (cb.learnerCount ?? 0)), 0)} members
+                        </Typography>
+                        <Stack spacing={1}>
+                          {session.combinedBatches.flatMap((cb) => {
+                            if (cb.audienceType === "Individual") {
+                              const individuals = cb.members && cb.members.length > 0
+                                ? cb.members.map((_m, i) => ({ key: cb.batch + "-ind-" + i }))
+                                : [{ key: cb.batch + "-ind" }];
+                              return individuals.map((row) => (
+                                <AttendeeRow
+                                  key={row.key}
+                                  title={cb.batch}
+                                  subtitle="1 learner"
+                                  chipLabel="Individual"
+                                />
+                              ));
+                            }
+                            return [
+                              <AttendeeRow
+                                key={cb.batch + (cb.group || "")}
+                                title={cb.batch}
+                                subtitle={cb.learnerCount != null ? `${cb.learnerCount} learner${cb.learnerCount !== 1 ? "s" : ""}` : undefined}
+                                chipLabel={cb.audienceType === "Batch" ? "Whole batch" : "Group"}
+                              />,
+                            ];
+                          })}
                         </Stack>
-                      </AccordionSummary>
-                      <AccordionDetails sx={{ px: 1.5, pt: 0, pb: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
-                        <Box>
-                          <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
-                            Members ({session.groupMembers.length})
-                          </Typography>
-                          <Stack
-                            spacing={0.5}
-                            sx={{
-                              maxHeight: 180,
-                              overflowY: "auto",
-                              pr: 0.5,
-                              "&::-webkit-scrollbar": { width: 2 },
-                              "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
-                              "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: "8px", "&:hover": { bgcolor: "text.disabled" } },
-                              scrollbarWidth: "thin",
-                              scrollbarColor: "var(--mui-palette-divider) transparent",
-                            }}
-                          >
-                            {session.groupMembers.map((m) => (
-                              <Stack key={m.email} direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
-                                <Avatar sx={{ width: 28, height: 28, fontSize: "0.65rem", bgcolor: "action.selected", color: "text.primary", flexShrink: 0 }}>
-                                  {m.name.charAt(0)}
-                                </Avatar>
-                                <Box sx={{ minWidth: 0 }}>
-                                  <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.2 }}>{m.name}</Typography>
-                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{m.email}</Typography>
-                                </Box>
-                              </Stack>
-                            ))}
-                          </Stack>
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
-                  </Box>
-                )}
-
-                {/* ── Combined batches ── */}
-                {session.combinedBatches && session.combinedBatches.length > 0 && (
-                  <Box sx={{ mb: 2.5 }}>
-                    <SectionHeading icon={<CallMergeOutlinedIcon sx={{ fontSize: 14 }} />}>
-                      Combined session &middot; {session.combinedBatches.reduce((sum, cb) => sum + (cb.learnerCount ?? 0), 0)} members
-                    </SectionHeading>
-                    <Stack spacing={1}>
-                      {session.combinedBatches.map((cb) => (
-                        <Accordion
-                          key={cb.batch + (cb.group || "")}
-                          disableGutters
-                          elevation={0}
-                          expanded={expandedCombinedBatch === (cb.batch + (cb.group || ""))}
-                          onChange={(_, isExpanded) => setExpandedCombinedBatch(isExpanded ? cb.batch + (cb.group || "") : false)}
-                          sx={{ border: "1px solid", borderColor: "divider", "&.MuiAccordion-root": { borderRadius: "12px" }, overflow: "hidden", "&::before": { display: "none" } }}
-                        >
-                          <AccordionSummary
-                            expandIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
-                            sx={{ px: 1.5, minHeight: "unset", "& .MuiAccordionSummary-content": { my: 0.75 } }}
-                          >
-                            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%", mr: 1 }}>
-                              <Box>
-                                <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>
-                                  {cb.audienceType === "Individual" ? "Individual students" : cb.batch}
-                                </Typography>
-                                {cb.learnerCount && (
-                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem", display: "block", lineHeight: 1.2 }}>
-                                    {cb.audienceType === "Individual" ? `${cb.learnerCount} student${cb.learnerCount !== 1 ? "s" : ""}` : `${cb.learnerCount} learners`}
-                                  </Typography>
-                                )}
-                              </Box>
-                              <Chip
-                                label={cb.audienceType === "Individual" ? "Individual" : cb.audienceType === "Batch" ? "Whole batch" : "Group"}
-                                size="small"
-                                variant="outlined"
-                                sx={{ height: 18, fontSize: "0.55rem", fontWeight: 600, borderRadius: "4px" }}
-                              />
-                            </Stack>
-                          </AccordionSummary>
-                          <AccordionDetails sx={{ px: 1.5, pt: 0, pb: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
-                            {/* Course name */}
-                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5, p: 1, borderRadius: "12px", bgcolor: "hsl(var(--md-surface-container) / 0.5)" }}>
-                              <MenuBookOutlinedIcon sx={{ fontSize: 16, color: "primary.main" }} />
-                              <Box>
-                                <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.6rem", display: "block", lineHeight: 1.2 }}>
-                                  {session.sessionType}
-                                </Typography>
-                                <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.3 }}>
-                                  {session.title}
-                                </Typography>
-                              </Box>
-                            </Stack>
-                            {/* Group info - show group identifier + batch */}
-                            {cb.audienceType === "Group" && cb.group && (
-                              <Box sx={{ mb: 1.5 }}>
-                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.5, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
-                                  Group details
-                                </Typography>
-                                <Stack spacing={0.5}>
-                                  <Typography variant="caption" fontWeight={500}>{cb.group} &middot; {cb.batch}</Typography>
-                                  {cb.learnerCount && <Typography variant="caption" color="text.secondary">{cb.learnerCount} learners</Typography>}
-                                </Stack>
-                              </Box>
-                            )}
-                            {/* Members list (Batch or Group) */}
-                            {(cb.audienceType === "Batch" || cb.audienceType === "Group") && cb.members && cb.members.length > 0 && (
-                              <Box>
-                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
-                                  Members ({cb.members.length})
-                                </Typography>
-                                <Stack
-                                  spacing={0.5}
-                                  sx={{
-                                    maxHeight: 180,
-                                    overflowY: "auto",
-                                    pr: 0.5,
-                                    "&::-webkit-scrollbar": { width: 2 },
-                                    "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
-                                    "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: "8px", "&:hover": { bgcolor: "text.disabled" } },
-                                    scrollbarWidth: "thin",
-                                    scrollbarColor: "var(--mui-palette-divider) transparent",
-                                  }}
-                                >
-                                  {cb.members.map((m) => (
-                                    <Stack key={m.email} direction="row" alignItems="center" spacing={1} sx={{ py: 0.75 }}>
-                                      <Avatar sx={{ width: 28, height: 28, fontSize: "0.65rem", bgcolor: "action.selected", color: "text.primary", flexShrink: 0 }}>
-                                        {m.name.charAt(0)}
-                                      </Avatar>
-                                      <Box sx={{ minWidth: 0 }}>
-                                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.2 }}>{m.name}</Typography>
-                                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>{m.email}</Typography>
-                                      </Box>
-                                    </Stack>
-                                  ))}
-                                </Stack>
-                              </Box>
-                            )}
-
-
-                            {/* Individual learner details */}
-                            {cb.audienceType === "Individual" && (cb.members && cb.members.length > 0 ? (
-                              <Box>
-                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
-                                  Students ({cb.members.length})
-                                </Typography>
-                                <Stack spacing={0.5}>
-                                  {cb.members.map((m) => (
-                                    <Stack key={m.email} direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
-                                      <Avatar sx={{ width: 28, height: 28, fontSize: "0.65rem", bgcolor: "action.selected", color: "text.primary", flexShrink: 0 }}>
-                                        {m.name.charAt(0)}
-                                      </Avatar>
-                                      <Box sx={{ minWidth: 0 }}>
-                                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.2 }}>{m.name}</Typography>
-                                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontSize: "0.7rem" }}>{m.email}</Typography>
-                                      </Box>
-                                    </Stack>
-                                  ))}
-                                </Stack>
-                              </Box>
-                            ) : cb.learnerName ? (
-                              <Box>
-                                <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: "block", mb: 0.75, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.6rem" }}>
-                                  Student
-                                </Typography>
-                                <Stack direction="row" alignItems="center" spacing={1} sx={{ py: 0.5 }}>
-                                  <Avatar sx={{ width: 28, height: 28, fontSize: "0.65rem", bgcolor: "action.selected", color: "text.primary", flexShrink: 0 }}>
-                                    {cb.learnerName.charAt(0)}
-                                  </Avatar>
-                                  <Box sx={{ minWidth: 0 }}>
-                                    <Typography variant="body2" fontWeight={600} sx={{ fontSize: "0.8rem", lineHeight: 1.2 }}>{cb.learnerName}</Typography>
-                                    {cb.learnerEmail && <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontSize: "0.7rem" }}>{cb.learnerEmail}</Typography>}
-                                  </Box>
-                                </Stack>
-                              </Box>
-                            ) : null)}
-                          </AccordionDetails>
-                        </Accordion>
-                      ))}
-                    </Stack>
+                      </Box>
+                    )}
                   </Box>
                 )}
 
                 {/* ── Linked course ── */}
                 {linkedCourse && (
                   <Box sx={{ mb: 2.5 }}>
-                    <SectionHeading>Linked course</SectionHeading>
+                    <SectionHeading icon={<MenuBookOutlinedIcon sx={{ fontSize: 14 }} />}>Linked course</SectionHeading>
                     <SectionCard>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography variant="body2" fontWeight={500} sx={{ fontSize: "0.8125rem" }}>{linkedCourse.title}</Typography>
@@ -1021,7 +901,7 @@ export function SessionDetailsModal() {
                 {/* ── Session materials ── */}
                 {session.prepMaterials && session.prepMaterials.length > 0 && (
                   <Box sx={{ mb: 2.5 }}>
-                    <SectionHeading>Session materials</SectionHeading>
+                    <SectionHeading icon={<FolderOutlinedIcon sx={{ fontSize: 14 }} />}>Session materials</SectionHeading>
                     <Stack spacing={0.5}>
                       {session.prepMaterials.map((m) => {
                         const isVideo = m.type === "video";
@@ -1078,7 +958,7 @@ export function SessionDetailsModal() {
                 {/* ── Learner context (1:1 sessions) ── */}
                 {isMentoring && session.learnerContext && (
                   <Box sx={{ mb: 2.5 }}>
-                    <SectionHeading>Learner context</SectionHeading>
+                    <SectionHeading icon={<PersonOutlinedIcon sx={{ fontSize: 14 }} />}>Learner context</SectionHeading>
                     <SectionCard>
                       {session.learnerContext.learnerName && (
                         <DetailRow label="Learner">{session.learnerContext.learnerName}</DetailRow>

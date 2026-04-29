@@ -7,6 +7,8 @@ import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -181,6 +183,9 @@ export function CompletedSessionDetailDialog() {
           <Stack spacing={0} sx={{ px: 2, py: 2 }}>
             <Box sx={{ mb: 2.5 }}>
               <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>
+                  <InfoOutlinedIcon sx={{ fontSize: 14 }} />
+                </Box>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
                   Details
                 </Typography>
@@ -229,6 +234,9 @@ export function CompletedSessionDetailDialog() {
             {/* Quick actions */}
             <Box>
               <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>
+                  <BoltOutlinedIcon sx={{ fontSize: 14 }} />
+                </Box>
                 <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
                   Actions
                 </Typography>
