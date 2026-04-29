@@ -29,6 +29,10 @@ import { keyframes } from "@mui/system";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -264,6 +268,24 @@ export default function ProfilePage() {
   const [ratingView, setRatingView] = useState<"course" | "program">("course");
   const [reportModal, setReportModal] = useState<string | null>(null);
   const [engagementModal, setEngagementModal] = useState<string | null>(null);
+
+  /* Per-category Performance accordion state. Persists user collapse choices
+     across reloads in localStorage so a guru only collapses Mentoring once.
+     Default for any unseen category is "expanded" (true). */
+  const PERF_EXPANDED_KEY = "profile.performance.expanded";
+  const [perfExpanded, setPerfExpanded] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = window.localStorage.getItem(PERF_EXPANDED_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem(PERF_EXPANDED_KEY, JSON.stringify(perfExpanded)); } catch {}
+  }, [perfExpanded]);
+  const isPerfExpanded = (cat: string) => perfExpanded[cat] !== false;
+  const togglePerfExpanded = (cat: string) =>
+    setPerfExpanded((s) => ({ ...s, [cat]: !(s[cat] !== false) }));
 
   /* Engagement Stats cards - shared config used by the grid tiles and by
      the detail drawer. Title acts as the lookup key for `engagementModal`. */
@@ -1977,12 +1999,101 @@ export default function ProfilePage() {
               ? rows.map((r) => ({ ...r, scores: r.scores.map((s, i) => i >= 6 ? s : null) }))
               : rows;
         const categoryStats = operationalCardsByCategory.get(category) ?? [];
+
+        // Glanceable KPI strip in the collapsed-state header. Mirrors the
+        // body's KPI cards so the same numbers are visible without expanding.
+        const expanded = isPerfExpanded(category);
+        const compactLabel = (label: string) =>
+          label
+            .toLowerCase()
+            .replace(/^avg\s+/, "")
+            .replace(/\s*\/\s*month$/, " / Month");
+
         return (
-          <Card key={category} variant="outlined" sx={{ mb: 3 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-              <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "0.95rem", sm: "1.05rem" }, mb: 2 }}>
+          <Accordion
+            key={category}
+            expanded={expanded}
+            onChange={() => togglePerfExpanded(category)}
+            disableGutters
+            elevation={0}
+            sx={{
+              mb: 3,
+              border: 1,
+              borderColor: "divider",
+              borderRadius: "12px !important",
+              overflow: "hidden",
+              "&::before": { display: "none" },
+              transition: "border-color 0.15s",
+              "&:hover": { borderColor: "text.disabled" },
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ fontSize: 20 }} />}
+              sx={{
+                px: { xs: 2, sm: 2.5 },
+                "& .MuiAccordionSummary-content": {
+                  my: { xs: 1.5, sm: 1.75 },
+                  alignItems: "center",
+                  gap: 1.5,
+                  justifyContent: "space-between",
+                  mr: 1,
+                  flexWrap: "wrap",
+                },
+                "& .MuiAccordionSummary-expandIconWrapper": {
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "background-color 0.15s, color 0.15s",
+                  color: "text.secondary",
+                  "&:hover": { bgcolor: "action.hover", color: "text.primary" },
+                },
+              }}
+            >
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: "0.95rem", sm: "1.05rem" }, flexShrink: 0 }}>
                 {category} Performance
               </Typography>
+              {!expanded && categoryStats.length > 0 && (
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={2}
+                  divider={<Box sx={{ width: "1px", height: 24, bgcolor: "divider" }} />}
+                  sx={{
+                    display: { xs: "none", sm: "flex" },
+                    minWidth: 0,
+                    flexWrap: "wrap",
+                    rowGap: 1,
+                  }}
+                >
+                  {categoryStats.map((card) => (
+                    <Stack key={card.id} spacing={0.25} sx={{ minWidth: 0 }}>
+                      <Stack direction="row" alignItems="baseline" spacing={0.5}>
+                        <Typography sx={{ fontSize: "0.95rem", fontWeight: 700, color: "text.primary", lineHeight: 1.1 }}>
+                          {card.value}
+                        </Typography>
+                        {card.delta && card.deltaPositive != null && (
+                          <Stack direction="row" alignItems="center" spacing={0.125}>
+                            {card.deltaPositive
+                              ? <TrendingUpIcon sx={{ fontSize: 12, color: "success.main" }} />
+                              : <TrendingDownIcon sx={{ fontSize: 12, color: "error.main" }} />}
+                            <Typography sx={{ fontSize: "0.7rem", fontWeight: 600, color: card.deltaPositive ? "success.main" : "error.main", lineHeight: 1 }}>
+                              {card.delta}
+                            </Typography>
+                          </Stack>
+                        )}
+                      </Stack>
+                      <Typography sx={{ fontSize: "0.7rem", color: "text.secondary", lineHeight: 1.2, textTransform: "capitalize" }}>
+                        {compactLabel(card.label)}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+              )}
+            </AccordionSummary>
+            <AccordionDetails sx={{ px: { xs: 2, sm: 2.5 }, pt: 0, pb: { xs: 2, sm: 2.5 } }}>
 
               {/* Subsection 1: KPI cards - no overline label, cards self-describe */}
               {categoryStats.length > 0 && (
@@ -2033,8 +2144,8 @@ export default function ProfilePage() {
                 </Table>
               </TableContainer>
 
-            </CardContent>
-          </Card>
+            </AccordionDetails>
+          </Accordion>
         );
       })}
 

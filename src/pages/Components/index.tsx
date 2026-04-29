@@ -1438,17 +1438,18 @@ const RESIDENCY_COMBINED_ACCORDION = (
     <AccordionDetails sx={{ p: 0 }}>
       <Stack divider={<Divider />}>
         {[
-          { batch: "AIML Online March 26 A", group: "All Groups", learnerCount: 120 },
-          { batch: "AIML Online Feb 26 B", group: "All Groups", learnerCount: 95 },
+          { batch: "AIML Online March 26 A", learnerCount: 120, chip: "Whole batch" },
+          { batch: "AIML Online Feb 26 B", learnerCount: 95, chip: "Whole batch" },
         ].map((cb) => (
           <Box key={cb.batch} sx={{ px: 1.5, py: 0.75 }}>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
-              <Typography variant="caption" fontWeight={500}>{cb.batch}</Typography>
-              <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
-            </Stack>
-            <Stack direction="row" spacing={1} sx={{ ml: 2, mt: 0.25 }}>
-              <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 18, fontSize: "0.6rem" }} />
+            <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+              <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, minWidth: 0 }} noWrap>
+                {cb.batch}
+                <Box component="span" sx={{ fontWeight: 400, color: "text.secondary", ml: 0.5 }}>
+                  &middot; {cb.learnerCount} learner{cb.learnerCount !== 1 ? "s" : ""}
+                </Box>
+              </Typography>
+              <Chip label={cb.chip} size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", height: 20, flexShrink: 0, color: "text.secondary", borderColor: "divider" }} />
             </Stack>
           </Box>
         ))}
@@ -1792,17 +1793,18 @@ function OnlineSessionCards() {
             <AccordionDetails sx={{ p: 0 }}>
               <Stack divider={<Divider />}>
                 {[
-                  { batch: "PGPDS.O.MAR26.A", group: "Group 07", learnerCount: 20 },
-                  { batch: "PGPDS.O.MAR26.B", group: "Group 03", learnerCount: 18 },
+                  { batch: "PGPDS.O.MAR26.A", learnerCount: 20, chip: "Group" },
+                  { batch: "PGPDS.O.MAR26.B", learnerCount: 18, chip: "Group" },
                 ].map((cb) => (
                   <Box key={cb.batch} sx={{ px: 1.5, py: 0.75 }}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
-                      <Typography variant="caption" fontWeight={500}>{cb.batch}</Typography>
-                      <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
-                    </Stack>
-                    <Stack direction="row" spacing={1} sx={{ ml: 2, mt: 0.25 }}>
-                      <Chip label={`${cb.learnerCount} learners`} size="small" sx={{ height: 18, fontSize: "0.6rem" }} />
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                      <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, minWidth: 0 }} noWrap>
+                        {cb.batch}
+                        <Box component="span" sx={{ fontWeight: 400, color: "text.secondary", ml: 0.5 }}>
+                          &middot; {cb.learnerCount} learner{cb.learnerCount !== 1 ? "s" : ""}
+                        </Box>
+                      </Typography>
+                      <Chip label={cb.chip} size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", height: 20, flexShrink: 0, color: "text.secondary", borderColor: "divider" }} />
                     </Stack>
                   </Box>
                 ))}
@@ -1870,14 +1872,18 @@ function OnlineSessionCards() {
             <AccordionDetails sx={{ p: 0 }}>
               <Stack divider={<Divider />}>
                 {[
-                  { batch: "PGPDS.O.MAR26.A", group: "Group 07" },
-                  { batch: "PGPDS.O.MAR26.B", group: "Group 03" },
+                  { batch: "PGPDS.O.MAR26.A", learnerCount: 20, chip: "Group" },
+                  { batch: "PGPDS.O.MAR26.B", learnerCount: 18, chip: "Group" },
                 ].map((cb) => (
                   <Box key={cb.batch} sx={{ px: 1.5, py: 0.75 }}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.disabled", flexShrink: 0 }} />
-                      <Typography variant="caption" fontWeight={500}>{cb.batch}</Typography>
-                      <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                      <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, minWidth: 0 }} noWrap>
+                        {cb.batch}
+                        <Box component="span" sx={{ fontWeight: 400, color: "text.secondary", ml: 0.5 }}>
+                          &middot; {cb.learnerCount} learner{cb.learnerCount !== 1 ? "s" : ""}
+                        </Box>
+                      </Typography>
+                      <Chip label={cb.chip} size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", height: 20, flexShrink: 0, color: "text.secondary", borderColor: "divider" }} />
                     </Stack>
                   </Box>
                 ))}

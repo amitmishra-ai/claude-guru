@@ -11,6 +11,7 @@ import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
@@ -905,24 +906,36 @@ export default function DashboardPage() {
                                   </AccordionSummary>
                                   <AccordionDetails sx={{ p: 0 }}>
                                   <Stack divider={<Divider />}>
-                                    {s.combinedBatches.map((cb) => (
-                                      <Box key={cb.batch + (cb.group || "")} sx={{ px: 1.5, py: 0.75 }}>
-                                        <Stack direction="row" alignItems="center" spacing={0.75}>
-                                          <Typography variant="caption" fontWeight={500}>
-                                            {cb.audienceType === "Individual" ? cb.learnerName ?? cb.batch : cb.batch}
-                                          </Typography>
-                                          {cb.group && cb.audienceType !== "Individual" && (
-                                            <Typography variant="caption" color="text.secondary">&mdash; {cb.group}</Typography>
-                                          )}
-                                          <Chip
-                                            label={cb.audienceType === "Batch" ? "Batch" : cb.audienceType === "Group" ? "Group" : "Individual"}
-                                            size="small"
-                                            variant="outlined"
-                                            sx={{ height: 16, fontSize: "0.55rem", fontWeight: 600, "& .MuiChip-label": { px: 0.5 } }}
-                                          />
-                                        </Stack>
-                                      </Box>
-                                    ))}
+                                    {s.combinedBatches.flatMap((cb) => {
+                                      const rows = cb.audienceType === "Individual"
+                                        ? (cb.members && cb.members.length > 0
+                                            ? cb.members.map((_m, i) => ({ key: cb.batch + "-ind-" + i, label: cb.batch, count: 1, chip: "Individual" }))
+                                            : [{ key: cb.batch + "-ind", label: cb.batch, count: cb.learnerCount ?? 1, chip: "Individual" }])
+                                        : [{
+                                            key: cb.batch + (cb.group || ""),
+                                            label: cb.batch,
+                                            count: cb.learnerCount ?? 0,
+                                            chip: cb.audienceType === "Batch" ? "Whole batch" : "Group",
+                                          }];
+                                      return rows.map((row) => (
+                                        <Box key={row.key} sx={{ px: 1.5, py: 0.75 }}>
+                                          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                                            <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, minWidth: 0 }} noWrap>
+                                              {row.label}
+                                              <Box component="span" sx={{ fontWeight: 400, color: "text.secondary", ml: 0.5 }}>
+                                                &middot; {row.count} learner{row.count !== 1 ? "s" : ""}
+                                              </Box>
+                                            </Typography>
+                                            <Chip
+                                              label={row.chip}
+                                              size="small"
+                                              variant="outlined"
+                                              sx={{ fontWeight: 500, fontSize: "0.75rem", height: 20, flexShrink: 0, color: "text.secondary", borderColor: "divider" }}
+                                            />
+                                          </Stack>
+                                        </Box>
+                                      ));
+                                    })}
                                   </Stack>
                                   </AccordionDetails>
                                 </Accordion>
@@ -1084,6 +1097,9 @@ export default function DashboardPage() {
                                     <Box sx={{ mb: 2.5 }}>
                                       {/* SectionHeading */}
                                       <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
+                                        <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>
+                                          <InfoOutlinedIcon sx={{ fontSize: 14 }} />
+                                        </Box>
                                         <Typography variant="overline" fontWeight={700} color="text.secondary" sx={{ fontSize: "0.65rem", letterSpacing: "0.08em" }}>
                                           Details
                                         </Typography>
