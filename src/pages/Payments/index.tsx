@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import Switch from "@mui/material/Switch";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
@@ -202,23 +202,46 @@ export default function PaymentsPage() {
     }
     setPage(0);
   };
-  /* All-time earnings shown DESCENDING (latest on the left, oldest on the right).
-     Source data is ascending chronological; reverse once here and thread the
-     same descending array through chart + stats. */
+  /* All-time earnings shown ASCENDING chronologically (oldest on the left,
+     latest on the right) — natural reading order for time-series charts.
+     Source data is already ascending; thread it directly. The horizontal
+     scroller auto-scrolls to the right edge on mount so the user lands on
+     the most recent months without disturbing the order. */
   const chartData = useMemo(() => {
     const src = isEmpty ? demoMonthlyEarnings.map((d) => ({ ...d, amount: 0 })) : demoMonthlyEarnings;
-    return [...src].reverse();
+    return [...src];
   }, [isEmpty]);
   const earningsOnly = useMemo(() => chartData.filter((d) => d.amount > 0), [chartData]);
   const totalEarnings = useMemo(() => earningsOnly.reduce((a, m) => a + m.amount, 0), [earningsOnly]);
   const avgMonthly    = useMemo(() => earningsOnly.length ? Math.round(totalEarnings / earningsOnly.length) : 0, [totalEarnings, earningsOnly]);
   const bestMonth     = useMemo(() => earningsOnly.length ? earningsOnly.reduce((a, b) => b.amount > a.amount ? b : a, earningsOnly[0]) : { label: "-", amount: 0 }, [earningsOnly]);
-  /* MoM trend: in descending order arr[0] is the most recent month and arr[1]
-     is the previous month, so latest minus previous gives the current MoM delta. */
+  /* MoM trend: ascending order — last entry is the most recent month, second-
+     to-last is the previous month. Latest minus previous = current MoM delta. */
   const momTrend      = useMemo(() => {
     if (earningsOnly.length < 2) return 0;
-    return earningsOnly[0].amount - earningsOnly[1].amount;
+    return earningsOnly[earningsOnly.length - 1].amount - earningsOnly[earningsOnly.length - 2].amount;
   }, [earningsOnly]);
+
+  /* Auto-scroll the chart to its right edge once after data is ready so the
+     user lands on the latest months. Re-runs if the dataset length changes
+     (empty-state toggle, future filter). */
+  const chartScrollRef = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    if (chartLoading) return;
+    const el = chartScrollRef.current;
+    if (!el) return;
+    el.scrollLeft = el.scrollWidth;
+  }, [chartLoading, chartData.length]);
+
+  /* Explicit Y-domain shared by the sticky Y-axis chart on the left and the
+     scrollable bar chart on the right so their tick positions stay aligned. */
+  const chartYMax = useMemo(() => {
+    const max = Math.max(0, ...chartData.map((d) => d.amount));
+    if (max === 0) return 1000;
+    const step = 5000;
+    return Math.ceil((max * 1.1) / step) * step;
+  }, [chartData]);
+  const chartYDomain: [number, number] = [0, chartYMax];
 
   /* Click-on-activity handler — opens the universal activity/session details
      drawer used everywhere else (Dashboard "View Details", Courses, Calendar).
@@ -338,10 +361,12 @@ export default function PaymentsPage() {
             </>
           ) : (
             <>
-              <FlexBox sx={{ alignItems: "center", gap: 2, mb: 1.5, flexWrap: "wrap" }}>
+              <FlexBox sx={{ alignItems: "flex-start", gap: 2, mb: 1.5, flexWrap: "wrap" }}>
                 <Box>
-                  <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1.2 }}>{showNumbers ? fmtInr(totalEarnings) : maskValue(fmtInr(totalEarnings))}</Typography>
-                  <Typography variant="caption" color="text.secondary">Total earnings</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>Total earnings</Typography>
+                  <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1.2 }}>
+                    {showNumbers ? fmtInr(totalEarnings) : maskValue(fmtInr(totalEarnings))}
+                  </Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
                 {[
@@ -357,69 +382,97 @@ export default function PaymentsPage() {
                   </Box>
                 ))}
               </FlexBox>
-              {/* All-time chart (5+ years of monthly data) — scrolls horizontally.
-                  Bars are sized so ~16 months are visible in the first viewport
-                  on a typical desktop; scrolling right reveals older history
-                  back to 2021. Latest month is leftmost. */}
-              <Box sx={{
-                width: "100%",
-                height: 200,
-                overflowX: "auto",
-                overflowY: "hidden",
-                pb: 0.5,
-                // soft scrollbar so it doesn't eat vertical space dramatically
-                "&::-webkit-scrollbar": { height: 6 },
-                "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: 3 },
-              }}>
-                <Box sx={{ minWidth: `${Math.max(chartData.length * 68, 600)}px`, height: "100%" }}>
-                  <ResponsiveContainer>
-                    <BarChart data={chartData} margin={{ top: 8, right: 12, left: -20, bottom: 0 }} barCategoryGap="18%">
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
-                      <XAxis
-                        dataKey="label"
-                        tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }}
-                        axisLine={false}
-                        tickLine={false}
-                        interval={0}
-                      />
+              {/* All-time chart (5+ years of monthly data). Order is ascending
+                  (oldest left → latest right) and the scroller auto-scrolls to
+                  its right edge on mount so the user lands on the most recent
+                  months. The Y-axis is split into a fixed left strip so its
+                  tick labels (e.g. "80k") stay in view at any scroll position;
+                  the scrollable strip on the right hides its own Y-axis but
+                  shares the same explicit domain so bar heights stay aligned. */}
+              <Box sx={{ display: "flex", width: "100%", height: 200 }}>
+                {/* Sticky Y-axis. Container is wider than the YAxis itself so
+                    recharts has a valid plot rectangle to compute scales in. */}
+                <Box sx={{ width: 56, height: "100%", flexShrink: 0 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }} barCategoryGap="18%">
                       <YAxis
                         tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }}
                         tickFormatter={(v) => showNumbers ? `${(v / 1000).toFixed(0)}k` : "••"}
                         axisLine={false}
                         tickLine={false}
+                        domain={chartYDomain}
+                        width={48}
                       />
-                      <Tooltip
-                        cursor={{ fill: "hsl(var(--md-outline-variant))", opacity: 0.15 }}
-                        content={({ active, payload, label }) => {
-                          if (!active || !payload?.length) return null;
-                          const val = Number(payload[0].value ?? 0);
-                          const amtStr = val > 0 ? fmtInr(val) : "–";
-                          return (
-                            <Chip
-                              size="small"
-                              label={`${label} · ${showNumbers ? amtStr : maskValue(amtStr)}`}
-                              sx={{
-                                fontSize: 11,
-                                fontWeight: 600,
-                                height: 24,
-                                bgcolor: "background.paper",
-                                border: 1,
-                                borderColor: "divider",
-                                boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
-                              }}
-                            />
-                          );
-                        }}
+                      <XAxis
+                        dataKey="label"
+                        tick={false}
+                        axisLine={false}
+                        tickLine={false}
+                        height={22}
                       />
-                      <Bar
-                        dataKey="amount"
-                        radius={[4, 4, 0, 0]}
-                        fill="var(--gl-chart-bar-earnings)"
-                        fillOpacity={0.95}
-                        activeBar={{ fillOpacity: 1 }}
-                      />
+                      {/* Hidden bar so recharts treats this as a valid chart and
+                          the YAxis ticks render. */}
+                      <Bar dataKey="amount" fillOpacity={0} isAnimationActive={false} />
                     </BarChart>
                   </ResponsiveContainer>
+                </Box>
+                {/* Scrollable bars */}
+                <Box ref={chartScrollRef} sx={{
+                  flex: 1,
+                  height: "100%",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  pb: 0.5,
+                  // soft scrollbar so it doesn't eat vertical space dramatically
+                  "&::-webkit-scrollbar": { height: 6 },
+                  "&::-webkit-scrollbar-thumb": { bgcolor: "divider", borderRadius: 3 },
+                }}>
+                  <Box sx={{ minWidth: `${Math.max(chartData.length * 68, 600)}px`, height: "100%" }}>
+                    <ResponsiveContainer>
+                      <BarChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }} barCategoryGap="18%">
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--md-outline-variant))" vertical={false} />
+                        <XAxis
+                          dataKey="label"
+                          tick={{ fontSize: 11, fill: "hsl(var(--md-on-surface))" }}
+                          axisLine={false}
+                          tickLine={false}
+                          interval={0}
+                          height={22}
+                        />
+                        <YAxis hide domain={chartYDomain} />
+                        <Tooltip
+                          cursor={{ fill: "hsl(var(--md-outline-variant))", opacity: 0.15 }}
+                          content={({ active, payload, label }) => {
+                            if (!active || !payload?.length) return null;
+                            const val = Number(payload[0].value ?? 0);
+                            const amtStr = val > 0 ? fmtInr(val) : "–";
+                            return (
+                              <Chip
+                                size="small"
+                                label={`${label} · ${showNumbers ? amtStr : maskValue(amtStr)}`}
+                                sx={{
+                                  fontSize: 11,
+                                  fontWeight: 600,
+                                  height: 24,
+                                  bgcolor: "background.paper",
+                                  border: 1,
+                                  borderColor: "divider",
+                                  boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                                }}
+                              />
+                            );
+                          }}
+                        />
+                        <Bar
+                          dataKey="amount"
+                          radius={[4, 4, 0, 0]}
+                          fill="var(--gl-chart-bar-earnings)"
+                          fillOpacity={0.95}
+                          activeBar={{ fillOpacity: 1 }}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
                 </Box>
               </Box>
             </>
