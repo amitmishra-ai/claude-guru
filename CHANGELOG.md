@@ -4,6 +4,15 @@ All notable changes to the Guru Dashboard are documented here.
 
 ---
 
+## 2026-04-30
+
+### Payments - metric tile consistency + chronological earnings chart
+- **Total earnings tile now matches sibling metrics: label-on-top, value-below** — In [src/pages/Payments/index.tsx](src/pages/Payments/index.tsx) the leading `Total earnings` block had its `h5` value rendered above the `caption` label, while the sibling tiles in the same flex row (`Avg/month`, `Best month`, `MoM trend`) all use label-on-top, value-below. Inverted the Total earnings stack so all four tiles share the same vertical structure (`caption` label → bold value). Total earnings keeps its larger `h5 / weight 700` value to remain the visual anchor of the row, but the layout itself is no longer inconsistent. Switched the FlexBox `alignItems` from `center` to `flex-start` so taller tiles don't push shorter ones into mis-aligned baselines.
+- **Earnings chart Y-axis pinned so tick labels (`80k`, `60k`…) stay visible at any scroll position** — Single-chart layout meant the Y-axis lived inside the wide scrolling SVG and slid off-screen when the user reached the right edge. Split the chart into two adjacent recharts: a fixed-width 50px sticky strip on the left rendering only the Y-axis, and the existing horizontal scroller on the right rendering bars + X-axis with its own Y-axis hidden (`<YAxis hide />`). Both charts share an explicit `chartYDomain` (`[0, ceil(max * 1.1 / 5000) * 5000]`) so bar heights and tick positions stay aligned regardless of scroll. Both charts use matching top/bottom margins + `XAxis height={22}` (left axis with `tick={false}`) so plot rectangles line up.
+- **All-time earnings bar chart restored to ascending chronological order with auto-scroll to latest** — Chart was reversing the source data so the latest month sat on the left and scrolling right uncovered older history — readable but inverts the natural left-to-right time axis convention. Dropped the `[...src].reverse()` so `chartData` is now ascending (Jan 2021 → Mar 2026, oldest left → latest right). Updated `momTrend` to read from the tail of the array (`length-1` minus `length-2`) instead of indices 0/1. To preserve the convenience of the previous design (latest months in view without manual scrolling) added a `chartScrollRef` on the horizontal scroll container and a `useLayoutEffect` that sets `el.scrollLeft = el.scrollWidth` after data is ready, so the viewport lands on the right edge on mount; scrolling left reveals older history. Re-runs when `chartData.length` changes (e.g. empty-state toggle). Imported `useLayoutEffect` + `useRef` from React.
+
+---
+
 ## 2026-04-29
 
 ### Activity Details - Combined session attendees simplified
