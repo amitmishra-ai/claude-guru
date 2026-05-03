@@ -49,6 +49,7 @@ export default function AccountPage() {
     { icon: <SettingsOutlinedIcon />, label: "Settings", sublabel: "Notifications & preferences", onClick: () => navigate("/preferences") },
     { icon: isDarkMode ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />, label: isDarkMode ? "Light Mode" : "Dark Mode", onClick: () => dispatch(setIsDarkMode(!isDarkMode)) },
     { icon: <SwapHorizOutlinedIcon />, label: "Switch to Learner", sublabel: "Open learner dashboard", onClick: () => dispatch(pushToast({ title: "Switching", description: "Redirecting to Learner Dashboard..." })) },
+    { icon: <SwapHorizOutlinedIcon />, label: "Switch to Old Dashboard", sublabel: "Open old guru dashboard", onClick: () => navigate("/old-dashboard") },
     { icon: <PersonAddAltOutlinedIcon />, label: "Refer a Guru", onClick: () => dispatch(pushToast({ title: "Referral", description: "Opening referral link..." })) },
   ];
 

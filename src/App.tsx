@@ -13,10 +13,12 @@ const PreferencesPage = lazy(() => import("@/pages/Preferences"));
 const ComponentsPage = lazy(() => import("@/pages/Components"));
 const SupportPage = lazy(() => import("@/pages/Support"));
 const AccountPage = lazy(() => import("@/pages/Account"));
+const OldDashboardPage = lazy(() => import("@/pages/OldDashboard"));
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/old-dashboard" element={<Suspense><OldDashboardPage /></Suspense>} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<Suspense><DashboardPage /></Suspense>} />
         <Route path="/courses" element={<Suspense><CoursesPage /></Suspense>} />

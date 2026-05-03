@@ -533,6 +533,11 @@ export function Sidebar() {
           <ListItemText>Switch to Learner Dashboard</ListItemText>
         </MenuItem>
 
+        <MenuItem onClick={() => { handleMenuClose(); navigate("/old-dashboard"); }}>
+          <ListItemIcon><SwapHorizOutlinedIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Switch to Old Dashboard</ListItemText>
+        </MenuItem>
+
         <MenuItem onClick={() => { handleMenuClose(); dispatch(pushToast({ title: "Refer participants", description: "Opening referral link..." })); }}>
           <ListItemIcon><PersonAddAltOutlinedIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Refer Participants</ListItemText>
