@@ -29,6 +29,7 @@ import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -795,7 +796,7 @@ export function SessionDetailsModal() {
                   <SectionHeading icon={<InfoOutlinedIcon sx={{ fontSize: 14 }} />}>Details</SectionHeading>
                   <SectionCard>
                     {session.cohort && <DetailRow label="Batch">{session.cohort}</DetailRow>}
-                    {session.group && !session.groupMembers && (
+                    {session.group && !session.groupMembers && !isMentoring && (
                       <DetailRow label="Group">
                         <Stack direction="row" alignItems="center" spacing={0.5} justifyContent="flex-end">
                           <GroupsOutlinedIcon sx={{ fontSize: 14 }} />
@@ -817,8 +818,8 @@ export function SessionDetailsModal() {
                   </SectionCard>
                 </Box>
 
-                {/* ── Attendees ── */}
-                {((session.group && session.groupMembers && session.groupMembers.length > 0) ||
+                {/* ── Attendees ── (hidden for Career mentoring 1:1 — single learner shown in Learner Details) */}
+                {!isMentoring && ((session.group && session.groupMembers && session.groupMembers.length > 0) ||
                   (session.combinedBatches && session.combinedBatches.length > 0)) && (
                   <Box sx={{ mb: 2.5 }}>
                     <SectionHeading icon={<GroupsOutlinedIcon sx={{ fontSize: 14 }} />}>Attendees</SectionHeading>
@@ -873,8 +874,8 @@ export function SessionDetailsModal() {
                   </Box>
                 )}
 
-                {/* ── Linked course ── */}
-                {linkedCourse && (
+                {/* ── Linked course ── (hidden for Career mentoring 1:1 — no course attached) */}
+                {linkedCourse && !isMentoring && (
                   <Box sx={{ mb: 2.5 }}>
                     <SectionHeading icon={<MenuBookOutlinedIcon sx={{ fontSize: 14 }} />}>Linked course</SectionHeading>
                     <SectionCard>
@@ -955,52 +956,129 @@ export function SessionDetailsModal() {
                   </Box>
                 )}
 
-                {/* ── Learner context (1:1 sessions) ── */}
-                {isMentoring && session.learnerContext && (
-                  <Box sx={{ mb: 2.5 }}>
-                    <SectionHeading icon={<PersonOutlinedIcon sx={{ fontSize: 14 }} />}>Learner context</SectionHeading>
-                    <SectionCard>
-                      {session.learnerContext.learnerName && (
-                        <DetailRow label="Learner">{session.learnerContext.learnerName}</DetailRow>
-                      )}
-                      <Stack direction="row" spacing={1} sx={{ mt: 0.5 }} flexWrap="wrap" useFlexGap>
-                        {session.learnerContext.resumeUrl && (
-                          <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}
-                            onClick={() => dispatch(pushToast({ title: "Opening resume" }))} sx={{ fontSize: "0.75rem" }}>
-                            Resume
-                          </Button>
-                        )}
-                        {session.learnerContext.linkedInUrl && (
-                          <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}
-                            onClick={() => dispatch(pushToast({ title: "Opening LinkedIn" }))} sx={{ fontSize: "0.75rem" }}>
-                            LinkedIn
-                          </Button>
-                        )}
-                        {session.learnerContext.learnerProfileUrl && (
-                          <Button variant="soft" size="small" startIcon={<AccountCircleOutlinedIcon sx={{ fontSize: 14 }} />}
-                            onClick={() => dispatch(pushToast({ title: "Opening profile" }))} sx={{ fontSize: "0.75rem" }}>
-                            Profile
-                          </Button>
-                        )}
-                      </Stack>
-                      {session.learnerContext.notes && (
-                        <Box
-                          sx={{
-                            mt: 1.5,
-                            p: 1.25,
-                            borderRadius: "12px",
-                            bgcolor: "hsl(var(--md-surface-container) / 0.3)",
-                            fontSize: "0.8rem",
-                            color: "hsl(var(--md-on-surface-variant))",
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {session.learnerContext.notes}
+                {/* ── Learner Details (every Career mentoring session) ── */}
+                {isMentoring && (() => {
+                  const lc = session.learnerContext ?? {};
+                  const displayName = lc.learnerName ?? "Learner";
+                  const initials = displayName.split(" ").map((p) => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+                  const subline = [lc.designation, lc.companyName].filter(Boolean).join(" · ");
+                  const hasLinks = Boolean(lc.linkedInUrl || lc.resumeUrl || lc.learnerProfileUrl);
+                  return (
+                    <Box sx={{ mb: 2.5 }}>
+                      <SectionHeading icon={<PersonOutlinedIcon sx={{ fontSize: 14 }} />}>Learner Details</SectionHeading>
+                      <SectionCard>
+                        {/* Identity row */}
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                          <Avatar
+                            src={lc.imageUrl || undefined}
+                            alt={displayName}
+                            sx={{
+                              width: 48, height: 48,
+                              bgcolor: "hsl(var(--md-primary-container))",
+                              color: "hsl(var(--md-on-primary-container))",
+                              fontSize: "0.9rem",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {initials || "L"}
+                          </Avatar>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="body1" fontWeight={600} sx={{ fontSize: "0.95rem", lineHeight: 1.3, color: "hsl(var(--md-on-surface))" }} noWrap>
+                              {displayName}
+                            </Typography>
+                            {subline && (
+                              <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.8125rem", lineHeight: 1.4 }} noWrap>
+                                {subline}
+                              </Typography>
+                            )}
+                            {typeof lc.experience === "number" && (
+                              <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem", display: "block", mt: 0.25 }}>
+                                {lc.experience} {lc.experience === 1 ? "year" : "years"} experience
+                              </Typography>
+                            )}
+                          </Box>
+                        </Stack>
+
+                        {/* Agenda */}
+                        <Box sx={{ mt: 2 }}>
+                          <Typography
+                            variant="overline"
+                            sx={{ display: "block", fontWeight: 700, fontSize: "0.65rem", color: "text.secondary", letterSpacing: "0.08em", mb: 0.75 }}
+                          >
+                            Agenda
+                          </Typography>
+                          <Box
+                            sx={{
+                              p: 1.25,
+                              borderRadius: "10px",
+                              bgcolor: "hsl(var(--md-surface-container) / 0.4)",
+                              fontSize: "0.8125rem",
+                              lineHeight: 1.55,
+                              color: lc.agenda ? "hsl(var(--md-on-surface))" : "hsl(var(--md-on-surface-variant))",
+                              whiteSpace: "pre-wrap",
+                              fontStyle: lc.agenda ? "normal" : "italic",
+                            }}
+                          >
+                            {lc.agenda || "The learner has not shared an agenda yet."}
+                          </Box>
                         </Box>
-                      )}
-                    </SectionCard>
-                  </Box>
-                )}
+
+                        {/* Action links */}
+                        {hasLinks && (
+                          <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
+                            {lc.linkedInUrl && (
+                              <Button
+                                variant="soft" size="small"
+                                startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />}
+                                component="a" href={lc.linkedInUrl} target="_blank" rel="noopener"
+                                sx={{ fontSize: "0.75rem" }}
+                              >
+                                View LinkedIn
+                              </Button>
+                            )}
+                            {lc.resumeUrl && (
+                              <Button
+                                variant="soft" size="small"
+                                startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />}
+                                component="a" href={lc.resumeUrl} target="_blank" rel="noopener"
+                                sx={{ fontSize: "0.75rem" }}
+                              >
+                                View Resume
+                              </Button>
+                            )}
+                            {lc.learnerProfileUrl && (
+                              <Button
+                                variant="soft" size="small"
+                                startIcon={<AccountCircleOutlinedIcon sx={{ fontSize: 14 }} />}
+                                component="a" href={lc.learnerProfileUrl} target="_blank" rel="noopener"
+                                sx={{ fontSize: "0.75rem" }}
+                              >
+                                View Profile
+                              </Button>
+                            )}
+                          </Stack>
+                        )}
+
+                        {/* Notes (carry-over from older data shape) */}
+                        {lc.notes && (
+                          <Box
+                            sx={{
+                              mt: 1.5,
+                              p: 1.25,
+                              borderRadius: "10px",
+                              bgcolor: "hsl(var(--md-surface-container) / 0.3)",
+                              fontSize: "0.8rem",
+                              color: "hsl(var(--md-on-surface-variant))",
+                              lineHeight: 1.5,
+                            }}
+                          >
+                            {lc.notes}
+                          </Box>
+                        )}
+                      </SectionCard>
+                    </Box>
+                  );
+                })()}
 
                 {/* ── Polls ── */}
                 {showPolls && (

@@ -33,6 +33,14 @@ export type LearnerContext = {
   linkedInUrl?: string;
   learnerProfileUrl?: string;
   notes?: string;
+  /** Career-mentor learner profile fields (sourced from career_session API) */
+  imageUrl?: string;
+  designation?: string;
+  companyName?: string;
+  /** Years of professional experience */
+  experience?: number;
+  /** What the learner wants help with for this session */
+  agenda?: string;
 };
 
 export type Session = {

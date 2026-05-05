@@ -18,7 +18,7 @@ import Box from "@mui/material/Box";
  */
 
 const NAV_ITEMS = [
-  { to: "/", end: true, label: "Home", Icon: HomeOutlinedIcon, ActiveIcon: HomeIcon },
+  { to: "/new-dashboard", end: true, label: "Home", Icon: HomeOutlinedIcon, ActiveIcon: HomeIcon },
   { to: "/courses", end: false, label: "Courses", Icon: DescriptionOutlinedIcon, ActiveIcon: DescriptionIcon },
   { to: "/calendar", end: false, label: "Calendar", Icon: CalendarTodayOutlinedIcon, ActiveIcon: CalendarMonthIcon },
   { to: "/support", end: false, label: "Support", Icon: ConfirmationNumberOutlinedIcon, ActiveIcon: ConfirmationNumberIcon },

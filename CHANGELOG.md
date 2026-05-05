@@ -4,6 +4,38 @@ All notable changes to the Guru Dashboard are documented here.
 
 ---
 
+## 2026-05-05
+
+### Career Mentor — richer "Learner Details" section in Activity Details drawer
+- **`LearnerContext` type extended** in [src/lib/types.ts](src/lib/types.ts) with the fields the `career_session` API returns: `imageUrl`, `designation`, `companyName`, `experience` (years) and `agenda`. Existing fields (`learnerName`, `resumeUrl`, `linkedInUrl`, `learnerProfileUrl`, `notes`) kept for back-compat.
+- **Existing "Learner context" block in [src/components/dialogs/SessionDetailsModal.tsx](src/components/dialogs/SessionDetailsModal.tsx) replaced with a richer "Learner Details" card**. Shown for `Career mentoring session` whenever `learnerContext` exists. Layout:
+  - Identity row: 48×48 `Avatar` (uses `imageUrl`, falls back to initials in primary-container colours), name in 600 weight, designation · company in muted secondary, "X years experience" caption below.
+  - **Agenda** block in an `overline` label + soft container background pill, `whiteSpace: pre-wrap` so multi-line agendas render cleanly.
+  - Action buttons row: "View LinkedIn", "View Resume", "View Profile" — all `variant="soft"` size small with proper `<a target="_blank" rel="noopener">` so the links actually open the URL instead of dispatching toasts.
+  - Legacy `notes` field still rendered below if present, in the same muted block style as before.
+- **Demo data populated** so the section is visible end-to-end:
+  - [src/data/demo-sessions.ts](src/data/demo-sessions.ts): three `Career mentoring session` rows (`career1` Ananya Sharma / Senior Analyst at Infosys; `career2` Karthik Iyer / Software Engineer at TCS; `career3` Meera Pillai / Business Analyst at Accenture) now carry full `learnerContext` with avatar, designation, company, experience and a realistic multi-sentence agenda.
+  - [src/pages/Components/demo-component-sessions.ts](src/pages/Components/demo-component-sessions.ts): the three career-session demo rows used by the Components catalogue (`demoCareerConfirmed` Aarav Mehta, `demoCareerCompletedGathering` Priya Sharma, `demoMockConfirmed` Rohan Gupta) extended with the same shape so the Components page also renders the new card.
+- Imports: `Avatar` added to [SessionDetailsModal.tsx](src/components/dialogs/SessionDetailsModal.tsx).
+
+### Career Mentor — drawer trimmed to what matters for 1:1 career sessions
+- **"Group: 1:1 Session" row hidden** in the Details section ([src/components/dialogs/SessionDetailsModal.tsx](src/components/dialogs/SessionDetailsModal.tsx)) for career mentoring sessions. The session type already implies 1:1, so the row was noise.
+- **Attendees section hidden** for career mentoring. The single learner is fully covered by the Learner Details card above, so the "Combined session · 1 members" box no longer appears.
+- **Linked course section hidden** for career mentoring. These sessions have no course attached, so the entire block is suppressed.
+- **Combined-session accordion on Dashboard cards** ([src/pages/Dashboard/index.tsx](src/pages/Dashboard/index.tsx)) hidden for career mentoring; the mobile View-details suppression also skips the type. Career sessions are 1:1 by definition, no combined-batches affordance needed.
+- **Planned activities (subject to change) section hidden** for the Career Mentor role. `rolePlannedEvents` returns `[]` when the selected role is "Career Mentor"; learners self-schedule from the guru's calendar so there is no tentative state.
+
+### Career Mentor — demo session naming aligned with production
+- All seven demo career sessions across [src/data/demo-sessions.ts](src/data/demo-sessions.ts) (`career1`, `career2`, `career3`, `ind-1on1`) and [src/pages/Components/demo-component-sessions.ts](src/pages/Components/demo-component-sessions.ts) (`demoCareerConfirmed`, `demoCareerCompletedGathering`, `demoCareerCompletedWithRating`, `demoMockConfirmed`) now use production-style values: title `"Career mentoring session"`, topic `"Career Guidance, Interview Preparation"`, contact `learners_success@greatlearning.in` (Learners Success), and real-world batch names (`Mtech SRM Chennai- DS July 24- Sem 1`, `AIML Online March 25`, `PGPDSBA.O.OCT24.A`, `JAIN-MCA-Sem-1_Jul'24`, `Mtech SRM Chennai- WAI July 24- Sem 1-Section B`, `JAIN-MBA-Sem-1_July22A`).
+
+### Old Dashboard — default landing route + dialog flow + sticky stack + vibrant alert
+- **Default landing now `/old-dashboard`** — root path `/` in [src/App.tsx](src/App.tsx) renders `OldDashboardPage`. New dashboard moved to `/new-dashboard`. Sidebar Home (`NavLink` in [src/components/layout/Sidebar.tsx](src/components/layout/Sidebar.tsx)) and MobileNav Home tab ([src/components/layout/MobileNav.tsx](src/components/layout/MobileNav.tsx)) updated accordingly.
+- **Dialog no longer auto-opens** ([src/pages/OldDashboard/index.tsx](src/pages/OldDashboard/index.tsx)). It now opens only when the user clicks "Try it now" in the sticky alert. Dialog content shortened to a "What is new" header + four single-line bullets and a one-sentence note that explains how to switch back from the new dashboard's profile menu.
+- **Top nav + alert pin together** — both wrapped in a single `.od-sticky-stack` container that is `position: sticky; top: 0`. Earlier the alert was the only sticky element and competing scroll contexts caused it to scroll away. Document-level scroll restored by setting `html` and `body` to `overflow: visible !important` while the page is mounted.
+- **Alert restyled to a Bootstrap warning** with a left-side warning-triangle SVG, cream-yellow background `#fcf3cf`, soft border `#f6e58d`, dark amber text `#6b5300`, and a `#337ab7` Bootstrap-primary "Try it now" button. Clearly visible against the page's light blue-gray backdrop.
+
+---
+
 ## 2026-05-04
 
 ### Old Dashboard — dialog and bar copy cut to scannable length

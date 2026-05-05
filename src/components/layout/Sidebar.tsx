@@ -310,7 +310,7 @@ export function Sidebar() {
         }}
       >
         {/* Home */}
-        <NavLink to="/" end style={{ textDecoration: "none" }}>
+        <NavLink to="/new-dashboard" end style={{ textDecoration: "none" }}>
           {({ isActive }) =>
             isNavCollapsed ? (
               <Tooltip title="Home" placement="right">
