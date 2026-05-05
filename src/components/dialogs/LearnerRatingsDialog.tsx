@@ -109,6 +109,7 @@ export function LearnerRatingsDialog() {
 
   const session = sessionId ? sessions.find((s) => s.id === sessionId) : null;
   const isQualitative = session?.sessionType === "Evaluation" || session?.sessionType === "Moderation";
+  const isCareer = session?.sessionType === "Career mentoring session";
   const qualFeedback = sessionId ? demoQualitativeFeedbackBySessionId[sessionId] : null;
   const ratings = sessionId ? demoLearnerRatingsBySessionId[sessionId] ?? [] : [];
   const summary = sessionId ? demoFeedbackSummaryBySessionId[sessionId] : null;
@@ -304,8 +305,8 @@ export function LearnerRatingsDialog() {
                 </>
               )}
 
-              {/* ── Pattern 1: Chart-based feedback (Online, Residency, etc.) ── */}
-              {!isQualitative && summary && donutData.length > 0 && (
+              {/* ── Pattern 1: Chart-based feedback (Online, Residency, etc. — skipped for 1:1 career) ── */}
+              {!isQualitative && !isCareer && summary && donutData.length > 0 && (
                 <Card>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 2 }}>
                     Rating distribution
@@ -374,8 +375,8 @@ export function LearnerRatingsDialog() {
                 </Card>
               )}
 
-              {/* ── Benchmark card ── */}
-              {!isQualitative && ratings.length > 0 && (
+              {/* ── Benchmark card (skipped for 1:1 career — single rating doesn't benchmark) ── */}
+              {!isQualitative && !isCareer && ratings.length > 0 && (
                 <Card>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 2 }}>
                     Session benchmark
@@ -417,8 +418,8 @@ export function LearnerRatingsDialog() {
                 </Card>
               )}
 
-              {/* ── Parameter wise rating ── */}
-              {!isQualitative && summary && summary.parameterRatings.length > 0 && (
+              {/* ── Parameter wise rating (multi-learner aggregated — skipped for 1:1 career) ── */}
+              {!isQualitative && !isCareer && summary && summary.parameterRatings.length > 0 && (
                 <Card>
                   <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 0.5 }}>
                     Parameter wise rating
@@ -442,8 +443,56 @@ export function LearnerRatingsDialog() {
                 </Card>
               )}
 
-              {/* ── Student's comments ── */}
-              {!isQualitative && <Card>
+              {/* ── Career mentoring 1:1 — parameter rating list (single feedback) ── */}
+              {isCareer && summary && summary.parameterRatings.length > 0 && (
+                <Card>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 1.5 }}>
+                    Parameter wise rating
+                  </Typography>
+                  <Stack spacing={1.25}>
+                    {summary.parameterRatings.map((p, i) => {
+                      const stars = p.fiveStar > 0 ? 5 : p.fourStar > 0 ? 4 : p.threeAndBelow > 0 ? 3 : 0;
+                      const color = stars >= 5 ? C.five : stars >= 4 ? C.four : C.three;
+                      return (
+                        <Stack key={i} direction="row" justifyContent="space-between" alignItems="center">
+                          <Typography variant="body2" sx={{ fontSize: "0.8rem", color: "text.primary" }}>
+                            {p.label}
+                          </Typography>
+                          <Stack direction="row" spacing={0.25} alignItems="center">
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <StarOutlinedIcon key={n} sx={{ fontSize: 14, color: n <= stars ? color : "action.disabled" }} />
+                            ))}
+                          </Stack>
+                        </Stack>
+                      );
+                    })}
+                  </Stack>
+                </Card>
+              )}
+
+              {/* ── Career mentoring 1:1 — single learner comment ── */}
+              {isCareer && ratings.length > 0 && (
+                <Card>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 1.5 }}>
+                    Learner's comment
+                  </Typography>
+                  {ratings.slice(0, 1).map((r, i) => (
+                    <Box key={i}>
+                      {r.learnerName && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontSize: "0.7rem", fontWeight: 600, mb: 0.5 }}>
+                          {r.learnerName}
+                        </Typography>
+                      )}
+                      <Typography variant="body2" sx={{ fontSize: "0.8rem", lineHeight: 1.55, color: "text.primary" }}>
+                        {r.feedback || "No comment provided."}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Card>
+              )}
+
+              {/* ── Student's comments (multi-learner — skipped for 1:1 career) ── */}
+              {!isQualitative && !isCareer && <Card>
                 <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.82rem", mb: 2 }}>
                   Student's comments
                 </Typography>
