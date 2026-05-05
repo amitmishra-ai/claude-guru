@@ -66,6 +66,7 @@ import { ScoreCell } from "@/components/shared/ScoreCell";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { EmptyState } from "@/components/shared/EmptyState";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { setOpenProfileEdit, setOpenTimezone } from "@/store/slices/uiSlice";
 import {
   setDraftName, setDraftMode, setDraftPrograms,
@@ -295,7 +296,13 @@ export default function ProfilePage() {
     total: string;
     color: string;
     data: number[];
+    /** Why this number may differ from the old dashboard */
+    infoNote?: string;
   };
+  const ENGAGEMENT_COUNT_NOTE =
+    "May differ from the old dashboard. CV review requests are not counted in either dashboard. They now show as 99+ in the Completed tab. We also include all completed online sessions, including those without feedback. The old dashboard counted only sessions with feedback.";
+  const LEARNERS_IMPACTED_NOTE =
+    "May be higher than the old dashboard. The previous count was inaccurate; this calculation is more accurate.";
   const engagementCharts: EngagementChart[] = isMidUser ? [
     {
       title: "Engagement Count",
@@ -303,6 +310,7 @@ export default function ProfilePage() {
       total: "95",
       color: "#4caf50",
       data: midEngagementCount,
+      infoNote: ENGAGEMENT_COUNT_NOTE,
     },
     {
       title: "Engagement Hours",
@@ -317,6 +325,7 @@ export default function ProfilePage() {
       total: "820",
       color: "#ff9800",
       data: midLearnersImpacted,
+      infoNote: LEARNERS_IMPACTED_NOTE,
     },
   ] : [
     {
@@ -325,6 +334,7 @@ export default function ProfilePage() {
       total: "800",
       color: "#4caf50",
       data: demoEngagementCount,
+      infoNote: ENGAGEMENT_COUNT_NOTE,
     },
     {
       title: "Engagement Hours",
@@ -339,6 +349,7 @@ export default function ProfilePage() {
       total: "7,332",
       color: "#ff9800",
       data: demoLearnersImpacted,
+      infoNote: LEARNERS_IMPACTED_NOTE,
     },
   ];
   const [showCourseReport, setShowCourseReport] = useState(false);
@@ -599,6 +610,7 @@ export default function ProfilePage() {
       peerValue: demoRoleStatCards[selectedRole].peerAvgRating,
       peerLabel: demoRoleStatCards[selectedRole].peerAvgRating.toFixed(2),
       lowerIsBetter: false,
+      infoNote: "May be slightly higher than the old dashboard. The new calculation is more accurate.",
     })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
   [categoryRatings, selectedRole]);
@@ -833,9 +845,31 @@ export default function ProfilePage() {
       >
         <CardContent sx={{ p: { xs: 1.25, sm: 1.5 }, flex: 1, display: "flex", flexDirection: "column" }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: { xs: 0.75, sm: 1 } }}>
-            <Typography variant="caption" fontWeight={700} sx={{ letterSpacing: "0.08em", color: labelColor, fontSize: { xs: "0.55rem", sm: "0.65rem" } }}>
-              {card.label}
-            </Typography>
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Typography variant="caption" fontWeight={700} sx={{ letterSpacing: "0.08em", color: labelColor, fontSize: { xs: "0.55rem", sm: "0.65rem" } }}>
+                {card.label}
+              </Typography>
+              {(card as { infoNote?: string }).infoNote && (
+                <MuiTooltip
+                  title={(card as { infoNote?: string }).infoNote}
+                  arrow
+                  placement="top"
+                  enterTouchDelay={0}
+                  leaveTouchDelay={6000}
+                  slotProps={{ tooltip: { sx: { maxWidth: 320, fontSize: "0.7rem", lineHeight: 1.45, py: 1, px: 1.25 } } }}
+                >
+                  <IconButton
+                    size="small"
+                    aria-label={`Why this ${card.label} may differ from the old dashboard`}
+                    onClick={(e) => e.stopPropagation()}
+                    disableRipple
+                    sx={{ p: 0.25, color: "text.secondary", "&:hover": { color: ctaColor } }}
+                  >
+                    <InfoOutlinedIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
+                </MuiTooltip>
+              )}
+            </Stack>
             {!isNewOrEarly && (
               <MuiTooltip title="See detailed report" arrow placement="top">
                 <IconButton
@@ -1720,9 +1754,31 @@ export default function ProfilePage() {
                 {/* Header row: title + pill CTA (mirrors Performance stat cards
                     so the click affordance is consistent across both sets) */}
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: { xs: 0.5, sm: 0.75 } }}>
-                  <Typography variant="caption" fontWeight={700} sx={{ fontSize: { xs: "0.55rem", sm: "0.65rem" }, letterSpacing: "0.08em", textTransform: "uppercase", color: chart.color }}>
-                    {chart.title}
-                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                    <Typography variant="caption" fontWeight={700} sx={{ fontSize: { xs: "0.55rem", sm: "0.65rem" }, letterSpacing: "0.08em", textTransform: "uppercase", color: chart.color }}>
+                      {chart.title}
+                    </Typography>
+                    {chart.infoNote && (
+                      <MuiTooltip
+                        title={chart.infoNote}
+                        arrow
+                        placement="top"
+                        enterTouchDelay={0}
+                        leaveTouchDelay={6000}
+                        slotProps={{ tooltip: { sx: { maxWidth: 320, fontSize: "0.7rem", lineHeight: 1.45, py: 1, px: 1.25 } } }}
+                      >
+                        <IconButton
+                          size="small"
+                          aria-label={`Why this ${chart.title} may differ from the old dashboard`}
+                          onClick={(e) => e.stopPropagation()}
+                          disableRipple
+                          sx={{ p: 0.25, color: "text.secondary", "&:hover": { color: chart.color } }}
+                        >
+                          <InfoOutlinedIcon sx={{ fontSize: 14 }} />
+                        </IconButton>
+                      </MuiTooltip>
+                    )}
+                  </Stack>
                   <MuiTooltip title="See detailed report" arrow placement="top">
                     <IconButton
                       size="small"

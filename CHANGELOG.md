@@ -6,6 +6,21 @@ All notable changes to the Guru Dashboard are documented here.
 
 ## 2026-05-05
 
+### Profile — info tooltips on stats explaining differences from the old dashboard
+- **`InfoOutlinedIcon` tooltips** added to three Profile-page stat tiles in [src/pages/Profile/index.tsx](src/pages/Profile/index.tsx) so gurus comparing numbers between dashboards understand why the new value may differ:
+  - **Engagement Count** tile: covers reasons 1 + 2 from the engineer's note. CV review requests are not counted in either dashboard (they now show as 99+ in the Completed tab); we now include all completed online sessions, including those without feedback (the old dashboard counted only sessions with feedback).
+  - **Learners Impacted** tile: count may be higher than the old dashboard. The previous calculation was inaccurate; this one is more accurate.
+  - **Rating cards** (Teaching / Mentoring / Evaluation / Moderation in the Performance section): rating may be slightly higher than the old dashboard. The new calculation is more accurate.
+- New `infoNote?: string` field added to the `EngagementChart` type and to `ratingCards` entries; the existing tile header `Stack` now wraps the label + a small `InfoOutlined` `IconButton` inside an inner `Stack` and falls back to no icon when the field is empty. Tooltip is touch-friendly (`enterTouchDelay: 0`, `leaveTouchDelay: 6000`) and capped at 320px width with smaller font / tighter padding so the message reads naturally on hover or tap.
+- Click on the info icon stops event propagation so it doesn't also open the detailed-report drawer.
+
+### Career Mentor — feedback drawer reshaped for 1:1 sessions
+- **Demo data updated** in [src/data/demo-sessions.ts](src/data/demo-sessions.ts) so career sessions reflect the 1:1 reality: `career1`, `career2`, `career3` and `ind-1on1` now each have **a single learner rating** instead of dozens, and their entries in `demoFeedbackSummaryBySessionId` use `totalResponses: 1`, `totalEnrolled: 1`, with career-specific parameters: **Understanding my concerns** and **Advice based on my profile** (replacing the teaching parameters like "Concepts covered" that did not apply).
+- **`LearnerRatingsDialog`** ([src/components/dialogs/LearnerRatingsDialog.tsx](src/components/dialogs/LearnerRatingsDialog.tsx)) now branches on `isCareer = sessionType === "Career mentoring session"`. For career sessions the multi-learner aggregated cards (rating distribution donut, session benchmark, parameter stacked bars, comments filter tabs) are skipped and replaced with two simpler cards:
+  - **Parameter wise rating** — a clean list with the parameter label on the left and a 5-star row coloured by rating (5★ green, 4★ amber, 3★ red).
+  - **Learner's comment** — single block with the learner's name and their comment text, no filter tabs.
+- The header still reads "Online session feedback" and the session-info card still shows `1/1 No. of feedback` and the single rating, mirroring the old dashboard's framing for this view.
+
 ### Career Mentor — richer "Learner Details" section in Activity Details drawer
 - **`LearnerContext` type extended** in [src/lib/types.ts](src/lib/types.ts) with the fields the `career_session` API returns: `imageUrl`, `designation`, `companyName`, `experience` (years) and `agenda`. Existing fields (`learnerName`, `resumeUrl`, `linkedInUrl`, `learnerProfileUrl`, `notes`) kept for back-compat.
 - **Existing "Learner context" block in [src/components/dialogs/SessionDetailsModal.tsx](src/components/dialogs/SessionDetailsModal.tsx) replaced with a richer "Learner Details" card**. Shown for `Career mentoring session` whenever `learnerContext` exists. Layout:
