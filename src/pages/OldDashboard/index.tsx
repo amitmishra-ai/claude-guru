@@ -10,8 +10,9 @@ import { useAppSelector } from "@/store";
 export default function OldDashboardPage() {
   const navigate = useNavigate();
   const guruName = useAppSelector((s) => s.profile.guruName);
-  const [showDialog, setShowDialog] = useState(true);
-  const handleSwitch = () => navigate("/");
+  const [showDialog, setShowDialog] = useState(false);
+  const handleOpenDialog = () => setShowDialog(true);
+  const handleSwitch = () => navigate("/new-dashboard");
 
   useEffect(() => {
     document.body.classList.add("od-body");
@@ -31,6 +32,8 @@ export default function OldDashboardPage() {
     <>
       <style>{css}</style>
 
+      {/* ── Sticky stack: topbar + promo alert pin together on scroll ── */}
+      <div className="od-sticky-stack">
       {/* ── Top bar ── */}
       <header className="od-topbar">
         <div className="od-topbar-logo">
@@ -47,7 +50,7 @@ export default function OldDashboardPage() {
             <ul className="od-user-menu">
               <li><button type="button">Your Profile</button></li>
               <li><button type="button">Switch to Learner Dashboard</button></li>
-              <li><button type="button" onClick={handleSwitch}>Switch to New Dashboard</button></li>
+              <li><button type="button" onClick={() => navigate("/new-dashboard")}>Switch to New Dashboard</button></li>
               <li><button type="button">Refer participants</button></li>
               <li><button type="button">Logout</button></li>
             </ul>
@@ -55,15 +58,19 @@ export default function OldDashboardPage() {
         </ul>
       </header>
 
-      {/* ── Sticky Bootstrap-style alert (sits below topbar, pins to viewport top on scroll) ── */}
-      <div className="od-promo-bar alert alert-info" role="alert">
+      {/* ── Sticky promo alert (Bootstrap warning style with icon, pinned to top) ── */}
+      <div className="od-promo-bar" role="alert">
+        <svg className="od-promo-icon" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 1.45L0.5 14.5h15L8 1.45zM8 5.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 5.5zm0 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+        </svg>
         <span className="od-promo-text">
           <strong>A new Guru Dashboard is ready for you.</strong>
-          <span> We are switching everyone over in a few days. Take it for a spin and tell us how it feels.</span>
+          <span> We are switching everyone over in a few days.</span>
         </span>
-        <button type="button" className="btn btn-primary od-promo-cta" onClick={handleSwitch}>
+        <button type="button" className="btn od-promo-cta" onClick={handleOpenDialog}>
           Try it now
         </button>
+      </div>
       </div>
 
       {/* ── Body ── */}
@@ -149,22 +156,15 @@ export default function OldDashboardPage() {
                   <h4 className="od-modal-title" id="od-modal-title">Try the new Guru Dashboard</h4>
                 </div>
                 <div className="od-modal-body">
-                  <p>
-                    The Guru Dashboard has been rebuilt around your work as a guru.
-                    Sessions, evaluations, capstones, payments, ratings and student
-                    details now live on one screen instead of being scattered across pages.
-                  </p>
-                  <p className="od-modal-strong">Here is what is different:</p>
+                  <p className="od-modal-strong">What is new</p>
                   <ul className="od-modal-list">
-                    <li><strong>Calendar with real availability marking.</strong> Block leaves and free slots in one place.</li>
-                    <li><strong>Payments and invoices in one place.</strong> Charts, totals and downloadable invoices.</li>
-                    <li><strong>Profile with cleaner performance stats.</strong> Rating coverage and NPS at a glance.</li>
-                    <li><strong>Richer activity cards on Home.</strong> More details where they matter.</li>
+                    <li>Calendar with real availability marking</li>
+                    <li>Payments and invoices in one place</li>
+                    <li>Profile with cleaner performance stats</li>
+                    <li>Richer activity cards on Home</li>
                   </ul>
                   <div className="alert alert-warning od-modal-note">
-                    This becomes the default dashboard for everyone in a few days.
-                    If anything feels off, you can come back here any time from the profile menu.
-                    Do tell us what works for you and what does not, so we can fix it before the switch.
+                    Becomes the default in a few days. To come back here, pick <strong>Switch to Old Dashboard</strong> from the profile menu in the new dashboard.
                   </div>
                 </div>
                 <div className="od-modal-footer">
@@ -217,7 +217,9 @@ function EventRow({ day, month, title, lines, email, time, showPolls }: {
 }
 
 const css = `
-html:has(body.od-body), body.od-body { overflow: auto !important; height: auto !important; }
+html:has(body.od-body) { overflow: visible !important; height: auto !important; }
+body.od-body { overflow: visible !important; height: auto !important; }
+#root:has(.od-promo-bar) { overflow: visible !important; }
 .od-body { margin: 0 !important; background: #fff !important; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; -webkit-font-smoothing: antialiased; }
 .od-body * { box-sizing: border-box; }
 .od-body a { text-decoration: none; }
@@ -320,27 +322,35 @@ html:has(body.od-body), body.od-body { overflow: auto !important; height: auto !
 .od-body .alert-info { color: #31708f; background-color: #d9edf7; border-color: #bce8f1; }
 .od-body .alert-warning { color: #8a6d3b; background-color: #fcf8e3; border-color: #faebcc; }
 
-/* ── Sticky promo bar (Bootstrap alert pinned to top) ── */
-.od-promo-bar.alert {
+/* ── Sticky stack (topbar + promo alert pin together on scroll) ── */
+.od-sticky-stack {
   position: sticky;
   top: 0;
   z-index: 50;
+  background: #f8f8f8;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+/* ── Promo alert (Bootstrap warning style + icon) ── */
+.od-promo-bar {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 0;
-  border-radius: 0;
-  border-left: 0;
-  border-right: 0;
-  border-top: 0;
-  padding: 12px 20px;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 24px;
+  background: #fcf3cf;
+  border-bottom: 1px solid #f6e58d;
+  color: #6b5300;
 }
-.od-promo-text { flex: 1; min-width: 0; font-size: 14px; line-height: 20px; }
-.od-promo-text strong { font-weight: 700; margin-right: 4px; }
+.od-promo-icon { flex: 0 0 auto; width: 20px; height: 20px; fill: #8a6d3b; }
+.od-promo-text { flex: 1; min-width: 0; font-size: 14px; line-height: 20px; color: #6b5300; }
+.od-promo-text strong { font-weight: 700; margin-right: 4px; color: #4a3800; }
 .od-promo-cta { flex: 0 0 auto; }
+.od-body .od-promo-cta.btn { background-color: #337ab7; border-color: #2e6da4; color: #fff; font-weight: 600; padding: 6px 14px; }
+.od-body .od-promo-cta.btn:hover, .od-body .od-promo-cta.btn:focus { background-color: #286090; border-color: #204d74; color: #fff; }
 
 @media (max-width: 600px) {
-  .od-promo-bar.alert { flex-wrap: wrap; padding: 10px 15px; gap: 10px; }
+  .od-promo-bar { flex-wrap: wrap; padding: 12px 14px; gap: 10px; }
   .od-promo-text { flex-basis: 100%; }
 }
 

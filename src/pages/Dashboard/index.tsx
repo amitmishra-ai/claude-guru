@@ -290,7 +290,13 @@ export default function DashboardPage() {
     [sessions, sessionDeclined]
   );
 
-  const rolePlannedEvents = useMemo(() => isEmpty ? [] : filterSessionsByRole(demoPlannedEvents, selectedRole), [selectedRole, isEmpty]);
+  // Career Mentor: learners self-schedule from the guru's calendar, so there are no tentative/planned events
+  const rolePlannedEvents = useMemo(
+    () => (isEmpty || selectedRole === "Career Mentor")
+      ? []
+      : filterSessionsByRole(demoPlannedEvents, selectedRole),
+    [selectedRole, isEmpty],
+  );
   const rolePreviouslyDeclined = useMemo(() => isEmpty ? [] : filterSessionsByRole(demoPreviouslyDeclinedSessions, selectedRole), [selectedRole, isEmpty]);
 
   const todayYmd = demoNow.toISOString().slice(0, 10);
@@ -881,9 +887,9 @@ export default function DashboardPage() {
                                   dispatch(setSessionFocus(s));
                                   dispatch(setOpenSessionDetails(true));
                                 }}
-                                hideMobileViewDetails={!!s.combinedBatches}
+                                hideMobileViewDetails={!!s.combinedBatches && s.sessionType !== "Career mentoring session"}
                               />
-                              {s.combinedBatches && (
+                              {s.combinedBatches && s.sessionType !== "Career mentoring session" && (
                                 <>
                                 <Accordion
                                   disableGutters

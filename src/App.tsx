@@ -18,9 +18,10 @@ const OldDashboardPage = lazy(() => import("@/pages/OldDashboard"));
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<Suspense><OldDashboardPage /></Suspense>} />
       <Route path="/old-dashboard" element={<Suspense><OldDashboardPage /></Suspense>} />
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Suspense><DashboardPage /></Suspense>} />
+        <Route path="/new-dashboard" element={<Suspense><DashboardPage /></Suspense>} />
         <Route path="/courses" element={<Suspense><CoursesPage /></Suspense>} />
         <Route path="/calendar" element={<Suspense><CalendarPage /></Suspense>} />
         <Route path="/availability" element={<Suspense><AvailabilityPage /></Suspense>} />
