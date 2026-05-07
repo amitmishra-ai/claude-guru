@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
@@ -15,6 +16,7 @@ import Typography from "@mui/material/Typography";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { pushToast } from "@/store/slices/toastsSlice";
 import { setIsDarkMode } from "@/store/slices/uiSlice";
+import { SwitchToOldDashboardDialog, type SwitchFeedback } from "@/components/dialogs/SwitchToOldDashboardDialog";
 
 /**
  * Mobile Account page - Material 3 native Android approach.
@@ -36,6 +38,7 @@ export default function AccountPage() {
   const guruName = useAppSelector((s) => s.profile.guruName);
   const guruPrograms = useAppSelector((s) => s.profile.guruPrograms);
   const isDarkMode = useAppSelector((s) => s.ui.isDarkMode);
+  const [switchDialogOpen, setSwitchDialogOpen] = useState(false);
 
   const initials = guruName.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   const email = `${guruName.toLowerCase().replace(/\s+/g, ".")}@greatlearning.in`;
@@ -49,7 +52,7 @@ export default function AccountPage() {
     { icon: <SettingsOutlinedIcon />, label: "Settings", sublabel: "Notifications & preferences", onClick: () => navigate("/preferences") },
     { icon: isDarkMode ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />, label: isDarkMode ? "Light Mode" : "Dark Mode", onClick: () => dispatch(setIsDarkMode(!isDarkMode)) },
     { icon: <SwapHorizOutlinedIcon />, label: "Switch to Learner", sublabel: "Open learner dashboard", onClick: () => dispatch(pushToast({ title: "Switching", description: "Redirecting to Learner Dashboard..." })) },
-    { icon: <SwapHorizOutlinedIcon />, label: "Switch to Old Dashboard", sublabel: "Open old guru dashboard", onClick: () => navigate("/old-dashboard") },
+    { icon: <SwapHorizOutlinedIcon />, label: "Switch to Old Dashboard", sublabel: "Open old guru dashboard", onClick: () => setSwitchDialogOpen(true) },
     { icon: <PersonAddAltOutlinedIcon />, label: "Refer a Guru", onClick: () => dispatch(pushToast({ title: "Referral", description: "Opening referral link..." })) },
   ];
 
@@ -257,6 +260,18 @@ export default function AccountPage() {
       >
         Guru Dashboard v2.0
       </Typography>
+
+      <SwitchToOldDashboardDialog
+        open={switchDialogOpen}
+        onClose={() => setSwitchDialogOpen(false)}
+        onConfirm={(feedback: SwitchFeedback) => {
+          setSwitchDialogOpen(false);
+          dispatch(pushToast({ title: "Thanks for the feedback", description: "Switching to old dashboard..." }));
+          // eslint-disable-next-line no-console
+          console.log("[switch-feedback]", feedback);
+          navigate("/old-dashboard");
+        }}
+      />
     </Box>
   );
 }

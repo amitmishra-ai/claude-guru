@@ -64,7 +64,7 @@ export default function OldDashboardPage() {
           <path d="M8 1.45L0.5 14.5h15L8 1.45zM8 5.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 5.5zm0 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
         </svg>
         <span className="od-promo-text">
-          <strong>A new Guru Dashboard is ready for you.</strong>
+          <strong>New Guru Dashboard experience is available for you.</strong>
           <span> We are switching everyone over in a few days.</span>
         </span>
         <button type="button" className="btn od-promo-cta" onClick={handleOpenDialog}>
@@ -153,19 +153,18 @@ export default function OldDashboardPage() {
                   <button type="button" className="od-modal-close" aria-label="Close" onClick={() => setShowDialog(false)}>
                     <span aria-hidden>×</span>
                   </button>
-                  <h4 className="od-modal-title" id="od-modal-title">Try the new Guru Dashboard</h4>
+                  <h4 className="od-modal-title" id="od-modal-title">Experience the New Guru Dashboard</h4>
                 </div>
                 <div className="od-modal-body">
-                  <p className="od-modal-strong">What is new</p>
                   <ul className="od-modal-list">
-                    <li>Calendar with real availability marking</li>
-                    <li>Payments and invoices in one place</li>
-                    <li>Profile with cleaner performance stats</li>
-                    <li>Richer activity cards on Home</li>
+                    <li>A cleaner, more intuitive interface to manage all your activities at a glance.</li>
+                    <li>Calendar with activities and easy recurring availability marking.</li>
+                    <li>Deeper insights into your mentorship hours, learner impact, and ratings.</li>
+                    <li>Payments and invoices in one place.</li>
                   </ul>
-                  <div className="alert alert-warning od-modal-note">
-                    Becomes the default in a few days. To come back here, pick <strong>Switch to Old Dashboard</strong> from the profile menu in the new dashboard.
-                  </div>
+                  <p className="od-modal-note-secondary">
+                    <strong>Note :</strong> You can always switch back if needed. New dashboard will become the default dashboard for everyone in a few days.
+                  </p>
                 </div>
                 <div className="od-modal-footer">
                   <button type="button" className="btn btn-default" onClick={() => setShowDialog(false)}>Maybe later</button>
@@ -423,10 +422,10 @@ body.od-body { overflow: visible !important; height: auto !important; }
   color: #333;
 }
 .od-modal-body p { margin: 0 0 10px; }
-.od-modal-strong { font-weight: 600; margin-top: 4px !important; }
-.od-modal-list { margin: 0 0 12px; padding-left: 20px; }
+.od-modal-list { margin: 4px 0 12px; padding-left: 20px; }
 .od-modal-list li { margin-bottom: 4px; line-height: 1.5; }
-.od-modal-note { margin-top: 12px !important; margin-bottom: 0 !important; font-size: 13px; line-height: 1.5; }
+.od-modal-note-secondary { margin-top: 12px !important; margin-bottom: 0 !important; font-size: 13px; line-height: 1.5; color: #777; }
+.od-modal-note-secondary strong { font-weight: 600; color: #777; }
 .od-modal-footer {
   padding: 15px;
   text-align: right;

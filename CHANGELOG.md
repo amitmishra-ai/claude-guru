@@ -4,6 +4,25 @@ All notable changes to the Guru Dashboard are documented here.
 
 ---
 
+## 2026-05-07
+
+### New Dashboard - feedback dialog before switching to old dashboard
+- New reusable [src/components/dialogs/SwitchToOldDashboardDialog.tsx](src/components/dialogs/SwitchToOldDashboardDialog.tsx) intercepts the **Switch to Old Dashboard** action so we capture *why* a guru is leaving the new dashboard before they navigate away. Title "Help us improve before you switch" with a humanised subtitle, then a vertical radio list of 5 buckets (Unable to find something, Something looks wrong (broken / data / missing), Performance feels slow or laggy, Prefer the old dashboard, Other). The 5-option count keeps decision time low (Hick's Law) and the buckets are intentionally non-overlapping. A 2-row comment field follows; it becomes required for "Other" and "Unable to find something" (with a small "Required for this option" helper) and otherwise stays optional. On submit the dialog calls `onConfirm({ reason, reasonLabel, comment })`. Caller is responsible for navigating; for now the feedback is `console.log`'d under the `[switch-feedback]` tag pending a backend endpoint.
+- **Visual rules followed:** Dialog Paper, TextField, and primary button all use 4px border radius (project convention). Radio rows use `alignItems: center` so the radio and label sit on the same baseline (the initial pass had the radios floating above the labels because of an inherited `flex-start` + top padding).
+- **Wired into both switch entry points:**
+  - Desktop sidebar profile menu in [src/components/layout/Sidebar.tsx](src/components/layout/Sidebar.tsx). The menu item now opens the dialog instead of navigating directly to `/old-dashboard`.
+  - Mobile [src/pages/Account/index.tsx](src/pages/Account/index.tsx) "Switch to Old Dashboard" row, same flow.
+- After successful submit both surfaces push a toast ("Thanks for the feedback. Switching to old dashboard...") and then navigate to `/old-dashboard`.
+
+### Old Dashboard - promo alert + switch dialog copy refresh
+- **Sticky alert** in [src/pages/OldDashboard/index.tsx](src/pages/OldDashboard/index.tsx) now reads "**New Guru Dashboard experience is available for you.** We are switching everyone over in a few days." (was "A new Guru Dashboard is ready for you.").
+- **Switch dialog** rewritten in the same file:
+  - Title: "Experience the New Guru Dashboard" (was "Try the new Guru Dashboard").
+  - Bullet list replaced with four benefit-led points: cleaner more intuitive interface to manage all activities at a glance; calendar with activities and easy recurring availability marking; deeper insights into mentorship hours, learner impact, and ratings; payments and invoices in one place.
+  - Old yellow warning note swapped for a secondary muted line (`.od-modal-note-secondary`, color `#777`): "**Note :** You can always switch back if needed. New dashboard will become the default dashboard for everyone in a few days." Secondary styling intentional so the switch-back affordance does not steal attention from the primary CTA.
+
+---
+
 ## 2026-05-05
 
 ### Profile — info tooltips on stats explaining differences from the old dashboard

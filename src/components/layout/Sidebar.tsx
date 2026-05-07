@@ -25,6 +25,7 @@ import Typography from "@mui/material/Typography";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setIsNavCollapsed } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
+import { SwitchToOldDashboardDialog, type SwitchFeedback } from "@/components/dialogs/SwitchToOldDashboardDialog";
 
 // ── Collapsed: pill is 56×32, icon centred. Label sits below.
 // ── Expanded: pill is full-width row, borderRadius 28px, icon + label.
@@ -177,6 +178,7 @@ export function Sidebar() {
   const guruPhoto = useAppSelector((s) => s.profile.guruPhoto);
   const [isHovered, setIsHovered] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const [switchDialogOpen, setSwitchDialogOpen] = useState(false);
   const sidebarWidth = isNavCollapsed ? 80 : 256;
 
   const initials = guruName
@@ -533,7 +535,7 @@ export function Sidebar() {
           <ListItemText>Switch to Learner Dashboard</ListItemText>
         </MenuItem>
 
-        <MenuItem onClick={() => { handleMenuClose(); navigate("/old-dashboard"); }}>
+        <MenuItem onClick={() => { handleMenuClose(); setSwitchDialogOpen(true); }}>
           <ListItemIcon><SwapHorizOutlinedIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Switch to Old Dashboard</ListItemText>
         </MenuItem>
@@ -550,6 +552,18 @@ export function Sidebar() {
           <ListItemText sx={{ "& .MuiListItemText-primary": { color: "error.main" } }}>Logout</ListItemText>
         </MenuItem>
       </Menu>
+
+      <SwitchToOldDashboardDialog
+        open={switchDialogOpen}
+        onClose={() => setSwitchDialogOpen(false)}
+        onConfirm={(feedback: SwitchFeedback) => {
+          setSwitchDialogOpen(false);
+          dispatch(pushToast({ title: "Thanks for the feedback", description: "Switching to old dashboard..." }));
+          // eslint-disable-next-line no-console
+          console.log("[switch-feedback]", feedback);
+          navigate("/old-dashboard");
+        }}
+      />
     </Box>
   );
 }
