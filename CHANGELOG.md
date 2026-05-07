@@ -15,10 +15,11 @@ All notable changes to the Guru Dashboard are documented here.
 - After successful submit both surfaces push a toast ("Thanks for the feedback. Switching to old dashboard...") and then navigate to `/old-dashboard`.
 
 ### Old Dashboard - promo alert + switch dialog copy refresh
-- **Sticky alert** in [src/pages/OldDashboard/index.tsx](src/pages/OldDashboard/index.tsx) now reads "**New Guru Dashboard experience is available for you.** We are switching everyone over in a few days." (was "A new Guru Dashboard is ready for you.").
+- **Sticky alert** in [src/pages/OldDashboard/index.tsx](src/pages/OldDashboard/index.tsx) now reads "**Your Guru Dashboard experience just got upgraded!**" (was "A new Guru Dashboard is ready for you. We are switching everyone over in a few days."). Single positive sentence; the rollout-timing detail moved into the dialog where it has more room. The CTA next to it changed from "Try it now" to "Explore New Dashboard" so the action reads as a confident invitation rather than a tentative trial.
 - **Switch dialog** rewritten in the same file:
   - Title: "Experience the New Guru Dashboard" (was "Try the new Guru Dashboard").
-  - Bullet list replaced with four benefit-led points: cleaner more intuitive interface to manage all activities at a glance; calendar with activities and easy recurring availability marking; deeper insights into mentorship hours, learner impact, and ratings; payments and invoices in one place.
+  - Bullet list rewritten as four labelled benefits with a bold lead-in for scannability: **A cleaner interface** (manage all activities at a glance), **Calendar** (track activities and easy recurring availability marking), **Profile** (deeper insights into mentorship impact), **Payments and invoices** (track monthly payouts and activity-based invoices).
+  - Primary CTA changed from "Try it now" to "Switch to New Dashboard" so the action label matches the menu wording gurus already know.
   - Old yellow warning note swapped for a secondary muted line (`.od-modal-note-secondary`, color `#777`): "**Note :** You can always switch back if needed. New dashboard will become the default dashboard for everyone in a few days." Secondary styling intentional so the switch-back affordance does not steal attention from the primary CTA.
 
 ---

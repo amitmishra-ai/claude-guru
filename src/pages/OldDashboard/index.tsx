@@ -64,11 +64,10 @@ export default function OldDashboardPage() {
           <path d="M8 1.45L0.5 14.5h15L8 1.45zM8 5.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 5.5zm0 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
         </svg>
         <span className="od-promo-text">
-          <strong>New Guru Dashboard experience is available for you.</strong>
-          <span> We are switching everyone over in a few days.</span>
+          <strong>Your Guru Dashboard experience just got upgraded!</strong>
         </span>
         <button type="button" className="btn od-promo-cta" onClick={handleOpenDialog}>
-          Try it now
+          Explore New Dashboard
         </button>
       </div>
       </div>
@@ -157,10 +156,10 @@ export default function OldDashboardPage() {
                 </div>
                 <div className="od-modal-body">
                   <ul className="od-modal-list">
-                    <li>A cleaner, more intuitive interface to manage all your activities at a glance.</li>
-                    <li>Calendar with activities and easy recurring availability marking.</li>
-                    <li>Deeper insights into your mentorship hours, learner impact, and ratings.</li>
-                    <li>Payments and invoices in one place.</li>
+                    <li><strong>A cleaner interface:</strong> manage all your activities at a glance.</li>
+                    <li><strong>Calendar:</strong> Track activities and easy recurring availability marking.</li>
+                    <li><strong>Profile:</strong> Get deeper insights into your mentorship impact.</li>
+                    <li><strong>Payments and invoices:</strong> Track your monthly payouts and activity-based invoices.</li>
                   </ul>
                   <p className="od-modal-note-secondary">
                     <strong>Note :</strong> You can always switch back if needed. New dashboard will become the default dashboard for everyone in a few days.
@@ -168,7 +167,7 @@ export default function OldDashboardPage() {
                 </div>
                 <div className="od-modal-footer">
                   <button type="button" className="btn btn-default" onClick={() => setShowDialog(false)}>Maybe later</button>
-                  <button type="button" className="btn btn-primary" onClick={handleSwitch}>Try it now</button>
+                  <button type="button" className="btn btn-primary" onClick={handleSwitch}>Switch to New Dashboard</button>
                 </div>
               </div>
             </div>
