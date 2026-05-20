@@ -812,12 +812,16 @@ export default function DashboardPage() {
                           const isEvaluation = s.sessionType === "Evaluation";
                           const isModeration = s.sessionType === "Moderation";
                           const isEvalOrMod = isEvaluation || isModeration;
-                          /* Mock progress stats — live data doesn't carry these yet. */
+                          /* Mock progress stats — live data doesn't carry these yet.
+                             Assignments collapse Submissions + Graded into one fraction
+                             "graded / total" so the relationship is in view at a glance. */
                           const hasLateSubmissions = s.id === "eval5";
                           const upcomingStats = isEvaluation
                             ? [
-                                { label: "Submissions", value: s.id === "eval3" ? 12 : s.id === "eval5" ? 34 : 0 },
-                                { label: "Graded", value: s.id === "eval3" ? 6 : s.id === "eval5" ? 20 : 0 },
+                                {
+                                  label: "Graded submissions",
+                                  value: s.id === "eval3" ? "6/12" : s.id === "eval5" ? "20/34" : "0/0",
+                                },
                               ]
                             : isModeration
                               ? [
@@ -1494,10 +1498,11 @@ export default function DashboardPage() {
                           // Date-only activity types (no time component)
                           const isDateOnly = isEvaluation || isModeration || isCapstone || isCVReview;
                           // Mock stats for Evaluation / Moderation (live data doesn't carry these yet)
-                          /* Discussion Question stats — both Unread and Graded shown as
-                             "X/total" so the denominator (total posts) is always visible. */
+                          /* Assignment: one fraction stat (graded / total submissions).
+                             Discussion Question: Unread + Graded both shown as fractions of
+                             total posts. Denominator is always visible. */
                           const cardStats = isEvaluation
-                            ? [{ label: "Submissions", value: 12 }, { label: "Graded", value: 6 }]
+                            ? [{ label: "Graded submissions", value: "12/12" }]
                             : isModeration
                               ? [{ label: "Unread", value: "0/18" }, { label: "Graded", value: "18/18" }]
                               : undefined;
