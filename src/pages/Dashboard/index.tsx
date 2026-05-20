@@ -232,7 +232,15 @@ export default function DashboardPage() {
   const nowMs = demoNow.getTime();
 
   const upcomingSessions = useMemo(
-    () => sortByDateTime(sessions).filter((s) => dateTimeMs(s.dateYmd, s.start) >= nowMs && !sessionDeclined[s.id]),
+    () => sortByDateTime(sessions).filter((s) => {
+      /* Range activities (Evaluation, Moderation, Residency) stay in
+         Upcoming while their window is still open — until endDateYmd
+         passes. Single-day sessions use the original start-time check. */
+      const stillOpen = s.endDateYmd
+        ? dateTimeMs(s.endDateYmd, 24 * 60 - 1) >= nowMs
+        : dateTimeMs(s.dateYmd, s.start) >= nowMs;
+      return stillOpen && !sessionDeclined[s.id];
+    }),
     [sessions, sessionDeclined, nowMs]
   );
   const completedSessions = useMemo(
@@ -671,26 +679,13 @@ export default function DashboardPage() {
                             key={s.id}
                             variant="outlined"
                             sx={{
-                              p: { xs: 2, sm: 2 },
+                              p: 0,
+                              overflow: "hidden",
                               ...(startsWithin30
                                 ? { bgcolor: 'hsl(var(--md-primary-container) / 0.12)', borderColor: 'hsl(var(--md-primary) / 0.4)' }
                                 : {}),
                             }}
                           >
-                            {startsWithin30 && (
-                              <Chip
-                                label="Starting soon"
-                                size="small"
-                                sx={{
-                                  mb: 1,
-                                  fontWeight: 500,
-                                  fontSize: "0.75rem",
-                                  bgcolor: "var(--gl-status-declined-bg)",
-                                  color: "var(--gl-status-declined-text)",
-                                  border: "1px solid var(--gl-status-declined-border)",
-                                }}
-                              />
-                            )}
                             <SessionCard
                               title={s.title}
                               sessionType={s.sessionType}
@@ -701,6 +696,22 @@ export default function DashboardPage() {
                               start={s.start}
                               end={s.end}
                               onCourseClick={getOnCourseClick(s)}
+                              topRight={startsWithin30 ? (
+                                <Chip
+                                  label="Starting soon"
+                                  size="small"
+                                  sx={{
+                                    fontWeight: 500,
+                                    fontSize: "0.7rem",
+                                    height: 22,
+                                    borderRadius: "4px",
+                                    bgcolor: "var(--gl-status-declined-bg)",
+                                    color: "var(--gl-status-declined-text)",
+                                    border: "1px solid var(--gl-status-declined-border)",
+                                    "& .MuiChip-label": { px: 1 },
+                                  }}
+                                />
+                              ) : undefined}
                               actions={
                                 <>
                                   {!isSecondaryGuru && (
@@ -798,9 +809,26 @@ export default function DashboardPage() {
                         upcomingSessions.filter((s) => !todaySessionIds.has(s.id)).map((s) => {
                           const isConfirmed = !!confirmations[s.id];
                           const isExiting = s.id === exitingId && isConfirmed;
+                          const isEvaluation = s.sessionType === "Evaluation";
+                          const isModeration = s.sessionType === "Moderation";
+                          const isEvalOrMod = isEvaluation || isModeration;
+                          /* Mock progress stats — live data doesn't carry these yet. */
+                          const hasLateSubmissions = s.id === "eval5";
+                          const upcomingStats = isEvaluation
+                            ? [
+                                { label: "Submissions", value: s.id === "eval3" ? 12 : s.id === "eval5" ? 34 : 0 },
+                                { label: "Graded", value: s.id === "eval3" ? 6 : s.id === "eval5" ? 20 : 0 },
+                              ]
+                            : isModeration
+                              ? [
+                                  { label: "Unread", value: s.id === "mod3" ? "4/18" : "0/0" },
+                                  { label: "Graded", value: s.id === "mod3" ? "2/18" : "0/0" },
+                                ]
+                              : undefined;
                           return (
                             <Card key={s.id} variant="outlined" sx={{
-                              p: { xs: 2, sm: 2 },
+                              p: 0,
+                              overflow: "hidden",
                               transition: "box-shadow 0.3s ease, border-color 0.3s ease",
                               ...(highlightUnconfirmed && !isConfirmed && {
                                 borderColor: "primary.main",
@@ -823,13 +851,49 @@ export default function DashboardPage() {
                                 endDateYmd={s.endDateYmd}
                                 start={s.start}
                                 end={s.end}
-                                onCourseClick={getOnCourseClick(s)}
+                                hideTime={isEvalOrMod}
+                                stats={upcomingStats}
+                                onCourseClick={isEvalOrMod ? undefined : getOnCourseClick(s)}
+                                eyebrowExtra={hasLateSubmissions ? (
+                                  <Chip
+                                    label="Late submission"
+                                    size="small"
+                                    sx={{
+                                      height: 20,
+                                      borderRadius: "4px",
+                                      bgcolor: "rgba(25, 106, 229, 0.10)",
+                                      color: "primary.main",
+                                      border: "none",
+                                      fontWeight: 500,
+                                      fontSize: "0.7rem",
+                                      "& .MuiChip-label": { px: 1 },
+                                    }}
+                                  />
+                                ) : undefined}
                                 status={isConfirmed
                                   ? STATUS_CONFIRMED()
                                   : STATUS_SCHEDULED
                                 }
                                 chips={undefined}
                                 actions={isConfirmed ? (
+                                  isEvalOrMod ? (
+                                    <>
+                                      <Button
+                                        variant="soft"
+                                        size="small"
+                                        onClick={() => dispatch(pushToast({ title: "Opening discussion", description: `Launching discussion thread for ${s.title}` }))}
+                                      >
+                                        Discussion Question
+                                      </Button>
+                                      <Button
+                                        variant="soft"
+                                        size="small"
+                                        onClick={() => dispatch(pushToast({ title: "Opening SpeedGrader", description: `Launching SpeedGrader for ${s.title}` }))}
+                                      >
+                                        Grade
+                                      </Button>
+                                    </>
+                                  ) : (
                                   <>
                                     <Button
                                       variant="soft"
@@ -854,6 +918,7 @@ export default function DashboardPage() {
                                       Course
                                     </Button>
                                   </>
+                                  )
                                 ) : (
                                   <>
                                     <Button
@@ -895,14 +960,30 @@ export default function DashboardPage() {
                                   disableGutters
                                   elevation={0}
                                   defaultExpanded={false}
-                                  sx={{ mt: 1.5, borderRadius: "12px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+                                  square
+                                  sx={{
+                                    borderTop: "1px solid",
+                                    borderColor: "divider",
+                                    bgcolor: "transparent",
+                                    boxShadow: "none",
+                                    "&::before": { display: "none" },
+                                    "& .MuiAccordion-region": { bgcolor: "transparent" },
+                                  }}
                                 >
                                   <AccordionSummary
-                                    expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
-                                    sx={{ px: 1.5, py: 0, minHeight: "unset", bgcolor: "hsl(var(--md-surface-container) / 0.5)", "& .MuiAccordionSummary-content": { my: 0.75, gap: 0.75, alignItems: "center" } }}
+                                    expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />}
+                                    sx={{
+                                      px: 2,
+                                      py: 0,
+                                      minHeight: "unset",
+                                      bgcolor: "hsl(var(--md-surface-container) / 0.35)",
+                                      "&:hover": { bgcolor: "hsl(var(--md-surface-container) / 0.6)" },
+                                      transition: "background-color 0.15s",
+                                      "& .MuiAccordionSummary-content": { my: 1, gap: 0.75, alignItems: "center" },
+                                    }}
                                   >
-                                    <CallMergeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
-                                    <Typography variant="caption" fontWeight={600} color="text.secondary">
+                                    <CallMergeOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+                                    <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ fontSize: "0.75rem" }}>
                                       Combined session
                                     </Typography>
                                     <Chip label={s.combinedBatches.length} size="small" sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, bgcolor: "action.selected", "& .MuiChip-label": { px: 0.5 } }} />
@@ -910,7 +991,7 @@ export default function DashboardPage() {
                                       <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>· {s.combinedBatches[0].learnerName}</Typography>
                                     )}
                                   </AccordionSummary>
-                                  <AccordionDetails sx={{ p: 0 }}>
+                                  <AccordionDetails sx={{ p: 0, borderTop: "1px solid", borderColor: "divider" }}>
                                   <Stack divider={<Divider />}>
                                     {s.combinedBatches.flatMap((cb) => {
                                       const rows = cb.audienceType === "Individual"
@@ -924,7 +1005,7 @@ export default function DashboardPage() {
                                             chip: cb.audienceType === "Batch" ? "Whole batch" : "Group",
                                           }];
                                       return rows.map((row) => (
-                                        <Box key={row.key} sx={{ px: 1.5, py: 0.75 }}>
+                                        <Box key={row.key} sx={{ px: 2, py: 1 }}>
                                           <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
                                             <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, minWidth: 0 }} noWrap>
                                               {row.label}
@@ -945,21 +1026,17 @@ export default function DashboardPage() {
                                   </Stack>
                                   </AccordionDetails>
                                 </Accordion>
-                                {/* Mobile view details row - below accordion */}
+                                {/* Mobile view details row - spans full card width below accordion */}
                                 <Box
                                   onClick={() => { dispatch(setSessionFocus(s)); dispatch(setOpenSessionDetails(true)); }}
                                   sx={{
                                     display: { xs: "flex", sm: "none" },
                                     justifyContent: "space-between",
                                     alignItems: "center",
-                                    mt: 2,
-                                    mx: -2,
-                                    mb: -2,
                                     px: 2, py: "10px",
                                     cursor: "pointer",
                                     borderTop: 1, borderColor: "divider",
                                     bgcolor: "action.hover",
-                                    borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
                                     "&:hover": { bgcolor: "action.selected" },
                                     transition: "background-color 0.15s",
                                   }}
@@ -1354,11 +1431,6 @@ export default function DashboardPage() {
                             dispatch(setSessionFocus(s));
                             dispatch(setOpenSessionDetails(true));
                           };
-                          const viewDetailsBtn = (
-                            <Button variant="text" size="small" onClick={handleViewDetails}>
-                              View details
-                            </Button>
-                          );
 
                           let cardActions: React.ReactNode;
                           if (isCapstone) {
@@ -1419,90 +1491,37 @@ export default function DashboardPage() {
                             );
                           }
 
-                          // Card title - Residency/Capstone use custom prefix
-                          const cardTitle = isResidency
-                            ? s.title
-                            : isCapstone
-                              ? `Capstone - ${s.batch}`
-                              : isCVReview
-                                ? "CV Review"
-                                : isEvaluation
-                                  ? `Evaluation: ${s.title}`
-                                  : isModeration
-                                    ? `Moderation: ${s.title}`
-                                    : s.title;
+                          // Date-only activity types (no time component)
+                          const isDateOnly = isEvaluation || isModeration || isCapstone || isCVReview;
+                          // Mock stats for Evaluation / Moderation (live data doesn't carry these yet)
+                          /* Discussion Question stats — both Unread and Graded shown as
+                             "X/total" so the denominator (total posts) is always visible. */
+                          const cardStats = isEvaluation
+                            ? [{ label: "Submissions", value: 12 }, { label: "Graded", value: 6 }]
+                            : isModeration
+                              ? [{ label: "Unread", value: "0/18" }, { label: "Graded", value: "18/18" }]
+                              : undefined;
 
                           return (
-                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-                              {/* Card header: title row + date + actions - custom for non-SessionCard types */}
-                              {(isResidency || isEvaluation || isModeration || isCapstone || isCVReview) ? (
-                                <>
-                                  {/* MOBILE: chips on top line when present */}
-                                  {topRightContent && (
-                                    <Box sx={{ display: { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.75, mb: 0.75, "& > .MuiStack-root": { width: "100%", "& .star-rating-numeric": { ml: "auto" } } }}>
-                                      {topRightContent}
-                                    </Box>
-                                  )}
-                                  {/* MOBILE: title + inline rating when no chips */}
-                                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "flex", sm: "none" }, mb: 0.5 }}>
-                                    <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>{cardTitle}</Typography>
-                                    {!topRightContent && ratingElement}
-                                  </Stack>
-                                  {/* DESKTOP: title + chips/rating side by side */}
-                                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5, gap: 1 }}>
-                                    <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>{cardTitle}</Typography>
-                                    <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
-                                      {topRightContent ?? ratingElement}
-                                    </Stack>
-                                  </Stack>
-                                  <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
-                                    <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-                                    <Typography variant="caption" color="text.secondary">
-                                      {fmtDateNice(s.dateYmd)} &middot; {s.batch}
-                                    </Typography>
-                                  </Stack>
-                                  <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
-                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ "& .MuiButton-startIcon": { display: { xs: "none", sm: "inline-flex" } } }}>{cardActions}</Stack>
-                                    <Box sx={{ display: { xs: "none", sm: "block" } }}>{viewDetailsBtn}</Box>
-                                  </Stack>
-                                  {/* Mobile: full-width view details row */}
-                                  <Box
-                                    onClick={handleViewDetails}
-                                    sx={{
-                                      display: { xs: "flex", sm: "none" },
-                                      justifyContent: "space-between",
-                                      alignItems: "center",
-                                      mt: 2, mx: -2, mb: -2,
-                                      px: 2, py: "10px",
-                                      cursor: "pointer",
-                                      borderTop: 1, borderColor: "divider",
-                                      bgcolor: "action.hover",
-                                      borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
-                                      "&:hover": { bgcolor: "action.selected" },
-                                      transition: "background-color 0.15s",
-                                    }}
-                                  >
-                                    <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
-                                    <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
-                                  </Box>
-                                </>
-                              ) : (
-                                <SessionCard
-                                  title={s.title}
-                                  sessionType={s.sessionType}
-                                  topic={s.topic}
-                                  batch={s.batch}
-                                  dateYmd={s.dateYmd}
-                                  start={s.start}
-                                  end={s.end}
-                                  onCourseClick={getOnCourseClick(s)}
-                                  topRight={topRightContent}
-                                  titleRight={!topRightContent ? ratingElement : undefined}
-                                  chips={undefined}
-                                  actions={cardActions}
-                                  onViewDetails={handleViewDetails}
-                                />
-                              )}
+                            <Card key={s.id} variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+                              <SessionCard
+                                title={s.title}
+                                sessionType={s.sessionType}
+                                topic={s.topic}
+                                batch={s.batch}
+                                dateYmd={s.dateYmd}
+                                endDateYmd={s.endDateYmd}
+                                start={s.start}
+                                end={s.end}
+                                hideTime={isDateOnly}
+                                onCourseClick={isResidency || isCapstone || isCVReview ? undefined : getOnCourseClick(s)}
+                                topRight={topRightContent}
+                                titleRight={!topRightContent ? ratingElement : undefined}
+                                stats={cardStats}
+                                chips={undefined}
+                                actions={cardActions}
+                                onViewDetails={handleViewDetails}
+                              />
                             </Card>
                           );
                         })}
@@ -1530,7 +1549,7 @@ export default function DashboardPage() {
                         <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Active declined</Typography>
                         <Stack spacing={1.5}>
                           {declinedSessions.map((s) => (
-                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+                            <Card key={s.id} variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
                               <SessionCard
                                 title={s.title}
                                 sessionType={s.sessionType}
@@ -1542,14 +1561,18 @@ export default function DashboardPage() {
                                 onCourseClick={getOnCourseClick(s)}
                                 status={STATUS_DECLINED}
                               />
-                              {sessionDeclinedReasons[s.id] && (
-                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
-                                  Reason: {sessionDeclinedReasons[s.id]}
-                                </Typography>
+                              {(sessionDeclinedReasons[s.id] || s.scheduledByName) && (
+                                <Box sx={{ px: 2, pb: 2, pt: 0 }}>
+                                  {sessionDeclinedReasons[s.id] && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontStyle: "italic" }}>
+                                      Reason: {sessionDeclinedReasons[s.id]}
+                                    </Typography>
+                                  )}
+                                  <Typography variant="caption" color="text.secondary" sx={{ mt: sessionDeclinedReasons[s.id] ? 0.5 : 0, display: "block" }}>
+                                    To re-accept this session, contact {s.scheduledByName || "the scheduler"}{s.scheduledByEmail ? ` at ${s.scheduledByEmail}` : ""}.
+                                  </Typography>
+                                </Box>
                               )}
-                              <Typography variant="caption" color="text.secondary" sx={{ mt: sessionDeclinedReasons[s.id] ? 0.5 : 1, display: "block" }}>
-                                To re-accept this session, contact {s.scheduledByName || "the scheduler"}{s.scheduledByEmail ? ` at ${s.scheduledByEmail}` : ""}.
-                              </Typography>
                             </Card>
                           ))}
                         </Stack>
@@ -1561,7 +1584,7 @@ export default function DashboardPage() {
                         <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Previously declined</Typography>
                         <Stack spacing={1.5}>
                           {rolePreviouslyDeclined.map((s) => (
-                            <Card key={s.id} variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+                            <Card key={s.id} variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
                               <SessionCard
                                 title={s.title}
                                 topic={s.topic}
@@ -1572,9 +1595,11 @@ export default function DashboardPage() {
                                 status={{ label: "Declined", bg: "action.hover", color: "text.secondary", border: "transparent" }}
                               />
                               {s.declineReason && (
-                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block", fontStyle: "italic" }}>
-                                  Reason: {s.declineReason}
-                                </Typography>
+                                <Box sx={{ px: 2, pb: 2 }}>
+                                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontStyle: "italic" }}>
+                                    Reason: {s.declineReason}
+                                  </Typography>
+                                </Box>
                               )}
                             </Card>
                           ))}

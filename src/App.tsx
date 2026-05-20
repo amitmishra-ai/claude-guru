@@ -14,12 +14,14 @@ const ComponentsPage = lazy(() => import("@/pages/Components"));
 const SupportPage = lazy(() => import("@/pages/Support"));
 const AccountPage = lazy(() => import("@/pages/Account"));
 const OldDashboardPage = lazy(() => import("@/pages/OldDashboard"));
+const MarketingDashboardPage = lazy(() => import("@/pages/MarketingDashboard"));
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Suspense><OldDashboardPage /></Suspense>} />
       <Route path="/old-dashboard" element={<Suspense><OldDashboardPage /></Suspense>} />
+      <Route path="/marketing-dashboard" element={<Suspense><MarketingDashboardPage /></Suspense>} />
       <Route element={<AppLayout />}>
         <Route path="/new-dashboard" element={<Suspense><DashboardPage /></Suspense>} />
         <Route path="/courses" element={<Suspense><CoursesPage /></Suspense>} />

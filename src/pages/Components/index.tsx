@@ -53,6 +53,7 @@ import { setSessionFocus } from "@/store/slices/sessionsSlice";
 import { setOpenSessionDetails, setOpenCompletedSession } from "@/store/slices/uiSlice";
 import type { GuruRole } from "@/store/slices/devPanelSlice";
 import type { Poll } from "@/lib/types";
+import { ActivityCardExplorations } from "./ActivityCardExplorations";
 import {
   demoMentoringConfirmed,
   demoMentoringCombinedConfirmed,
@@ -260,33 +261,35 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd,
   contactEmail?: string; program?: string; onViewDetails?: () => void;
 }) {
   return (
-    <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
-      {/* Mobile: chip on top */}
-      <Box sx={{ display: { xs: "block", sm: "none" }, mb: 0.75 }}>
-        {CHIP_TO_BE_CONFIRMED}
-      </Box>
-      <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>
-        {sessionType}: {title}
-      </Typography>
-      {/* Desktop: chip beside title */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5 }}>
-        <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
+    <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+      <Box sx={{ p: 2 }}>
+        {/* Mobile: chip on top */}
+        <Box sx={{ display: { xs: "block", sm: "none" }, mb: 0.75 }}>
+          {CHIP_TO_BE_CONFIRMED}
+        </Box>
+        <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>
           {sessionType}: {title}
         </Typography>
-        {CHIP_TO_BE_CONFIRMED}
-      </Stack>
-      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
-        <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
-        <Typography variant="caption" color="text.secondary">
-          {fmtDateNice(startDateYmd)} &ndash; {fmtDateNice(endDateYmd)} &middot; {batch}
-        </Typography>
-      </Stack>
-      {/* Desktop: text button */}
-      {onViewDetails && (
-        <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1, display: { xs: "none", sm: "flex" } }}>
-          <Button variant="text" size="small" onClick={onViewDetails}>View details</Button>
+        {/* Desktop: chip beside title */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5 }}>
+          <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
+            {sessionType}: {title}
+          </Typography>
+          {CHIP_TO_BE_CONFIRMED}
         </Stack>
-      )}
+        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary" }}>
+          <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+          <Typography variant="caption" color="text.secondary">
+            {fmtDateNice(startDateYmd)} &ndash; {fmtDateNice(endDateYmd)} &middot; {batch}
+          </Typography>
+        </Stack>
+        {/* Desktop: text button */}
+        {onViewDetails && (
+          <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1, display: { xs: "none", sm: "flex" } }}>
+            <Button variant="text" size="small" onClick={onViewDetails}>View details</Button>
+          </Stack>
+        )}
+      </Box>
       {/* Mobile: full-width row */}
       {onViewDetails && (
         <Box
@@ -295,16 +298,12 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd,
             display: { xs: "flex", sm: "none" },
             justifyContent: "space-between",
             alignItems: "center",
-            mt: 2,
-            mx: -2,
-            mb: -2,
             px: 2,
             py: "10px",
             cursor: "pointer",
             borderTop: 1,
             borderColor: "divider",
             bgcolor: "action.hover",
-            borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
             "&:hover": { bgcolor: "action.selected" },
             transition: "background-color 0.15s",
           }}
@@ -1425,23 +1424,38 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
 const RESIDENCY_COMBINED_ACCORDION = (
   <Accordion
     disableGutters elevation={0} defaultExpanded={false}
-    sx={{ mt: 1.5, borderRadius: "12px !important", border: "1px solid", borderColor: "divider", overflow: "hidden", "&::before": { display: "none" } }}
+    square
+    sx={{
+      borderTop: "1px solid",
+      borderColor: "divider",
+      bgcolor: "transparent",
+      boxShadow: "none",
+      "&::before": { display: "none" },
+    }}
   >
     <AccordionSummary
-      expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16 }} />}
-      sx={{ px: 1.5, py: 0, minHeight: "unset", bgcolor: "hsl(var(--md-surface-container) / 0.5)", "& .MuiAccordionSummary-content": { my: 0.75, gap: 0.75, alignItems: "center" } }}
+      expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />}
+      sx={{
+        px: 2,
+        py: 0,
+        minHeight: "unset",
+        bgcolor: "hsl(var(--md-surface-container) / 0.35)",
+        "&:hover": { bgcolor: "hsl(var(--md-surface-container) / 0.6)" },
+        transition: "background-color 0.15s",
+        "& .MuiAccordionSummary-content": { my: 1, gap: 0.75, alignItems: "center" },
+      }}
     >
-      <CallMergeOutlinedIcon sx={{ fontSize: 13, color: "text.secondary" }} />
-      <Typography variant="caption" fontWeight={600} color="text.secondary">Combined session</Typography>
+      <CallMergeOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+      <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ fontSize: "0.75rem" }}>Combined session</Typography>
       <Chip label="2" size="small" sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, bgcolor: "action.selected", "& .MuiChip-label": { px: 0.5 } }} />
     </AccordionSummary>
-    <AccordionDetails sx={{ p: 0 }}>
+    <AccordionDetails sx={{ p: 0, borderTop: "1px solid", borderColor: "divider" }}>
       <Stack divider={<Divider />}>
         {[
           { batch: "AIML Online March 26 A", learnerCount: 120, chip: "Whole batch" },
           { batch: "AIML Online Feb 26 B", learnerCount: 95, chip: "Whole batch" },
         ].map((cb) => (
-          <Box key={cb.batch} sx={{ px: 1.5, py: 0.75 }}>
+          <Box key={cb.batch} sx={{ px: 2, py: 1 }}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
               <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, minWidth: 0 }} noWrap>
                 {cb.batch}
@@ -1471,7 +1485,7 @@ function ResidencyCards() {
         title="Residency - Confirmed"
         description="Confirmed residency with 3-day schedule. Date range with → arrow. Material + Course actions."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="AI in Practice Workshop"
             sessionType="Residency"
@@ -1499,7 +1513,7 @@ function ResidencyCards() {
         title="Residency - Confirmed (Combined session)"
         description="Multi-batch combined residency with 3-day schedule + combined session accordion."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Deep Learning Fundamentals"
             sessionType="Residency"
@@ -1528,7 +1542,7 @@ function ResidencyCards() {
         title="Residency - Scheduled"
         description="Awaiting guru confirmation. Confirm/Unavailable actions with 3-day schedule accordion."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Deep Learning Fundamentals"
             sessionType="Residency"
@@ -1556,7 +1570,7 @@ function ResidencyCards() {
         title="Residency - Scheduled (Combined session)"
         description="Unconfirmed combined residency. Confirm/Unavailable + schedule + combined session accordions."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="AI in Practice Workshop"
             sessionType="Residency"
@@ -1585,7 +1599,7 @@ function ResidencyCards() {
         title="Residency - Completed (Gathering feedback)"
         description="Residency done, no feedback yet. Payment pending + Gathering feedback chips."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Program Overview (All)"
             sessionType="Residency"
@@ -1611,7 +1625,7 @@ function ResidencyCards() {
         title="Residency - Completed (with feedback)"
         description="Past residency with rating. Payment processed chip + star rating. Feedback button."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Program Overview (All)"
             sessionType="Residency"
@@ -1638,7 +1652,7 @@ function ResidencyCards() {
         title="Residency - Completed (No feedback)"
         description="Residency older than 30 days, no learner ratings received. Payment processed + No feedback collected chips."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Program Overview (All)"
             sessionType="Residency"
@@ -1666,7 +1680,7 @@ function ResidencyCards() {
       >
         <CombinedCompletedGroup>
           {/* Batch A card */}
-          <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
             <SessionCard
               title="AI in Practice Workshop"
               sessionType="Residency"
@@ -1687,7 +1701,7 @@ function ResidencyCards() {
             />
           </Card>
           {/* Batch B card */}
-          <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
             <SessionCard
               title="AI in Practice Workshop"
               sessionType="Residency"
@@ -1737,7 +1751,7 @@ function OnlineSessionCards() {
 
       {/* 1. Mentoring - Confirmed */}
       <ComponentSection title="Mentoring - Confirmed" description="Virtual mentoring event. Disabled Join session + Material on card.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1760,7 +1774,7 @@ function OnlineSessionCards() {
 
       {/* 2. Mentoring - Combined (Confirmed) */}
       <ComponentSection title="Mentoring - Combined (Confirmed)" description="Combined session across batches. Combined session accordion with batch details.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1816,7 +1830,7 @@ function OnlineSessionCards() {
 
       {/* 3. Mentoring - Scheduled */}
       <ComponentSection title="Mentoring - Scheduled" description="Unconfirmed mentoring event awaiting guru action.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Python Fundamentals"
             sessionType="Online session"
@@ -1839,7 +1853,7 @@ function OnlineSessionCards() {
 
       {/* 3b. Mentoring - Combined (Scheduled) */}
       <ComponentSection title="Mentoring - Combined (Scheduled)" description="Unconfirmed combined event awaiting guru action. Combined session accordion.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1895,7 +1909,7 @@ function OnlineSessionCards() {
 
       {/* 4. Mock Interview - Confirmed (secondary facilitator) */}
       <ComponentSection title="Mock Interview - Confirmed (secondary)" description="Mock interview event. Join session + Share Feedback on card. Secondary facilitator badge.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Mock Interview"
             sessionType="Career mentoring session"
@@ -1932,7 +1946,7 @@ function OnlineSessionCards() {
 
       {/* 7. Mentoring - Completed (Gathering feedback) */}
       <ComponentSection title="Mentoring - Completed (Gathering feedback)" description="Event done, learners haven't rated yet. Payment pending + Gathering feedback chips top-right. Recording on card.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1957,7 +1971,7 @@ function OnlineSessionCards() {
 
       {/* 7b. Mentoring - Completed (Recording processing) */}
       <ComponentSection title="Mentoring - Completed (Recording processing)" description="Session just ended, recording not yet processed. Recording button is disabled. Typically takes up to an hour.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -1987,7 +2001,7 @@ function OnlineSessionCards() {
 
       {/* 8. Mentoring - Completed (No feedback) */}
       <ComponentSection title="Mentoring - Completed (No feedback)" description="Event older than 30 days, no learner ratings. Payment processed + No feedback collected chips top-right.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Python Fundamentals"
             sessionType="Online session"
@@ -2012,7 +2026,7 @@ function OnlineSessionCards() {
 
       {/* 9. Mentoring - Completed (with rating) */}
       <ComponentSection title="Mentoring - Completed (with rating)" description="Past mentoring event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Statistics for Data Science"
             sessionType="Online session"
@@ -2042,7 +2056,7 @@ function OnlineSessionCards() {
       <ComponentSection title="Mentoring - Combined (Completed)" description="Combined session splits into separate cards per batch when completed -each batch has its own rating. Two cards shown below for Batch A and Batch B.">
         <CombinedCompletedGroup>
           {/* Batch A card */}
-          <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
             <SessionCard
               title="Statistics for Data Science"
               sessionType="Online session"
@@ -2066,7 +2080,7 @@ function OnlineSessionCards() {
             />
           </Card>
           {/* Batch B card */}
-          <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+          <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
             <SessionCard
               title="Statistics for Data Science"
               sessionType="Online session"
@@ -2108,7 +2122,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 1. Career 1:1 - Confirmed */}
       <ComponentSection title="Career 1:1 - Confirmed" description="1:1 career mentoring. Join session on card. Student info, LinkedIn, resume in View Details.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Career Mentoring"
             sessionType="Career mentoring session"
@@ -2127,7 +2141,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 2. Mock Interview - Confirmed */}
       <ComponentSection title="Mock Interview - Confirmed" description="Mock interview event. Join session + Share Feedback on card.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Mock Interview"
             sessionType="Career mentoring session"
@@ -2149,7 +2163,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 3. Career 1:1 - Scheduled */}
       <ComponentSection title="Career 1:1 - Scheduled" description="Career mentoring event awaiting guru confirmation.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Career Mentoring"
             sessionType="Career mentoring session"
@@ -2171,7 +2185,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 4. Career - Completed (Gathering feedback) */}
       <ComponentSection title="Career - Completed (Gathering feedback)" description="Event done, no ratings yet. Payment pending + Gathering feedback chips top-right.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Career Mentoring"
             sessionType="Career mentoring session"
@@ -2195,7 +2209,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 5. Career - Completed (with rating) */}
       <ComponentSection title="Career - Completed (with rating)" description="Past career event. Payment processed chip + star rating top-right. Recording + Feedback on card.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Career Mentoring"
             sessionType="Career mentoring session"
@@ -2222,7 +2236,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 6. Mock - Completed (with Share Feedback) */}
       <ComponentSection title="Mock - Completed (with Share Feedback)" description="Past mock interview. Payment processed chip + star rating top-right. Recording + Feedback + Share Feedback.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Mock Interview"
             sessionType="Career mentoring session"
@@ -2250,7 +2264,7 @@ function CareerMentorOnlineSessionCards() {
 
       {/* 7. Career - Completed (No feedback) */}
       <ComponentSection title="Career - Completed (No feedback)" description="Career session older than 30 days, no learner ratings received. Payment processed + No feedback collected chips. Recording on card.">
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
             title="Career Mentoring"
             sessionType="Career mentoring session"
@@ -2289,7 +2303,7 @@ function EvaluationCards() {
         title="Evaluation - Confirmed"
         description="Date range (assessment due → grading due), primary CTA to open SpeedGrader, submission progress, course template, batch, contact."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={CHIP_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 0.75 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2308,7 +2322,7 @@ function EvaluationCards() {
         title="Evaluation - Scheduled"
         description="Assigned to guru but not yet confirmed. Primary CTA is Confirm, secondary is I'm unavailable. No SpeedGrader link until confirmed."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={CHIP_SCHEDULED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2329,7 +2343,7 @@ function EvaluationCards() {
         title="Evaluation - Tentative"
         description="Assignment label is plain text (no link). No student progress. 'To be confirmed' instead of submission counts."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Evaluation: Decision Tree Assignment" chips={CHIP_TO_BE_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2359,7 +2373,7 @@ function ModerationCards() {
         title="Moderation - Confirmed"
         description="Date range (moderation start → concluding remark), primary CTA to open discussion in SpeedGrader, response progress, course template, batch, contact."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={CHIP_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 0.75 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2378,7 +2392,7 @@ function ModerationCards() {
         title="Moderation - Scheduled"
         description="Assigned to guru but not yet confirmed. Primary CTA is Confirm, secondary is I'm unavailable. No SpeedGrader link until confirmed."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Moderation: Impact of AI on Healthcare" chips={CHIP_SCHEDULED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2399,7 +2413,7 @@ function ModerationCards() {
         title="Moderation - Tentative"
         description="DQ label is plain text (no link). No student progress. 'To be confirmed' instead of progress stats."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Moderation: Ethics in Machine Learning" chips={CHIP_TO_BE_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2429,7 +2443,7 @@ function CapstoneCards() {
         title="Capstone Project - Scheduled"
         description="Assigned to guru but not yet confirmed. Guru must confirm to participate. Confirm / I'm unavailable actions."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Capstone - PGPDS.O.MAR26.A" chips={CHIP_SCHEDULED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2450,7 +2464,7 @@ function CapstoneCards() {
         title="Capstone Project - Confirmed"
         description="Date range (start → presentation), 'Capstone -[Batch]', group, domain, next session date, contact. Progress + Group Details in dialog."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Capstone - PGPDS.O.MAR26.A" chips={CHIP_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2467,7 +2481,7 @@ function CapstoneCards() {
         title="Capstone Project - Completed (Payment pending)"
         description="No rating for capstones. Payment pending chip top-right. Progress button always shown."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Capstone - PGPDS.O.JUL25.A" chips={CHIP_PAYMENT_PENDING} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2485,7 +2499,7 @@ function CapstoneCards() {
         title="Capstone Project - Completed"
         description="No rating. Payment processed chip top-right. Progress always shown."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="Capstone - PGPDS.O.JUL25.A" chips={CHIP_PAYMENT_PROCESSED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2515,7 +2529,7 @@ function CVReviewCards() {
         title="CV Review - Scheduled"
         description="Assigned to guru but not yet confirmed. Guru must confirm to accept the CV review task. Confirm / I'm unavailable actions."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="CV Review" chips={CHIP_SCHEDULED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2536,7 +2550,7 @@ function CVReviewCards() {
         title="CV Review - Confirmed"
         description="Due date, batch, 'Due on' line. View LinkedIn, View CV, View User Comments, Submit CV Review as primary actions."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="CV Review" chips={CHIP_CONFIRMED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2554,7 +2568,7 @@ function CVReviewCards() {
         title="CV Review - Confirmed (Already Submitted)"
         description="Submit button replaced by 'Already Submitted' text. 'Due on' line hidden once submitted."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="CV Review" chips={<>{CHIP_ALREADY_SUBMITTED}{CHIP_CONFIRMED}</>} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2571,7 +2585,7 @@ function CVReviewCards() {
         title="CV Review - Completed (Payment pending)"
         description="Review submitted, payment not yet processed. Payment pending chip top-right. Reviewed CV button shown."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="CV Review" chips={CHIP_PAYMENT_PENDING} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -2589,7 +2603,7 @@ function CVReviewCards() {
         title="CV Review - Completed (Payment processed)"
         description="Review done, payment processed. Payment processed chip top-right. No rating, no feedback."
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <CardTitleRow title="CV Review" chips={CHIP_PAYMENT_PROCESSED} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 1.5 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
@@ -3007,6 +3021,7 @@ export default function ComponentsPage() {
 
       {pageTab === 0 ? (
         <>
+          <ActivityCardExplorations />
           {sections.map((section) => (
             <Card key={section.label} sx={{ p: 2 }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>{section.label}</Typography>

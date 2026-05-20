@@ -22,7 +22,7 @@ interface SessionsState {
 
 const initialState: SessionsState = {
   items: demoSessions,
-  confirmations: { s0: true },
+  confirmations: { s0: true, eval3: true, eval5: true, mod3: true },
   sessionDeclined: {},
   sessionDeclinedAtYmd: {},
   sessionDeclinedReasons: {},

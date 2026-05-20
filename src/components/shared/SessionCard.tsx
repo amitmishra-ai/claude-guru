@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import { Fragment } from "react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
@@ -9,8 +9,14 @@ import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { fmtDateNice, fmtTime12, applyTzOffset } from "@/lib/helpers";
+import { fmtTime12, applyTzOffset, fmtDateNice } from "@/lib/helpers";
 import { useAppSelector } from "@/store";
+import { ActivitySpine } from "./ActivityDateTile";
+import { getActivityVisual } from "@/lib/activity-visuals";
+import type { SessionType } from "@/lib/types";
+
+const HAIRLINE_SOFT = "rgba(15, 23, 42, 0.06)";
+const TABULAR = { fontFeatureSettings: '"tnum", "ss01"', fontVariantNumeric: "tabular-nums" } as const;
 
 export type SessionCardStatus = {
   label: string;
@@ -20,52 +26,65 @@ export type SessionCardStatus = {
   icon?: ReactNode;
 };
 
+export type SessionCardStat = {
+  label: string;
+  value: number | string;
+};
+
 export type SessionCardProps = {
   /** Session title (course name) */
   title: string;
-  /** Title variant - defaults to "h6" */
+  /** Title variant - defaults to "h6" (kept for API compat; subtitle2 styling applied) */
   titleVariant?: "h5" | "h6";
-  /** Session type label (e.g. "Mentored Learning session") */
+  /** Session type — used to derive the eyebrow icon + color label */
   sessionType?: string;
-  /** Session topic (e.g. "Orientation + Industry Landscape") */
+  /** Session topic */
   topic?: string;
-  /** Batch identifier (e.g. "AIML Online March 26 A") */
+  /** Batch identifier */
   batch?: string;
   /** Date in YYYY-MM-DD */
   dateYmd: string;
-  /** End date for multi-day events (YYYY-MM-DD) */
+  /** End date for multi-day events */
   endDateYmd?: string;
-  /** Start time (minutes from midnight) */
+  /** Start time (minutes from midnight); pass NaN to suppress time in meta */
   start: number;
   /** End time (minutes from midnight) */
   end: number;
-  /** Group name (shows Users icon) */
+  /** When true, suppress the time range in the meta line (date-only activities) */
+  hideTime?: boolean;
+  /** Group name (shows Users icon in meta) */
   group?: string;
-  /** Extra text appended to date line (e.g. location) */
+  /** Extra text appended to meta line (e.g. location) */
   locationText?: string;
   /** Status chip config; omit for no status chip */
   status?: SessionCardStatus;
   /** Category chip labels (program, cohort, location, etc.) */
   chips?: string[];
-  /** Content in top-right corner (e.g. star rating) */
+  /** Content in top-right corner of content column (e.g. additional chips, star rating) */
   topRight?: ReactNode;
-  /** Content rendered inline to the right of the title (e.g. star rating when no chips) */
+  /** Content rendered to the right of the eyebrow on the LEFT side of the
+      top row — used for attention chips like "Late submission" that should
+      visually attach to the activity-type label rather than the status
+      cluster on the right. */
+  eyebrowExtra?: ReactNode;
+  /** Content rendered inline to the right of the title */
   titleRight?: ReactNode;
+  /** Progress stats — rendered as a "12 Submissions · 0 Graded" row */
+  stats?: SessionCardStat[];
   /** Primary action buttons */
   actions?: ReactNode;
   /** Secondary action (right-aligned, e.g. "Group profile") */
   secondaryAction?: ReactNode;
-  /** When provided, renders a mobile-style "View details →" row on xs and a text button on sm+ */
+  /** When provided, renders a "View details →" affordance */
   onViewDetails?: () => void;
-  /** When true, suppresses the mobile "View details" row (parent handles it separately, e.g. after accordion) */
+  /** When true, suppresses the mobile "View details" row */
   hideMobileViewDetails?: boolean;
-  /** When provided, makes the course name (title) a clickable link */
+  /** When provided, makes the title clickable */
   onCourseClick?: () => void;
-  /** Container sx overrides (animation, opacity, etc.) */
   sx?: SxProps<Theme>;
 };
 
-/* ── Status presets ── */
+/* ── Status presets — chip styling matches the A1 tonal palette ── */
 
 export const STATUS_SCHEDULED: SessionCardStatus = {
   label: "Scheduled",
@@ -89,25 +108,49 @@ export const STATUS_DECLINED: SessionCardStatus = {
   border: "var(--gl-status-declined-border)",
 };
 
+/* ── Stats row helper ── */
+
+function StatsRow({ stats }: { stats: SessionCardStat[] }) {
+  return (
+    <Stack direction="row" spacing={1} alignItems="baseline" flexWrap="wrap" useFlexGap>
+      {stats.map((stat, i) => (
+        <Fragment key={stat.label}>
+          {i > 0 && (
+            <Typography sx={{ color: "text.disabled", fontSize: "0.8125rem", mx: 0.25 }}>·</Typography>
+          )}
+          <Stack direction="row" spacing={0.625} alignItems="baseline">
+            <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary", lineHeight: 1, ...TABULAR }}>
+              {stat.value}
+            </Typography>
+            <Typography sx={{ fontSize: "0.75rem", fontWeight: 500, color: "text.secondary" }}>
+              {stat.label}
+            </Typography>
+          </Stack>
+        </Fragment>
+      ))}
+    </Stack>
+  );
+}
 
 /* ── Component ── */
 
 export function SessionCard({
   title,
-  titleVariant = "h6",
   sessionType,
-  topic,
   batch,
   dateYmd,
   endDateYmd,
   start,
   end,
+  hideTime,
   group,
   locationText,
   status,
   chips,
   topRight,
+  eyebrowExtra,
   titleRight,
+  stats,
   actions,
   secondaryAction,
   onViewDetails,
@@ -118,43 +161,51 @@ export function SessionCard({
   const tzOffset = useAppSelector((s) => s.profile.tzOffsetMinutes);
   const tzStart = applyTzOffset(start, tzOffset);
   const tzEnd = applyTzOffset(end, tzOffset);
-  /* Secondary Guru tag — auto-injected on every activity card when the
-     current Guru role is "Secondary Guru". Surfaces the secondary status
-     consistently across Dashboard / Calendar / Courses / Payments. */
+  const visual = getActivityVisual(sessionType);
+  const TypeIcon = visual.renderIcon;
+
+  /* Secondary Guru tag — auto-injected when the current Guru role is Secondary */
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
   const secondaryChip = selectedRole === "Secondary Guru" ? (
     <Chip
       label="Secondary"
       size="small"
       sx={{
-        height: 20,
-        fontSize: "0.65rem",
-        fontWeight: 600,
+        height: 22,
+        fontSize: "0.7rem",
+        fontWeight: 500,
+        borderRadius: "4px",
         bgcolor: "var(--gl-status-pending-bg)",
         color: "var(--gl-status-pending-text)",
         border: "1px solid var(--gl-status-pending-border)",
         flexShrink: 0,
+        "& .MuiChip-label": { px: 1 },
       }}
     />
   ) : null;
 
+  /* Status chip — slimmer, 4px radius, sentence-case label */
   const statusChip = status && (
     <Chip
       icon={status.icon ? <>{status.icon}</> : undefined}
       label={status.label}
       size="small"
       sx={{
+        height: 22,
+        borderRadius: "4px",
         bgcolor: status.bg,
         color: status.color,
         border: `1px solid ${status.border}`,
         fontWeight: 500,
-        fontSize: "0.75rem",
+        fontSize: "0.7rem",
         "& .MuiChip-icon": { color: "inherit" },
+        "& .MuiChip-label": { px: 1 },
         flexShrink: 0,
       }}
     />
   );
 
+  /* Combined / Full batch chips (kept for legacy callers) */
   const chipsRow = (chips && chips.length > 0) && (
     <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
       {chips.map((c) =>
@@ -180,22 +231,8 @@ export function SessionCard({
     </Stack>
   );
 
-  const titleContent = sessionType ? (
-    <>
-      <Box component="span">{sessionType}: </Box>
-      {onCourseClick ? (
-        <Box
-          component="span"
-          onClick={(e) => { e.stopPropagation(); onCourseClick(); }}
-          sx={{ color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
-        >
-          {title}
-        </Box>
-      ) : (
-        <Box component="span">{title}</Box>
-      )}
-    </>
-  ) : onCourseClick ? (
+  /* Title (subtitle2 styling, optionally clickable) */
+  const titleContent = onCourseClick ? (
     <Box
       component="span"
       onClick={(e) => { e.stopPropagation(); onCourseClick(); }}
@@ -205,59 +242,82 @@ export function SessionCard({
     </Box>
   ) : title;
 
-  const titleRow = (
-    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
-      <Typography
-        variant={titleVariant}
-        fontWeight={600}
-        sx={{ fontSize: titleVariant === "h5" ? { xs: "1rem", md: "1.125rem" } : "0.875rem", minWidth: 0 }}
-      >
-        {titleContent}
-      </Typography>
-      <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
-        {secondaryChip}
-        {statusChip}
-      </Stack>
-    </Stack>
-  );
-
-  const dateRow = (
-    <Stack
-      direction="row"
-      alignItems="center"
-      spacing={1}
-      flexWrap="wrap"
-      useFlexGap
-      sx={{ mb: actions || secondaryAction ? 1.5 : 0, color: "text.secondary" }}
-    >
-      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0 }}>
-        <CalendarTodayOutlinedIcon sx={{ fontSize: 12, flexShrink: 0 }} />
-        <Typography variant="caption" color="text.secondary" noWrap sx={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-          {fmtDateNice(dateYmd)}{endDateYmd ? <> &rarr; {fmtDateNice(endDateYmd)}</> : null} &middot; {fmtTime12(tzStart)}&ndash;{fmtTime12(tzEnd)}
-          {batch ? <> &middot; {batch}</> : null}
-          {locationText ? <> &middot; {locationText}</> : null}
-        </Typography>
-      </Stack>
-      {group && (
-        <>
-          <Typography variant="body2" color="text.disabled">&middot;</Typography>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
-            <GroupOutlinedIcon sx={{ fontSize: 14 }} />
-            <Typography variant="body2" color="text.secondary">{group}</Typography>
-          </Stack>
-        </>
+  /* Eyebrow — type icon stays in type color (single point of accent for
+     at-a-glance discrimination); label text goes neutral so the eyebrow
+     doesn't repeat the color signal and crowd the action / status hues.
+     `eyebrowExtra` attaches inline to the right of the label for attention
+     chips like "Late submission". */
+  const eyebrow = (sessionType || eyebrowExtra) ? (
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0, flexWrap: "wrap" }} useFlexGap>
+      {sessionType && (
+        <Stack direction="row" alignItems="center" spacing={0.75} sx={{ minWidth: 0 }}>
+          {TypeIcon(16)}
+          <Typography
+            variant="overline"
+            sx={{ fontWeight: 600, color: "text.secondary", lineHeight: 1.4 }}
+          >
+            {visual.label}
+          </Typography>
+        </Stack>
       )}
+      {eyebrowExtra}
     </Stack>
-  );
+  ) : null;
 
-  /* Desktop-only secondary for onViewDetails */
+  /* Right cluster (status chip(s) + topRight content) */
+  const rightCluster = (statusChip || secondaryChip || topRight) ? (
+    <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap" useFlexGap justifyContent="flex-end" sx={{ flexShrink: 0 }}>
+      {secondaryChip}
+      {statusChip}
+      {topRight}
+    </Stack>
+  ) : null;
+
+  /* Meta line — composed differently for desktop and mobile.
+     Desktop: the spine on the left carries the start date, so meta only
+       shows the range (multi-day events), time and batch.
+     Mobile: no spine, so the meta line carries the date inline ahead of
+       time + batch — keeps the card horizontal-space-light on narrow
+       screens. */
+  const showTime = !hideTime && Number.isFinite(start) && Number.isFinite(end);
+  const hasRange = !!endDateYmd && endDateYmd !== dateYmd;
+  const timeText = showTime ? `${fmtTime12(tzStart)}–${fmtTime12(tzEnd)}` : null;
+
+  const desktopMeta: string[] = [];
+  if (hasRange) desktopMeta.push(`${fmtDateNice(dateYmd)} → ${fmtDateNice(endDateYmd!)}`);
+  if (timeText) desktopMeta.push(timeText);
+  if (batch) desktopMeta.push(batch);
+  if (locationText) desktopMeta.push(locationText);
+  const desktopMetaText = desktopMeta.join(" · ");
+
+  const mobileMeta: string[] = [];
+  if (hasRange) {
+    mobileMeta.push(`${fmtDateNice(dateYmd)} → ${fmtDateNice(endDateYmd!)}`);
+  } else {
+    mobileMeta.push(fmtDateNice(dateYmd));
+  }
+  if (timeText) mobileMeta.push(timeText);
+  if (batch) mobileMeta.push(batch);
+  if (locationText) mobileMeta.push(locationText);
+  const mobileMetaText = mobileMeta.join(" · ");
+
+  const hasMeta = desktopMetaText.length > 0 || mobileMetaText.length > 0 || !!group;
+
+  /* Desktop "View details" text button (right side of action row) */
   const desktopViewDetailsBtn = onViewDetails && (
     <Box sx={{ display: { xs: "none", sm: "block" } }}>
-      <Button variant="text" size="small" onClick={onViewDetails}>View details</Button>
+      <Button
+        variant="text"
+        size="small"
+        endIcon={<ChevronRightIcon sx={{ fontSize: 14 }} />}
+        onClick={onViewDetails}
+        sx={{ color: "primary.main", fontSize: "0.8125rem" }}
+      >
+        Details
+      </Button>
     </Box>
   );
 
-  /* On mobile, secondaryAction is hidden from actionsRow and rendered as a full-width bottom row instead */
   const resolvedSecondary = onViewDetails
     ? desktopViewDetailsBtn
     : secondaryAction
@@ -274,7 +334,26 @@ export function SessionCard({
       useFlexGap
     >
       {actions && (
-        <Stack direction="row" spacing={1} flexWrap="nowrap" useFlexGap sx={{ width: { xs: "100%", sm: "auto" }, "& .MuiButton-root": { flex: { xs: 1, sm: "0 0 auto" }, fontSize: { xs: "0.78rem", sm: "0.8125rem" }, px: { xs: 1.5, sm: 1.5 }, py: { xs: 0.75, sm: 0.5 }, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }, "& .MuiButton-startIcon": { display: { xs: "none", sm: "inline-flex" } } }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          flexWrap="nowrap"
+          useFlexGap
+          sx={{
+            width: { xs: "100%", sm: "auto" },
+            "& .MuiButton-root": {
+              flex: { xs: 1, sm: "0 0 auto" },
+              fontSize: { xs: "0.78rem", sm: "0.8125rem" },
+              px: { xs: 1.5, sm: 1.5 },
+              py: { xs: 0.75, sm: 0.5 },
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              minWidth: 0,
+            },
+            "& .MuiButton-startIcon": { display: { xs: "none", sm: "inline-flex" } },
+          }}
+        >
           {actions}
         </Stack>
       )}
@@ -282,23 +361,44 @@ export function SessionCard({
     </Stack>
   );
 
-  /* Mobile full-width row for secondaryAction (when not using onViewDetails) */
-  const mobileSecondaryRow = !onViewDetails && secondaryAction && (
+  /* Mobile full-width "View details" footer — spans the full card width
+     (under the spine + content), so kept OUTSIDE the row-flex below. */
+  const mobileViewDetailsRow = onViewDetails && !hideMobileViewDetails && (
     <Box
+      onClick={onViewDetails}
       sx={{
         display: { xs: "flex", sm: "none" },
         justifyContent: "space-between",
         alignItems: "center",
-        mt: 2,
-        mx: -2,
-        mb: -2,
         px: 2,
         py: "10px",
         cursor: "pointer",
         borderTop: 1,
         borderColor: "divider",
         bgcolor: "action.hover",
-        borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
+        "&:hover": { bgcolor: "action.selected" },
+        transition: "background-color 0.15s",
+      }}
+    >
+      <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
+      <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+    </Box>
+  );
+
+  /* Mobile secondary action footer (used when no onViewDetails). Same
+     full-card-width footer pattern. */
+  const mobileSecondaryRow = !onViewDetails && secondaryAction && (
+    <Box
+      sx={{
+        display: { xs: "flex", sm: "none" },
+        justifyContent: "space-between",
+        alignItems: "center",
+        px: 2,
+        py: "10px",
+        cursor: "pointer",
+        borderTop: 1,
+        borderColor: "divider",
+        bgcolor: "action.hover",
         "&:hover": { bgcolor: "action.selected" },
         transition: "background-color 0.15s",
         "& .MuiButton-root": { p: 0, minHeight: "unset", minWidth: "unset" },
@@ -309,113 +409,103 @@ export function SessionCard({
     </Box>
   );
 
-  /* Mobile full-width "View details →" row - rendered outside actionsRow to span full card width */
-  const mobileViewDetailsRow = onViewDetails && !hideMobileViewDetails && (
-    <Box
-      onClick={onViewDetails}
-      sx={{
-        display: { xs: "flex", sm: "none" },
-        justifyContent: "space-between",
-        alignItems: "center",
-        mt: 2,
-        mx: { xs: -2, sm: -2 },
-        mb: { xs: -2, sm: -2 },
-        px: 2,
-        py: "10px",
-        cursor: "pointer",
-        borderTop: 1,
-        borderColor: "divider",
-        bgcolor: "action.hover",
-        borderRadius: { xs: "0 0 12px 12px", sm: "0 0 12px 12px" },
-        "&:hover": { bgcolor: "action.selected" },
-        transition: "background-color 0.15s",
-      }}
-    >
-      <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
-      <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
-    </Box>
-  );
-
   return (
     <Box sx={sx}>
-      {topRight ? (
-        <>
-          {/* ── MOBILE (xs): chips on top line, title below ── */}
-          <Box sx={{ display: { xs: "block", sm: "none" } }}>
-            <Box sx={{ mb: 0.75, display: "flex", alignItems: "center", gap: 0.75, "& > .MuiStack-root": { width: "100%", "& .star-rating-numeric": { ml: "auto" } } }}>
-              {secondaryChip}
-              {statusChip}
-              {topRight}
-            </Box>
-            <Typography
-              variant={titleVariant}
-              fontWeight={600}
-              sx={{ fontSize: { xs: "0.8rem" }, mb: 0.5 }}
-            >
-              {titleContent}
-            </Typography>
-          </Box>
-          {/* ── DESKTOP (sm+): chips beside title ── */}
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5, gap: 1 }}>
-            <Typography
-              variant={titleVariant}
-              fontWeight={600}
-              sx={{ fontSize: titleVariant === "h5" ? { sm: "1rem", md: "1.125rem" } : "0.875rem", minWidth: 0 }}
-            >
-              {titleContent}
-            </Typography>
-            <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap" useFlexGap justifyContent="flex-end" sx={{ flexShrink: 0 }}>
-              {secondaryChip}
-              {statusChip}
-              {topRight}
-            </Stack>
-          </Stack>
-          {dateRow}
+      <Stack direction="row" alignItems="stretch">
+        {/* Spine — vertical date column on the left. Desktop only; mobile
+            shows the date inline in the meta line instead so the title gets
+            full horizontal width. */}
+        <ActivitySpine
+          dateYmd={dateYmd}
+          endDateYmd={endDateYmd}
+          sessionType={sessionType as SessionType | undefined}
+          size="md"
+          sx={{ display: { xs: "none", sm: "flex" } }}
+        />
 
-          {chipsRow}
-        </>
-      ) : (
-        <>
-          {/* ── MOBILE (xs): status / secondary chip on top line, title below ── */}
-          {(statusChip || secondaryChip) && (
-            <Box sx={{ display: { xs: "flex", sm: "none" }, mb: 0.75, gap: 0.75 }}>
-              {secondaryChip}
-              {statusChip}
-            </Box>
+        {/* Content column */}
+        <Box sx={{ flex: 1, minWidth: 0, px: 2, py: 2 }}>
+          {/* Eyebrow row */}
+          {(eyebrow || rightCluster) && (
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="flex-start"
+              spacing={1}
+              sx={{ mb: 0.5, gap: 1, flexWrap: { xs: "wrap", sm: "nowrap" } }}
+            >
+              {eyebrow}
+              {rightCluster}
+            </Stack>
           )}
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "flex", sm: "none" }, mb: 0.5 }}>
+
+          {/* Title */}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5, gap: 1 }}>
             <Typography
-              variant={titleVariant}
-              fontWeight={600}
-              sx={{ fontSize: titleVariant === "h5" ? "1rem" : "0.875rem", minWidth: 0 }}
+              variant="subtitle2"
+              sx={{ fontWeight: 600, color: "text.primary", minWidth: 0, lineHeight: 1.35 }}
             >
               {titleContent}
             </Typography>
             {titleRight}
           </Stack>
-          {/* ── DESKTOP (sm+): status chip beside title ── */}
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5 }}>
-            <Typography
-              variant={titleVariant}
-              fontWeight={600}
-              sx={{ fontSize: titleVariant === "h5" ? { sm: "1rem", md: "1.125rem" } : "0.875rem", minWidth: 0 }}
+
+          {/* Meta line — mobile carries the date inline; desktop relies on the spine */}
+          {hasMeta && (
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              flexWrap="wrap"
+              useFlexGap
+              sx={{ mb: stats ? 1.25 : (actions || secondaryAction ? 1.5 : 0), color: "text.secondary" }}
             >
-              {titleContent}
-            </Typography>
-            <Stack direction="row" spacing={0.75} alignItems="center">
-              {secondaryChip}
-              {statusChip}
-              {titleRight}
+              {desktopMetaText && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  noWrap
+                  sx={{ display: { xs: "none", sm: "block" }, fontSize: "0.75rem", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", ...TABULAR }}
+                >
+                  {desktopMetaText}
+                </Typography>
+              )}
+              {mobileMetaText && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  noWrap
+                  sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.75rem", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", ...TABULAR }}
+                >
+                  {mobileMetaText}
+                </Typography>
+              )}
+              {group && (
+                <>
+                  <Typography variant="body2" color="text.disabled">·</Typography>
+                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                    <GroupOutlinedIcon sx={{ fontSize: 14 }} />
+                    <Typography variant="body2" color="text.secondary">{group}</Typography>
+                  </Stack>
+                </>
+              )}
             </Stack>
-          </Stack>
-          {dateRow}
+          )}
+
+          {/* Stats row */}
+          {stats && stats.length > 0 && (
+            <Box sx={{ mb: actions || secondaryAction ? 1.5 : 0 }}>
+              <StatsRow stats={stats} />
+            </Box>
+          )}
 
           {chipsRow}
-        </>
-      )}
-      {actionsRow}
-      {mobileSecondaryRow}
+
+          {actionsRow}
+        </Box>
+      </Stack>
       {mobileViewDetailsRow}
+      {mobileSecondaryRow}
     </Box>
   );
 }

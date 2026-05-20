@@ -188,9 +188,9 @@ function buildTheme(mode: "light" | "dark") {
         letterSpacing: "0.03333em",
       },
       overline: {
-        fontSize: "0.75rem",
-        fontWeight: 400,
-        lineHeight: 2.66,
+        fontSize: "0.625rem",
+        fontWeight: 500,
+        lineHeight: 1.6,
         letterSpacing: "0.08333em",
         textTransform: "uppercase" as const,
       },

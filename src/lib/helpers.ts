@@ -215,7 +215,13 @@ export function dateTimeMs(dateYmd: string, startMinutes: number) {
 }
 
 export function isSessionCompleted(s: Session, nowMs: number) {
-  return dateTimeMs(s.dateYmd, s.end) < nowMs;
+  /* For date-range activities (Evaluation, Moderation, Residency) the
+     session is "completed" only after the END date — keeping it in upcoming
+     while its window is open. Single-day sessions fall back to start+end. */
+  const endMs = s.endDateYmd
+    ? dateTimeMs(s.endDateYmd, 24 * 60 - 1)
+    : dateTimeMs(s.dateYmd, s.end);
+  return endMs < nowMs;
 }
 
 export function fmtDuration(startMins: number, endMins: number): string {
