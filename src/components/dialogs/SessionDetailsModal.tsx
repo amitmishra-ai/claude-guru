@@ -61,6 +61,7 @@ import { demoNow } from "@/lib/constants";
 import { demoCourseCatalog, demoLearnerRatingsBySessionId } from "@/data/demo-sessions";
 import { dateTimeMs, sortByDateTime } from "@/lib/helpers";
 import type { SessionPrepMaterial, Poll } from "@/lib/types";
+import { getActivityStats } from "@/lib/activity-stats";
 
 const MATERIAL_ICONS: Record<SessionPrepMaterial["type"], React.ReactNode> = {
   slides: <SlideshowOutlinedIcon sx={{ fontSize: 15 }} />,
@@ -573,6 +574,10 @@ export function SessionDetailsModal() {
     ? demoCourseCatalog.find((c) => c.id === session.linkedCourseId)
     : null;
   const isMentoring = session?.sessionType === "Career mentoring session";
+  /* Grading progress — Evaluation (Submissions/Graded) & Moderation
+     (Posts/Posts unread/Graded). Shared with the activity card via
+     getActivityStats so card and drawer never drift. */
+  const activityStats = getActivityStats(session, { completed: isCompleted });
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
   const isSecondaryGuru = selectedRole === "Secondary Guru";
   /* Polls: hidden for Secondary Gurus per spec (no create / no view). */
@@ -790,6 +795,31 @@ export function SessionDetailsModal() {
 
               {/* ═══ DETAIL SECTIONS ═══ */}
               <Stack spacing={0} sx={{ px: 2, py: 2 }}>
+
+                {/* ── Grading progress (Evaluation / Moderation) ── */}
+                {activityStats && (
+                  <Box sx={{ mb: 2.5 }}>
+                    <SectionHeading icon={<CheckCircleOutlinedIcon sx={{ fontSize: 14 }} />}>Grading progress</SectionHeading>
+                    <SectionCard>
+                      <Stack
+                        direction="row"
+                        divider={<Divider orientation="vertical" flexItem sx={{ borderColor: "divider" }} />}
+                        spacing={2}
+                      >
+                        {activityStats.map((st) => (
+                          <Box key={st.label} sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, lineHeight: 1.15 }}>
+                              {st.value}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
+                              {st.label}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </SectionCard>
+                  </Box>
+                )}
 
                 {/* ── Details ── */}
                 <Box sx={{ mb: 2.5 }}>

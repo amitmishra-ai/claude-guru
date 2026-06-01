@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Fragment } from "react";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CallMergeOutlinedIcon from "@mui/icons-material/CallMergeOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
@@ -11,9 +12,7 @@ import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { fmtTime12, applyTzOffset, fmtDateNice } from "@/lib/helpers";
 import { useAppSelector } from "@/store";
-import { ActivitySpine } from "./ActivityDateTile";
 import { getActivityVisual } from "@/lib/activity-visuals";
-import type { SessionType } from "@/lib/types";
 
 const HAIRLINE_SOFT = "rgba(15, 23, 42, 0.06)";
 const TABULAR = { fontFeatureSettings: '"tnum", "ss01"', fontVariantNumeric: "tabular-nums" } as const;
@@ -273,35 +272,25 @@ export function SessionCard({
     </Stack>
   ) : null;
 
-  /* Meta line — composed differently for desktop and mobile.
-     Desktop: the spine on the left carries the start date, so meta only
-       shows the range (multi-day events), time and batch.
-     Mobile: no spine, so the meta line carries the date inline ahead of
-       time + batch — keeps the card horizontal-space-light on narrow
-       screens. */
+  /* Meta line — date always carried inline (with a leading calendar icon)
+     so the card stays scalable on any width. Composes
+     date · time · batch · location in one row. */
   const showTime = !hideTime && Number.isFinite(start) && Number.isFinite(end);
   const hasRange = !!endDateYmd && endDateYmd !== dateYmd;
   const timeText = showTime ? `${fmtTime12(tzStart)}–${fmtTime12(tzEnd)}` : null;
 
-  const desktopMeta: string[] = [];
-  if (hasRange) desktopMeta.push(`${fmtDateNice(dateYmd)} → ${fmtDateNice(endDateYmd!)}`);
-  if (timeText) desktopMeta.push(timeText);
-  if (batch) desktopMeta.push(batch);
-  if (locationText) desktopMeta.push(locationText);
-  const desktopMetaText = desktopMeta.join(" · ");
-
-  const mobileMeta: string[] = [];
+  const meta: string[] = [];
   if (hasRange) {
-    mobileMeta.push(`${fmtDateNice(dateYmd)} → ${fmtDateNice(endDateYmd!)}`);
+    meta.push(`${fmtDateNice(dateYmd)} → ${fmtDateNice(endDateYmd!)}`);
   } else {
-    mobileMeta.push(fmtDateNice(dateYmd));
+    meta.push(fmtDateNice(dateYmd));
   }
-  if (timeText) mobileMeta.push(timeText);
-  if (batch) mobileMeta.push(batch);
-  if (locationText) mobileMeta.push(locationText);
-  const mobileMetaText = mobileMeta.join(" · ");
+  if (timeText) meta.push(timeText);
+  if (batch) meta.push(batch);
+  if (locationText) meta.push(locationText);
+  const metaText = meta.join(" · ");
 
-  const hasMeta = desktopMetaText.length > 0 || mobileMetaText.length > 0 || !!group;
+  const hasMeta = metaText.length > 0 || !!group;
 
   /* Desktop "View details" text button (right side of action row) */
   const desktopViewDetailsBtn = onViewDetails && (
@@ -411,21 +400,9 @@ export function SessionCard({
 
   return (
     <Box sx={sx}>
-      <Stack direction="row" alignItems="stretch">
-        {/* Spine — vertical date column on the left. Desktop only; mobile
-            shows the date inline in the meta line instead so the title gets
-            full horizontal width. */}
-        <ActivitySpine
-          dateYmd={dateYmd}
-          endDateYmd={endDateYmd}
-          sessionType={sessionType as SessionType | undefined}
-          size="md"
-          sx={{ display: { xs: "none", sm: "flex" } }}
-        />
-
-        {/* Content column */}
-        <Box sx={{ flex: 1, minWidth: 0, px: 2, py: 2 }}>
-          {/* Eyebrow row */}
+      {/* Content column */}
+      <Box sx={{ minWidth: 0, px: 2, py: 2 }}>
+        {/* Eyebrow row */}
           {(eyebrow || rightCluster) && (
             <Stack
               direction="row"
@@ -450,7 +427,7 @@ export function SessionCard({
             {titleRight}
           </Stack>
 
-          {/* Meta line — mobile carries the date inline; desktop relies on the spine */}
+          {/* Meta line — date carried inline with a leading calendar icon */}
           {hasMeta && (
             <Stack
               direction="row"
@@ -460,25 +437,18 @@ export function SessionCard({
               useFlexGap
               sx={{ mb: stats ? 1.25 : (actions || secondaryAction ? 1.5 : 0), color: "text.secondary" }}
             >
-              {desktopMetaText && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  noWrap
-                  sx={{ display: { xs: "none", sm: "block" }, fontSize: "0.75rem", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", ...TABULAR }}
-                >
-                  {desktopMetaText}
-                </Typography>
-              )}
-              {mobileMetaText && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  noWrap
-                  sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.75rem", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", ...TABULAR }}
-                >
-                  {mobileMetaText}
-                </Typography>
+              {metaText && (
+                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0 }}>
+                  <CalendarTodayOutlinedIcon sx={{ fontSize: 12, flexShrink: 0 }} />
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    noWrap
+                    sx={{ fontSize: "0.75rem", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", ...TABULAR }}
+                  >
+                    {metaText}
+                  </Typography>
+                </Stack>
               )}
               {group && (
                 <>
@@ -502,8 +472,7 @@ export function SessionCard({
           {chipsRow}
 
           {actionsRow}
-        </Box>
-      </Stack>
+      </Box>
       {mobileViewDetailsRow}
       {mobileSecondaryRow}
     </Box>

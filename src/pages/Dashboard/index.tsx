@@ -79,6 +79,7 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import type { Session, SessionType } from "@/lib/types";
 import { filterSessionsByRole } from "@/lib/role-config";
+import { getActivityStats } from "@/lib/activity-stats";
 
 const slideOutDown = keyframes`
   0%   { opacity: 1; transform: translateY(0)     scale(1);   }
@@ -812,23 +813,11 @@ export default function DashboardPage() {
                           const isEvaluation = s.sessionType === "Evaluation";
                           const isModeration = s.sessionType === "Moderation";
                           const isEvalOrMod = isEvaluation || isModeration;
-                          /* Mock progress stats — live data doesn't carry these yet.
-                             Assignments collapse Submissions + Graded into one fraction
-                             "graded / total" so the relationship is in view at a glance. */
+                          /* Progress stats — Evaluation: Submissions + Graded;
+                             Moderation: Posts + Posts unread + Graded. Sourced from
+                             getActivityStats so the card matches the Activity Details drawer. */
                           const hasLateSubmissions = s.id === "eval5";
-                          const upcomingStats = isEvaluation
-                            ? [
-                                {
-                                  label: "Graded submissions",
-                                  value: s.id === "eval3" ? "6/12" : s.id === "eval5" ? "20/34" : "0/0",
-                                },
-                              ]
-                            : isModeration
-                              ? [
-                                  { label: "Unread", value: s.id === "mod3" ? "4/18" : "0/0" },
-                                  { label: "Graded", value: s.id === "mod3" ? "2/18" : "0/0" },
-                                ]
-                              : undefined;
+                          const upcomingStats = getActivityStats(s);
                           return (
                             <Card key={s.id} variant="outlined" sx={{
                               p: 0,
@@ -1497,15 +1486,9 @@ export default function DashboardPage() {
 
                           // Date-only activity types (no time component)
                           const isDateOnly = isEvaluation || isModeration || isCapstone || isCVReview;
-                          // Mock stats for Evaluation / Moderation (live data doesn't carry these yet)
-                          /* Assignment: one fraction stat (graded / total submissions).
-                             Discussion Question: Unread + Graded both shown as fractions of
-                             total posts. Denominator is always visible. */
-                          const cardStats = isEvaluation
-                            ? [{ label: "Graded submissions", value: "12/12" }]
-                            : isModeration
-                              ? [{ label: "Unread", value: "0/18" }, { label: "Graded", value: "18/18" }]
-                              : undefined;
+                          // Progress stats for Evaluation / Moderation — completed, so fully graded.
+                          // Sourced from getActivityStats so the card matches the Activity Details drawer.
+                          const cardStats = getActivityStats(s, { completed: true });
 
                           return (
                             <Card key={s.id} variant="outlined" sx={{ p: 0, overflow: "hidden" }}>

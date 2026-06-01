@@ -4,6 +4,14 @@ All notable changes to the Guru Dashboard are documented here.
 
 ---
 
+## 2026-06-01
+
+### Activity Cards: reverted left date spine + expanded Eval/Mod stats (review feedback)
+- **Removed the left date spine** ([src/components/shared/SessionCard.tsx](src/components/shared/SessionCard.tsx)) — the vertical DOW/day/month column on the left of every activity card is gone. Date is back inline in the meta line (leading calendar icon, `date · time · batch · location`) on all breakpoints, matching the originally planned card. More scalable for users. Desktop/mobile meta split collapsed into one row. Deleted the now orphaned `ActivityDateTile.tsx` (`ActivitySpine`).
+- **Late submission chip retained in the card** — confirmed the `Late submission` chip renders in the eyebrow row of the Evaluation card ([src/pages/Dashboard/index.tsx](src/pages/Dashboard/index.tsx), `eval5`). Added the same chip to the Components page Evaluation Confirmed card as the canonical reference ([src/pages/Components/index.tsx](src/pages/Components/index.tsx), `CHIP_LATE_SUBMISSION`).
+- **Expanded Evaluation / Moderation stats** — undid the single collapsed "Graded submissions" fraction. Evaluation now shows `# Submissions · # Graded`; Moderation shows `# Posts · # Posts unread · # Graded`. Applied to both the Upcoming and Completed tabs ([src/pages/Dashboard/index.tsx](src/pages/Dashboard/index.tsx)).
+- **Stats now reflect in the Activity Details drawer** — added a "Grading progress" section to the right-side Activity Details drawer ([src/components/dialogs/SessionDetailsModal.tsx](src/components/dialogs/SessionDetailsModal.tsx)) showing the same Evaluation / Moderation figures as the card. Centralised the numbers in a single helper ([src/lib/activity-stats.ts](src/lib/activity-stats.ts), `getActivityStats`) consumed by both the cards and the drawer so they never drift. Completed activities show fully graded.
+
 ## 2026-05-20
 
 ### Evaluator / Moderator dashboards: more card variations

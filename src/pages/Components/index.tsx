@@ -160,6 +160,22 @@ const CHIP_COMBINED = (
   />
 );
 const CHIP_ALREADY_SUBMITTED = <Chip label="Already submitted" size="small" sx={chipSx.confirmed} />;
+const CHIP_LATE_SUBMISSION = (
+  <Chip
+    label="Late submission"
+    size="small"
+    sx={{
+      height: 20,
+      borderRadius: "4px",
+      bgcolor: "rgba(25, 106, 229, 0.10)",
+      color: "primary.main",
+      border: "none",
+      fontWeight: 500,
+      fontSize: "0.7rem",
+      "& .MuiChip-label": { px: 1 },
+    }}
+  />
+);
 
 /* ── Section wrapper ── */
 
@@ -2301,10 +2317,10 @@ function EvaluationCards() {
       {/* ── Confirmed ── */}
       <ComponentSection
         title="Evaluation - Confirmed"
-        description="Date range (assessment due → grading due), primary CTA to open SpeedGrader, submission progress, course template, batch, contact."
+        description="Date range (assessment due → grading due), primary CTA to open SpeedGrader, submission progress, course template, batch, contact. Late submission chip surfaces when submissions arrived after the due date."
       >
         <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
-          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={CHIP_CONFIRMED} />
+          <CardTitleRow title="Evaluation: Linear Regression Assignment" chips={<>{CHIP_LATE_SUBMISSION}{CHIP_CONFIRMED}</>} />
           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 0.75 }}>
             <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
             <Typography variant="caption" color="text.secondary">15 Mar – 22 Mar, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
