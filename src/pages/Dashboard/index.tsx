@@ -12,6 +12,7 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import PlayCircleOutlinedIcon from "@mui/icons-material/PlayCircleOutlined";
@@ -66,6 +67,7 @@ import {
   dateTimeMs,
   fmtDateNice,
   isSessionCompleted,
+  isOverdueActivity,
   getLocaleFromTimezone,
 } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
@@ -264,13 +266,27 @@ export default function DashboardPage() {
     return filtered;
   }, [completedSessions, selectedSessionType, selectedTimePeriod]);
 
+  /* Overdue (Evaluation / Moderation only) — activities that slid into
+     Completed because their due date passed while grading was unfinished.
+     Pulled out of the normal month groups and pinned to the top so the Guru
+     can still find and finish them. */
+  const overdueCompletedSessions = useMemo(
+    () => filteredCompletedSessions.filter(isOverdueActivity),
+    [filteredCompletedSessions],
+  );
+  const settledCompletedSessions = useMemo(
+    () => filteredCompletedSessions.filter((s) => !isOverdueActivity(s)),
+    [filteredCompletedSessions],
+  );
+
   /* Group completed sessions by month for accordion rendering. Order is
      preserved (input is already most-recent-first), so the first group in
-     the list is the current / latest month. */
+     the list is the current / latest month. Overdue items are excluded —
+     they live in the pinned Overdue section instead. */
   const currentMonthKey = demoNow.toISOString().slice(0, 7); // "YYYY-MM"
   const completedMonthGroups = useMemo(() => {
-    const map = new Map<string, { key: string; label: string; sessions: typeof filteredCompletedSessions }>();
-    for (const s of filteredCompletedSessions) {
+    const map = new Map<string, { key: string; label: string; sessions: typeof settledCompletedSessions }>();
+    for (const s of settledCompletedSessions) {
       const key = s.dateYmd.slice(0, 7);
       if (!map.has(key)) {
         const label = new Date(s.dateYmd + "T00:00:00").toLocaleDateString(userLocale, { month: "long", year: "numeric" });
@@ -279,7 +295,9 @@ export default function DashboardPage() {
       map.get(key)!.sessions.push(s);
     }
     return Array.from(map.values());
-  }, [filteredCompletedSessions, userLocale]);
+  }, [settledCompletedSessions, userLocale]);
+  /* Overdue accordion — collapsed by default so it stays an at-a-glance flag. */
+  const [overdueExpanded, setOverdueExpanded] = useState(false);
   /* Accordion expand state — prefer current month. If the current month has
      no completed activities (group missing), fall back to the latest month
      that does have data (first in the most-recent-first list). Re-seeds
@@ -854,8 +872,8 @@ export default function DashboardPage() {
                                     sx={{
                                       height: 20,
                                       borderRadius: "4px",
-                                      bgcolor: "rgba(25, 106, 229, 0.10)",
-                                      color: "primary.main",
+                                      bgcolor: "primary.main",
+                                      color: "primary.contrastText",
                                       border: "none",
                                       fontWeight: 500,
                                       fontSize: "0.7rem",
@@ -1312,7 +1330,90 @@ export default function DashboardPage() {
                     </Stack>
 
                     {filteredCompletedSessions.length > 0 ? (
-                      <Stack spacing={1}>
+                      <Stack spacing={1} useFlexGap>
+                        {/* ── Overdue (pinned, Evaluation / Moderation) ── */}
+                        {overdueCompletedSessions.length > 0 && (
+                          <Accordion
+                            elevation={0}
+                            disableGutters
+                            expanded={overdueExpanded}
+                            onChange={(_, isOpen) => setOverdueExpanded(isOpen)}
+                            sx={{
+                              border: "1px solid",
+                              borderColor: "var(--gl-status-declined-border)",
+                              borderRadius: "12px",
+                              overflow: "hidden",
+                              "&:before": { display: "none" },
+                              "&.Mui-expanded": { m: 0 },
+                            }}
+                          >
+                            <AccordionSummary
+                              expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 20, color: "var(--gl-status-declined-text)" }} />}
+                              sx={{
+                                px: 2,
+                                bgcolor: "var(--gl-status-declined-bg)",
+                                "& .MuiAccordionSummary-content": { alignItems: "center", gap: 1, my: 1 },
+                              }}
+                            >
+                              <ErrorOutlineOutlinedIcon sx={{ fontSize: 18, color: "var(--gl-status-declined-text)" }} />
+                              <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.875rem", color: "var(--gl-status-declined-text)" }}>
+                                Overdue
+                              </Typography>
+                              <Chip
+                                label={overdueCompletedSessions.length}
+                                size="small"
+                                sx={{ height: 20, fontSize: "0.7rem", fontWeight: 600, bgcolor: "var(--gl-status-declined-text)", color: "common.white" }}
+                              />
+                              <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5, display: { xs: "none", sm: "block" } }}>
+                                Past due date with grading unfinished
+                              </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ p: { xs: 1.25, sm: 1.5 } }}>
+                              <Stack spacing={1.5}>
+                                {overdueCompletedSessions.map((s) => {
+                                  const isMod = s.sessionType === "Moderation";
+                                  const overdueStats = getActivityStats(s, { overdue: true });
+                                  return (
+                                    <Card key={s.id} variant="outlined" sx={{ p: 0, overflow: "hidden", borderColor: "var(--gl-status-declined-border)" }}>
+                                      <SessionCard
+                                        title={s.title}
+                                        sessionType={s.sessionType}
+                                        topic={s.topic}
+                                        batch={s.batch}
+                                        dateYmd={s.dateYmd}
+                                        endDateYmd={s.endDateYmd}
+                                        start={s.start}
+                                        end={s.end}
+                                        hideTime
+                                        stats={overdueStats}
+                                        status={{ label: "Overdue", bg: "var(--gl-status-declined-bg)", color: "var(--gl-status-declined-text)", border: "var(--gl-status-declined-border)" }}
+                                        actions={
+                                          <>
+                                            {isMod && (
+                                              <Button variant="soft" size="small"
+                                                onClick={() => dispatch(pushToast({ title: "Opening discussion", description: `Launching discussion thread for ${s.title}` }))}>
+                                                Discussion Question
+                                              </Button>
+                                            )}
+                                            <Button variant="soft" size="small"
+                                              onClick={() => dispatch(pushToast({ title: "Opening SpeedGrader", description: `Resume grading for ${s.title}` }))}>
+                                              {isMod ? "Grade" : "Evaluate"}
+                                            </Button>
+                                          </>
+                                        }
+                                        onViewDetails={() => {
+                                          dispatch(setSessionFocus(s));
+                                          dispatch(setOpenSessionDetails(true));
+                                        }}
+                                      />
+                                    </Card>
+                                  );
+                                })}
+                              </Stack>
+                            </AccordionDetails>
+                          </Accordion>
+                        )}
+
                         {completedMonthGroups.map((group) => (
                           <Accordion
                             key={group.key}

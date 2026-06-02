@@ -224,6 +224,12 @@ export function isSessionCompleted(s: Session, nowMs: number) {
   return endMs < nowMs;
 }
 
+/* Evaluation / Moderation activity whose due date passed before grading was
+   finished. Completed-but-incomplete — pinned in the Overdue section. */
+export function isOverdueActivity(s: Session): boolean {
+  return (s.sessionType === "Evaluation" || s.sessionType === "Moderation") && !!s.overdue;
+}
+
 export function fmtDuration(startMins: number, endMins: number): string {
   const diff = endMins - startMins;
   const h = Math.floor(diff / 60);
