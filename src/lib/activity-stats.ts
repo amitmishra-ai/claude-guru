@@ -24,15 +24,35 @@ const MOD_DATA: Record<string, { posts: number; unread: number; graded: number }
   mod3: { posts: 18, unread: 4, graded: 2 },
 };
 
+/* Overdue activities — the due date passed before grading finished, so they
+   stay partially graded (graded < submissions / posts). Drives the figures
+   shown in the pinned "Overdue" section of the Completed tab. */
+const EVAL_OVERDUE_DATA: Record<string, { submissions: number; graded: number }> = {
+  eval6: { submissions: 26, graded: 18 },
+  eval7: { submissions: 15, graded: 9 },
+};
+
+const MOD_OVERDUE_DATA: Record<string, { posts: number; unread: number; graded: number }> = {
+  mod5: { posts: 20, unread: 6, graded: 11 },
+};
+
 export function getActivityStats(
   session: { id: string; sessionType: string } | null | undefined,
-  opts: { completed?: boolean } = {},
+  opts: { completed?: boolean; overdue?: boolean } = {},
 ): ActivityStat[] | undefined {
   if (!session) return undefined;
   const { id, sessionType } = session;
   const completed = !!opts.completed;
+  const overdue = !!opts.overdue;
 
   if (sessionType === "Evaluation") {
+    if (overdue) {
+      const o = EVAL_OVERDUE_DATA[id] ?? { submissions: 20, graded: 12 };
+      return [
+        { label: "Submissions", value: o.submissions },
+        { label: "Graded", value: o.graded },
+      ];
+    }
     const known = EVAL_DATA[id];
     const submissions = known?.submissions ?? (completed ? 12 : 0);
     const graded = completed ? submissions : (known?.graded ?? 0);
@@ -43,6 +63,14 @@ export function getActivityStats(
   }
 
   if (sessionType === "Moderation") {
+    if (overdue) {
+      const o = MOD_OVERDUE_DATA[id] ?? { posts: 18, unread: 5, graded: 10 };
+      return [
+        { label: "Posts", value: o.posts },
+        { label: "Posts unread", value: o.unread },
+        { label: "Graded", value: o.graded },
+      ];
+    }
     const known = MOD_DATA[id];
     const posts = known?.posts ?? (completed ? 18 : 0);
     const unread = completed ? 0 : (known?.unread ?? 0);

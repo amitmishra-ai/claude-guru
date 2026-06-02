@@ -161,7 +161,6 @@ export function SessionCard({
   const tzStart = applyTzOffset(start, tzOffset);
   const tzEnd = applyTzOffset(end, tzOffset);
   const visual = getActivityVisual(sessionType);
-  const TypeIcon = visual.renderIcon;
 
   /* Secondary Guru tag — auto-injected when the current Guru role is Secondary */
   const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
@@ -190,15 +189,12 @@ export function SessionCard({
       label={status.label}
       size="small"
       sx={{
-        height: 22,
-        borderRadius: "4px",
         bgcolor: status.bg,
         color: status.color,
         border: `1px solid ${status.border}`,
         fontWeight: 500,
-        fontSize: "0.7rem",
+        fontSize: "0.75rem",
         "& .MuiChip-icon": { color: "inherit" },
-        "& .MuiChip-label": { px: 1 },
         flexShrink: 0,
       }}
     />
@@ -230,8 +226,9 @@ export function SessionCard({
     </Stack>
   );
 
-  /* Title (subtitle2 styling, optionally clickable) */
-  const titleContent = onCourseClick ? (
+  /* Title (subtitle2 styling, optionally clickable). Type label carried
+     inline as a "Type: Title" prefix (not a separate overline eyebrow). */
+  const titleBody = onCourseClick ? (
     <Box
       component="span"
       onClick={(e) => { e.stopPropagation(); onCourseClick(); }}
@@ -240,25 +237,17 @@ export function SessionCard({
       {title}
     </Box>
   ) : title;
+  const titleContent = sessionType ? (
+    <>
+      <Box component="span">{visual.label}: </Box>
+      {titleBody}
+    </>
+  ) : titleBody;
 
-  /* Eyebrow — type icon stays in type color (single point of accent for
-     at-a-glance discrimination); label text goes neutral so the eyebrow
-     doesn't repeat the color signal and crowd the action / status hues.
-     `eyebrowExtra` attaches inline to the right of the label for attention
-     chips like "Late submission". */
-  const eyebrow = (sessionType || eyebrowExtra) ? (
+  /* Eyebrow — type label now lives inline in the title, so the eyebrow row
+     only carries `eyebrowExtra` attention chips like "Late submission". */
+  const eyebrow = eyebrowExtra ? (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0, flexWrap: "wrap" }} useFlexGap>
-      {sessionType && (
-        <Stack direction="row" alignItems="center" spacing={0.75} sx={{ minWidth: 0 }}>
-          {TypeIcon(16)}
-          <Typography
-            variant="overline"
-            sx={{ fontWeight: 600, color: "text.secondary", lineHeight: 1.4 }}
-          >
-            {visual.label}
-          </Typography>
-        </Stack>
-      )}
       {eyebrowExtra}
     </Stack>
   ) : null;
@@ -402,29 +391,33 @@ export function SessionCard({
     <Box sx={sx}>
       {/* Content column */}
       <Box sx={{ minWidth: 0, px: 2, py: 2 }}>
-        {/* Eyebrow row */}
-          {(eyebrow || rightCluster) && (
+        {/* Eyebrow row — only attention chips (e.g. "Late submission") */}
+          {eyebrow && (
             <Stack
               direction="row"
-              justifyContent="space-between"
+              justifyContent="flex-start"
               alignItems="flex-start"
               spacing={1}
               sx={{ mb: 0.5, gap: 1, flexWrap: { xs: "wrap", sm: "nowrap" } }}
             >
               {eyebrow}
-              {rightCluster}
             </Stack>
           )}
 
-          {/* Title */}
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5, gap: 1 }}>
+          {/* Title — status chip sits inline on the right of the title row */}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mb: 0.5, gap: 1, flexWrap: { xs: "wrap", sm: "nowrap" } }}>
             <Typography
               variant="subtitle2"
               sx={{ fontWeight: 600, color: "text.primary", minWidth: 0, lineHeight: 1.35 }}
             >
               {titleContent}
             </Typography>
-            {titleRight}
+            {(rightCluster || titleRight) && (
+              <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
+                {rightCluster}
+                {titleRight}
+              </Stack>
+            )}
           </Stack>
 
           {/* Meta line — date carried inline with a leading calendar icon */}

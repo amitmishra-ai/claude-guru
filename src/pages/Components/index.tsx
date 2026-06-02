@@ -160,6 +160,20 @@ const CHIP_COMBINED = (
   />
 );
 const CHIP_ALREADY_SUBMITTED = <Chip label="Already submitted" size="small" sx={chipSx.confirmed} />;
+const CHIP_OVERDUE = (
+  <Chip
+    label="Overdue"
+    size="small"
+    sx={{
+      bgcolor: "var(--gl-status-declined-bg)",
+      color: "var(--gl-status-declined-text)",
+      border: "1px solid var(--gl-status-declined-border)",
+      fontWeight: 500,
+      fontSize: "0.75rem",
+      flexShrink: 0,
+    }}
+  />
+);
 const CHIP_LATE_SUBMISSION = (
   <Chip
     label="Late submission"
@@ -167,8 +181,8 @@ const CHIP_LATE_SUBMISSION = (
     sx={{
       height: 20,
       borderRadius: "4px",
-      bgcolor: "rgba(25, 106, 229, 0.10)",
-      color: "primary.main",
+      bgcolor: "primary.main",
+      color: "primary.contrastText",
       border: "none",
       fontWeight: 500,
       fontSize: "0.7rem",
@@ -2371,6 +2385,25 @@ function EvaluationCards() {
         </Card>
       </ComponentSection>
 
+      {/* ── Overdue ── */}
+      <ComponentSection
+        title="Evaluation - Overdue"
+        description="Due date passed while grading was unfinished, so the activity moved to Completed but is incomplete. Grouped under the pinned, collapsed-by-default Overdue section at the top of the Completed tab (Evaluator / Moderator only). Overdue chip in red, CTA to resume grading."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden", borderColor: "var(--gl-status-declined-border)" }}>
+          <CardTitleRow title="Evaluation: Decision Tree Assignment" chips={CHIP_OVERDUE} />
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 0.75 }}>
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+            <Typography variant="caption" color="text.secondary">26 Apr, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>19 / 28 graded &middot; 28 submissions</Typography>
+          <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+            <Button variant="soft" size="small">Evaluate</Button>
+            <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
+          </Stack>
+        </Card>
+      </ComponentSection>
+
     </>
   );
 }
@@ -2437,6 +2470,28 @@ function ModerationCards() {
           </Stack>
           <Stack direction="row" spacing={1} justifyContent="flex-end">
             <Button variant="text" size="small" onClick={() => setDetailOpen("tentative")}>View details</Button>
+          </Stack>
+        </Card>
+      </ComponentSection>
+
+      {/* ── Overdue ── */}
+      <ComponentSection
+        title="Moderation - Overdue"
+        description="Discussion closed with posts still unmoderated / ungraded, so it moved to Completed but is incomplete. Grouped under the pinned, collapsed-by-default Overdue section at the top of the Completed tab. Overdue chip in red, CTAs to resume moderation / grading."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden", borderColor: "var(--gl-status-declined-border)" }}>
+          <CardTitleRow title="Moderation: Ethics in Machine Learning" chips={CHIP_OVERDUE} />
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", mb: 0.75 }}>
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 12 }} />
+            <Typography variant="caption" color="text.secondary">28 Apr, 2026 &middot; PGP-AIML-BA-UTA-Nov25-C</Typography>
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>24 posts &middot; 7 unread &middot; 16 / 24 graded</Typography>
+          <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+            <Stack direction="row" spacing={1}>
+              <Button variant="soft" size="small">Discussion Question</Button>
+              <Button variant="soft" size="small">Grade</Button>
+            </Stack>
+            <Button variant="text" size="small" onClick={() => setDetailOpen("confirmed")}>View details</Button>
           </Stack>
         </Card>
       </ComponentSection>

@@ -79,6 +79,10 @@ export type Session = {
   totalEarningsInr?: number;
   /** Residency end date for multi-day residencies (YYYY-MM-DD) */
   endDateYmd?: string;
+  /** Evaluation / Moderation only — the due date passed before the Guru
+      finished grading, so the activity is completed-but-incomplete (overdue).
+      Surfaced in a pinned "Overdue" section at the top of the Completed tab. */
+  overdue?: boolean;
   /** Residency day-level schedule (date + time per day) */
   residencySchedule?: { dateYmd: string; start: number; end: number }[];
   /** Combined session - lists the batches merged into this session */
