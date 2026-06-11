@@ -9,6 +9,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
 import MarkAvailabilityDialog from "./MarkAvailabilityDialog";
+import AvailabilityCalendar, { type AvailSlot } from "./AvailabilityCalendar";
 
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
@@ -33,8 +34,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 /**
  * Pixel-static recreation of Great Learning's internal admin console screen:
@@ -102,26 +101,6 @@ const REMUNERATIONS: Array<{ label: string; value: string }> = [
 
 const SKILLS = ["Data Analytics Python", "Data Visualization:Matplotlib&Seaborn(python)"];
 
-// Jun 2026 month grid. Week starts Sunday (May 31). null number cells never occur;
-// out-of-month days are flagged via `muted`.
-const WEEKS: Array<Array<{ d: number; muted?: boolean }>> = [
-  [{ d: 31, muted: true }, { d: 1 }, { d: 2 }, { d: 3 }, { d: 4 }, { d: 5 }, { d: 6 }],
-  [{ d: 7 }, { d: 8 }, { d: 9 }, { d: 10 }, { d: 11 }, { d: 12 }, { d: 13 }],
-  [{ d: 14 }, { d: 15 }, { d: 16 }, { d: 17 }, { d: 18 }, { d: 19 }, { d: 20 }],
-  [{ d: 21 }, { d: 22 }, { d: 23 }, { d: 24 }, { d: 25 }, { d: 26 }, { d: 27 }],
-  [
-    { d: 28 },
-    { d: 29 },
-    { d: 30 },
-    { d: 1, muted: true },
-    { d: 2, muted: true },
-    { d: 3, muted: true },
-    { d: 4, muted: true },
-  ],
-];
-
-const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
 // ---- Style constants ------------------------------------------------------
 
 const BLUE = "#196ae5";
@@ -180,6 +159,28 @@ function OutlinedPill({ children }: { children: React.ReactNode }) {
 export default function NinjaAvailability() {
   const [availOpen, setAvailOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  // Interactive calendar state (static mock — local only, no backend).
+  const [view, setView] = useState({ year: 2026, monthIndex: 5 }); // June 2026
+  const [slots, setSlots] = useState<AvailSlot[]>([]);
+
+  const addSlots = (raw: Array<{ dateYmd: string; start: string; end: string }>) => {
+    setSlots((prev) => {
+      const next = [...prev];
+      raw.forEach((r, i) => {
+        // Skip exact duplicates (same date + time window).
+        if (next.some((s) => s.dateYmd === r.dateYmd && s.start === r.start && s.end === r.end)) return;
+        next.push({ id: `slot-${Date.now()}-${i}-${Math.round(Math.random() * 1e6)}`, ...r });
+      });
+      return next;
+    });
+  };
+
+  const shiftMonth = (delta: number) =>
+    setView((v) => {
+      const m = v.monthIndex + delta;
+      return { year: v.year + Math.floor(m / 12), monthIndex: ((m % 12) + 12) % 12 };
+    });
 
   return (
     <Box sx={{ display: "flex", height: "100vh", bgcolor: "#fff", color: TEXT, overflow: "hidden" }}>
@@ -465,88 +466,15 @@ export default function NinjaAvailability() {
                 </Button>
               </Stack>
 
-              {/* Legend + month nav */}
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1.75 }}>
-                <Stack direction="row" spacing={2.5}>
-                  <Stack direction="row" spacing={0.9} alignItems="center">
-                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#9c52d6" }} />
-                    <Typography sx={{ fontSize: 13 }}>Career Mentor</Typography>
-                  </Stack>
-                  <Stack direction="row" spacing={0.9} alignItems="center">
-                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#19b899" }} />
-                    <Typography sx={{ fontSize: 13 }}>Course Mentor</Typography>
-                  </Stack>
-                </Stack>
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  sx={{ border: `1px solid ${BORDER}`, borderRadius: "4px" }}
-                >
-                  <IconButton size="small" sx={{ borderRadius: 0 }}>
-                    <ChevronLeftIcon sx={{ fontSize: 20 }} />
-                  </IconButton>
-                  <Typography sx={{ fontSize: 14, px: 1.25, minWidth: 78, textAlign: "center" }}>
-                    Jun 2026
-                  </Typography>
-                  <IconButton size="small" sx={{ borderRadius: 0 }}>
-                    <ChevronRightIcon sx={{ fontSize: 20 }} />
-                  </IconButton>
-                </Stack>
-              </Stack>
-
-              <Typography sx={{ fontSize: 13, color: TEXT, mt: 1.75 }}>
-                Note: Time slots in the calendar are in IST timezone.
-              </Typography>
-
-              {/* Month grid */}
-              <Box sx={{ mt: 1.75, border: `1px solid ${BORDER}`, borderRadius: "4px", overflow: "hidden" }}>
-                {/* DOW header */}
-                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", bgcolor: "#f4f5f7" }}>
-                  {DOW.map((d) => (
-                    <Box
-                      key={d}
-                      sx={{
-                        py: 1.25,
-                        textAlign: "center",
-                        fontSize: 13,
-                        color: TEXT,
-                        borderRight: `1px solid ${BORDER}`,
-                        "&:last-of-type": { borderRight: "none" },
-                      }}
-                    >
-                      {d}
-                    </Box>
-                  ))}
-                </Box>
-                {/* Week rows */}
-                {WEEKS.map((week, wi) => (
-                  <Box
-                    key={wi}
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(7, 1fr)",
-                      borderTop: `1px solid ${BORDER}`,
-                    }}
-                  >
-                    {week.map((cell, ci) => (
-                      <Box
-                        key={ci}
-                        sx={{
-                          height: 118,
-                          p: 0.9,
-                          borderRight: `1px solid ${BORDER}`,
-                          "&:last-of-type": { borderRight: "none" },
-                          bgcolor: cell.muted ? "#fafbfc" : "#fff",
-                        }}
-                      >
-                        <Typography sx={{ fontSize: 13, color: cell.muted ? "#9aa3af" : TEXT }}>
-                          {cell.d}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Box>
-                ))}
-              </Box>
+              <AvailabilityCalendar
+                year={view.year}
+                monthIndex={view.monthIndex}
+                slots={slots}
+                onPrev={() => shiftMonth(-1)}
+                onNext={() => shiftMonth(1)}
+                onAddSlot={(dateYmd, start, end) => addSlots([{ dateYmd, start, end }])}
+                onRemoveSlot={(id) => setSlots((prev) => prev.filter((s) => s.id !== id))}
+              />
             </Box>
           </Box>
         </Box>
@@ -556,6 +484,9 @@ export default function NinjaAvailability() {
         open={availOpen}
         onClose={() => setAvailOpen(false)}
         guruName="Aashish Chauhan"
+        viewYear={view.year}
+        viewMonthIndex={view.monthIndex}
+        onAddSlots={(raw) => addSlots(raw)}
         onSaved={(msg) => setToast(msg)}
       />
 
