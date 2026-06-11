@@ -1,26 +1,16 @@
-import { useState, useEffect } from "react";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import { useEffect, useRef } from "react";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
-import Paper from "@mui/material/Paper";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -38,16 +28,9 @@ import { setOpenAvailability } from "@/store/slices/uiSlice";
 import { setTimeZoneMode, setManualTimeZone } from "@/store/slices/profileSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import { useSaveAvailabilityMutation } from "@/api/ninja/availabilityApi";
-import { DOW_LONG, timeOptions12 } from "@/lib/constants";
-import { parseHHMM, fmtTime, fmtTime12, formatDayGroupShort } from "@/lib/helpers";
+import { parseHHMM, fmtTime } from "@/lib/helpers";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
-import type { PresetCard } from "@/lib/types";
-
-const defaultPresets: PresetCard[] = [
-  { key: "weekends", label: "Weekend morning", days: ["Saturday", "Sunday"], start: "10:00", end: "12:00", enabled: false },
-  { key: "weekendAfternoons", label: "Weekend afternoon", days: ["Saturday", "Sunday"], start: "14:00", end: "16:00", enabled: false },
-  { key: "weekdayEvenings", label: "Weekday evenings", days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], start: "18:00", end: "20:00", enabled: false },
-];
+import WeeklySlotsEditor, { defaultPresets, type WeeklySlotsHandle } from "./WeeklySlotsEditor";
 
 /* ── Step indicator pill ── */
 function StepPill({ stepNum, label, active, done }: { stepNum: number; label: string; active: boolean; done: boolean }) {
@@ -104,14 +87,7 @@ const AvailabilityBuilderDialog = () => {
   const manualTimeZone = useAppSelector((s) => s.profile.manualTimeZone);
 
   const [saveAvailability, { isLoading: isSaving }] = useSaveAvailabilityMutation();
-  const [showCustomForm, setShowCustomForm] = useState(false);
-  const [editingPresetKey, setEditingPresetKey] = useState<string | null>(null);
-  const [editPresetStart, setEditPresetStart] = useState("");
-  const [editPresetEnd, setEditPresetEnd] = useState("");
-  const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
-  const [editDraftDays, setEditDraftDays] = useState<string[]>([]);
-  const [editDraftStart, setEditDraftStart] = useState("");
-  const [editDraftEnd, setEditDraftEnd] = useState("");
+  const editorRef = useRef<WeeklySlotsHandle>(null);
 
   const effectiveTimezone =
     timeZoneMode === "manual"
@@ -146,7 +122,6 @@ const AvailabilityBuilderDialog = () => {
     dispatch(setAvailabilityStep(1));
     dispatch(setAvailabilityDraftPatterns([]));
     dispatch(setPresetCards([]));
-    setShowCustomForm(false);
   };
 
   const handleNext = () => {
@@ -156,67 +131,11 @@ const AvailabilityBuilderDialog = () => {
 
   const handleBack = () => dispatch(setAvailabilityStep(1));
 
-  const togglePreset = (key: string) => {
-    const updated = cards.map((c) =>
-      c.key === key ? { ...c, enabled: !c.enabled } : c
-    );
-    dispatch(setPresetCards(updated));
-  };
-
-  const toggleDay = (day: string) => {
-    const newDays = builderDays.includes(day)
-      ? builderDays.filter((d) => d !== day)
-      : [...builderDays, day];
-    dispatch(setBuilderDays(newDays));
-  };
-
-  const addCustomSlot = () => {
-    if (!builderDays.length) return;
-    const label = `${formatDayGroupShort(builderDays)} ${fmtTime12(parseHHMM(builderStart))}–${fmtTime12(parseHHMM(builderEnd))}`;
-    const newPattern = {
-      id: `custom-${Date.now()}`,
-      label,
-      days: [...builderDays],
-      start: parseHHMM(builderStart),
-      end: parseHHMM(builderEnd),
-    };
-    dispatch(setAvailabilityDraftPatterns([...draftPatterns, newPattern]));
-    dispatch(setBuilderDays([]));
-    dispatch(setBuilderStart("10:00"));
-    dispatch(setBuilderEnd("12:00"));
-    setShowCustomForm(false);
-  };
-
-  const removeCustomSlot = (id: string) => {
-    dispatch(setAvailabilityDraftPatterns(draftPatterns.filter((p) => p.id !== id)));
-  };
-
   const handleSave = async () => {
-    // Auto-save any in-progress preset edit
-    let finalCards = cards;
-    if (editingPresetKey && editPresetStart && editPresetEnd) {
-      finalCards = cards.map((c) => c.key === editingPresetKey ? { ...c, start: editPresetStart, end: editPresetEnd } : c);
-      dispatch(setPresetCards(finalCards));
-      setEditingPresetKey(null);
-    }
-
-    // Auto-save any in-progress draft edit
-    let finalDrafts = draftPatterns;
-    if (editingDraftId && editDraftDays.length > 0 && editDraftStart && editDraftEnd) {
-      const label = `${formatDayGroupShort(editDraftDays)} ${fmtTime12(parseHHMM(editDraftStart))}–${fmtTime12(parseHHMM(editDraftEnd))}`;
-      finalDrafts = draftPatterns.map((d) => d.id === editingDraftId ? { ...d, label, days: editDraftDays, start: parseHHMM(editDraftStart), end: parseHHMM(editDraftEnd) } : d);
-      dispatch(setAvailabilityDraftPatterns(finalDrafts));
-      setEditingDraftId(null);
-    }
-
-    // Auto-save any in-progress custom slot form
-    if (showCustomForm && builderDays.length > 0) {
-      const label = `${formatDayGroupShort(builderDays)} ${fmtTime12(parseHHMM(builderStart))}–${fmtTime12(parseHHMM(builderEnd))}`;
-      const newPattern = { id: `custom-${Date.now()}`, label, days: [...builderDays], start: parseHHMM(builderStart), end: parseHHMM(builderEnd) };
-      finalDrafts = [...finalDrafts, newPattern];
-      dispatch(setAvailabilityDraftPatterns(finalDrafts));
-      setShowCustomForm(false);
-    }
+    // Commit any in-progress inline edit / open custom-slot form in the editor.
+    const flushed = editorRef.current?.flush() ?? { cards, drafts: draftPatterns };
+    const finalCards = flushed.cards;
+    const finalDrafts = flushed.drafts;
 
     const presetPatterns = finalCards
       .filter((c) => c.enabled)
@@ -334,201 +253,19 @@ const AvailabilityBuilderDialog = () => {
 
         {step === 2 && (
           /* ── Step 2: Weekly availability ── */
-          <Stack spacing={1.5}>
-            {/* Active slots - enabled presets + custom drafts */}
-            {(cards.filter((c) => c.enabled).length > 0 || draftPatterns.length > 0) && (
-              <>
-              <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8rem" }}>Added slots</Typography>
-              <Stack spacing={1}>
-                {cards.filter((c) => c.enabled).map((card) =>
-                  editingPresetKey === card.key ? (
-                    <Paper key={card.key} variant="outlined" sx={{ p: 1.25, borderRadius: "8px", borderColor: "primary.main" }}>
-                      <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: "1rem", fontSize: "0.7rem" }}>{card.label}</Typography>
-                      <Stack direction="row" spacing={0.75} sx={{ mb: "1rem" }}>
-                        <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
-                          <InputLabel>Start</InputLabel>
-                          <Select label="Start" value={editPresetStart} onChange={(e) => setEditPresetStart(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                            {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
-                          </Select>
-                        </FormControl>
-                        <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
-                          <InputLabel>End</InputLabel>
-                          <Select label="End" value={editPresetEnd} onChange={(e) => setEditPresetEnd(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                            {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
-                          </Select>
-                        </FormControl>
-                      </Stack>
-                      <Stack direction="row" spacing={0.75}>
-                        <Button size="small" variant="contained" sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }} onClick={() => {
-                          dispatch(setPresetCards(cards.map((c) => c.key === card.key ? { ...c, start: editPresetStart, end: editPresetEnd } : c)));
-                          setEditingPresetKey(null);
-                        }}>Save</Button>
-                        <Button size="small" variant="text" color="inherit" sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }} onClick={() => setEditingPresetKey(null)}>Cancel</Button>
-                      </Stack>
-                    </Paper>
-                  ) : (
-                    <Paper key={card.key} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: "8px", bgcolor: "action.hover" }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Box>
-                          <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>{card.label}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {formatDayGroupShort(card.days)} · {fmtTime12(parseHHMM(card.start))} – {fmtTime12(parseHHMM(card.end))}
-                          </Typography>
-                        </Box>
-                        <Stack direction="row" spacing={0.25}>
-                          <IconButton size="small" onClick={() => { setEditingPresetKey(card.key); setEditPresetStart(card.start); setEditPresetEnd(card.end); }}>
-                            <EditOutlinedIcon sx={{ fontSize: 14 }} />
-                          </IconButton>
-                          <IconButton size="small" onClick={() => togglePreset(card.key)}>
-                            <CloseOutlinedIcon sx={{ fontSize: 14 }} />
-                          </IconButton>
-                        </Stack>
-                      </Stack>
-                    </Paper>
-                  )
-                )}
-                {draftPatterns.map((p) =>
-                  editingDraftId === p.id ? (
-                    <Paper key={p.id} variant="outlined" sx={{ p: 1.25, borderRadius: "8px", borderColor: "primary.main" }}>
-                      <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: "1rem", fontSize: "0.7rem" }}>Edit custom slot</Typography>
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.4, mb: 1.5 }}>
-                        {DOW_LONG.map((day) => {
-                          const selected = editDraftDays.includes(day);
-                          return (
-                            <Chip key={day} label={day.slice(0, 3)} size="small"
-                              onClick={() => setEditDraftDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day])}
-                              sx={{ height: 24, width: 44, fontSize: "0.65rem", fontWeight: 600, border: "none", "& .MuiChip-label": { px: 0, width: "100%", textAlign: "center" }, cursor: "pointer", transition: "all 0.15s", ...(selected ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { bgcolor: "hsl(var(--md-surface-container) / 0.8)", color: "text.secondary", "&:hover": { bgcolor: "action.hover" } }) }}
-                            />
-                          );
-                        })}
-                      </Box>
-                      <Stack direction="row" spacing={0.75} sx={{ mb: "1rem" }}>
-                        <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
-                          <InputLabel>Start</InputLabel>
-                          <Select label="Start" value={editDraftStart} onChange={(e) => setEditDraftStart(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                            {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
-                          </Select>
-                        </FormControl>
-                        <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
-                          <InputLabel>End</InputLabel>
-                          <Select label="End" value={editDraftEnd} onChange={(e) => setEditDraftEnd(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                            {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
-                          </Select>
-                        </FormControl>
-                      </Stack>
-                      <Stack direction="row" spacing={0.75}>
-                        <Button size="small" variant="contained" disabled={!editDraftDays.length} sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }} onClick={() => {
-                          const label = `${formatDayGroupShort(editDraftDays)} ${fmtTime12(parseHHMM(editDraftStart))}–${fmtTime12(parseHHMM(editDraftEnd))}`;
-                          const updated = draftPatterns.map((d) => d.id === p.id ? { ...d, label, days: editDraftDays, start: parseHHMM(editDraftStart), end: parseHHMM(editDraftEnd) } : d);
-                          dispatch(setAvailabilityDraftPatterns(updated));
-                          setEditingDraftId(null);
-                        }}>Save</Button>
-                        <Button size="small" variant="text" color="inherit" sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }} onClick={() => setEditingDraftId(null)}>Cancel</Button>
-                      </Stack>
-                    </Paper>
-                  ) : (
-                    <Paper key={p.id} variant="outlined" sx={{ px: 1.5, py: 1, borderRadius: "8px", bgcolor: "action.hover" }}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Box>
-                          <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.25 }}>Custom time slot</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {formatDayGroupShort(p.days)} · {fmtTime12(p.start)} – {fmtTime12(p.end)}
-                          </Typography>
-                        </Box>
-                        <Stack direction="row" spacing={0.25}>
-                          <IconButton size="small" onClick={() => {
-                            setEditingDraftId(p.id);
-                            setEditDraftDays([...p.days]);
-                            setEditDraftStart(fmtTime(p.start));
-                            setEditDraftEnd(fmtTime(p.end));
-                          }}>
-                            <EditOutlinedIcon sx={{ fontSize: 14 }} />
-                          </IconButton>
-                          <IconButton size="small" onClick={() => removeCustomSlot(p.id)}>
-                            <CloseOutlinedIcon sx={{ fontSize: 14 }} />
-                          </IconButton>
-                        </Stack>
-                      </Stack>
-                    </Paper>
-                  )
-                )}
-              </Stack>
-              </>
-            )}
-
-            {/* Popular slots - unselected presets */}
-            {cards.filter((c) => !c.enabled).length > 0 && (
-              <>
-                {(cards.filter((c) => c.enabled).length > 0 || draftPatterns.length > 0) && <Divider sx={{ my: 0.5 }} />}
-                <Box sx={{ mb: 0.75 }}>
-                  <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8rem", lineHeight: 1 }}>Popular slots</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", lineHeight: 1 }}>
-                    Adding these helps you get scheduled faster.
-                  </Typography>
-                </Box>
-                {cards.filter((c) => !c.enabled).map((card) => (
-                  <Stack key={card.key} direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 0.5 }}>
-                    <Box>
-                      <Typography variant="caption" fontWeight={600} sx={{ display: "block" }}>{card.label}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {formatDayGroupShort(card.days)} · {fmtTime12(parseHHMM(card.start))} – {fmtTime12(parseHHMM(card.end))}
-                      </Typography>
-                    </Box>
-                    <Stack direction="row" spacing={0.5}>
-                      <Button size="small" variant="text" sx={{ textTransform: "none", minWidth: 0, px: 1 }} onClick={() => { setEditingPresetKey(card.key); setEditPresetStart(card.start); setEditPresetEnd(card.end); togglePreset(card.key); }}>Edit</Button>
-                      <Button size="small" variant="soft" sx={{ textTransform: "none" }} onClick={() => togglePreset(card.key)}>Add</Button>
-                    </Stack>
-                  </Stack>
-                ))}
-              </>
-            )}
-
-            {/* Add custom slot */}
-            {showCustomForm ? (
-              <Paper variant="outlined" sx={{ p: 1.25, borderRadius: "8px", borderColor: "primary.main" }}>
-                <Typography variant="caption" fontWeight={600} sx={{ display: "block", mb: 0.75, fontSize: "0.7rem" }}>Add custom slot</Typography>
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.4, mb: 1.5 }}>
-                  {DOW_LONG.map((day) => {
-                    const selected = builderDays.includes(day);
-                    return (
-                      <Chip key={day} label={day.slice(0, 3)} size="small"
-                        onClick={() => toggleDay(day)}
-                        sx={{ height: 24, width: 44, fontSize: "0.65rem", fontWeight: 600, border: "none", "& .MuiChip-label": { px: 0, width: "100%", textAlign: "center" }, cursor: "pointer", transition: "all 0.15s", ...(selected ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } : { bgcolor: "hsl(var(--md-surface-container) / 0.8)", color: "text.secondary", "&:hover": { bgcolor: "action.hover" } }) }}
-                      />
-                    );
-                  })}
-                </Box>
-                <Stack direction="row" spacing={0.75} sx={{ mb: 0.75 }}>
-                  <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
-                    <InputLabel>Start</InputLabel>
-                    <Select label="Start" value={builderStart} onChange={(e) => dispatch(setBuilderStart(e.target.value))} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                      {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
-                    <InputLabel>End</InputLabel>
-                    <Select label="End" value={builderEnd} onChange={(e) => dispatch(setBuilderEnd(e.target.value))} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                      {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
-                    </Select>
-                  </FormControl>
-                </Stack>
-                <Stack direction="row" spacing={0.75}>
-                  <Button size="small" variant="contained" onClick={addCustomSlot} disabled={!builderDays.length} sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }}>Add</Button>
-                  <Button size="small" variant="text" color="inherit" onClick={() => setShowCustomForm(false)} sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }}>Cancel</Button>
-                </Stack>
-              </Paper>
-            ) : (
-              <Button variant="soft" size="small" startIcon={<AddOutlinedIcon sx={{ fontSize: 14 }} />} onClick={() => setShowCustomForm(true)} sx={{ alignSelf: "flex-start", textTransform: "none" }}>
-                Custom slot
-              </Button>
-            )}
-            <Stack direction="row" alignItems="center" spacing={1} sx={(theme) => ({ mt: 1.5, p: 1.25, borderRadius: "8px", bgcolor: theme.palette.mode === "dark" ? "hsl(45 30% 12%)" : "hsl(45 100% 95%)", border: "1px solid", borderColor: theme.palette.mode === "dark" ? "hsl(45 30% 22%)" : "hsl(45 80% 80%)" })}>
-              <TipsAndUpdatesOutlinedIcon sx={(theme) => ({ fontSize: 16, color: theme.palette.mode === "dark" ? "hsl(40 60% 60%)" : "hsl(40 80% 45%)" })} />
-              <Typography variant="caption" sx={(theme) => ({ fontSize: "0.7rem", color: theme.palette.mode === "dark" ? "hsl(40 30% 75%)" : "hsl(40 50% 30%)", lineHeight: 1.3 })}>
-                Set recurring availability. Add exceptions later.
-              </Typography>
-            </Stack>
-          </Stack>
+          <WeeklySlotsEditor
+            ref={editorRef}
+            cards={cards}
+            onCardsChange={(c) => dispatch(setPresetCards(c))}
+            drafts={draftPatterns}
+            onDraftsChange={(d) => dispatch(setAvailabilityDraftPatterns(d))}
+            builderDays={builderDays}
+            onBuilderDaysChange={(d) => dispatch(setBuilderDays(d))}
+            builderStart={builderStart}
+            onBuilderStartChange={(v) => dispatch(setBuilderStart(v))}
+            builderEnd={builderEnd}
+            onBuilderEndChange={(v) => dispatch(setBuilderEnd(v))}
+          />
         )}
       </DialogContent>
 
