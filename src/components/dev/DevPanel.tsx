@@ -22,6 +22,7 @@ import CodeOutlinedIcon from "@mui/icons-material/CodeOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
 import Button from "@mui/material/Button";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
@@ -280,6 +281,23 @@ export function DevPanel() {
             <ListItemText
               primary="Components"
               secondary="Event cards & variants"
+              primaryTypographyProps={{ variant: "body2", fontWeight: 500 }}
+              secondaryTypographyProps={{ variant: "caption" }}
+            />
+          </ListItemButton>
+          <ListItemButton
+            sx={{ borderRadius: "8px", mx: 0.5, mb: 0.5, py: 0.75 }}
+            onClick={() => {
+              navigate("/ninja-availability");
+              dispatch(setDevPanelOpen(false));
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <CalendarMonthOutlinedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Ninja Availability"
+              secondary="Facilitator profile + calendar"
               primaryTypographyProps={{ variant: "body2", fontWeight: 500 }}
               secondaryTypographyProps={{ variant: "caption" }}
             />
