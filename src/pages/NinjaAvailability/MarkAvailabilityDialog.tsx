@@ -13,14 +13,15 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Chip from "@mui/material/Chip";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import InputAdornment from "@mui/material/InputAdornment";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import LanguageIcon from "@mui/icons-material/Language";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 
-import { timeOptions12, DOW_LONG } from "@/lib/constants";
-import { parseHHMM } from "@/lib/helpers";
+import { timeOptions12 } from "@/lib/constants";
+import { parseHHMM, hhmmFromMinutes } from "@/lib/helpers";
 import type { Pattern, PresetCard } from "@/lib/types";
 import WeeklySlotsEditor, {
   defaultPresets,
@@ -41,6 +42,37 @@ const MODES: Array<{ key: Mode; label: string }> = [
   { key: "dates", label: "Specific dates" },
   { key: "weekly", label: "Weekly slots" },
 ];
+
+// ---- Date helpers (native Date, no dependency) ----------------------------
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const toYmd = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const DAY_INDEX: Record<string, number> = {
+  Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6,
+};
+
+/** Every YYYY-MM-DD from start to end inclusive. */
+function eachDayYmd(startYmd: string, endYmd: string): string[] {
+  const out: string[] = [];
+  const d = new Date(`${startYmd}T00:00:00`);
+  const end = new Date(`${endYmd}T00:00:00`);
+  while (d <= end) {
+    out.push(toYmd(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return out;
+}
+
+/** All dates in the given month matching a weekday name (e.g. "Monday"). */
+function weekdayDatesInMonth(year: number, monthIndex: number, dayName: string): string[] {
+  const target = DAY_INDEX[dayName];
+  const out: string[] = [];
+  const d = new Date(year, monthIndex, 1);
+  while (d.getMonth() === monthIndex) {
+    if (d.getDay() === target) out.push(toYmd(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return out;
+}
 
 /** Time picker matching the platform pattern (FormControl + InputLabel + Select). */
 function TimeSelect({
@@ -72,8 +104,9 @@ function TimeSelect({
 }
 
 /**
- * Date field that shows a clean outlined resting state (label sitting inside,
- * no native dd/mm/yyyy) when empty, and becomes a real date picker on focus.
+ * Date field with a clean outlined resting state: when empty + unfocused the
+ * label rests inside (the native dd/mm/yyyy is masked) and a calendar icon
+ * shows on the right. Clicking anywhere in the field opens the date picker.
  */
 function DateField({
   label,
@@ -86,55 +119,61 @@ function DateField({
   onChange: (v: string) => void;
   min?: string;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
-  const asDate = focused || !!value;
+  const shrink = focused || !!value;
+
+  const openPicker = () => {
+    const el = inputRef.current;
+    if (el && typeof el.showPicker === "function") {
+      try {
+        el.showPicker();
+        return;
+      } catch {
+        /* fall through to focus */
+      }
+    }
+    el?.focus();
+  };
+
   return (
     <TextField
       label={label}
-      type={asDate ? "date" : "text"}
+      type="date"
       value={value}
+      inputRef={inputRef}
       onChange={(e) => onChange(e.target.value)}
+      onClick={openPicker}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       size="small"
       fullWidth
       slotProps={{
-        inputLabel: { shrink: asDate },
+        inputLabel: { shrink },
         htmlInput: min ? { min } : undefined,
+        input: {
+          endAdornment: (
+            <InputAdornment position="end" sx={{ pointerEvents: "none" }}>
+              <CalendarTodayOutlinedIcon sx={{ fontSize: 17, color: "action.active" }} />
+            </InputAdornment>
+          ),
+        },
+      }}
+      sx={{
+        cursor: "pointer",
+        "& input": { cursor: "pointer" },
+        // We provide our own calendar icon, so hide the browser's default one.
+        "& input::-webkit-calendar-picker-indicator": {
+          display: "none",
+          WebkitAppearance: "none",
+          margin: 0,
+        },
+        // Mask the dd/mm/yyyy placeholder while empty so the label can rest inside.
+        ...(!shrink && {
+          "& input::-webkit-datetime-edit": { color: "transparent" },
+        }),
       }}
     />
-  );
-}
-
-/** Day-of-week toggle chips, styled like the shared Weekly slots editor. */
-function DayChips({ selected, onToggle }: { selected: string[]; onToggle: (d: string) => void }) {
-  return (
-    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.4 }}>
-      {DOW_LONG.map((day) => {
-        const on = selected.includes(day);
-        return (
-          <Chip
-            key={day}
-            label={day.slice(0, 3)}
-            size="small"
-            onClick={() => onToggle(day)}
-            sx={{
-              height: 24,
-              width: 44,
-              fontSize: "0.65rem",
-              fontWeight: 600,
-              border: "none",
-              "& .MuiChip-label": { px: 0, width: "100%", textAlign: "center" },
-              cursor: "pointer",
-              transition: "all 0.15s",
-              ...(on
-                ? { bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }
-                : { bgcolor: "hsl(var(--md-surface-container) / 0.8)", color: "text.secondary", "&:hover": { bgcolor: "action.hover" } }),
-            }}
-          />
-        );
-      })}
-    </Box>
   );
 }
 
@@ -142,11 +181,17 @@ export default function MarkAvailabilityDialog({
   open,
   onClose,
   guruName,
+  viewYear,
+  viewMonthIndex,
+  onAddSlots,
   onSaved,
 }: {
   open: boolean;
   onClose: () => void;
   guruName: string;
+  viewYear: number;
+  viewMonthIndex: number;
+  onAddSlots: (slots: Array<{ dateYmd: string; start: string; end: string }>) => void;
   onSaved: (message: string) => void;
 }) {
   const [mode, setMode] = useState<Mode>("dates");
@@ -157,8 +202,6 @@ export default function MarkAvailabilityDialog({
   const [endDate, setEndDate] = useState("");
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
-  const [days, setDays] = useState<string[]>([...DOW_LONG]);
-  const isRange = !!startDate && !!endDate && endDate > startDate;
 
   // Weekly slots (shared editor — same flow as the Guru's Update availability)
   const [cards, setCards] = useState<PresetCard[]>(defaultPresets);
@@ -168,9 +211,6 @@ export default function MarkAvailabilityDialog({
   const [builderEnd, setBuilderEnd] = useState("12:00");
   const editorRef = useRef<WeeklySlotsHandle>(null);
 
-  const toggle = (list: string[], d: string) =>
-    list.includes(d) ? list.filter((x) => x !== d) : [...list, d];
-
   const datesFilled = !!startDate && !!endDate;
   const timesFilled = !!fromTime && !!toTime;
   const datesError =
@@ -178,9 +218,7 @@ export default function MarkAvailabilityDialog({
       ? "End date must be on or after the start date."
       : timesFilled && parseHHMM(toTime) <= parseHHMM(fromTime)
         ? "End time must be after start time."
-        : datesFilled && isRange && days.length === 0
-          ? "Select at least one day."
-          : null;
+        : null;
   const weeklyInvalid = !cards.some((c) => c.enabled) && drafts.length === 0;
 
   const actionDisabled =
@@ -188,14 +226,52 @@ export default function MarkAvailabilityDialog({
       ? weeklyInvalid
       : !datesFilled || !timesFilled || datesError !== null;
 
+  function resetFields() {
+    setStartDate("");
+    setEndDate("");
+    setFromTime("");
+    setToTime("");
+    setCards(defaultPresets);
+    setDrafts([]);
+    setBuilderDays([]);
+    setBuilderStart("10:00");
+    setBuilderEnd("12:00");
+    setMode("dates");
+  }
+
   function handleSave() {
-    let msg = `Availability marked for ${guruName}`;
-    if (mode === "weekly") {
+    const built: Array<{ dateYmd: string; start: string; end: string }> = [];
+
+    if (mode === "dates") {
+      for (const ymd of eachDayYmd(startDate, endDate)) {
+        built.push({ dateYmd: ymd, start: fromTime, end: toTime });
+      }
+    } else {
+      // Weekly: expand enabled presets + custom drafts onto matching weekdays
+      // within the month currently shown on the calendar.
       const flushed = editorRef.current?.flush() ?? { cards, drafts };
-      const count = flushed.cards.filter((c) => c.enabled).length + flushed.drafts.length;
-      msg = `${count} weekly slot${count === 1 ? "" : "s"} saved for ${guruName}`;
+      for (const c of flushed.cards.filter((c) => c.enabled)) {
+        for (const day of c.days) {
+          for (const ymd of weekdayDatesInMonth(viewYear, viewMonthIndex, day)) {
+            built.push({ dateYmd: ymd, start: c.start, end: c.end });
+          }
+        }
+      }
+      for (const dr of flushed.drafts) {
+        const start = hhmmFromMinutes(dr.start);
+        const end = hhmmFromMinutes(dr.end);
+        for (const day of dr.days) {
+          for (const ymd of weekdayDatesInMonth(viewYear, viewMonthIndex, day)) {
+            built.push({ dateYmd: ymd, start, end });
+          }
+        }
+      }
     }
-    onSaved(msg);
+
+    onAddSlots(built);
+    const n = built.length;
+    onSaved(`${n} slot${n === 1 ? "" : "s"} added for ${guruName}`);
+    resetFields();
     onClose();
   }
 
@@ -272,14 +348,6 @@ export default function MarkAvailabilityDialog({
                 <TimeSelect label="End time" value={toTime} onChange={setToTime} />
               </Box>
             </Box>
-            {isRange && (
-              <Box>
-                <Typography variant="subtitle2" sx={{ display: "block", mb: 1.5 }}>
-                  Apply on days
-                </Typography>
-                <DayChips selected={days} onToggle={(d) => setDays((l) => toggle(l, d))} />
-              </Box>
-            )}
             {datesError && (
               <Typography variant="caption" sx={{ color: "error.main" }}>
                 {datesError}
