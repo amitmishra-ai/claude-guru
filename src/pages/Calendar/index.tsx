@@ -15,6 +15,7 @@ import Chip from "@mui/material/Chip";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
 import Menu from "@mui/material/Menu";
+import Popover from "@mui/material/Popover";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemText from "@mui/material/ListItemText";
 import CheckIcon from "@mui/icons-material/Check";
@@ -29,6 +30,7 @@ import { useAppSelector, useAppDispatch } from "@/store";
 import { setCalendarViewMode, setAnchorDate, type CalendarViewMode } from "@/store/slices/calendarSlice";
 import { setSessionFocus, clearRecentlyConfirmed } from "@/store/slices/sessionsSlice";
 import { setRequestFocus } from "@/store/slices/requestsSlice";
+import { addOneOffAvail } from "@/store/slices/availabilitySlice";
 import {
   setOpenSession,
   setOpenSessionDetails,
@@ -296,6 +298,61 @@ export default function CalendarPage() {
   /* ── Popover anchor refs ──────────────────────────────────────────── */
   const [leaveAnchorEl, setLeaveAnchorEl] = useState<HTMLElement | null>(null);
   const [availAnchorEl, setAvailAnchorEl] = useState<HTMLElement | null>(null);
+
+  /* ── Drag-to-select spot availability (week/day time-grid) ────────── */
+  const SPOT_SNAP = 30; // minutes
+  const [dragSel, setDragSel] = useState<{ ymd: string; aMin: number; bMin: number } | null>(null);
+  const dragColRef = useRef<HTMLElement | null>(null);
+  // Pending selection awaiting confirmation (set on drag-release, committed on confirm).
+  const [pendingSpot, setPendingSpot] = useState<{ ymd: string; start: number; end: number } | null>(null);
+  const [spotConfirmPos, setSpotConfirmPos] = useState<{ top: number; left: number } | null>(null);
+
+  // Snap a pointer's Y position (within a day column) to minutes-since-midnight.
+  const minsFromPointer = (col: HTMLElement, clientY: number) => {
+    const rect = col.getBoundingClientRect();
+    const frac = (clientY - rect.top) / rect.height;
+    const raw = CAL_START + frac * (CAL_END - CAL_START);
+    const snapped = Math.round(raw / SPOT_SNAP) * SPOT_SNAP;
+    return Math.max(CAL_START, Math.min(CAL_END, snapped));
+  };
+
+  const onColPointerDown = (e: React.PointerEvent<HTMLElement>, ymd: string) => {
+    // Only start a drag on the empty column background, not on an event/avail block.
+    if (e.target !== e.currentTarget || e.button !== 0) return;
+    const col = e.currentTarget;
+    col.setPointerCapture(e.pointerId);
+    dragColRef.current = col;
+    const m = minsFromPointer(col, e.clientY);
+    setDragSel({ ymd, aMin: m, bMin: m });
+  };
+  const onColPointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (!dragSel || !dragColRef.current) return;
+    const m = minsFromPointer(dragColRef.current, e.clientY);
+    setDragSel((d) => (d && m !== d.bMin ? { ...d, bMin: m } : d));
+  };
+  const onColPointerUp = (e: React.PointerEvent<HTMLElement>) => {
+    if (!dragSel) return;
+    const start = Math.min(dragSel.aMin, dragSel.bMin);
+    let end = Math.max(dragSel.aMin, dragSel.bMin);
+    if (end - start < SPOT_SNAP) end = Math.min(start + SPOT_SNAP, CAL_END); // single click = one slot
+    // Hold as pending; require a confirmation before locking it in.
+    setPendingSpot({ ymd: dragSel.ymd, start, end });
+    setSpotConfirmPos({ top: e.clientY, left: e.clientX });
+    dragColRef.current = null;
+    setDragSel(null);
+  };
+
+  const confirmSpot = () => {
+    if (!pendingSpot) return;
+    const { ymd, start, end } = pendingSpot;
+    dispatch(addOneOffAvail({ id: `oneoff-${ymd}-${start}-${end}-${Date.now()}`, dateYmd: ymd, start, end }));
+    setPendingSpot(null);
+    setSpotConfirmPos(null);
+  };
+  const cancelSpot = () => {
+    setPendingSpot(null);
+    setSpotConfirmPos(null);
+  };
 
   /* ── Auto-scroll to 8 AM on mount / view change ─────────────────── */
   const desktopGridRef = useRef<HTMLDivElement>(null);
@@ -929,6 +986,9 @@ export default function CalendarPage() {
                   return (
                     <Box
                       key={colIdx}
+                      onPointerDown={(e) => onColPointerDown(e, ymd)}
+                      onPointerMove={onColPointerMove}
+                      onPointerUp={onColPointerUp}
                       sx={{
                         position: 'relative',
                         gridColumn: colIdx + 2,
@@ -936,8 +996,47 @@ export default function CalendarPage() {
                         borderLeft: 1,
                         borderColor: 'divider',
                         bgcolor: colIsToday ? 'hsl(var(--md-primary) / 0.03)' : 'transparent',
+                        cursor: 'cell',
+                        touchAction: 'none',
+                        userSelect: 'none',
                       }}
                     >
+                      {/* Drag-to-select spot-availability preview (live drag or pending confirmation) */}
+                      {(dragSel?.ymd === ymd || pendingSpot?.ymd === ymd) && (() => {
+                        const s = dragSel?.ymd === ymd
+                          ? Math.min(dragSel.aMin, dragSel.bMin)
+                          : pendingSpot!.start;
+                        const e2 = dragSel?.ymd === ymd
+                          ? Math.max(dragSel.aMin, dragSel.bMin)
+                          : pendingSpot!.end;
+                        const top = timeToPercent(s);
+                        const h = timeToPercent(Math.max(e2, s + SPOT_SNAP)) - top;
+                        return (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              left: 0,
+                              right: 0,
+                              top: `${top}%`,
+                              height: `${h}%`,
+                              bgcolor: 'var(--gl-cal-avail-bg)',
+                              border: '1.5px solid',
+                              borderColor: 'success.main',
+                              borderRadius: '8px',
+                              zIndex: 8,
+                              pointerEvents: 'none',
+                              px: 0.5,
+                              pt: 0.25,
+                              overflow: 'hidden',
+                            }}
+                          >
+                            <Typography sx={{ fontSize: 10, fontWeight: 700, color: 'success.dark' }} noWrap>
+                              {fmtTime12(s)} – {fmtTime12(Math.max(e2, s + SPOT_SNAP))}
+                            </Typography>
+                          </Box>
+                        );
+                      })()}
+
                       {/* Current time indicator - today column only */}
                       {colIsToday && (() => {
                         const nowMins = realNow.getHours() * 60 + realNow.getMinutes();
@@ -1345,6 +1444,46 @@ export default function CalendarPage() {
           {/* ── Popovers ─────────────────────────────────────────────── */}
           <LeavePopover anchorEl={leaveAnchorEl} />
           <AvailabilityPopover anchorEl={availAnchorEl} blocks={allAvailBlocks} />
+
+          {/* Confirm drag-selected spot availability */}
+          <Popover
+            open={!!pendingSpot && !!spotConfirmPos}
+            anchorReference="anchorPosition"
+            anchorPosition={spotConfirmPos ?? { top: 0, left: 0 }}
+            onClose={cancelSpot}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+            slotProps={{ paper: { sx: { borderRadius: '12px', p: 2, width: 248 } } }}
+          >
+            {pendingSpot && (
+              <>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: 'text.primary' }}>
+                  Mark yourself available?
+                </Typography>
+                <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 0.5 }}>
+                  {fmtShortDate(new Date(`${pendingSpot.ymd}T00:00:00`), userLocale)}
+                </Typography>
+                <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'success.dark', mt: 0.25 }}>
+                  {fmtTime12(pendingSpot.start)} – {fmtTime12(pendingSpot.end)}
+                </Typography>
+                <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 1.75 }}>
+                  <Button size="small" color="inherit" onClick={cancelSpot} sx={{ fontSize: 12 }}>
+                    Cancel
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="success"
+                    disableElevation
+                    onClick={confirmSpot}
+                    sx={{ fontSize: 12 }}
+                  >
+                    Confirm
+                  </Button>
+                </Stack>
+              </>
+            )}
+          </Popover>
         </Box>
       )}
 
