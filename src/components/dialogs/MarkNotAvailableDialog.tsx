@@ -13,8 +13,6 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Chip from "@mui/material/Chip";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -32,17 +30,21 @@ import {
 import { declineSession } from "@/store/slices/sessionsSlice";
 import { respondToRequest } from "@/store/slices/requestsSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
-import { TIME_START, TIME_END, timeOptions12 } from "@/lib/constants";
-import { parseHHMM, fmtTime12, toYmd, addDays, hhmmFromMinutes, getLocaleFromTimezone } from "@/lib/helpers";
+import { timeOptions12 } from "@/lib/constants";
+
+/** Full-day bounds in minutes (midnight → midnight). */
+const DAY_START = 0;
+const DAY_END = 24 * 60;
+import { fmtTime12, toYmd, addDays, hhmmFromMinutes, getLocaleFromTimezone } from "@/lib/helpers";
 import type { NA } from "@/lib/types";
 
 /**
  * §10: Multi-day leave segmentation helper.
  *
  * Given a date range with start/end times, create leave blocks per day segment:
- * - First day: start at selected start time, end at TIME_END (20:00)
- * - Middle days: full calendar window TIME_START (08:00) to TIME_END (20:00)
- * - Last day: start at TIME_START (08:00), end at selected end time
+ * - First day: start at selected start time, end at midnight (24:00)
+ * - Middle days: full 24-hour span (00:00 to 24:00)
+ * - Last day: start at midnight (00:00), end at selected end time
  * - Single day: start at selected start time, end at selected end time
  */
 function generateLeaveSegments(
@@ -76,8 +78,8 @@ function generateLeaveSegments(
     const isFirst = ymd === startDateYmd;
     const isLast = ymd === endDateYmd;
 
-    const segStart = isFirst ? startMins : TIME_START;
-    const segEnd = isLast ? endMins : TIME_END;
+    const segStart = isFirst ? startMins : DAY_START;
+    const segEnd = isLast ? endMins : DAY_END;
 
     segments.push({
       dateYmd: ymd,
@@ -104,9 +106,8 @@ export function MarkNotAvailableDialog() {
   const open = useAppSelector((s) => s.ui.openNotAvailable);
   const naStartDate = useAppSelector((s) => s.availability.naStartDate);
   const naEndDate = useAppSelector((s) => s.availability.naEndDate);
+  // Leave is always marked on a full-day basis (midnight → midnight).
   const naReason = useAppSelector((s) => s.availability.naReason);
-  const naStart = useAppSelector((s) => s.availability.naStart);
-  const naEnd = useAppSelector((s) => s.availability.naEnd);
   const sessions = useAppSelector((s) => s.sessions.items);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
   const requests = useAppSelector((s) => s.requests.items);
@@ -115,18 +116,11 @@ export function MarkNotAvailableDialog() {
 
   const [autoDecline, setAutoDecline] = useState(true);
   const [step, setStep] = useState<1 | 2>(1);
-  const [duration, setDuration] = useState<"full" | "first-half" | "second-half">("full");
   const startDateRef = useRef<HTMLInputElement>(null);
   const endDateRef = useRef<HTMLInputElement>(null);
   const timeZoneMode = useAppSelector((s) => s.profile.timeZoneMode);
   const manualTimeZone = useAppSelector((s) => s.profile.manualTimeZone);
   const userLocale = getLocaleFromTimezone(timeZoneMode === "manual" ? manualTimeZone : Intl.DateTimeFormat().resolvedOptions().timeZone);
-
-  // Sync duration → time values
-  useEffect(() => {
-    dispatch(setNaStart(duration === "second-half" ? "13:00" : "00:00"));
-    dispatch(setNaEnd(duration === "first-half" ? "13:00" : "23:59"));
-  }, [duration, dispatch]);
 
   /* ── Pre-fill when editing existing leave ───────────────────────── */
   useEffect(() => {
@@ -154,27 +148,18 @@ export function MarkNotAvailableDialog() {
     }
   }, [open]);
 
-  /* ── Validation (§10): end must be after start in datetime terms ── */
+  /* ── Validation (§10): end date must be on or after start date ──── */
   const isValid = useMemo(() => {
     if (!naStartDate || !naEndDate) return false;
     if (naStartDate > naEndDate) return false;
-    if (naStartDate === naEndDate) {
-      return parseHHMM(naEnd) > parseHHMM(naStart);
-    }
     return true;
-  }, [naStartDate, naEndDate, naStart, naEnd]);
+  }, [naStartDate, naEndDate]);
 
   /* ── §10: Detect overlapping scheduled sessions ─────────────────── */
   const todayYmd = toYmd(new Date());
   const conflictingSessions = useMemo(() => {
     if (!naStartDate || !naEndDate) return [];
-    const segments = generateLeaveSegments(
-      naStartDate,
-      naEndDate,
-      parseHHMM(naStart),
-      parseHHMM(naEnd),
-      ""
-    );
+    const segments = generateLeaveSegments(naStartDate, naEndDate, DAY_START, DAY_END, "");
 
     return sessions.filter((s) => {
       if (sessionDeclined[s.id]) return false;
@@ -185,18 +170,12 @@ export function MarkNotAvailableDialog() {
           seg.dateYmd === s.dateYmd && overlaps(seg.start, seg.end, s.start, s.end)
       );
     });
-  }, [sessions, sessionDeclined, naStartDate, naEndDate, naStart, naEnd, todayYmd]);
+  }, [sessions, sessionDeclined, naStartDate, naEndDate, todayYmd]);
 
   /* ── §10: Detect overlapping pending requests ───────────────────── */
   const conflictingRequests = useMemo(() => {
     if (!naStartDate || !naEndDate) return [];
-    const segments = generateLeaveSegments(
-      naStartDate,
-      naEndDate,
-      parseHHMM(naStart),
-      parseHHMM(naEnd),
-      ""
-    );
+    const segments = generateLeaveSegments(naStartDate, naEndDate, DAY_START, DAY_END, "");
 
     return requests.filter((r) => {
       if (r.response !== "pending") return false;
@@ -205,7 +184,7 @@ export function MarkNotAvailableDialog() {
           seg.dateYmd === r.dateYmd && overlaps(seg.start, seg.end, r.start, r.end)
       );
     });
-  }, [requests, naStartDate, naEndDate, naStart, naEnd]);
+  }, [requests, naStartDate, naEndDate]);
 
   const totalConflicts = conflictingSessions.length + conflictingRequests.length;
 
@@ -219,8 +198,6 @@ export function MarkNotAvailableDialog() {
   };
 
   const handleConfirm = () => {
-    const startMins = parseHHMM(naStart);
-    const endMins = parseHHMM(naEnd);
     const reason = naReason.trim() || "Leave";
     const groupId = editingLeaveGroupId || `leave-${Date.now()}`;
 
@@ -230,7 +207,7 @@ export function MarkNotAvailableDialog() {
     }
 
     /* §10: create leave blocks per day segment */
-    const segments = generateLeaveSegments(naStartDate, naEndDate, startMins, endMins, reason);
+    const segments = generateLeaveSegments(naStartDate, naEndDate, DAY_START, DAY_END, reason);
     segments.forEach((seg, i) => {
       dispatch(
         addUnavailable({
@@ -357,26 +334,9 @@ export function MarkNotAvailableDialog() {
               </Box>
             </Box>
 
-            {/* Duration */}
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem", mb: 0.5, display: "block" }}>Duration</Typography>
-              <ToggleButtonGroup
-                value={duration}
-                exclusive
-                onChange={(_, v) => { if (v) setDuration(v); }}
-                size="small"
-                fullWidth
-                sx={{ "& .MuiToggleButton-root": { fontSize: "0.68rem", py: 0.5, textTransform: "none" } }}
-              >
-                <ToggleButton value="full">Full day</ToggleButton>
-                <ToggleButton value="first-half">First half</ToggleButton>
-                <ToggleButton value="second-half">Second half</ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-
             {naStartDate && naEndDate && !isValid && (
               <Typography variant="caption" sx={{ color: "error.main", fontSize: "0.7rem" }}>
-                End date/time must be after start date/time.
+                End date must be on or after the start date.
               </Typography>
             )}
 

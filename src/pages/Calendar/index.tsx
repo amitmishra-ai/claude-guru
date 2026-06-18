@@ -11,6 +11,8 @@ import LanguageIcon from "@mui/icons-material/Language";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Card from "@mui/material/Card";
@@ -70,11 +72,12 @@ import {
   fmtTime12,
   toYmd,
   parseHHMM,
+  hhmmFromMinutes,
   getTimeZoneOffsetMinutes,
   formatGMTOffsetFromMinutesAhead,
   getLocaleFromTimezone,
 } from "@/lib/helpers";
-import { DOW, DOW_LONG, demoNow, timeOptions12 } from "@/lib/constants";
+import { DOW, DOW_LONG, demoNow } from "@/lib/constants";
 import type { NA, RequestSlot, Session } from "@/lib/types";
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
@@ -132,6 +135,16 @@ const HOUR_LABELS: number[] = (() => {
   for (let m = CAL_START; m < CAL_END; m += 60) arr.push(m);
   return arr;
 })();
+
+/** Full-day (24h) time options for the month quick-add popover, 30-min steps. */
+const SPOT_FROM_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const m = i * 30; // 00:00 … 23:30
+  return { value: hhmmFromMinutes(m), label: fmtTime12(m) };
+});
+const SPOT_TO_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const m = (i + 1) * 30; // 00:30 … 24:00
+  return { value: hhmmFromMinutes(m), label: m === 24 * 60 ? "12:00 AM (next day)" : fmtTime12(m) };
+});
 
 /** Shared sizing constants */
 const GRID_ROW_PX = 42;
@@ -396,6 +409,23 @@ export default function CalendarPage() {
     setSpotConfirmPos(null);
   };
 
+  // Dismissible nudge prompting users to drag-add availability (persisted).
+  const [spotNudgeDismissed, setSpotNudgeDismissed] = useState(() => {
+    try {
+      return typeof window !== "undefined" && window.localStorage.getItem("guru-spot-nudge-dismissed") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const dismissSpotNudge = () => {
+    setSpotNudgeDismissed(true);
+    try {
+      window.localStorage.setItem("guru-spot-nudge-dismissed", "1");
+    } catch {
+      /* ignore */
+    }
+  };
+
   /* ── Auto-scroll to 8 AM on mount / view change ─────────────────── */
   const desktopGridRef = useRef<HTMLDivElement>(null);
   const mobileGridRef = useRef<HTMLDivElement>(null);
@@ -621,6 +651,34 @@ export default function CalendarPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {hasUserConfiguredAvailability && isWeekLike && (
         <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+          {/* ── Nudge: encourage drag-to-add availability (desktop only) ── */}
+          {!spotNudgeDismissed && (
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{
+                display: { xs: "none", md: "flex" },
+                mb: 1.25,
+                px: 1.5,
+                py: 0.85,
+                borderRadius: "10px",
+                bgcolor: "var(--gl-cal-avail-bg)",
+                border: "1px dashed",
+                borderColor: "success.main",
+              }}
+            >
+              <LightbulbOutlinedIcon sx={{ fontSize: 17, color: "success.dark" }} />
+              <Typography sx={{ fontSize: 12.5, color: "success.dark", flex: 1 }}>
+                <Box component="span" sx={{ fontWeight: 700 }}>Mark when you’re free:</Box>{" "}
+                click and drag down any day to add an availability slot, then confirm.
+              </Typography>
+              <IconButton size="small" onClick={dismissSpotNudge} aria-label="Dismiss tip" sx={{ color: "success.dark", p: 0.25 }}>
+                <CloseRoundedIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Stack>
+          )}
+
           {/* ── Mobile time-grid view (below md) ────────────────────────── */}
           <Box sx={{ display: { md: "none" } }}>
 
@@ -1805,7 +1863,7 @@ export default function CalendarPage() {
                   onChange={(e) => setMonthAddStart(e.target.value)}
                   MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
                 >
-                  {timeOptions12.map((o) => (
+                  {SPOT_FROM_OPTIONS.map((o) => (
                     <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
                   ))}
                 </Select>
@@ -1818,7 +1876,7 @@ export default function CalendarPage() {
                   onChange={(e) => setMonthAddEnd(e.target.value)}
                   MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
                 >
-                  {timeOptions12.map((o) => (
+                  {SPOT_TO_OPTIONS.map((o) => (
                     <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
                   ))}
                 </Select>

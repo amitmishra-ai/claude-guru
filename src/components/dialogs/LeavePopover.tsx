@@ -81,8 +81,9 @@ export function LeavePopover({
       open={open}
       anchorEl={anchorEl}
       onClose={handleClose}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      transformOrigin={{ vertical: "top", horizontal: "center" }}
+      anchorOrigin={{ vertical: "center", horizontal: "center" }}
+      transformOrigin={{ vertical: "center", horizontal: "center" }}
+      marginThreshold={12}
       slotProps={{
         paper: {
           sx: {
@@ -92,7 +93,6 @@ export function LeavePopover({
             boxShadow: "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
             border: "1px solid",
             borderColor: "divider",
-            mt: 1,
           },
         },
       }}
