@@ -53,7 +53,6 @@ import {
   selectSessionsThisWeek,
   selectRequestsThisWeek,
   selectBusyThisWeek,
-  selectAvailabilityEndDate,
   selectPendingRequestsThisWeek,
   selectIsCurrentPeriod,
 } from "@/store/selectors/calendarSelectors";
@@ -234,8 +233,10 @@ export default function CalendarPage() {
   const weekStart = useAppSelector(selectWeekStart);
   const monthStart = useAppSelector(selectMonthStart);
   const weekDays = useAppSelector(selectWeekDays);
-  const availabilityEndDate = useAppSelector(selectAvailabilityEndDate);
-  const rangeEndYmd = availabilityEndDate;
+  const rangeDays = useAppSelector((s) => s.availability.rangeDays);
+  // Availability horizon is relative to *today* (not a fixed demo date), so the
+  // current period is never rendered as disabled when viewed at the real date.
+  const rangeEndYmd = toYmd(addDays(realNow, rangeDays));
   const _sessionsThisWeek = useAppSelector(selectSessionsThisWeek);
   const _requestsThisWeek = useAppSelector(selectRequestsThisWeek);
   const _busyThisWeek = useAppSelector(selectBusyThisWeek);
@@ -307,32 +308,48 @@ export default function CalendarPage() {
   const [pendingSpot, setPendingSpot] = useState<{ ymd: string; start: number; end: number } | null>(null);
   const [spotConfirmPos, setSpotConfirmPos] = useState<{ top: number; left: number } | null>(null);
 
-  // Snap a pointer's Y position (within a day column) to minutes-since-midnight.
-  const minsFromPointer = (col: HTMLElement, clientY: number) => {
+  // Earliest minute selectable on a given day. null → whole day is in the past.
+  // Today is clamped to "now" (snapped up); future days start at midnight.
+  const earliestSelectableMin = (ymd: string): number | null => {
+    if (ymd < todayYmd) return null;
+    if (ymd === todayYmd) {
+      const nowMins = realNow.getHours() * 60 + realNow.getMinutes();
+      return Math.min(Math.ceil(nowMins / SPOT_SNAP) * SPOT_SNAP, CAL_END);
+    }
+    return CAL_START;
+  };
+
+  // Snap a pointer's Y position (within a day column) to minutes-since-midnight,
+  // clamped so a selection can never start before `floor` (the present).
+  const minsFromPointer = (col: HTMLElement, clientY: number, floor: number) => {
     const rect = col.getBoundingClientRect();
     const frac = (clientY - rect.top) / rect.height;
     const raw = CAL_START + frac * (CAL_END - CAL_START);
     const snapped = Math.round(raw / SPOT_SNAP) * SPOT_SNAP;
-    return Math.max(CAL_START, Math.min(CAL_END, snapped));
+    return Math.max(floor, Math.min(CAL_END, snapped));
   };
 
   const onColPointerDown = (e: React.PointerEvent<HTMLElement>, ymd: string) => {
     // Only start a drag on the empty column background, not on an event/avail block.
     if (e.target !== e.currentTarget || e.button !== 0) return;
+    const floor = earliestSelectableMin(ymd);
+    if (floor === null) return; // past day — not selectable
     const col = e.currentTarget;
     col.setPointerCapture(e.pointerId);
     dragColRef.current = col;
-    const m = minsFromPointer(col, e.clientY);
+    const m = minsFromPointer(col, e.clientY, floor);
     setDragSel({ ymd, aMin: m, bMin: m });
   };
   const onColPointerMove = (e: React.PointerEvent<HTMLElement>) => {
     if (!dragSel || !dragColRef.current) return;
-    const m = minsFromPointer(dragColRef.current, e.clientY);
+    const floor = earliestSelectableMin(dragSel.ymd) ?? CAL_START;
+    const m = minsFromPointer(dragColRef.current, e.clientY, floor);
     setDragSel((d) => (d && m !== d.bMin ? { ...d, bMin: m } : d));
   };
   const onColPointerUp = (e: React.PointerEvent<HTMLElement>) => {
     if (!dragSel) return;
-    const start = Math.min(dragSel.aMin, dragSel.bMin);
+    const floor = earliestSelectableMin(dragSel.ymd) ?? CAL_START;
+    const start = Math.max(Math.min(dragSel.aMin, dragSel.bMin), floor);
     let end = Math.max(dragSel.aMin, dragSel.bMin);
     if (end - start < SPOT_SNAP) end = Math.min(start + SPOT_SNAP, CAL_END); // single click = one slot
     // Hold as pending; require a confirmation before locking it in.
@@ -983,6 +1000,14 @@ export default function CalendarPage() {
                   ]);
 
                   const colIsToday = toYmd(d) === toYmd(realNow);
+                  // Past region (not selectable for availability): whole column for past
+                  // days, midnight→now for today.
+                  const isPastDay = ymd < todayYmd;
+                  const pastEndMin = isPastDay
+                    ? CAL_END
+                    : colIsToday
+                    ? Math.min(realNow.getHours() * 60 + realNow.getMinutes(), CAL_END)
+                    : 0;
                   return (
                     <Box
                       key={colIdx}
@@ -996,11 +1021,28 @@ export default function CalendarPage() {
                         borderLeft: 1,
                         borderColor: 'divider',
                         bgcolor: colIsToday ? 'hsl(var(--md-primary) / 0.03)' : 'transparent',
-                        cursor: 'cell',
+                        cursor: isPastDay ? 'default' : 'cell',
                         touchAction: 'none',
                         userSelect: 'none',
                       }}
                     >
+                      {/* Past time — dimmed, not available for selection */}
+                      {pastEndMin > 0 && (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            height: `${timeToPercent(pastEndMin)}%`,
+                            bgcolor: 'action.disabledBackground',
+                            opacity: 0.5,
+                            zIndex: 0,
+                            pointerEvents: 'none',
+                          }}
+                        />
+                      )}
+
                       {/* Drag-to-select spot-availability preview (live drag or pending confirmation) */}
                       {(dragSel?.ymd === ymd || pendingSpot?.ymd === ymd) && (() => {
                         const s = dragSel?.ymd === ymd
