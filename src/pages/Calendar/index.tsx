@@ -10,6 +10,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LanguageIcon from "@mui/icons-material/Language";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Card from "@mui/material/Card";
@@ -17,6 +18,10 @@ import Divider from "@mui/material/Divider";
 import Menu from "@mui/material/Menu";
 import Popover from "@mui/material/Popover";
 import MenuItem from "@mui/material/MenuItem";
+import IconButton from "@mui/material/IconButton";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
 import ListItemText from "@mui/material/ListItemText";
 import CheckIcon from "@mui/icons-material/Check";
 import SpeedDial from "@mui/material/SpeedDial";
@@ -64,11 +69,12 @@ import {
   fmtTime,
   fmtTime12,
   toYmd,
+  parseHHMM,
   getTimeZoneOffsetMinutes,
   formatGMTOffsetFromMinutesAhead,
   getLocaleFromTimezone,
 } from "@/lib/helpers";
-import { DOW, DOW_LONG, demoNow } from "@/lib/constants";
+import { DOW, DOW_LONG, demoNow, timeOptions12 } from "@/lib/constants";
 import type { NA, RequestSlot, Session } from "@/lib/types";
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
@@ -299,6 +305,25 @@ export default function CalendarPage() {
   /* ── Popover anchor refs ──────────────────────────────────────────── */
   const [leaveAnchorEl, setLeaveAnchorEl] = useState<HTMLElement | null>(null);
   const [availAnchorEl, setAvailAnchorEl] = useState<HTMLElement | null>(null);
+
+  /* ── Month-view quick-add availability popover (Ninja-style) ──────── */
+  const [monthAddAnchor, setMonthAddAnchor] = useState<HTMLElement | null>(null);
+  const [monthAddYmd, setMonthAddYmd] = useState<string>("");
+  const [monthAddStart, setMonthAddStart] = useState("10:00");
+  const [monthAddEnd, setMonthAddEnd] = useState("12:00");
+  const openMonthAdd = (el: HTMLElement, ymd: string) => {
+    setMonthAddYmd(ymd);
+    setMonthAddStart("10:00");
+    setMonthAddEnd("12:00");
+    setMonthAddAnchor(el);
+  };
+  const monthAddInvalid = parseHHMM(monthAddEnd) <= parseHHMM(monthAddStart);
+  const confirmMonthAdd = () => {
+    const start = parseHHMM(monthAddStart);
+    const end = parseHHMM(monthAddEnd);
+    dispatch(addOneOffAvail({ id: `oneoff-${monthAddYmd}-${start}-${end}-${Date.now()}`, dateYmd: monthAddYmd, start, end }));
+    setMonthAddAnchor(null);
+  };
 
   /* ── Drag-to-select spot availability (week/day time-grid) ────────── */
   const SPOT_SNAP = 30; // minutes
@@ -1567,6 +1592,8 @@ export default function CalendarPage() {
                   const isCurrentMonth = d.getMonth() === monthStart.getMonth();
                   const isBeyondRange = ymd > rangeEndYmd;
                   const isDisabled = isBeyondRange;
+                  // Availability can only be added for today/future, within range.
+                  const canAddAvail = !isDisabled && ymd >= todayYmd;
 
                   /* §9.2 Event composition per day from all sources */
                   const dayLong = DOW_LONG[d.getDay() === 0 ? 6 : d.getDay() - 1]; // map JS day to DOW_LONG index
@@ -1666,6 +1693,7 @@ export default function CalendarPage() {
                       }
                       aria-label={`${ymd}${chips.length > 0 ? `, ${chips.length} events` : ""}${isDisabled ? ", disabled" : ""}`}
                       sx={{
+                        position: 'relative',
                         borderRadius: 1,
                         border: 1,
                         borderColor: 'divider',
@@ -1674,11 +1702,38 @@ export default function CalendarPage() {
                         // §9.4: beyond range → disabled, reduced opacity
                         opacity: isDisabled ? 0.35 : isCurrentMonth ? 1 : 0.5,
                         cursor: isDisabled ? 'default' : 'pointer',
-                        '&:hover': isDisabled ? {} : { bgcolor: 'action.hover' },
+                        '&:hover': isDisabled ? {} : { bgcolor: 'action.hover', '& .month-add': { opacity: 1, transform: 'scale(1)' } },
                         transition: 'background-color 0.15s',
                         overflow: 'hidden',
                       }}
                     >
+                      {canAddAvail && (
+                        <IconButton
+                          className="month-add"
+                          size="small"
+                          aria-label={`Add availability on ${ymd}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openMonthAdd(e.currentTarget, ymd);
+                          }}
+                          sx={{
+                            position: 'absolute',
+                            top: 2,
+                            right: 2,
+                            p: 0.25,
+                            opacity: 0.55,
+                            transform: 'scale(0.92)',
+                            transition: 'opacity 0.12s, transform 0.12s, background-color 0.12s',
+                            color: 'success.main',
+                            bgcolor: 'var(--gl-cal-avail-bg)',
+                            border: '1px solid',
+                            borderColor: 'success.main',
+                            '&:hover': { opacity: 1, bgcolor: 'success.main', color: '#fff' },
+                          }}
+                        >
+                          <AddOutlinedIcon sx={{ fontSize: 14 }} />
+                        </IconButton>
+                      )}
                       <Typography
                         variant="caption"
                         sx={{
@@ -1727,6 +1782,65 @@ export default function CalendarPage() {
               })()}
             </Box>
           </Card>
+
+          {/* Quick-add availability popover (Ninja-style) */}
+          <Popover
+            open={!!monthAddAnchor}
+            anchorEl={monthAddAnchor}
+            onClose={() => setMonthAddAnchor(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+            slotProps={{ paper: { sx: { borderRadius: '12px', p: 2, width: 248 } } }}
+          >
+            <Typography sx={{ fontSize: 13, fontWeight: 700, mb: 1.5 }}>
+              Add availability
+              {monthAddYmd && ` · ${fmtShortDate(new Date(`${monthAddYmd}T00:00:00`), userLocale)}`}
+            </Typography>
+            <Stack spacing={1.75} sx={{ mb: 2 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>From</InputLabel>
+                <Select
+                  label="From"
+                  value={monthAddStart}
+                  onChange={(e) => setMonthAddStart(e.target.value)}
+                  MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
+                >
+                  {timeOptions12.map((o) => (
+                    <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel>To</InputLabel>
+                <Select
+                  label="To"
+                  value={monthAddEnd}
+                  onChange={(e) => setMonthAddEnd(e.target.value)}
+                  MenuProps={{ PaperProps: { sx: { maxHeight: 240 } } }}
+                >
+                  {timeOptions12.map((o) => (
+                    <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Stack>
+            <Stack direction="row" justifyContent="flex-end" spacing={1}>
+              <Button size="small" color="inherit" onClick={() => setMonthAddAnchor(null)} sx={{ fontSize: 12 }}>
+                Cancel
+              </Button>
+              <Button
+                size="small"
+                variant="contained"
+                color="success"
+                disableElevation
+                disabled={monthAddInvalid}
+                onClick={confirmMonthAdd}
+                sx={{ fontSize: 12 }}
+              >
+                Add
+              </Button>
+            </Stack>
+          </Popover>
         </Box>
       )}
 
