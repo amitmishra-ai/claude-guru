@@ -131,12 +131,20 @@ export type RequestSlot = {
 
 // ─── Availability Types ─────────────────────────────────────────────────────
 
+/**
+ * Which role an availability slot applies to. Only meaningful for the combined
+ * "Career + Course Mentor" role; `undefined` always reads as "both" (back-compat
+ * for every other role and pre-existing/persisted slots).
+ */
+export type AvailRole = "course" | "career" | "both";
+
 export type Pattern = {
   id: string;
   label: string;
   days: string[];
   start: number;
   end: number;
+  availFor?: AvailRole;
 };
 
 export type Block = {
@@ -147,6 +155,7 @@ export type Block = {
   source?: "pattern" | "request";
   requestId?: string;
   patternId?: string;
+  availFor?: AvailRole;
 };
 
 export type NA = {

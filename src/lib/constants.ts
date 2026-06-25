@@ -25,6 +25,12 @@ export const timeOptions12 = Array.from(
   }
 );
 
+/** Full 24-hour list (00:00 → 23:30, 30-min steps) for availability time pickers. */
+export const timeOptions24 = Array.from({ length: (24 * 60) / TIME_STEP }, (_, i) => {
+  const mins = i * TIME_STEP;
+  return { value: hhmmFromMinutes(mins), label: fmtTime12(mins) };
+});
+
 // ─── Demo Anchor Date ───────────────────────────────────────────────────────
 
 export const demoNow = new Date("2026-04-21T09:00:00");

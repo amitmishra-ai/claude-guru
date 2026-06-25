@@ -2706,6 +2706,11 @@ const ROLE_SECTIONS: Record<GuruRole, { label: string; render: () => React.React
   "Career Mentor": [
     { label: "Career / Mock Interview", render: () => <CareerMentorOnlineSessionCards /> },
   ],
+  "Career + Course Mentor": [
+    { label: "Career / Mock Interview", render: () => <CareerMentorOnlineSessionCards /> },
+    { label: "Online Event", render: () => <OnlineSessionCards /> },
+    { label: "Residency", render: () => <ResidencyCards /> },
+  ],
   "CV Review Mentor": [
     { label: "CV Review", render: () => <CVReviewCards /> },
   ],
@@ -2771,6 +2776,7 @@ const ROLE_ACTIVITIES: Record<GuruRole, { activities: ActivityType[]; note?: str
   Teacher:          { activities: ["Online Session", "Residency"] },
   "Course Mentor":  { activities: ["Online Session", "Residency"], note: "Same as Teacher (different order)" },
   "Career Mentor":  { activities: ["Career / Mock"] },
+  "Career + Course Mentor": { activities: ["Career / Mock", "Online Session", "Residency"], note: "Does both career and course mentoring" },
   "CV Review Mentor": { activities: ["CV Review"] },
   Evaluator:        { activities: ["Evaluation"] },
   Moderator:        { activities: ["Moderation"] },
