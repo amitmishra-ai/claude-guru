@@ -191,11 +191,15 @@ export function classNames(...xs: Array<string | false | null | undefined>) {
 }
 
 export function formatDayGroupShort(days: string[]) {
-  const set = new Set(days);
+  const order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  const isWeekdays = weekdays.every((d) => set.has(d)) && !set.has("Saturday") && !set.has("Sunday");
-  if (isWeekdays) return "Weekdays";
-  return days.map((d) => d.slice(0, 3)).join(", ");
+  const weekend = ["Saturday", "Sunday"];
+  const set = new Set(days);
+  if (set.size === 7 && order.every((d) => set.has(d))) return "Everyday";
+  if (weekdays.every((d) => set.has(d)) && !weekend.some((d) => set.has(d))) return "Weekdays";
+  if (weekend.every((d) => set.has(d)) && !weekdays.some((d) => set.has(d))) return "Weekends";
+  // Otherwise list the days in week order (Mon → Sun), short form.
+  return order.filter((d) => set.has(d)).map((d) => d.slice(0, 3)).join(", ");
 }
 
 export function clampNumber(n: number, min: number, max: number) {

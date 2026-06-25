@@ -2,7 +2,6 @@ import { forwardRef, useImperativeHandle, useState } from "react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
@@ -15,7 +14,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
-import { DOW_LONG, timeOptions12 } from "@/lib/constants";
+import { DOW_LONG, timeOptions24 } from "@/lib/constants";
 import { parseHHMM, fmtTime, fmtTime12, formatDayGroupShort } from "@/lib/helpers";
 import type { PresetCard, Pattern } from "@/lib/types";
 
@@ -159,13 +158,13 @@ const WeeklySlotsEditor = forwardRef<WeeklySlotsHandle, WeeklySlotsEditorProps>(
                     <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
                       <InputLabel>Start</InputLabel>
                       <Select label="Start" value={editPresetStart} onChange={(e) => setEditPresetStart(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                        {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
+                        {timeOptions24.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
                       </Select>
                     </FormControl>
                     <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
                       <InputLabel>End</InputLabel>
                       <Select label="End" value={editPresetEnd} onChange={(e) => setEditPresetEnd(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                        {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
+                        {timeOptions24.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
                       </Select>
                     </FormControl>
                   </Stack>
@@ -217,13 +216,13 @@ const WeeklySlotsEditor = forwardRef<WeeklySlotsHandle, WeeklySlotsEditorProps>(
                     <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
                       <InputLabel>Start</InputLabel>
                       <Select label="Start" value={editDraftStart} onChange={(e) => setEditDraftStart(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                        {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
+                        {timeOptions24.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
                       </Select>
                     </FormControl>
                     <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
                       <InputLabel>End</InputLabel>
                       <Select label="End" value={editDraftEnd} onChange={(e) => setEditDraftEnd(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                        {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
+                        {timeOptions24.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
                       </Select>
                     </FormControl>
                   </Stack>
@@ -312,19 +311,19 @@ const WeeklySlotsEditor = forwardRef<WeeklySlotsHandle, WeeklySlotsEditorProps>(
             <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
               <InputLabel>Start</InputLabel>
               <Select label="Start" value={builderStart} onChange={(e) => onBuilderStartChange(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
+                {timeOptions24.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
               </Select>
             </FormControl>
             <FormControl fullWidth size="small" sx={{ "& .MuiInputBase-root": { height: 32, fontSize: "0.75rem" }, "& .MuiInputLabel-root": { fontSize: "0.7rem" } }}>
               <InputLabel>End</InputLabel>
               <Select label="End" value={builderEnd} onChange={(e) => onBuilderEndChange(e.target.value)} MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}>
-                {timeOptions12.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
+                {timeOptions24.map((opt) => <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.75rem", minHeight: 28 }}>{opt.label}</MenuItem>)}
               </Select>
             </FormControl>
           </Stack>
-          <Stack direction="row" spacing={0.75}>
-            <Button size="small" variant="contained" onClick={addCustomSlot} disabled={!builderDays.length} sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }}>Add</Button>
+          <Stack direction="row" spacing={0.75} justifyContent="flex-end">
             <Button size="small" variant="text" color="inherit" onClick={() => setShowCustomForm(false)} sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }}>Cancel</Button>
+            <Button size="small" variant="contained" onClick={addCustomSlot} disabled={!builderDays.length} sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }}>Add</Button>
           </Stack>
         </Paper>
       ) : (
@@ -332,12 +331,6 @@ const WeeklySlotsEditor = forwardRef<WeeklySlotsHandle, WeeklySlotsEditorProps>(
           Custom slot
         </Button>
       )}
-      <Stack direction="row" alignItems="center" spacing={1} sx={(theme) => ({ mt: 1.5, p: 1.25, borderRadius: "8px", bgcolor: theme.palette.mode === "dark" ? "hsl(45 30% 12%)" : "hsl(45 100% 95%)", border: "1px solid", borderColor: theme.palette.mode === "dark" ? "hsl(45 30% 22%)" : "hsl(45 80% 80%)" })}>
-        <TipsAndUpdatesOutlinedIcon sx={(theme) => ({ fontSize: 16, color: theme.palette.mode === "dark" ? "hsl(40 60% 60%)" : "hsl(40 80% 45%)" })} />
-        <Typography variant="caption" sx={(theme) => ({ fontSize: "0.7rem", color: theme.palette.mode === "dark" ? "hsl(40 30% 75%)" : "hsl(40 50% 30%)", lineHeight: 1.3 })}>
-          Set recurring availability.
-        </Typography>
-      </Stack>
     </Stack>
   );
 });

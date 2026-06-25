@@ -105,6 +105,12 @@
   --gl-cal-avail-bg: rgba(34, 197, 94, 0.08);
   --gl-cal-avail-border: rgb(34, 197, 94);
   --gl-cal-avail-text: #15803d;
+  --gl-cal-avail-course-bg: rgba(20, 184, 166, 0.08);
+  --gl-cal-avail-course-border: rgb(20, 184, 166);
+  --gl-cal-avail-course-text: #0f766e;
+  --gl-cal-avail-career-bg: rgba(139, 92, 246, 0.08);
+  --gl-cal-avail-career-border: rgb(139, 92, 246);
+  --gl-cal-avail-career-text: #6d28d9;
   --gl-cal-leave-bg: rgba(244, 63, 94, 0.08);
   --gl-cal-leave-border: rgb(244, 63, 94);
   --gl-cal-leave-text: #be123c;
@@ -255,6 +261,12 @@
   --gl-cal-avail-bg: rgba(34, 197, 94, 0.10);
   --gl-cal-avail-border: rgba(34, 197, 94, 0.5);
   --gl-cal-avail-text: #86efac;
+  --gl-cal-avail-course-bg: rgba(20, 184, 166, 0.12);
+  --gl-cal-avail-course-border: rgba(20, 184, 166, 0.5);
+  --gl-cal-avail-course-text: #5eead4;
+  --gl-cal-avail-career-bg: rgba(139, 92, 246, 0.14);
+  --gl-cal-avail-career-border: rgba(139, 92, 246, 0.5);
+  --gl-cal-avail-career-text: #c4b5fd;
   --gl-cal-leave-bg: rgba(244, 63, 94, 0.10);
   --gl-cal-leave-border: rgba(244, 63, 94, 0.5);
   --gl-cal-leave-text: #fca5a5;

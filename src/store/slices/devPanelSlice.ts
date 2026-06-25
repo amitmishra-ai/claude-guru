@@ -3,6 +3,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 export type GuruRole =
   | "Career Mentor"
   | "Course Mentor"
+  | "Career + Course Mentor"
   | "CV Review Mentor"
   | "Evaluator"
   | "Industry Expert"
@@ -25,6 +26,7 @@ export const GURU_STAGES: { value: GuruStage; label: string; description: string
 export const GURU_ROLES: GuruRole[] = [
   "Career Mentor",
   "Course Mentor",
+  "Career + Course Mentor",
   "CV Review Mentor",
   "Evaluator",
   "Industry Expert",

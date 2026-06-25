@@ -19,7 +19,6 @@ interface AvailabilityState {
   builderDays: string[];
   builderStart: string;
   builderEnd: string;
-  availabilityStep: 1 | 2;
   availabilityDraftPatterns: Array<{ id: string; label: string; days: string[]; start: number; end: number }>;
   presetCards: PresetCard[];
   editingPresetKey: "weekends" | "weekendAfternoons" | "weekdayEvenings" | null;
@@ -65,7 +64,6 @@ const initialState: AvailabilityState = {
   builderDays: [] as string[],
   builderStart: "10:00",
   builderEnd: "12:00",
-  availabilityStep: 1,
   availabilityDraftPatterns: [],
   presetCards: [],
   editingPresetKey: null,
@@ -141,9 +139,6 @@ const availabilitySlice = createSlice({
     setBuilderEnd(state, action: PayloadAction<string>) {
       state.builderEnd = action.payload;
     },
-    setAvailabilityStep(state, action: PayloadAction<1 | 2>) {
-      state.availabilityStep = action.payload;
-    },
     setAvailabilityDraftPatterns(state, action: PayloadAction<Array<{ id: string; label: string; days: string[]; start: number; end: number }>>) {
       state.availabilityDraftPatterns = action.payload;
     },
@@ -201,7 +196,6 @@ const availabilitySlice = createSlice({
       state.patterns = demoPatterns;
       state.userConfiguredPatterns = [];
       state.presetCards = [];
-      state.availabilityStep = 1;
       state.availabilityDraftPatterns = [];
       if (typeof window !== "undefined") {
         window.localStorage.removeItem("guru-availability");
@@ -227,7 +221,6 @@ export const {
   setBuilderDays,
   setBuilderStart,
   setBuilderEnd,
-  setAvailabilityStep,
   setAvailabilityDraftPatterns,
   setPresetCards,
   setEditingPresetKey,

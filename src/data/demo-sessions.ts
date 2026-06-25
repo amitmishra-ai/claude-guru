@@ -3706,6 +3706,7 @@ const industryExpertMonthly: Record<string, ShareMonthDatum> = {
 export const demoRoleMonthlyShareData: Record<GuruRole, Record<string, ShareMonthDatum>> = {
   Teacher: teacherMonthly,
   "Course Mentor": courseMentorMonthly,
+  "Career + Course Mentor": courseMentorMonthly,
   "Career Mentor": careerMentorMonthly,
   "CV Review Mentor": cvReviewMentorMonthly,
   Evaluator: evaluatorMonthly,
@@ -3725,6 +3726,7 @@ export const demoRoleTillDateShareData: Record<
 > = {
   Teacher:          { sessions: "488", hours: "637", learners: "2483", rating: "4.76", rated4Plus: "462" },
   "Course Mentor":  { sessions: "334", hours: "501", learners: "1890", rating: "4.84", rated4Plus: "318" },
+  "Career + Course Mentor": { sessions: "334", hours: "501", learners: "1890", rating: "4.84", rated4Plus: "318" },
   "Career Mentor":  { sessions: "561", hours: "281", learners: "561",  rating: "4.88", rated4Plus: "540" },
   "CV Review Mentor": { sessions: "420", hours: "210", learners: "420", rating: "4.72", rated4Plus: "388" },
   Evaluator:        { sessions: "269", hours: "180", learners: "1076", rating: "4.98", rated4Plus: "266" },
@@ -3781,7 +3783,7 @@ export type RoleStatCardData = {
   peerLearnersImpactedPerMonth: number;
 };
 
-export const demoRoleStatCards: Record<GuruRole, RoleStatCardData> = {
+const demoRoleStatCardsBase: Record<Exclude<GuruRole, "Career + Course Mentor">, RoleStatCardData> = {
   Teacher: {
     avgRating: "4.76", avgRatingDelta: "+0.10", avgRatingBars: [4.62, 4.68, 4.71, 4.74, 4.66, 4.76],
     avgSessions: "6", avgSessionsDelta: "+2", avgSessionsBars: [4, 5, 6, 5, 8, 7],
@@ -3923,7 +3925,7 @@ export const demoRoleStatCards: Record<GuruRole, RoleStatCardData> = {
 
 /* ── Per-role course performance ──────────────────────────────────────────── */
 
-export const demoRoleCoursePerf: Record<GuruRole, { name: string; rating: number; delta: number }[]> = {
+const demoRoleCoursePerfBase: Record<Exclude<GuruRole, "Career + Course Mentor">, { name: string; rating: number; delta: number }[]> = {
   Teacher: [
     { name: "Deep Learning Fundamentals", rating: 4.8, delta: +0.15 },
     { name: "NLP Advanced Topics", rating: 4.7, delta: +0.08 },
@@ -3983,7 +3985,7 @@ export const demoRoleCoursePerf: Record<GuruRole, { name: string; rating: number
 
 /* ── Per-role monthly matrix ─────────────────────────────────────────────── */
 
-export const demoRoleMatrix: Record<GuruRole, { course: string; scores: (number | null)[] }[]> = {
+const demoRoleMatrixBase: Record<Exclude<GuruRole, "Career + Course Mentor">, { course: string; scores: (number | null)[] }[]> = {
   // 12 months: May 25 → Apr 26
   Teacher: [
     { course: "Deep Learning Fundamentals", scores: [4.5, 4.6, null, 4.7, 4.7, 4.8, 4.6, 4.9, 4.8, 4.8, 4.9, null] },
@@ -4073,7 +4075,7 @@ export const demoRoleMatrix: Record<GuruRole, { course: string; scores: (number 
 
 /* ── Per-role rating history ─────────────────────────────────────────────── */
 
-export const demoRoleRatingHistory: Record<GuruRole, RatingHistoryEntry[]> = {
+const demoRoleRatingHistoryBase: Record<Exclude<GuruRole, "Career + Course Mentor">, RatingHistoryEntry[]> = {
   Teacher: [
     { id: "t1", title: "Deep Learning Fundamentals", group: "Group 02", dateYmd: "2026-04-22", score: 4.80, feedback: "Excellent depth of content" },
     { id: "t2", title: "NLP Advanced Topics", group: "Group 06", dateYmd: "2026-04-01", score: 4.70 },
@@ -4174,4 +4176,23 @@ export const demoRoleRatingHistory: Record<GuruRole, RatingHistoryEntry[]> = {
     { id: "sg4", title: "Online Session Support - BA", group: "PGP-BA", dateYmd: "2026-03-05", score: 4.72 },
     { id: "sg5", title: "Online Session Support - AIML", group: "PGP-AIML", dateYmd: "2026-02-08", score: 4.68 },
   ],
+};
+
+/* ── "Career + Course Mentor" reuses the Course Mentor demo series for these
+   per-role showcase maps (it does both kinds of mentoring). ─────────────── */
+export const demoRoleStatCards: Record<GuruRole, RoleStatCardData> = {
+  ...demoRoleStatCardsBase,
+  "Career + Course Mentor": demoRoleStatCardsBase["Course Mentor"],
+};
+export const demoRoleCoursePerf: Record<GuruRole, { name: string; rating: number; delta: number }[]> = {
+  ...demoRoleCoursePerfBase,
+  "Career + Course Mentor": demoRoleCoursePerfBase["Course Mentor"],
+};
+export const demoRoleMatrix: Record<GuruRole, { course: string; scores: (number | null)[] }[]> = {
+  ...demoRoleMatrixBase,
+  "Career + Course Mentor": demoRoleMatrixBase["Course Mentor"],
+};
+export const demoRoleRatingHistory: Record<GuruRole, RatingHistoryEntry[]> = {
+  ...demoRoleRatingHistoryBase,
+  "Career + Course Mentor": demoRoleRatingHistoryBase["Course Mentor"],
 };

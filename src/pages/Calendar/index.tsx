@@ -78,7 +78,9 @@ import {
   getLocaleFromTimezone,
 } from "@/lib/helpers";
 import { DOW, DOW_LONG, demoNow } from "@/lib/constants";
-import type { NA, RequestSlot, Session } from "@/lib/types";
+import type { NA, RequestSlot, Session, AvailRole } from "@/lib/types";
+import { availRoleVisual, COMBINED_MENTOR_ROLE } from "@/lib/role-config";
+import { AvailRoleSelect } from "@/components/shared/AvailRoleSelect";
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 
@@ -245,6 +247,8 @@ export default function CalendarPage() {
   const removedAvailabilityIds = useAppSelector((s) => s.availability.removedAvailabilityIds);
   const hasUserConfiguredAvailability = useAppSelector((s) => s.availability.hasUserConfiguredAvailability);
   const guruStage = useAppSelector((s) => s.devPanel.guruStage);
+  const selectedRole = useAppSelector((s) => s.devPanel.selectedRole);
+  const isComboRole = selectedRole === COMBINED_MENTOR_ROLE;
   const isEmpty = guruStage === "empty";
   const requests = useAppSelector((s) => s.requests.items);
   /* ── memoized selectors (§7) ──────────────────────────────────────────── */
@@ -324,17 +328,23 @@ export default function CalendarPage() {
   const [monthAddYmd, setMonthAddYmd] = useState<string>("");
   const [monthAddStart, setMonthAddStart] = useState("10:00");
   const [monthAddEnd, setMonthAddEnd] = useState("12:00");
+  const [monthAddRole, setMonthAddRole] = useState<AvailRole>("both");
   const openMonthAdd = (el: HTMLElement, ymd: string) => {
     setMonthAddYmd(ymd);
     setMonthAddStart("10:00");
     setMonthAddEnd("12:00");
+    setMonthAddRole("both");
     setMonthAddAnchor(el);
   };
   const monthAddInvalid = parseHHMM(monthAddEnd) <= parseHHMM(monthAddStart);
   const confirmMonthAdd = () => {
     const start = parseHHMM(monthAddStart);
     const end = parseHHMM(monthAddEnd);
-    dispatch(addOneOffAvail({ id: `oneoff-${monthAddYmd}-${start}-${end}-${Date.now()}`, dateYmd: monthAddYmd, start, end }));
+    dispatch(addOneOffAvail({
+      id: `oneoff-${monthAddYmd}-${start}-${end}-${Date.now()}`,
+      dateYmd: monthAddYmd, start, end,
+      ...(isComboRole ? { availFor: monthAddRole } : {}),
+    }));
     setMonthAddAnchor(null);
   };
 
@@ -345,6 +355,7 @@ export default function CalendarPage() {
   // Pending selection awaiting confirmation (set on drag-release, committed on confirm).
   const [pendingSpot, setPendingSpot] = useState<{ ymd: string; start: number; end: number } | null>(null);
   const [spotConfirmPos, setSpotConfirmPos] = useState<{ top: number; left: number } | null>(null);
+  const [spotRole, setSpotRole] = useState<AvailRole>("both");
 
   // Earliest minute selectable on a given day. null → whole day is in the past.
   // Today is clamped to "now" (snapped up); future days start at midnight.
@@ -393,6 +404,7 @@ export default function CalendarPage() {
     // Hold as pending; require a confirmation before locking it in.
     setPendingSpot({ ymd: dragSel.ymd, start, end });
     setSpotConfirmPos({ top: e.clientY, left: e.clientX });
+    setSpotRole("both");
     dragColRef.current = null;
     setDragSel(null);
   };
@@ -400,7 +412,11 @@ export default function CalendarPage() {
   const confirmSpot = () => {
     if (!pendingSpot) return;
     const { ymd, start, end } = pendingSpot;
-    dispatch(addOneOffAvail({ id: `oneoff-${ymd}-${start}-${end}-${Date.now()}`, dateYmd: ymd, start, end }));
+    dispatch(addOneOffAvail({
+      id: `oneoff-${ymd}-${start}-${end}-${Date.now()}`,
+      dateYmd: ymd, start, end,
+      ...(isComboRole ? { availFor: spotRole } : {}),
+    }));
     setPendingSpot(null);
     setSpotConfirmPos(null);
   };
@@ -1075,11 +1091,37 @@ export default function CalendarPage() {
                     );
                   });
 
+                  // Conflict rule: a "Both" slot supersedes a Course-only / Career-only slot
+                  // ONLY when they align exactly (same start & end) — Both already covers both
+                  // roles. Partial overlaps keep the side-by-side layout below.
+                  const availNorm = (r?: AvailRole) => r ?? "both";
+                  const bothIntervals = [...filteredAvailBlocks, ...filteredOneOffBlocks]
+                    .filter((x) => availNorm(x.availFor) === "both")
+                    .map((x) => ({ start: x.start, end: x.end }));
+                  const supersededByBoth = (x: { start: number; end: number; availFor?: AvailRole }) =>
+                    availNorm(x.availFor) !== "both" &&
+                    bothIntervals.some((iv) => iv.start === x.start && iv.end === x.end);
+                  // Exclude removed blocks here (not just at render) so the layout
+                  // recomputes — a surviving slot reclaims the full column width.
+                  const availPatterns = filteredAvailBlocks.filter(
+                    (p) => !supersededByBoth(p) && !removedAvailabilityIds[`pat-${p.id}-${ymd}`]
+                  );
+                  const availOneOffs = filteredOneOffBlocks.filter(
+                    (b) => !supersededByBoth(b) && !removedAvailabilityIds[b.id]
+                  );
+
                   // Compute side-by-side column layout using ALL sessions (including declined)
                   // so that positions remain stable when a session is marked unavailable.
                   const combinedLayout = computeEventLayout([
                     ...daySessions.map((s) => ({ id: `sess-${s.id}`, start: s.start, end: s.end })),
                     ...dayRequests.map((r) => ({ id: `req-${r.id}`, start: r.start, end: r.end })),
+                  ]);
+
+                  // Side-by-side layout for overlapping availability blocks (e.g. a
+                  // "Both" and a "Career" slot at the same time) so they don't stack.
+                  const availLayout = computeEventLayout([
+                    ...availPatterns.map((p) => ({ id: `avail-${p.id}`, start: p.start, end: p.end })),
+                    ...availOneOffs.map((b) => ({ id: `oneoff-${b.id}`, start: b.start, end: b.end })),
                   ]);
 
                   const colIsToday = toYmd(d) === toYmd(realNow);
@@ -1262,9 +1304,10 @@ export default function CalendarPage() {
                       ))}
 
                       {/* §8.2 Draw order: 3. Availability placeholders - dashed emerald */}
-                      {filteredAvailBlocks.map((p) => {
+                      {availPatterns.map((p) => {
                         const virtualId = `pat-${p.id}-${ymd}`;
-                        if (removedAvailabilityIds[virtualId]) return null;
+                        const rv = availRoleVisual(p.availFor);
+                        const { col, numCols } = availLayout[`avail-${p.id}`] ?? { col: 0, numCols: 1 };
                         return (
                           <Box
                             key={`avail-${p.id}`}
@@ -1275,37 +1318,37 @@ export default function CalendarPage() {
                             }}
                             sx={{
                               position: 'absolute',
-                              left: 0,
-                              right: 0,
+                              left: `calc(${(col / numCols) * 100}% + 1px)`,
+                              width: `calc(${(1 / numCols) * 100}% - 2px)`,
                               top: `${timeToPercent(p.start)}%`,
                               height: `${timeToPercent(p.end) - timeToPercent(p.start)}%`,
-                              bgcolor: 'var(--gl-cal-avail-bg)',
+                              bgcolor: rv.bg,
                               border: '1.5px dashed',
-                              borderColor: 'success.main',
+                              borderColor: rv.border,
                               borderRadius: '8px',
                               zIndex: 3,
                               px: 0.5,
                               pt: 0.5,
                               overflow: 'hidden',
                               cursor: 'pointer',
-                              width: '100%',
                               fontFamily: 'inherit',
                               textAlign: 'left',
                             }}
                           >
-                            <Typography sx={{ fontSize: 10, fontWeight: 600, color: 'success.dark' }}>
-                              Available
+                            <Typography sx={{ fontSize: 10, fontWeight: 600, color: rv.text }}>
+                              {isComboRole ? `Available · ${rv.label || "Both"}` : "Available"}
                             </Typography>
-                            <Typography sx={{ fontSize: 9, color: 'success.dark' }}>
+                            <Typography sx={{ fontSize: 9, color: rv.text }}>
                               {fmtTime(p.start)}–{fmtTime(p.end)}
                             </Typography>
                           </Box>
                         );
                       })}
 
-                      {/* One-off availability blocks - dashed emerald */}
-                      {filteredOneOffBlocks.map((b) => {
-                        if (removedAvailabilityIds[b.id]) return null;
+                      {/* One-off availability blocks - dashed, color-coded by role */}
+                      {availOneOffs.map((b) => {
+                        const rv = availRoleVisual(b.availFor);
+                        const { col, numCols } = availLayout[`oneoff-${b.id}`] ?? { col: 0, numCols: 1 };
                         return (
                           <Box
                             key={`oneoff-${b.id}`}
@@ -1316,28 +1359,27 @@ export default function CalendarPage() {
                             }}
                             sx={{
                               position: 'absolute',
-                              left: 0,
-                              right: 0,
+                              left: `calc(${(col / numCols) * 100}% + 1px)`,
+                              width: `calc(${(1 / numCols) * 100}% - 2px)`,
                               top: `${timeToPercent(b.start)}%`,
                               height: `${timeToPercent(b.end) - timeToPercent(b.start)}%`,
-                              bgcolor: 'var(--gl-cal-avail-bg)',
+                              bgcolor: rv.bg,
                               border: '1.5px dashed',
-                              borderColor: 'success.main',
+                              borderColor: rv.border,
                               borderRadius: '8px',
                               zIndex: 3,
                               px: 0.5,
                               pt: 0.5,
                               overflow: 'hidden',
                               cursor: 'pointer',
-                              width: '100%',
                               fontFamily: 'inherit',
                               textAlign: 'left',
                             }}
                           >
-                            <Typography sx={{ fontSize: 10, fontWeight: 600, color: 'success.dark' }}>
-                              Available
+                            <Typography sx={{ fontSize: 10, fontWeight: 600, color: rv.text }}>
+                              {isComboRole ? `Available · ${rv.label || "Both"}` : "Available"}
                             </Typography>
-                            <Typography sx={{ fontSize: 9, color: 'success.dark' }}>
+                            <Typography sx={{ fontSize: 9, color: rv.text }}>
                               {fmtTime(b.start)}–{fmtTime(b.end)}
                             </Typography>
                           </Box>
@@ -1525,7 +1567,13 @@ export default function CalendarPage() {
                   { color: 'var(--gl-status-completed-text)', label: 'Completed', dot: true },
                   { color: 'var(--gl-status-missed-text)', label: 'Missed', dot: true },
                   { color: 'var(--gl-cal-session-declined-border)', label: 'Declined', dot: true },
-                  { color: 'var(--gl-cal-avail-border, rgb(34,197,94))', label: 'Available', dashed: true },
+                  ...(isComboRole
+                    ? [
+                        { color: availRoleVisual("course").border, label: 'Available · Course', dashed: true },
+                        { color: availRoleVisual("career").border, label: 'Available · Career', dashed: true },
+                        { color: 'var(--gl-cal-avail-border, rgb(34,197,94))', label: 'Available · Both', dashed: true },
+                      ]
+                    : [{ color: 'var(--gl-cal-avail-border, rgb(34,197,94))', label: 'Available', dashed: true }]),
                   { color: 'var(--gl-cal-leave-border, rgb(244,63,94))', label: 'Leave', dashed: true },
                 ].map((item) => (
                   <Box key={item.label} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -1591,6 +1639,11 @@ export default function CalendarPage() {
                 <Typography sx={{ fontSize: 14, fontWeight: 600, color: 'success.dark', mt: 0.25 }}>
                   {fmtTime12(pendingSpot.start)} – {fmtTime12(pendingSpot.end)}
                 </Typography>
+                {isComboRole && (
+                  <Box sx={{ mt: 1.5 }}>
+                    <AvailRoleSelect value={spotRole} onChange={setSpotRole} />
+                  </Box>
+                )}
                 <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 1.75 }}>
                   <Button size="small" color="inherit" onClick={cancelSpot} sx={{ fontSize: 12 }}>
                     Cancel
@@ -1705,25 +1758,20 @@ export default function CalendarPage() {
                     });
                   });
 
-                  // Availability tags (recurring + one-off)
-                  dayAvail.forEach((p) =>
+                  // Availability tags (recurring + one-off), color-coded by role
+                  const availChip = (id: string, key: string, s: number, e: number, availFor?: AvailRole) => {
+                    const isRole = !!availFor && availFor !== "both";
+                    const rv = availRoleVisual(availFor);
                     chips.push({
-                      key: `avail-${p.id}`,
-                      label: `${fmtTime(p.start)}–${fmtTime(p.end)}`,
+                      key,
+                      label: isRole ? `${rv.label} · ${fmtTime(s)}–${fmtTime(e)}` : `${fmtTime(s)}–${fmtTime(e)}`,
                       type: "availability",
-                      color: "var(--gl-cal-avail-text)",
-                      bg: "var(--gl-cal-avail-bg)",
-                    })
-                  );
-                  dayOneOff.forEach((b) =>
-                    chips.push({
-                      key: `oneoff-${b.id}`,
-                      label: `${fmtTime(b.start)}–${fmtTime(b.end)}`,
-                      type: "availability",
-                      color: "var(--gl-cal-avail-text)",
-                      bg: "var(--gl-cal-avail-bg)",
-                    })
-                  );
+                      color: isRole ? rv.text : "var(--gl-cal-avail-text)",
+                      bg: isRole ? rv.bg : "var(--gl-cal-avail-bg)",
+                    });
+                  };
+                  dayAvail.forEach((p) => availChip(p.id, `avail-${p.id}`, p.start, p.end, p.availFor));
+                  dayOneOff.forEach((b) => availChip(b.id, `oneoff-${b.id}`, b.start, b.end, b.availFor));
 
                   // Sort by priority: leave(0) → session(1) → request(2) → availability(3)
                   const priorityMap: Record<string, number> = { leave: 0, session: 1, request: 2, availability: 3 };
@@ -1881,8 +1929,11 @@ export default function CalendarPage() {
                   ))}
                 </Select>
               </FormControl>
+              {isComboRole && (
+                <AvailRoleSelect value={monthAddRole} onChange={setMonthAddRole} />
+              )}
             </Stack>
-            <Stack direction="row" justifyContent="flex-end" spacing={1}>
+            <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 2 }}>
               <Button size="small" color="inherit" onClick={() => setMonthAddAnchor(null)} sx={{ fontSize: 12 }}>
                 Cancel
               </Button>
