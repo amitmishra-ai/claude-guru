@@ -939,11 +939,11 @@ export default function DashboardPage() {
                                       onClick={() => {
                                         setExitingId(s.id);
                                         dispatch(confirmSession(s.id));
-                                        dispatch(pushToast({ title: "Confirmed", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
+                                        dispatch(pushToast({ title: "Marked as prepared", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
                                         setTimeout(() => setExitingId(null), 420);
                                       }}
                                     >
-                                      Confirm
+                                      Mark as prepared
                                     </Button>
                                     <Button
                                       startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />}
