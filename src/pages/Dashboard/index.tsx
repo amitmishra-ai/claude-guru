@@ -747,13 +747,11 @@ export default function DashboardPage() {
                                   <Button
                                     variant="soft"
                                     size="small"
+                                    component="a"
+                                    href="http://127.0.0.1:5500/mentor-session-prep.html"
                                     startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
-                                    onClick={() => {
-                                      dispatch(setSessionFocus(s));
-                                      dispatch(setOpenSessionMaterials(true));
-                                    }}
                                   >
-                                    Material
+                                    Review Preparation Material →
                                   </Button>
                                 </>
                               }
@@ -836,6 +834,9 @@ export default function DashboardPage() {
                              getActivityStats so the card matches the Activity Details drawer. */
                           const hasLateSubmissions = s.id === "eval5";
                           const upcomingStats = getActivityStats(s);
+                          /* Join session becomes available only close to the start
+                             (within 30 min before) — same rule as the "Up next" cards. */
+                          const joinEnabled = nowMs >= dateTimeMs(s.dateYmd, s.start) - 30 * 60 * 1000;
                           return (
                             <Card key={s.id} variant="outlined" sx={{
                               p: 0,
@@ -886,8 +887,8 @@ export default function DashboardPage() {
                                   : STATUS_SCHEDULED
                                 }
                                 chips={undefined}
-                                actions={isConfirmed ? (
-                                  isEvalOrMod ? (
+                                actions={isEvalOrMod ? (
+                                  isConfirmed ? (
                                     <>
                                       <Button
                                         variant="soft"
@@ -905,58 +906,56 @@ export default function DashboardPage() {
                                       </Button>
                                     </>
                                   ) : (
-                                  <>
-                                    <Button
-                                      variant="soft"
-                                      size="small"
-                                      startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
-                                      onClick={() => {
-                                        dispatch(setSessionFocus(s));
-                                        dispatch(setOpenSessionMaterials(true));
-                                      }}
-                                    >
-                                      Material
-                                    </Button>
-                                    <Button
-                                      variant="soft"
-                                      size="small"
-                                      startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}
-                                      onClick={() => {
-                                        navigate("/courses");
-                                        dispatch(pushToast({ title: "Course content", description: `Viewing content for ${s.title}` }));
-                                      }}
-                                    >
-                                      Course
-                                    </Button>
-                                  </>
-                                  )
-                                ) : (
-                                  <>
                                     <Button
                                       startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
                                       size="small"
                                       variant="contained"
                                       onClick={() => {
-                                        setExitingId(s.id);
                                         dispatch(confirmSession(s.id));
                                         dispatch(pushToast({ title: "Marked as prepared", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
-                                        setTimeout(() => setExitingId(null), 420);
                                       }}
                                     >
                                       Mark as prepared
                                     </Button>
+                                  )
+                                ) : (
+                                  <>
+                                    {/* Preparation material \u2014 always available; links to the
+                                        session-prep page on the Guru dashboard. */}
                                     <Button
-                                      startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />}
-                                      size="small"
                                       variant="soft"
-                                      onClick={() => {
-                                        dispatch(setDeclineSessionFocus(s));
-                                        dispatch(setDeclineReason(""));
-                                        dispatch(setOpenDeclineReason(true));
-                                      }}
+                                      size="small"
+                                      component="a"
+                                      href="http://127.0.0.1:5500/mentor-session-prep.html"
+                                      startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
                                     >
-                                      I'm unavailable
+                                      Review Preparation Material {"\u2192"}
                                     </Button>
+                                    {/* Join session \u2014 only surfaces close to the start time. */}
+                                    {joinEnabled && (
+                                      <Button
+                                        variant="contained"
+                                        size="small"
+                                        startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}
+                                        onClick={() => dispatch(pushToast({ title: "Joining session", description: "Launching join link..." }))}
+                                      >
+                                        Join session
+                                      </Button>
+                                    )}
+                                    {/* Mark as prepared \u2014 disappears once the mentor marks the session prepared. */}
+                                    {!isConfirmed && (
+                                      <Button
+                                        startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
+                                        size="small"
+                                        variant="contained"
+                                        onClick={() => {
+                                          dispatch(confirmSession(s.id));
+                                          dispatch(pushToast({ title: "Marked as prepared", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
+                                        }}
+                                      >
+                                        Mark as prepared
+                                      </Button>
+                                    )}
                                   </>
                                 )}
                                 onViewDetails={() => {
