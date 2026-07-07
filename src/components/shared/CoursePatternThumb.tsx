@@ -4,9 +4,12 @@ function PatternImg({ src, top, right, bottom, left, opacity = 1, transform }: {
   src: string; top: string; right: string; bottom: string; left: string;
   opacity?: number; transform?: string;
 }) {
+  // Resolve root-relative public paths against the app base so they work when
+  // hosted under a subpath (e.g. /claude-guru/ on GitHub Pages).
+  const resolved = src.startsWith("/") ? `${import.meta.env.BASE_URL}${src.slice(1)}` : src;
   return (
     <Box sx={{ position: "absolute", top, right, bottom, left, opacity, transform }}>
-      <Box component="img" src={src} alt="" sx={{ width: "100%", height: "100%", display: "block" }} />
+      <Box component="img" src={resolved} alt="" sx={{ width: "100%", height: "100%", display: "block" }} />
     </Box>
   );
 }

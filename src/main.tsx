@@ -8,17 +8,21 @@ import { store } from "@/store";
 import App from "@/App";
 import "@/index.css";
 
-// Use HashRouter for Capacitor (file:// protocol), BrowserRouter for web/PWA
+// Use HashRouter for Capacitor (file:// protocol) and for static hosts with no
+// SPA rewrite (e.g. GitHub Pages, opted in via VITE_ROUTER=hash at build time);
+// BrowserRouter for web/PWA where the server can serve index.html for any path.
 const isCapacitor = window.location.protocol === "file:" ||
   window.location.href.includes("localhost") === false &&
   window.location.protocol === "https:" &&
   "Capacitor" in window;
-const Router = isCapacitor ? HashRouter : BrowserRouter;
+const useHashRouter = isCapacitor || import.meta.env.VITE_ROUTER === "hash";
+const Router = useHashRouter ? HashRouter : BrowserRouter;
 
-// Register service worker for PWA support
+// Register service worker for PWA support. Resolve relative to the app base so
+// it also works when hosted under a subpath (e.g. /claude-guru/ on GitHub Pages).
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {});
   });
 }
 

@@ -37,7 +37,7 @@ export default function OldDashboardPage() {
       {/* ── Top bar ── */}
       <header className="od-topbar">
         <div className="od-topbar-logo">
-          <img src="/old-dashboard/gl-logo.svg" alt="Great Learning" />
+          <img src={`${import.meta.env.BASE_URL}old-dashboard/gl-logo.svg`} alt="Great Learning" />
         </div>
         <h3 className="od-topbar-title">Great Learning Gurus</h3>
         <ul className="od-topbar-nav">
@@ -85,7 +85,7 @@ export default function OldDashboardPage() {
               <a href="#"> Your Courses</a>
             </li>
             <li className="od-tab-right">
-              <a href="#">GL Profile <img src="/old-dashboard/graph-up.svg" alt="" className="od-graph-icon"/></a>
+              <a href="#">GL Profile <img src={`${import.meta.env.BASE_URL}old-dashboard/graph-up.svg`} alt="" className="od-graph-icon"/></a>
             </li>
           </ul>
 
@@ -93,7 +93,7 @@ export default function OldDashboardPage() {
             {/* Availability banner */}
             <div className="od-avail">
               <div className="od-avail-icon">
-                <img src="/old-dashboard/calendar.svg" alt="" />
+                <img src={`${import.meta.env.BASE_URL}old-dashboard/calendar.svg`} alt="" />
               </div>
               <div className="od-avail-text">
                 <h3>Availability for Online Mentorship Session</h3>
@@ -184,7 +184,7 @@ function EventRow({ day, month, title, lines, email, time, showPolls }: {
   return (
     <div className="od-event">
       <div className="od-event-date">
-        <img src="/old-dashboard/headset.png" alt="" className="od-event-headset"/>
+        <img src={`${import.meta.env.BASE_URL}old-dashboard/headset.png`} alt="" className="od-event-headset"/>
         <div className="od-event-day">{day}</div>
         <div className="od-event-month">{month}</div>
       </div>
@@ -201,7 +201,7 @@ function EventRow({ day, month, title, lines, email, time, showPolls }: {
       <div className="od-event-action">
         <div className="od-event-time">{time}</div>
         <a href="#" className="od-event-join">
-          <img src="/old-dashboard/cam.svg" alt="" className="od-event-cam"/>
+          <img src={`${import.meta.env.BASE_URL}old-dashboard/cam.svg`} alt="" className="od-event-cam"/>
           <span> Join session</span>
         </a>
         {showPolls && (

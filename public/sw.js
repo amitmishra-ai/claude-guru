@@ -4,12 +4,14 @@ const CACHE_NAME = 'guru-dashboard-v1';
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) =>
+      // Relative to the SW scope so the shell caches correctly whether the app
+      // is served from the domain root or a subpath (e.g. /claude-guru/).
       cache.addAll([
-        '/',
-        '/index.html',
-        '/favicon.png',
-        '/icons/icon-192.png',
-        '/icons/icon-512.png',
+        './',
+        './index.html',
+        './favicon.png',
+        './icons/icon-192.png',
+        './icons/icon-512.png',
       ])
     )
   );
