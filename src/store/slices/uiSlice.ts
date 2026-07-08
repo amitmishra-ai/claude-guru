@@ -23,6 +23,8 @@ interface UiState {
   openAddAvailability: boolean;
   openSessionDetails: boolean;
   openSessionMaterials: boolean;
+  openPrepMaterialsModal: boolean;
+  materialViewerId: string | null;
   impactOpen: boolean;
   openCourseDetail: boolean;
   courseDetailId: string | null;
@@ -63,6 +65,8 @@ const initialState: UiState = {
   openAddAvailability: false,
   openSessionDetails: false,
   openSessionMaterials: false,
+  openPrepMaterialsModal: false,
+  materialViewerId: null,
   impactOpen: false,
   openCourseDetail: false,
   courseDetailId: null,
@@ -169,6 +173,12 @@ const uiSlice = createSlice({
     setOpenSessionMaterials(state, action: PayloadAction<boolean>) {
       state.openSessionMaterials = action.payload;
     },
+    setOpenPrepMaterialsModal(state, action: PayloadAction<boolean>) {
+      state.openPrepMaterialsModal = action.payload;
+    },
+    setMaterialViewerId(state, action: PayloadAction<string | null>) {
+      state.materialViewerId = action.payload;
+    },
     setLeavePopoverNaId(state, action: PayloadAction<string | null>) {
       state.leavePopoverNaId = action.payload;
     },
@@ -218,6 +228,8 @@ export const {
   setOpenAddAvailability,
   setOpenSessionDetails,
   setOpenSessionMaterials,
+  setOpenPrepMaterialsModal,
+  setMaterialViewerId,
   setLeavePopoverNaId,
   setAvailPopoverBlockId,
   setMarkUnavailableTarget,

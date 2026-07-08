@@ -27,6 +27,15 @@ export type SessionPrepMaterial = {
   type: "slides" | "document" | "video" | "link";
 };
 
+/** A named bundle of prep materials (e.g. "Week-2: Data Manipulation - MLS").
+    The Review Material picker shows one card per module — never the raw
+    files inside it — since a module can hold several. */
+export type SessionPrepModule = {
+  id: string;
+  label: string;
+  materials: SessionPrepMaterial[];
+};
+
 export type LearnerContext = {
   learnerName?: string;
   resumeUrl?: string;
@@ -73,6 +82,10 @@ export type Session = {
   timeZone?: string;
   linkedCourseId?: string;
   prepMaterials?: SessionPrepMaterial[];
+  /** Module-level grouping for the Review Material flow — each module may
+      bundle several prepMaterials-style files, but only the module card
+      surfaces in the picker. */
+  prepModules?: SessionPrepModule[];
   learnerContext?: LearnerContext;
   paymentModel?: PaymentModel;
   hourlyRateInr?: number;

@@ -51,6 +51,13 @@ export const demoSessions: Session[] = [
       { id: "pm-c1b", label: "Data Structures Reference", url: "#", type: "document" },
       { id: "pm-c1c", label: "Intro to Python", url: "#", type: "video" },
     ],
+    prepModules: [
+      { id: "mod-c1", label: "Python Basics & Data Structures - MLS", materials: [
+        { id: "pm-c1a", label: "Python Basics Slides", url: "#", type: "slides" },
+        { id: "pm-c1b", label: "Data Structures Reference", url: "#", type: "document" },
+        { id: "pm-c1c", label: "Intro to Python", url: "#", type: "video" },
+      ] },
+    ],
   },
   {
     id: "c2",
@@ -1119,6 +1126,14 @@ export const demoSessions: Session[] = [
       { id: "pm-t3", label: "Sample Dataset (CSV)", url: "#", type: "link" },
       { id: "pm-t4", label: "EDA Walkthrough with Pandas", url: "#", type: "video" },
     ],
+    prepModules: [
+      { id: "mod-today1", label: "Exploratory Data Analysis with Pandas - MLS", materials: [
+        { id: "pm-t1", label: "EDA Session Slides", url: "#", type: "slides" },
+        { id: "pm-t2", label: "Pandas Cheat Sheet", url: "#", type: "document" },
+        { id: "pm-t3", label: "Sample Dataset (CSV)", url: "#", type: "link" },
+        { id: "pm-t4", label: "EDA Walkthrough with Pandas", url: "#", type: "video" },
+      ] },
+    ],
   },
   // ── Upcoming / scheduled sessions ──
   {
@@ -1152,6 +1167,21 @@ export const demoSessions: Session[] = [
       { id: "pm1", label: "Orientation Slides", url: "#", type: "slides" },
       { id: "pm2", label: "Industry Landscape PDF", url: "#", type: "document" },
       { id: "pm2b", label: "Welcome & Program Walkthrough", url: "#", type: "video" },
+    ],
+    prepModules: [
+      { id: "mod-s0-1", label: "Orientation & Onboarding - MLS", materials: [
+        { id: "pm1", label: "Orientation Slides", url: "#", type: "slides" },
+        { id: "pm1b", label: "Program Guide", url: "#", type: "document" },
+        { id: "pm1c", label: "Welcome Video", url: "#", type: "video" },
+      ] },
+      { id: "mod-s0-2", label: "Industry Landscape - MLS", materials: [
+        { id: "pm2", label: "Industry Landscape PDF", url: "#", type: "document" },
+        { id: "pm2c", label: "Market Trends Deck", url: "#", type: "slides" },
+      ] },
+      { id: "mod-s0-3", label: "Program Walkthrough - MLS", materials: [
+        { id: "pm2b", label: "Welcome & Program Walkthrough", url: "#", type: "video" },
+        { id: "pm2d", label: "Program FAQ", url: "#", type: "document" },
+      ] },
     ],
     paymentModel: "fixed",
     totalEarningsInr: 18000,
@@ -1253,6 +1283,13 @@ export const demoSessions: Session[] = [
       { id: "pm17", label: "SQL Joins Explained", url: "#", type: "video" },
       { id: "pm18", label: "Practice Queries Notebook", url: "#", type: "link" },
     ],
+    prepModules: [
+      { id: "mod-s0d", label: "Querying Data with SQL - MLS", materials: [
+        { id: "pm16", label: "SQL Query Cheat Sheet", url: "#", type: "document" },
+        { id: "pm17", label: "SQL Joins Explained", url: "#", type: "video" },
+        { id: "pm18", label: "Practice Queries Notebook", url: "#", type: "link" },
+      ] },
+    ],
     paymentModel: "fixed",
     totalEarningsInr: 14000,
   },
@@ -1284,6 +1321,14 @@ export const demoSessions: Session[] = [
       { id: "pm14", label: "Starter Code Repository", url: "#", type: "link" },
       { id: "pm15", label: "Variables & Data Types Walkthrough", url: "#", type: "video" },
       { id: "pm15b", label: "Session Slides  - Control Flow", url: "#", type: "slides" },
+    ],
+    prepModules: [
+      { id: "mod-s0c", label: "Variables, Data Types & Control Flow - MLS", materials: [
+        { id: "pm13", label: "Python Fundamentals Notebook", url: "#", type: "document" },
+        { id: "pm14", label: "Starter Code Repository", url: "#", type: "link" },
+        { id: "pm15", label: "Variables & Data Types Walkthrough", url: "#", type: "video" },
+        { id: "pm15b", label: "Session Slides  - Control Flow", url: "#", type: "slides" },
+      ] },
     ],
     paymentModel: "fixed",
   },
@@ -1344,6 +1389,13 @@ export const demoSessions: Session[] = [
       { id: "pm-cb1", label: "Hypothesis Testing Slides", url: "#", type: "slides" },
       { id: "pm-cb2", label: "Worked Examples PDF", url: "#", type: "document" },
       { id: "pm-cb3", label: "Confidence Intervals Demo", url: "#", type: "video" },
+    ],
+    prepModules: [
+      { id: "mod-comb-upcoming", label: "Hypothesis Testing - MLS", materials: [
+        { id: "pm-cb1", label: "Hypothesis Testing Slides", url: "#", type: "slides" },
+        { id: "pm-cb2", label: "Worked Examples PDF", url: "#", type: "document" },
+        { id: "pm-cb3", label: "Confidence Intervals Demo", url: "#", type: "video" },
+      ] },
     ],
     combinedBatches: [
       { batch: "PGPDS.O.MAR26.A", group: "Group 07", audienceType: "Batch", learnerCount: 42, progress: "Week 8 of 12",

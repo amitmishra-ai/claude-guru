@@ -59,6 +59,8 @@ import {
   setLearnerRatingsSessionId,
   setOpenSessionDetails,
   setOpenSessionMaterials,
+  setOpenPrepMaterialsModal,
+  setMaterialViewerId,
 } from "@/store/slices/uiSlice";
 import { pushToast } from "@/store/slices/toastsSlice";
 import {
@@ -355,6 +357,19 @@ export default function DashboardPage() {
   const getOnCourseClick = (s: Session) => {
     if (!s.linkedCourseId) return undefined;
     return () => navigate("/courses");
+  };
+
+  /** Multiple prep modules → picker modal; exactly one → straight to the learner view. */
+  const handleReviewMaterial = (s: Session) => {
+    dispatch(setSessionFocus(s));
+    const modules = s.prepModules ?? [];
+    if (modules.length > 1) {
+      dispatch(setOpenPrepMaterialsModal(true));
+    } else if (modules.length === 1 && modules[0].materials.length > 0) {
+      dispatch(setMaterialViewerId(modules[0].materials[0].id));
+    } else {
+      dispatch(pushToast({ title: "No materials added", description: "There's no prep material attached to this session yet." }));
+    }
   };
 
   const isNewUser = guruStage === "new" || isEmpty;
@@ -748,8 +763,7 @@ export default function DashboardPage() {
                                     <Button
                                       variant="soft"
                                       size="small"
-                                      component="a"
-                                      href="http://127.0.0.1:5500/mentor-session-prep.html"
+                                      onClick={() => handleReviewMaterial(s)}
                                       startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
                                       endIcon={<ChevronRightIcon sx={{ fontSize: 12 }} />}
                                       sx={{ "& .MuiButton-endIcon": { ml: 0.25 } }}
@@ -931,8 +945,7 @@ export default function DashboardPage() {
                                       <Button
                                         variant="soft"
                                         size="small"
-                                        component="a"
-                                        href="http://127.0.0.1:5500/mentor-session-prep.html"
+                                        onClick={() => handleReviewMaterial(s)}
                                         startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
                                         endIcon={<ChevronRightIcon sx={{ fontSize: 12 }} />}
                                         sx={{ "& .MuiButton-endIcon": { ml: 0.25 } }}

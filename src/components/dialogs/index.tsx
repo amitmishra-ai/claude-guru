@@ -12,6 +12,8 @@ import { MarkUnavailableModal } from "./MarkUnavailableModal";
 import { AddAvailabilityModal } from "./AddAvailabilityModal";
 import { SessionDetailsModal } from "./SessionDetailsModal";
 import { SessionMaterialsDrawer } from "./SessionMaterialsDrawer";
+import { PrepMaterialsModal } from "./PrepMaterialsModal";
+import { MaterialLearnerView } from "./MaterialLearnerView";
 import { CourseDetailDialog } from "./CourseDetailDialog";
 
 /**
@@ -35,6 +37,8 @@ export function GlobalDialogs() {
       <AddAvailabilityModal />
       <SessionDetailsModal />
       <SessionMaterialsDrawer />
+      <PrepMaterialsModal />
+      <MaterialLearnerView />
       <CourseDetailDialog />
     </>
   );
