@@ -100,6 +100,14 @@ export const STATUS_CONFIRMED: (icon?: ReactNode) => SessionCardStatus = (icon) 
   icon,
 });
 
+export const STATUS_PREPARED: (icon?: ReactNode) => SessionCardStatus = (icon) => ({
+  label: "Prepared",
+  bg: "var(--gl-status-completed-bg)",
+  color: "var(--gl-status-completed-text)",
+  border: "var(--gl-status-completed-border)",
+  icon,
+});
+
 export const STATUS_DECLINED: SessionCardStatus = {
   label: "Declined",
   bg: "var(--gl-status-declined-bg)",

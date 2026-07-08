@@ -72,7 +72,7 @@ import {
 } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
 import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions, demoPlannedEvents } from "@/data/demo-sessions";
-import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
+import { SessionCard, STATUS_SCHEDULED, STATUS_PREPARED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
@@ -693,6 +693,7 @@ export default function DashboardPage() {
                         const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
                         /* Secondary Guru: no Join button, show a "Secondary" badge on the card. */
                         const isSecondaryGuru = selectedRole === "Secondary Guru";
+                        const isConfirmed = !!confirmations[s.id];
                         return (
                           <Card
                             key={s.id}
@@ -715,6 +716,7 @@ export default function DashboardPage() {
                               start={s.start}
                               end={s.end}
                               onCourseClick={getOnCourseClick(s)}
+                              status={isConfirmed ? STATUS_PREPARED() : STATUS_SCHEDULED}
                               topRight={startsWithin30 ? (
                                 <Chip
                                   label="Starting soon"
@@ -750,8 +752,10 @@ export default function DashboardPage() {
                                     component="a"
                                     href="http://127.0.0.1:5500/mentor-session-prep.html"
                                     startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+                                    endIcon={<ChevronRightIcon sx={{ fontSize: 12 }} />}
+                                    sx={{ "& .MuiButton-endIcon": { ml: 0.25 } }}
                                   >
-                                    Review Preparation Material →
+                                    Review Preparation Material
                                   </Button>
                                 </>
                               }
@@ -883,7 +887,7 @@ export default function DashboardPage() {
                                   />
                                 ) : undefined}
                                 status={isConfirmed
-                                  ? STATUS_CONFIRMED()
+                                  ? STATUS_PREPARED()
                                   : STATUS_SCHEDULED
                                 }
                                 chips={undefined}
@@ -928,8 +932,10 @@ export default function DashboardPage() {
                                       component="a"
                                       href="http://127.0.0.1:5500/mentor-session-prep.html"
                                       startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+                                      endIcon={<ChevronRightIcon sx={{ fontSize: 12 }} />}
+                                      sx={{ "& .MuiButton-endIcon": { ml: 0.25 } }}
                                     >
-                                      Review Preparation Material {"\u2192"}
+                                      Review Preparation Material
                                     </Button>
                                     {/* Join session \u2014 only surfaces close to the start time. */}
                                     {joinEnabled && (
