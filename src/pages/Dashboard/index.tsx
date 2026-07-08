@@ -2,7 +2,6 @@ import { Fragment, useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import DoNotDisturbOnOutlinedIcon from "@mui/icons-material/DoNotDisturbOnOutlined";
 import Skeleton from "@mui/material/Skeleton";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
@@ -71,8 +70,8 @@ import {
   getLocaleFromTimezone,
 } from "@/lib/helpers";
 import { demoNow } from "@/lib/constants";
-import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPreviouslyDeclinedSessions, demoPlannedEvents } from "@/data/demo-sessions";
-import { SessionCard, STATUS_SCHEDULED, STATUS_PREPARED, STATUS_DECLINED } from "@/components/shared/SessionCard";
+import { demoRatingHistory, demoLearnerRatingsBySessionId, demoPlannedEvents } from "@/data/demo-sessions";
+import { SessionCard, STATUS_SCHEDULED } from "@/components/shared/SessionCard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
@@ -178,7 +177,6 @@ export default function DashboardPage() {
   const sessions = useMemo(() => isEmpty ? [] : filterSessionsByRole(allSessions, selectedRole), [allSessions, selectedRole, isEmpty]);
   const confirmations = useAppSelector((s) => s.sessions.confirmations);
   const sessionDeclined = useAppSelector((s) => s.sessions.sessionDeclined);
-  const sessionDeclinedReasons = useAppSelector((s) => s.sessions.sessionDeclinedReasons);
   const homeSessionsView = useAppSelector((s) => s.sessions.homeSessionsView);
   const hasUserConfiguredAvailability = useAppSelector((s) => s.availability.hasUserConfiguredAvailability);
   const maxPerWeek = useAppSelector((s) => s.availability.maxPerWeek);
@@ -317,10 +315,6 @@ export default function DashboardPage() {
     for (const g of completedMonthGroups) seed[g.key] = g.key === defaultOpenKey;
     setExpandedCompletedMonths(seed);
   }, [completedMonthGroups, currentMonthKey]);
-  const declinedSessions = useMemo(
-    () => sessions.filter((s) => sessionDeclined[s.id]),
-    [sessions, sessionDeclined]
-  );
 
   // Career Mentor: learners self-schedule from the guru's calendar, so there are no tentative/planned events
   const rolePlannedEvents = useMemo(
@@ -329,7 +323,6 @@ export default function DashboardPage() {
       : filterSessionsByRole(demoPlannedEvents, selectedRole),
     [selectedRole, isEmpty],
   );
-  const rolePreviouslyDeclined = useMemo(() => isEmpty ? [] : filterSessionsByRole(demoPreviouslyDeclinedSessions, selectedRole), [selectedRole, isEmpty]);
 
   const todayYmd = demoNow.toISOString().slice(0, 10);
   const todaySessions = upcomingSessions.filter((s) => s.dateYmd === todayYmd);
@@ -698,7 +691,6 @@ export default function DashboardPage() {
                         const joinEnabled = nowMs >= sessionStartMs - 30 * 60 * 1000;
                         /* Secondary Guru: no Join button, show a "Secondary" badge on the card. */
                         const isSecondaryGuru = selectedRole === "Secondary Guru";
-                        const isConfirmed = !!confirmations[s.id];
                         const hasNoMaterialReview = NO_MATERIAL_REVIEW_TYPES.includes(s.sessionType);
                         return (
                           <Card
@@ -722,7 +714,7 @@ export default function DashboardPage() {
                               start={s.start}
                               end={s.end}
                               onCourseClick={getOnCourseClick(s)}
-                              status={isConfirmed ? STATUS_PREPARED() : STATUS_SCHEDULED}
+                              status={STATUS_SCHEDULED}
                               topRight={startsWithin30 ? (
                                 <Chip
                                   label="Starting soon"
@@ -802,7 +794,6 @@ export default function DashboardPage() {
                 >
                   <Tab icon={<EventNoteOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Upcoming (${upcomingSessions.length})`} value="next" sx={{ "& .MuiTab-iconWrapper": { display: { xs: "none", sm: "flex" } } }} />
                   <Tab icon={<TaskAltOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Completed (${completedSessions.length})`} value="completed" sx={{ "& .MuiTab-iconWrapper": { display: { xs: "none", sm: "flex" } } }} />
-                  <Tab icon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: { xs: 14, sm: 18 } }} />} iconPosition="start" label={`Declined (${declinedSessions.length})`} value="declined" sx={{ "& .MuiTab-iconWrapper": { display: { xs: "none", sm: "flex" } } }} />
                 </Tabs>
 
                 {/* ── Tab loading skeleton ── */}
@@ -895,10 +886,10 @@ export default function DashboardPage() {
                                     }}
                                   />
                                 ) : undefined}
-                                status={isConfirmed
-                                  ? STATUS_PREPARED()
-                                  : STATUS_SCHEDULED
-                                }
+                                /* Chip always reads Scheduled — it reflects the backend-published
+                                   state, not prep-review progress. "Prepared" surfaces on the
+                                   Mark Prepared button itself instead. */
+                                status={STATUS_SCHEDULED}
                                 chips={undefined}
                                 actions={isEvalOrMod ? (
                                   isConfirmed ? (
@@ -922,7 +913,7 @@ export default function DashboardPage() {
                                     <Button
                                       startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
                                       size="small"
-                                      variant="contained"
+                                      variant="soft"
                                       onClick={() => {
                                         dispatch(confirmSession(s.id));
                                         dispatch(pushToast({ title: "Marked as prepared", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
@@ -960,18 +951,31 @@ export default function DashboardPage() {
                                         Join session
                                       </Button>
                                     )}
-                                    {!hasNoMaterialReview && !isConfirmed && (
-                                      <Button
-                                        startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
-                                        size="small"
-                                        variant="contained"
-                                        onClick={() => {
-                                          dispatch(confirmSession(s.id));
-                                          dispatch(pushToast({ title: "Marked as prepared", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
-                                        }}
-                                      >
-                                        Mark Prepared
-                                      </Button>
+                                    {/* Stays in the same slot after being marked \u2014 swaps to a
+                                        disabled, ticked "Prepared" state rather than disappearing. */}
+                                    {!hasNoMaterialReview && (
+                                      isConfirmed ? (
+                                        <Button
+                                          startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
+                                          size="small"
+                                          variant="soft"
+                                          disabled
+                                        >
+                                          Prepared
+                                        </Button>
+                                      ) : (
+                                        <Button
+                                          startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
+                                          size="small"
+                                          variant="soft"
+                                          onClick={() => {
+                                            dispatch(confirmSession(s.id));
+                                            dispatch(pushToast({ title: "Marked as prepared", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
+                                          }}
+                                        >
+                                          Mark Prepared
+                                        </Button>
+                                      )
                                     )}
                                   </>
                                 )}
@@ -1068,7 +1072,7 @@ export default function DashboardPage() {
                                     transition: "background-color 0.15s",
                                   }}
                                 >
-                                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
+                                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>Details</Typography>
                                   <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
                                 </Box>
                                 </>
@@ -1273,12 +1277,12 @@ export default function DashboardPage() {
                                   </Box>
                                 )}
                                 <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>
-                                  {pe.sessionType}: {pe.title}
+                                  {pe.sessionType}: <Box component="span" onClick={(e) => { e.stopPropagation(); navigate("/courses"); }} sx={{ color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}>{pe.title}</Box>
                                 </Typography>
                                 {/* Desktop: chip beside title */}
                                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5 }}>
                                   <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
-                                    {pe.sessionType}: {pe.title}
+                                    {pe.sessionType}: <Box component="span" onClick={(e) => { e.stopPropagation(); navigate("/courses"); }} sx={{ color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}>{pe.title}</Box>
                                   </Typography>
                                   {peIsConfirmed && confirmedChip}
                                 </Stack>
@@ -1290,7 +1294,7 @@ export default function DashboardPage() {
                                 </Stack>
                                 {/* Desktop: text button */}
                                 <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1, display: { xs: "none", sm: "flex" } }}>
-                                  <Button variant="text" size="small" onClick={() => setPlannedEventDetailId(pe.id)}>View details</Button>
+                                  <Button variant="text" size="small" endIcon={<ChevronRightIcon sx={{ fontSize: 14 }} />} onClick={() => setPlannedEventDetailId(pe.id)}>Details</Button>
                                 </Stack>
                                 {/* Mobile: full-width row */}
                                 <Box
@@ -1313,7 +1317,7 @@ export default function DashboardPage() {
                                     transition: "background-color 0.15s",
                                   }}
                                 >
-                                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
+                                  <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>Details</Typography>
                                   <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
                                 </Box>
                               </Card>
@@ -1647,83 +1651,6 @@ export default function DashboardPage() {
                         icon={<CheckCircleOutlinedIcon />}
                         title="No activities completed yet"
                         subtitle="Once you complete your first activity, it'll appear here with feedback and payment info"
-                        compact
-                      />
-                    )}
-                  </>
-                )}
-
-                {/* ── Declined tab ── */}
-                {!tabLoading && homeSessionsView === "declined" && (
-                  <>
-                    {declinedSessions.length > 0 && (
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Active declined</Typography>
-                        <Stack spacing={1.5}>
-                          {declinedSessions.map((s) => (
-                            <Card key={s.id} variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
-                              <SessionCard
-                                title={s.title}
-                                sessionType={s.sessionType}
-                                topic={s.topic}
-                                batch={s.batch}
-                                dateYmd={s.dateYmd}
-                                start={s.start}
-                                end={s.end}
-                                onCourseClick={getOnCourseClick(s)}
-                                status={STATUS_DECLINED}
-                              />
-                              {(sessionDeclinedReasons[s.id] || s.scheduledByName) && (
-                                <Box sx={{ px: 2, pb: 2, pt: 0 }}>
-                                  {sessionDeclinedReasons[s.id] && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontStyle: "italic" }}>
-                                      Reason: {sessionDeclinedReasons[s.id]}
-                                    </Typography>
-                                  )}
-                                  <Typography variant="caption" color="text.secondary" sx={{ mt: sessionDeclinedReasons[s.id] ? 0.5 : 0, display: "block" }}>
-                                    To re-accept this session, contact {s.scheduledByName || "the scheduler"}{s.scheduledByEmail ? ` at ${s.scheduledByEmail}` : ""}.
-                                  </Typography>
-                                </Box>
-                              )}
-                            </Card>
-                          ))}
-                        </Stack>
-                      </Box>
-                    )}
-
-                    {rolePreviouslyDeclined.length > 0 && (
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>Previously declined</Typography>
-                        <Stack spacing={1.5}>
-                          {rolePreviouslyDeclined.map((s) => (
-                            <Card key={s.id} variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
-                              <SessionCard
-                                title={s.title}
-                                topic={s.topic}
-                                batch={s.batch}
-                                dateYmd={s.dateYmd}
-                                start={s.start}
-                                end={s.end}
-                                status={{ label: "Declined", bg: "action.hover", color: "text.secondary", border: "transparent" }}
-                              />
-                              {s.declineReason && (
-                                <Box sx={{ px: 2, pb: 2 }}>
-                                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontStyle: "italic" }}>
-                                    Reason: {s.declineReason}
-                                  </Typography>
-                                </Box>
-                              )}
-                            </Card>
-                          ))}
-                        </Stack>
-                      </Box>
-                    )}
-
-                    {declinedSessions.length === 0 && rolePreviouslyDeclined.length === 0 && (
-                      <EmptyState
-                        icon={<DoNotDisturbOnOutlinedIcon />}
-                        title="No declined events"
-                        subtitle="Any events you choose to decline will be kept here for your reference"
                         compact
                       />
                     )}

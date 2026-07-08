@@ -579,8 +579,11 @@ export const demoSessions: Session[] = [
     program: "PGP-AIML",
     cohort: "AIML Online March 26 A",
     group: "Group 02", groupMembers: GROUP_MEMBERS_B,
-    dateYmd: "2026-04-30",
-    endDateYmd: "2026-05-02",
+    /* Kept in the past so the Upcoming tab shows only one Residency card
+       (res-combined) at a time — this one demonstrates the combined-batch
+       Residency layout in Completed instead. */
+    dateYmd: "2026-01-15",
+    endDateYmd: "2026-01-17",
     start: minutes(9),
     end: minutes(17),
     location: "Bangalore",
@@ -589,16 +592,16 @@ export const demoSessions: Session[] = [
     paymentAmountInr: 30000,
     scheduledByName: "Bhargavi CS",
     scheduledByEmail: "bhargavi.cs@greatlearning.in",
-    scheduledOnYmd: "2026-04-07",
+    scheduledOnYmd: "2026-01-02",
     paymentModel: "fixed",
     linkedCourseId: "p8",
     audienceType: "Group",
     scheduledByPhone: "+91 98765 43210",
     timeZone: "Asia/Kolkata",
     residencySchedule: [
-      { dateYmd: "2026-04-30", start: minutes(9), end: minutes(17) },
-      { dateYmd: "2026-05-01", start: minutes(9), end: minutes(17) },
-      { dateYmd: "2026-05-02", start: minutes(9), end: minutes(17) },
+      { dateYmd: "2026-01-15", start: minutes(9), end: minutes(17) },
+      { dateYmd: "2026-01-16", start: minutes(9), end: minutes(17) },
+      { dateYmd: "2026-01-17", start: minutes(9), end: minutes(17) },
     ],
     combinedBatches: [
       {

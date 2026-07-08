@@ -366,7 +366,7 @@ export function SessionCard({
         transition: "background-color 0.15s",
       }}
     >
-      <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>View details</Typography>
+      <Typography variant="caption" fontWeight={600} sx={{ fontSize: "0.75rem" }}>Details</Typography>
       <ChevronRightIcon sx={{ fontSize: 18, color: "text.secondary" }} />
     </Box>
   );

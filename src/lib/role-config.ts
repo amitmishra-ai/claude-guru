@@ -47,7 +47,9 @@ export const ROLE_SESSION_TYPES: Record<GuruRole, SessionType[] | "all"> = {
   Teacher: ["Mentored Learning session", "Online class", "Online session", "Residency"],
   "Course Mentor": ["Mentored Learning session", "Online session", "Online class", "Residency"],
   "Career Mentor": ["Career mentoring session", "Schedule a call"],
-  /* Does both career mentoring and course mentoring — union of both roles. */
+  /* Does both career mentoring and course mentoring — union of both roles.
+     Also carries Capstone project mentoring so this role can act as the
+     single "see every session type" persona for card/CTA review. */
   "Career + Course Mentor": [
     "Career mentoring session",
     "Schedule a call",
@@ -55,6 +57,7 @@ export const ROLE_SESSION_TYPES: Record<GuruRole, SessionType[] | "all"> = {
     "Online session",
     "Online class",
     "Residency",
+    "Capstone project mentoring session",
   ],
   "CV Review Mentor": ["CV Review"],
   Evaluator: ["Evaluation"],

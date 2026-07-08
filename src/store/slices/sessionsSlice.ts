@@ -9,7 +9,7 @@ interface SessionsState {
   sessionDeclinedAtYmd: Record<string, string>;
   sessionDeclinedReasons: Record<string, string>;
   sessionFocus: Session | null;
-  homeSessionsView: "next" | "completed" | "declined";
+  homeSessionsView: "next" | "completed";
   selectedSessionType: "All" | SessionType;
   selectedTimePeriod: "All" | "Last 6 months" | "2025" | "2024" | "2023" | "2022";
   confirmMoveSessionId: string | null;
@@ -71,7 +71,7 @@ const sessionsSlice = createSlice({
     setSessionFocus(state, action: PayloadAction<Session | null>) {
       state.sessionFocus = action.payload;
     },
-    setHomeSessionsView(state, action: PayloadAction<"next" | "completed" | "declined">) {
+    setHomeSessionsView(state, action: PayloadAction<"next" | "completed">) {
       state.homeSessionsView = action.payload;
     },
     setSelectedSessionType(state, action: PayloadAction<"All" | SessionType>) {
