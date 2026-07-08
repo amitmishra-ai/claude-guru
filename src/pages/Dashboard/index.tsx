@@ -93,6 +93,11 @@ const slideInFromAbove = keyframes`
   100% { opacity: 1; transform: translateY(0)     scale(1);   }
 `;
 
+/* Session types with nothing to prep beforehand — 1:1 conversations or
+   in-person events — so the review-material / mark-prepared workflow is
+   omitted entirely rather than shown disabled. */
+const NO_MATERIAL_REVIEW_TYPES: SessionType[] = ["Career mentoring session", "Capstone project mentoring session", "Residency"];
+
 const SESSION_TYPES: Array<"All" | SessionType> = [
   "All",
   "Online session",
@@ -694,6 +699,7 @@ export default function DashboardPage() {
                         /* Secondary Guru: no Join button, show a "Secondary" badge on the card. */
                         const isSecondaryGuru = selectedRole === "Secondary Guru";
                         const isConfirmed = !!confirmations[s.id];
+                        const hasNoMaterialReview = NO_MATERIAL_REVIEW_TYPES.includes(s.sessionType);
                         return (
                           <Card
                             key={s.id}
@@ -746,17 +752,19 @@ export default function DashboardPage() {
                                       Join session
                                     </Button>
                                   )}
-                                  <Button
-                                    variant="soft"
-                                    size="small"
-                                    component="a"
-                                    href="http://127.0.0.1:5500/mentor-session-prep.html"
-                                    startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
-                                    endIcon={<ChevronRightIcon sx={{ fontSize: 12 }} />}
-                                    sx={{ "& .MuiButton-endIcon": { ml: 0.25 } }}
-                                  >
-                                    Review Preparation Material
-                                  </Button>
+                                  {!hasNoMaterialReview && (
+                                    <Button
+                                      variant="soft"
+                                      size="small"
+                                      component="a"
+                                      href="http://127.0.0.1:5500/mentor-session-prep.html"
+                                      startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+                                      endIcon={<ChevronRightIcon sx={{ fontSize: 12 }} />}
+                                      sx={{ "& .MuiButton-endIcon": { ml: 0.25 } }}
+                                    >
+                                      Review Material
+                                    </Button>
+                                  )}
                                 </>
                               }
                               onViewDetails={() => {
@@ -833,6 +841,7 @@ export default function DashboardPage() {
                           const isEvaluation = s.sessionType === "Evaluation";
                           const isModeration = s.sessionType === "Moderation";
                           const isEvalOrMod = isEvaluation || isModeration;
+                          const hasNoMaterialReview = NO_MATERIAL_REVIEW_TYPES.includes(s.sessionType);
                           /* Progress stats — Evaluation: Submissions + Graded;
                              Moderation: Posts + Posts unread + Graded. Sourced from
                              getActivityStats so the card matches the Activity Details drawer. */
@@ -919,24 +928,27 @@ export default function DashboardPage() {
                                         dispatch(pushToast({ title: "Marked as prepared", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
                                       }}
                                     >
-                                      Mark as prepared
+                                      Mark Prepared
                                     </Button>
                                   )
                                 ) : (
                                   <>
-                                    {/* Preparation material \u2014 always available; links to the
-                                        session-prep page on the Guru dashboard. */}
-                                    <Button
-                                      variant="soft"
-                                      size="small"
-                                      component="a"
-                                      href="http://127.0.0.1:5500/mentor-session-prep.html"
-                                      startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
-                                      endIcon={<ChevronRightIcon sx={{ fontSize: 12 }} />}
-                                      sx={{ "& .MuiButton-endIcon": { ml: 0.25 } }}
-                                    >
-                                      Review Preparation Material
-                                    </Button>
+                                    {/* Career mentoring / Capstone project mentoring sessions are
+                                        1:1 conversations with nothing to review beforehand, so they
+                                        skip the material-review + prepared workflow entirely. */}
+                                    {!hasNoMaterialReview && (
+                                      <Button
+                                        variant="soft"
+                                        size="small"
+                                        component="a"
+                                        href="http://127.0.0.1:5500/mentor-session-prep.html"
+                                        startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+                                        endIcon={<ChevronRightIcon sx={{ fontSize: 12 }} />}
+                                        sx={{ "& .MuiButton-endIcon": { ml: 0.25 } }}
+                                      >
+                                        Review Material
+                                      </Button>
+                                    )}
                                     {/* Join session \u2014 only surfaces close to the start time. */}
                                     {joinEnabled && (
                                       <Button
@@ -948,8 +960,7 @@ export default function DashboardPage() {
                                         Join session
                                       </Button>
                                     )}
-                                    {/* Mark as prepared \u2014 disappears once the mentor marks the session prepared. */}
-                                    {!isConfirmed && (
+                                    {!hasNoMaterialReview && !isConfirmed && (
                                       <Button
                                         startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
                                         size="small"
@@ -959,7 +970,7 @@ export default function DashboardPage() {
                                           dispatch(pushToast({ title: "Marked as prepared", description: `${s.title} \u2022 ${fmtDateNice(s.dateYmd)}` }));
                                         }}
                                       >
-                                        Mark as prepared
+                                        Mark Prepared
                                       </Button>
                                     )}
                                   </>
@@ -1099,10 +1110,10 @@ export default function DashboardPage() {
                           })}
                         >
                           {plannedEventDetail && (() => {
-                            const peStatusLabel = plannedEventDetail.status === "to_be_confirmed" ? "To be confirmed" : "Confirmed";
-                            const peStatusSx = plannedEventDetail.status === "to_be_confirmed"
-                              ? { bgcolor: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "1px solid var(--gl-status-pending-border)" }
-                              : { bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" };
+                            /* Planned events are inherently tentative — "(subject to
+                               change)" already says so — so we only surface a chip once
+                               it's actually confirmed, not a redundant "To be confirmed". */
+                            const peIsConfirmed = plannedEventDetail.status === "confirmed";
                             return (
                               <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
                                 {/* Header - matches SessionDetailsModal */}
@@ -1124,7 +1135,9 @@ export default function DashboardPage() {
                                 >
                                   <Stack direction="row" alignItems="center" spacing={1.5}>
                                     <Typography variant="subtitle2" fontWeight={700} sx={{ fontSize: "0.8125rem" }}>Event details</Typography>
-                                    <Chip label={peStatusLabel} size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, ...peStatusSx }} />
+                                    {peIsConfirmed && (
+                                      <Chip label="Confirmed" size="small" sx={{ fontWeight: 600, fontSize: "0.7rem", height: 22, bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)" }} />
+                                    )}
                                   </Stack>
                                   <IconButton size="small" onClick={() => setPlannedEventDetailId(null)} sx={{ color: "text.secondary" }}>
                                     <CloseOutlinedIcon sx={{ fontSize: 16 }} />
@@ -1245,15 +1258,20 @@ export default function DashboardPage() {
 
                         <Stack spacing={1.5}>
                           {rolePlannedEvents.map((pe) => {
-                            const statusCfg = pe.status === "to_be_confirmed"
-                              ? { label: "To be confirmed", bg: "var(--gl-status-pending-bg)", color: "var(--gl-status-pending-text)", border: "var(--gl-status-pending-border)" }
-                              : { label: "Confirmed", bg: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "var(--gl-status-confirmed-border)" };
+                            /* Planned events are inherently tentative — only surface a
+                               chip once actually confirmed, not a redundant "To be confirmed". */
+                            const peIsConfirmed = pe.status === "confirmed";
+                            const confirmedChip = (
+                              <Chip label="Confirmed" size="small" sx={{ bgcolor: "var(--gl-status-confirmed-bg)", color: "var(--gl-status-confirmed-text)", border: "1px solid var(--gl-status-confirmed-border)", fontWeight: 500, fontSize: "0.75rem" }} />
+                            );
                             return (
                               <Card key={pe.id} variant="outlined" sx={{ p: { xs: 2, sm: 2 } }}>
                                 {/* Mobile: chip on top */}
-                                <Box sx={{ display: { xs: "block", sm: "none" }, mb: 0.75 }}>
-                                  <Chip label={statusCfg.label} size="small" sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem" }} />
-                                </Box>
+                                {peIsConfirmed && (
+                                  <Box sx={{ display: { xs: "block", sm: "none" }, mb: 0.75 }}>
+                                    {confirmedChip}
+                                  </Box>
+                                )}
                                 <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>
                                   {pe.sessionType}: {pe.title}
                                 </Typography>
@@ -1262,7 +1280,7 @@ export default function DashboardPage() {
                                   <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
                                     {pe.sessionType}: {pe.title}
                                   </Typography>
-                                  <Chip label={statusCfg.label} size="small" sx={{ bgcolor: statusCfg.bg, color: statusCfg.color, border: `1px solid ${statusCfg.border}`, fontWeight: 500, fontSize: "0.75rem", flexShrink: 0 }} />
+                                  {peIsConfirmed && confirmedChip}
                                 </Stack>
                                 <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: "text.secondary", minWidth: 0 }}>
                                   <CalendarTodayOutlinedIcon sx={{ fontSize: 12, flexShrink: 0 }} />

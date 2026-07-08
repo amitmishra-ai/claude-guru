@@ -46,7 +46,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
-import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_DECLINED } from "@/components/shared/SessionCard";
+import { SessionCard, STATUS_SCHEDULED, STATUS_CONFIRMED, STATUS_PREPARED, STATUS_DECLINED } from "@/components/shared/SessionCard";
 import { minutes, fmtDateNice, fmtTime12 } from "@/lib/helpers";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { setSessionFocus } from "@/store/slices/sessionsSlice";
@@ -70,8 +70,6 @@ import {
   demoMockConfirmed,
   demoMockCompleted,
   demoResidencyConfirmed,
-  demoResidencyCombined,
-  demoResidencyScheduled,
   demoResidencyCompletedGathering,
   demoResidencyCompletedWithRating,
 } from "./demo-component-sessions";
@@ -286,10 +284,19 @@ function CombinedCompletedGroup({ children }: { children: React.ReactNode }) {
 
 /* ── Planned Event Card (Tentative) ── */
 
-function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd, contactEmail, program, onViewDetails }: {
+function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd, contactEmail, program, onViewDetails, onCourseClick }: {
   sessionType: string; title: string; batch: string; startDateYmd: string; endDateYmd: string;
-  contactEmail?: string; program?: string; onViewDetails?: () => void;
+  contactEmail?: string; program?: string; onViewDetails?: () => void; onCourseClick?: () => void;
 }) {
+  const titleBody = onCourseClick ? (
+    <Box
+      component="span"
+      onClick={(e) => { e.stopPropagation(); onCourseClick(); }}
+      sx={{ color: "primary.main", cursor: "pointer", "&:hover": { textDecoration: "underline" } }}
+    >
+      {title}
+    </Box>
+  ) : title;
   return (
     <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
       <Box sx={{ p: 2 }}>
@@ -298,12 +305,12 @@ function PlannedEventCard({ sessionType, title, batch, startDateYmd, endDateYmd,
           {CHIP_TO_BE_CONFIRMED}
         </Box>
         <Typography variant="h6" fontWeight={600} sx={{ display: { xs: "block", sm: "none" }, fontSize: "0.875rem", mb: 0.5 }}>
-          {sessionType}: {title}
+          {sessionType}: {titleBody}
         </Typography>
         {/* Desktop: chip beside title */}
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ display: { xs: "none", sm: "flex" }, mb: 0.5 }}>
           <Typography variant="h6" fontWeight={600} sx={{ fontSize: "0.875rem", minWidth: 0 }}>
-            {sessionType}: {title}
+            {sessionType}: {titleBody}
           </Typography>
           {CHIP_TO_BE_CONFIRMED}
         </Stack>
@@ -1449,58 +1456,228 @@ function CVReviewDetailDialog({ open, onClose, variant }: { open: boolean; onClo
    ACTIVITY CARD SECTIONS
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Residency Cards (custom layout, NOT SessionCard) ── */
+/* ── Session card CTA / chip coverage ──────────────────────────────────
+   Every distinct chip + action-row combination the session card supports,
+   in one role-agnostic reference. The "prep-review" workflow (Review
+   Material / Mark Prepared) is one axis; the older RSVP workflow (Confirm /
+   I'm unavailable) is a separate, untouched flow — both are shown so the
+   two aren't confused for each other. ── */
 
-const RESIDENCY_COMBINED_ACCORDION = (
-  <Accordion
-    disableGutters elevation={0} defaultExpanded={false}
-    square
-    sx={{
-      borderTop: "1px solid",
-      borderColor: "divider",
-      bgcolor: "transparent",
-      boxShadow: "none",
-      "&::before": { display: "none" },
-    }}
-  >
-    <AccordionSummary
-      expandIcon={<ExpandMoreOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />}
-      sx={{
-        px: 2,
-        py: 0,
-        minHeight: "unset",
-        bgcolor: "hsl(var(--md-surface-container) / 0.35)",
-        "&:hover": { bgcolor: "hsl(var(--md-surface-container) / 0.6)" },
-        transition: "background-color 0.15s",
-        "& .MuiAccordionSummary-content": { my: 1, gap: 0.75, alignItems: "center" },
-      }}
-    >
-      <CallMergeOutlinedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-      <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ fontSize: "0.75rem" }}>Combined session</Typography>
-      <Chip label="2" size="small" sx={{ height: 18, minWidth: 18, fontSize: "0.65rem", fontWeight: 700, bgcolor: "action.selected", "& .MuiChip-label": { px: 0.5 } }} />
-    </AccordionSummary>
-    <AccordionDetails sx={{ p: 0, borderTop: "1px solid", borderColor: "divider" }}>
-      <Stack divider={<Divider />}>
-        {[
-          { batch: "AIML Online March 26 A", learnerCount: 120, chip: "Whole batch" },
-          { batch: "AIML Online Feb 26 B", learnerCount: 95, chip: "Whole batch" },
-        ].map((cb) => (
-          <Box key={cb.batch} sx={{ px: 2, py: 1 }}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-              <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, minWidth: 0 }} noWrap>
-                {cb.batch}
-                <Box component="span" sx={{ fontWeight: 400, color: "text.secondary", ml: 0.5 }}>
-                  &middot; {cb.learnerCount} learner{cb.learnerCount !== 1 ? "s" : ""}
-                </Box>
-              </Typography>
-              <Chip label={cb.chip} size="small" variant="outlined" sx={{ fontWeight: 500, fontSize: "0.75rem", height: 20, flexShrink: 0, color: "text.secondary", borderColor: "divider" }} />
-            </Stack>
-          </Box>
-        ))}
-      </Stack>
-    </AccordionDetails>
-  </Accordion>
-);
+function SessionPrepCtaStates() {
+  return (
+    <>
+      <ComponentSection
+        title="Review pending — Scheduled"
+        description="Prep-review workflow, not yet reviewed. Review Material + Join session (disabled outside the join window) + Mark Prepared."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="EDA Walkthrough"
+            sessionType="Mentored Learning session"
+            batch="PGPDS Online Jan '26"
+            dateYmd="2026-04-21"
+            start={minutes(9, 30)}
+            end={minutes(11, 30)}
+            status={STATUS_SCHEDULED}
+            actions={
+              <>
+                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />} endIcon={<ChevronRightIcon sx={{ fontSize: 12 }} />}>Review Material</Button>
+                <Button variant="soft" size="small" disabled startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>
+                <Button variant="contained" size="small" startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}>Mark Prepared</Button>
+              </>
+            }
+          />
+        </Card>
+      </ComponentSection>
+
+      <ComponentSection
+        title="Reviewed — Prepared"
+        description="Same session, after Mark Prepared. Chip swaps to Prepared and the row collapses to just Join session — no stacked Scheduled + Prepared chips."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="EDA Walkthrough"
+            sessionType="Mentored Learning session"
+            batch="PGPDS Online Jan '26"
+            dateYmd="2026-04-21"
+            start={minutes(9, 30)}
+            end={minutes(11, 30)}
+            status={STATUS_PREPARED()}
+            actions={<Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>}
+          />
+        </Card>
+      </ComponentSection>
+
+      <ComponentSection
+        title="No material to review — Career mentoring"
+        description="1:1 conversation, nothing to prep. The review row is omitted, not disabled — same treatment as Residency and Capstone project mentoring."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="Career Mentoring"
+            sessionType="Career mentoring session"
+            batch="PGP-AIML-BA-UTA-Nov25-C"
+            dateYmd="2026-04-23"
+            start={minutes(15)}
+            end={minutes(16)}
+            status={STATUS_SCHEDULED}
+            actions={<Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>}
+          />
+        </Card>
+      </ComponentSection>
+
+      <ComponentSection
+        title="No material to review — Capstone project mentoring"
+        description="Same exception as Career mentoring and Residency: a 1:1 project check-in, no material to review beforehand."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="Statistics for Data Science"
+            sessionType="Capstone project mentoring session"
+            batch="PGPDS.O.MAR26.A"
+            dateYmd="2026-04-24"
+            start={minutes(18)}
+            end={minutes(20)}
+            status={STATUS_SCHEDULED}
+            actions={<Button variant="contained" size="small" startIcon={<VideocamOutlinedIcon sx={{ fontSize: 16 }} />}>Join session</Button>}
+          />
+        </Card>
+      </ComponentSection>
+
+      <ComponentSection
+        title="Awaiting RSVP — Scheduled"
+        description="A separate, older flow: the guru hasn't confirmed attendance at all yet. Unrelated to prep-review — kept as-is."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="Deep Learning Fundamentals"
+            sessionType="Online session"
+            batch="AIML Online March 26 A"
+            dateYmd="2026-04-30"
+            start={minutes(18)}
+            end={minutes(20)}
+            status={STATUS_SCHEDULED}
+            actions={
+              <>
+                <Button startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="contained">Confirm</Button>
+                <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
+              </>
+            }
+          />
+        </Card>
+      </ComponentSection>
+
+      <ComponentSection
+        title="Evaluation / Moderation — review pending"
+        description="Batch grading work. Prep-review still applies, but the CTA is Mark Prepared only — there's no Join session for async work."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="Operations & Supply Chain Management"
+            sessionType="Evaluation"
+            batch="PGPMex - Nov'25"
+            dateYmd="2026-07-12"
+            start={NaN}
+            end={NaN}
+            hideTime
+            stats={[{ label: "Submissions", value: 3 }, { label: "Graded", value: 0 }]}
+            status={STATUS_SCHEDULED}
+            actions={<Button startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="contained">Mark Prepared</Button>}
+          />
+        </Card>
+      </ComponentSection>
+
+      <ComponentSection
+        title="Evaluation / Moderation — Prepared"
+        description="Once prepared, the grading actions themselves become the CTAs."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="Operations & Supply Chain Management"
+            sessionType="Evaluation"
+            batch="PGPMex - Nov'25"
+            dateYmd="2026-07-12"
+            start={NaN}
+            end={NaN}
+            hideTime
+            stats={[{ label: "Submissions", value: 3 }, { label: "Graded", value: 0 }]}
+            status={STATUS_PREPARED()}
+            actions={
+              <>
+                <Button variant="soft" size="small">Discussion Question</Button>
+                <Button variant="soft" size="small">Grade</Button>
+              </>
+            }
+          />
+        </Card>
+      </ComponentSection>
+
+      <ComponentSection
+        title="Declined"
+        description="The guru turned the activity down. No actions — the card is a record, not a task."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="Introduction to SQL"
+            sessionType="Mentored Learning session"
+            batch="AIML Online July 25 B"
+            dateYmd="2026-04-19"
+            start={minutes(10)}
+            end={minutes(12)}
+            status={STATUS_DECLINED}
+          />
+        </Card>
+      </ComponentSection>
+
+      <ComponentSection
+        title="Completed — with feedback"
+        description="Past session, payment processed, learner rating in. Feedback button + rating chip."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="Statistics for Data Science"
+            sessionType="Mentored Learning session"
+            batch="PGPDS.O.MAR26.A"
+            dateYmd="2026-04-02"
+            start={minutes(18)}
+            end={minutes(20)}
+            topRight={
+              <Stack direction="row" spacing={0.75} alignItems="center">
+                {CHIP_PAYMENT_PROCESSED}
+                <StarRatingNumeric rating={4.6} />
+              </Stack>
+            }
+            actions={<Button variant="soft" size="small" startIcon={<StarOutlinedIcon sx={{ fontSize: 14 }} />}>Feedback</Button>}
+          />
+        </Card>
+      </ComponentSection>
+
+      <ComponentSection
+        title="Completed — gathering feedback"
+        description="Past session, payment pending, no learner rating yet. No actions until feedback lands."
+      >
+        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
+          <SessionCard
+            title="Statistics for Data Science"
+            sessionType="Mentored Learning session"
+            batch="PGPDS.O.MAR26.A"
+            dateYmd="2026-04-05"
+            start={minutes(18)}
+            end={minutes(20)}
+            topRight={
+              <Stack direction="row" spacing={0.75} alignItems="center">
+                {CHIP_PAYMENT_PENDING}
+                {CHIP_GATHERING}
+              </Stack>
+            }
+          />
+        </Card>
+      </ComponentSection>
+    </>
+  );
+}
+
+/* ── Residency Cards (custom layout, NOT SessionCard) ── */
 
 function ResidencyCards() {
   const dispatch = useAppDispatch();
@@ -1510,10 +1687,12 @@ function ResidencyCards() {
   return (
     <>
 
-      {/* ── Confirmed ── */}
+      {/* ── Confirmed — in-person multi-day event: nothing to prep, no
+             material to review, no Mark Prepared. The title itself is still
+             a clickable course link — just no separate "Course" button. ── */}
       <ComponentSection
         title="Residency - Confirmed"
-        description="Confirmed residency with 3-day schedule. Date range with → arrow. Material + Course actions."
+        description="Confirmed, in-person residency. No prep material, no Mark Prepared — nothing to prep for a multi-day on-site event. Title links to the course."
       >
         <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
           <SessionCard
@@ -1526,101 +1705,9 @@ function ResidencyCards() {
             end={minutes(17)}
             locationText="Bangalore"
             status={STATUS_CONFIRMED()}
-            actions={
-              <>
-                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>Material</Button>
-                <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Course</Button>
-              </>
-            }
+            onCourseClick={() => {}}
             secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyConfirmed)}>View details</Button>}
-            onCourseClick={() => {}}
           />
-        </Card>
-      </ComponentSection>
-
-      {/* ── Confirmed (Combined Session) ── */}
-      <ComponentSection
-        title="Residency - Confirmed (Combined session)"
-        description="Multi-batch combined residency with 3-day schedule + combined session accordion."
-      >
-        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
-          <SessionCard
-            title="Deep Learning Fundamentals"
-            sessionType="Residency"
-            batch="AIML Online March 26 A"
-            dateYmd="2026-04-30"
-            endDateYmd="2026-05-02"
-            start={minutes(9)}
-            end={minutes(17)}
-            locationText="Bangalore"
-            status={STATUS_CONFIRMED()}
-            actions={
-              <>
-                <Button variant="soft" size="small" startIcon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}>Material</Button>
-                <Button variant="soft" size="small" startIcon={<OpenInNewOutlinedIcon sx={{ fontSize: 16 }} />}>Course</Button>
-              </>
-            }
-            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyCombined)}>View details</Button>}
-            onCourseClick={() => {}}
-          />
-          {RESIDENCY_COMBINED_ACCORDION}
-        </Card>
-      </ComponentSection>
-
-      {/* ── Scheduled ── */}
-      <ComponentSection
-        title="Residency - Scheduled"
-        description="Awaiting guru confirmation. Confirm/Unavailable actions with 3-day schedule accordion."
-      >
-        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
-          <SessionCard
-            title="Deep Learning Fundamentals"
-            sessionType="Residency"
-            batch="AIML Online March 26 A"
-            dateYmd="2026-04-30"
-            endDateYmd="2026-05-02"
-            start={minutes(9)}
-            end={minutes(17)}
-            locationText="Bangalore"
-            status={STATUS_SCHEDULED}
-            actions={
-              <>
-                <Button startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="contained">Confirm</Button>
-                <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
-              </>
-            }
-            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyScheduled)}>View details</Button>}
-            onCourseClick={() => {}}
-          />
-        </Card>
-      </ComponentSection>
-
-      {/* ── Scheduled (Combined) ── */}
-      <ComponentSection
-        title="Residency - Scheduled (Combined session)"
-        description="Unconfirmed combined residency. Confirm/Unavailable + schedule + combined session accordions."
-      >
-        <Card variant="outlined" sx={{ p: 0, overflow: "hidden" }}>
-          <SessionCard
-            title="AI in Practice Workshop"
-            sessionType="Residency"
-            batch="AIML Online March 26 A"
-            dateYmd="2026-04-24"
-            endDateYmd="2026-04-26"
-            start={minutes(9)}
-            end={minutes(17)}
-            locationText="Bangalore"
-            status={STATUS_SCHEDULED}
-            actions={
-              <>
-                <Button startIcon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="contained">Confirm</Button>
-                <Button startIcon={<DoNotDisturbOnOutlinedIcon sx={{ fontSize: 18 }} />} size="small" variant="soft">I&apos;m unavailable</Button>
-              </>
-            }
-            secondaryAction={<Button variant="text" size="small" onClick={() => openDetails(demoResidencyScheduled)}>View details</Button>}
-            onCourseClick={() => {}}
-          />
-          {RESIDENCY_COMBINED_ACCORDION}
         </Card>
       </ComponentSection>
 
@@ -1971,6 +2058,7 @@ function OnlineSessionCards() {
           startDateYmd="2026-02-19"
           endDateYmd="2026-03-14"
           onViewDetails={() => setPlannedDetailOpen(true)}
+          onCourseClick={() => {}}
         />
       </ComponentSection>
 
@@ -3099,6 +3187,15 @@ export default function ComponentsPage() {
       {pageTab === 0 ? (
         <>
           <ActivityCardExplorations />
+          <Card sx={{ p: 2 }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.25 }}>Session card — CTA &amp; chip coverage</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Every chip and action-row combination the card supports, independent of role.
+            </Typography>
+            <Stack spacing={3} divider={<Divider />}>
+              <SessionPrepCtaStates />
+            </Stack>
+          </Card>
           {sections.map((section) => (
             <Card key={section.label} sx={{ p: 2 }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>{section.label}</Typography>
